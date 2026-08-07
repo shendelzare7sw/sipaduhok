@@ -96,7 +96,7 @@ class AccountController extends Controller
 
         $validated = $request->validate([
             'current_password' => 'required',
-            'new_password' => ['required', 'confirmed', Password::min(8)],
+            'new_password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
         ]);
 
         // Cek password lama

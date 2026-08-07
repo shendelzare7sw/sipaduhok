@@ -162,7 +162,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/recovery/reset', function (\Illuminate\Http\Request $request) {
         $request->validate([
             'token' => 'required',
-            'password' => 'required|min:8|confirmed',
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)->mixedCase()->numbers()],
         ]);
 
         return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
