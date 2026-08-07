@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rules\Password;
 
 class AdminRecoveryController extends Controller
 {
@@ -45,7 +46,7 @@ class AdminRecoveryController extends Controller
             'security_question' => 'required|string',
             'security_answer' => 'required|string',
             'security_pin' => 'required|string|digits:6',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()],
         ]);
 
         // Find user by username or email
