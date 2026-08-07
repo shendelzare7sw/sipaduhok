@@ -589,7 +589,11 @@
                                            id="kelas_edit_{{ $kls->id }}">
                                     <label class="ms-2 mb-0 flex-grow-1 kelas-item-label" for="kelas_edit_{{ $kls->id }}">
                                         <strong>{{ $kls->nama_kelas }}</strong>
-                                        <small class="text-muted d-block">{{ $kls->jenjang }}</small>
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-layer-group me-1"></i>{{ $kls->jenjang }}
+                                            •
+                                            <i class="fas fa-building me-1"></i>{{ $kls->cabang->nama_cabang ?? '-' }}
+                                        </small>
                                     </label>
                                 </div>
                             @endforeach
