@@ -1,3 +1,6 @@
+import { initSearchableCombobox } from '../../shared/searchable-combobox.js';
+import { TEMPAT_LAHIR_OPTIONS } from '../../shared/tempat-lahir-options.js';
+
 const hiddenClass = 'd-none';
 
 const get = (id) => document.getElementById(id);
@@ -175,6 +178,14 @@ function toggleRelationship(selectId, fieldId) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    initSearchableCombobox({
+        wrapperId: 'tempatLahirCombobox',
+        inputId: 'tempatLahirInput',
+        listId: 'tempatLahirList',
+        groups: TEMPAT_LAHIR_OPTIONS,
+        emptyText: 'Tidak ditemukan. Anda tetap bisa mengetik tempat lahir sendiri.',
+    });
+
     const selectedOption = document.querySelector('#kelasSelectEdit option:checked');
     if (selectedOption?.value) {
         updateSelectedKelasUIEdit([{

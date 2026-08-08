@@ -268,6 +268,7 @@ export default defineConfig({
                 'resources/css/admin/users/wali-siswa-edit.css',
                 'resources/css/admin/users/tenaga-pendidik-create.css',
                 'resources/css/admin/users/tenaga-pendidik-edit.css',
+                'resources/css/shared/searchable-combobox.css',
                 'resources/js/admin/users/tenaga-pendidik-form.js',
                 'resources/js/admin/users/wali-siswa-form.js',
                 'resources/js/admin/users/siswa-create.js',

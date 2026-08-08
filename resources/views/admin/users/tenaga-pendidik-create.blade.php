@@ -8,7 +8,7 @@
 @endsection
 
 @section('styles')
-    @vite(['resources/css/admin/users/tenaga-pendidik-create.css'])
+    @vite(['resources/css/admin/users/tenaga-pendidik-create.css', 'resources/css/shared/searchable-combobox.css'])
 @endsection
 
 @section('content')
@@ -125,9 +125,14 @@
             <div class="row">
                 <div class="col">
                     <div class="form-group">
-                        <label class="form-label">Tempat Lahir <span class="required-mark">*</span></label>
-                        <input type="text" name="tempat_lahir" class="form-control" value="{{ old('tempat_lahir') }}"
-                            required>
+                        <label class="form-label" for="tempatLahirInput">Tempat Lahir <span class="required-mark">*</span></label>
+                        <div class="scb-combobox" id="tempatLahirCombobox">
+                            <input type="text" name="tempat_lahir" id="tempatLahirInput" class="form-control"
+                                placeholder="Ketik atau pilih kota/negara kelahiran..." autocomplete="off"
+                                value="{{ old('tempat_lahir') }}" required>
+                            <ul class="scb-list" id="tempatLahirList" role="listbox"></ul>
+                        </div>
+                        @error('tempat_lahir') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
                 </div>
                 <div class="col">
@@ -139,9 +144,14 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Pendidikan Terakhir <span class="required-mark">*</span></label>
-                <input type="text" name="pendidikan_terakhir" class="form-control"
-                    placeholder="Contoh: S1 Pendidikan Matematika" value="{{ old('pendidikan_terakhir') }}" required>
+                <label class="form-label" for="pendidikanTerakhirInput">Pendidikan Terakhir <span class="required-mark">*</span></label>
+                <div class="scb-combobox" id="pendidikanTerakhirCombobox">
+                    <input type="text" name="pendidikan_terakhir" id="pendidikanTerakhirInput" class="form-control"
+                        placeholder="Ketik atau pilih pendidikan terakhir..." autocomplete="off"
+                        value="{{ old('pendidikan_terakhir') }}" required>
+                    <ul class="scb-list" id="pendidikanTerakhirList" role="listbox"></ul>
+                </div>
+                @error('pendidikan_terakhir') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
                 <label class="form-label">Alamat Lengkap <span class="required-mark">*</span></label>

@@ -8,7 +8,7 @@
 @endsection
 
 @section('styles')
-    @vite(['resources/css/admin/users/siswa-create.css'])
+    @vite(['resources/css/admin/users/siswa-create.css', 'resources/css/shared/searchable-combobox.css'])
 @endsection
 
 @section('scripts')
@@ -193,9 +193,14 @@
                 </div>
                 <div class="col">
                     <div class="form-group">
-                        <label class="form-label">Tempat Lahir <span class="required-mark">*</span></label>
-                        <input type="text" name="tempat_lahir" class="form-control" value="{{ old('tempat_lahir') }}"
-                            placeholder="Kota tempat lahir" required>
+                        <label class="form-label" for="tempatLahirInput">Tempat Lahir <span class="required-mark">*</span></label>
+                        <div class="scb-combobox" id="tempatLahirCombobox">
+                            <input type="text" name="tempat_lahir" id="tempatLahirInput" class="form-control"
+                                placeholder="Ketik atau pilih kota/negara kelahiran..." autocomplete="off"
+                                value="{{ old('tempat_lahir') }}" required>
+                            <ul class="scb-list" id="tempatLahirList" role="listbox"></ul>
+                        </div>
+                        @error('tempat_lahir') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
                 </div>
                 <div class="col">
