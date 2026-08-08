@@ -1,4 +1,24 @@
+import { initSearchableCombobox } from '../../shared/searchable-combobox.js';
+import { PENDIDIKAN_TERAKHIR_OPTIONS } from '../../shared/pendidikan-terakhir-options.js';
+import { TEMPAT_LAHIR_OPTIONS } from '../../shared/tempat-lahir-options.js';
+
 document.addEventListener('DOMContentLoaded', () => {
+    initSearchableCombobox({
+        wrapperId: 'pendidikanTerakhirCombobox',
+        inputId: 'pendidikanTerakhirInput',
+        listId: 'pendidikanTerakhirList',
+        groups: PENDIDIKAN_TERAKHIR_OPTIONS,
+        emptyText: 'Tidak ditemukan. Anda tetap bisa mengetik pendidikan sendiri.',
+    });
+
+    initSearchableCombobox({
+        wrapperId: 'tempatLahirCombobox',
+        inputId: 'tempatLahirInput',
+        listId: 'tempatLahirList',
+        groups: TEMPAT_LAHIR_OPTIONS,
+        emptyText: 'Tidak ditemukan. Anda tetap bisa mengetik tempat lahir sendiri.',
+    });
+
     const flexibleRoles = ['ketua_pkbm', 'sekretaris', 'bendahara'];
     const defaultCabangId = '1';
     const roleSelect = document.querySelector('select[name="role"]');
