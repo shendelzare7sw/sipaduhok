@@ -18,6 +18,7 @@
         ->with('mataPelajaran')
         ->get()
         ->pluck('mataPelajaran')
+        ->filter(fn($mapel) => $mapel && $siswa && $siswa->canAccessMapel($mapel))
         ->unique('id')
         ->sortBy('nama_mapel');
 @endphp

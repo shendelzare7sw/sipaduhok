@@ -49,7 +49,8 @@ class NotificationService
      */
     public function notifyMateriNew($materi)
     {
-        $siswaList = Siswa::where('kelas_id', $materi->kelas_id)->get();
+        $materi->loadMissing('mataPelajaran');
+        $siswaList = $this->siswaKelasYangBisaAksesMapel($materi->kelas_id, $materi->mataPelajaran);
 
         foreach ($siswaList as $siswa) {
             if ($siswa->user_id) {
@@ -70,7 +71,8 @@ class NotificationService
      */
     public function notifyTugasNew($tugas)
     {
-        $siswaList = Siswa::where('kelas_id', $tugas->kelas_id)->get();
+        $tugas->loadMissing('mataPelajaran');
+        $siswaList = $this->siswaKelasYangBisaAksesMapel($tugas->kelas_id, $tugas->mataPelajaran);
         $label = $tugas->jenis_tugas === 'latihan' ? 'Latihan' : 'Tugas';
 
         foreach ($siswaList as $siswa) {
@@ -92,7 +94,8 @@ class NotificationService
      */
     public function notifyUjianNew($ujian)
     {
-        $siswaList = Siswa::where('kelas_id', $ujian->kelas_id)->get();
+        $ujian->loadMissing('mataPelajaran');
+        $siswaList = $this->siswaKelasYangBisaAksesMapel($ujian->kelas_id, $ujian->mataPelajaran);
 
         $isLatihan = $ujian->tipe_ujian === 'latihan';
         $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
@@ -122,9 +125,8 @@ class NotificationService
             return;
         }
 
-        $siswaList = Siswa::where('kelas_id', $meeting->kelas_id)
-            ->whereNotNull('user_id')
-            ->get();
+        $meeting->loadMissing('mataPelajaran');
+        $siswaList = $this->siswaKelasYangBisaAksesMapel($meeting->kelas_id, $meeting->mataPelajaran);
 
         $mapelNama = $meeting->mataPelajaran->nama_mapel ?? 'Mata Pelajaran';
         $waktu = '';
@@ -150,11 +152,16 @@ class NotificationService
      */
     public function notifyDeadlineReminder($tugas)
     {
+        $tugas->loadMissing('mataPelajaran');
         $siswaList = Siswa::where('kelas_id', $tugas->kelas_id)
             ->whereDoesntHave('tugasSiswa', function ($q) use ($tugas) {
                 $q->where('tugas_id', $tugas->id)
                     ->where('status', '!=', 'belum_dikerjakan');
-            })->get();
+            })
+            ->whereNotNull('user_id')
+            ->get()
+            ->filter(fn ($siswa) => $siswa->canAccessMapel($tugas->mataPelajaran))
+            ->values();
 
         foreach ($siswaList as $siswa) {
             if ($siswa->user_id) {
@@ -175,9 +182,8 @@ class NotificationService
      */
     public function notifyForumNew($forumDiskusi)
     {
-        $siswaList = Siswa::where('kelas_id', $forumDiskusi->kelas_id)
-            ->whereNotNull('user_id')
-            ->get();
+        $forumDiskusi->loadMissing('mataPelajaran');
+        $siswaList = $this->siswaKelasYangBisaAksesMapel($forumDiskusi->kelas_id, $forumDiskusi->mataPelajaran);
 
         foreach ($siswaList as $siswa) {
             $this->create(
@@ -1550,6 +1556,18 @@ class NotificationService
         }
     }
 
+    private function siswaKelasYangBisaAksesMapel($kelasId, $mataPelajaran)
+    {
+        if (!$kelasId) {
+            return collect();
+        }
+
+        return Siswa::where('kelas_id', $kelasId)
+            ->whereNotNull('user_id')
+            ->get()
+            ->filter(fn ($siswa) => $siswa->canAccessMapel($mataPelajaran))
+            ->values();
+    }
     private function normalizeRoleAlias(?string $role): string
     {
         $role = trim((string) $role);

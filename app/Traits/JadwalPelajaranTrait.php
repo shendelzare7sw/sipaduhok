@@ -260,6 +260,10 @@ trait JadwalPelajaranTrait
             $kelasIds = [$kelasIds];
         }
 
+        $targetMapel = $mataPelajaranId ? MataPelajaran::find($mataPelajaranId) : null;
+        $targetAgamaFilter = $targetMapel?->filter_agama;
+        $isAgama = ! empty($targetAgamaFilter);
+
         // 1. Conflict Check: Classes
         foreach ($kelasIds as $kelasId) {
             $kelas = Kelas::find($kelasId);
@@ -282,13 +286,6 @@ trait JadwalPelajaranTrait
             }
 
             // Other Jadwal Check
-            $isAgama = false;
-            if ($mataPelajaranId) {
-                $mapel = MataPelajaran::find($mataPelajaranId);
-                if ($mapel && (stripos($mapel->nama_mapel, 'Agama') !== false || stripos($mapel->nama_mapel, 'Religi') !== false)) {
-                    $isAgama = true;
-                }
-            }
 
             $kelasConflictQuery = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
                 ->byKelas($kelasId)
@@ -303,11 +300,14 @@ trait JadwalPelajaranTrait
                 })
                 ->when(!empty($allExcludes), fn($q) => $q->whereNotIn('id', $allExcludes));
 
-            // Agama Exception Logic
+            // Agama Exception Logic: different agama subjects may share the same slot.
             if ($isAgama) {
-                $kelasConflictQuery->whereHas('mataPelajaran', function ($q) {
-                    $q->where('nama_mapel', 'not like', '%Agama%')
-                        ->where('nama_mapel', 'not like', '%Religi%');
+                $kelasConflictQuery->where(function ($q) use ($targetAgamaFilter) {
+                    $q->whereDoesntHave('mataPelajaran')
+                        ->orWhereHas('mataPelajaran', function ($mapelQuery) use ($targetAgamaFilter) {
+                            $mapelQuery->whereNull('filter_agama')
+                                ->orWhere('filter_agama', $targetAgamaFilter);
+                        });
                 });
             }
 
@@ -343,14 +343,13 @@ trait JadwalPelajaranTrait
 
                 // Check if the conflicting schedule is also a religion subject
                 $existingMapel = $guruConflict->mataPelajaran;
-                $existingIsAgama = $existingMapel && (
-                    stripos($existingMapel->nama_mapel, 'Agama') !== false ||
-                    stripos($existingMapel->nama_mapel, 'Religi') !== false
-                );
+                $existingAgamaFilter = $existingMapel?->filter_agama;
+                $existingIsAgama = ! empty($existingAgamaFilter);
+
                 // Allow: same teacher teaches different religion denominations at same time
                 // (students are physically in separate groups)
-                if ($isAgama && $existingIsAgama && !$sameSubject) {
-                    // Different denomination subjects — skip guru conflict
+                if ($isAgama && $existingIsAgama && $existingAgamaFilter !== $targetAgamaFilter && !$sameSubject) {
+                    // Different agama subjects: skip guru conflict
                 } else {
                     $newBranchIds = Kelas::whereIn('id', $kelasIds)->pluck('cabang_id')->unique()->filter();
 
@@ -416,32 +415,16 @@ trait JadwalPelajaranTrait
     protected function getFilteredSiswaIds($kelasId, $mataPelajaranId)
     {
         $mapel = MataPelajaran::find($mataPelajaranId);
-        if (!$mapel) {
+        if (!$mapel || empty($mapel->filter_agama)) {
             return null;
         }
 
-        $namaMapel = strtolower($mapel->nama_mapel);
-
-        $agamaFilter = null;
-        if (str_contains($namaMapel, 'agama kristen') || str_contains($namaMapel, 'religi kristen')) {
-            $agamaFilter = 'Kristen';
-        } elseif (str_contains($namaMapel, 'agama islam') || str_contains($namaMapel, 'religi islam')) {
-            $agamaFilter = 'Islam';
-        }
-
-        if ($agamaFilter) {
-            $siswaIds = \App\Models\Siswa::where('kelas_id', $kelasId)
-                ->where('status', 'aktif')
-                ->where('agama', 'LIKE', "%{$agamaFilter}%")
-                ->pluck('id')
-                ->toArray();
-
-            return $siswaIds;
-        }
-
-        return null;
+        return \App\Models\Siswa::where('kelas_id', $kelasId)
+            ->where('status', 'aktif')
+            ->where('agama', $mapel->filter_agama)
+            ->pluck('id')
+            ->toArray();
     }
-
     /**
      * Auto-sync guru_pengajar_kelas table.
      * Adds entries that don't exist yet (does NOT remove old entries).

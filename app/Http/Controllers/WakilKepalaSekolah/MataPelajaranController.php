@@ -45,8 +45,9 @@ class MataPelajaranController extends Controller
     public function create()
     {
         $jenjangList = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+        $agamaList = MataPelajaran::AGAMA_FILTERS;
 
-        return view('waka.mata-pelajaran.create', compact('jenjangList'));
+        return view('waka.mata-pelajaran.create', compact('jenjangList', 'agamaList'));
     }
 
     public function store(Request $request)
@@ -56,6 +57,7 @@ class MataPelajaranController extends Controller
             'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel',
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kelompok' => 'nullable|in:A,B',
+            'filter_agama' => 'nullable|in:'.implode(',', MataPelajaran::AGAMA_FILTERS),
             'deskripsi' => 'nullable|string',
         ]);
 
@@ -82,8 +84,9 @@ class MataPelajaranController extends Controller
     public function edit(MataPelajaran $mataPelajaran)
     {
         $jenjangList = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+        $agamaList = MataPelajaran::AGAMA_FILTERS;
 
-        return view('waka.mata-pelajaran.edit', compact('mataPelajaran', 'jenjangList'));
+        return view('waka.mata-pelajaran.edit', compact('mataPelajaran', 'jenjangList', 'agamaList'));
     }
 
     public function update(Request $request, MataPelajaran $mataPelajaran)
@@ -93,6 +96,7 @@ class MataPelajaranController extends Controller
             'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel,'.$mataPelajaran->id,
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kelompok' => 'nullable|in:A,B',
+            'filter_agama' => 'nullable|in:'.implode(',', MataPelajaran::AGAMA_FILTERS),
             'deskripsi' => 'nullable|string',
         ]);
 

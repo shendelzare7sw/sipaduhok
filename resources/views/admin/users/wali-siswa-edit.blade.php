@@ -15,7 +15,7 @@
 @endsection
 
 @section('styles')
-    @vite(['resources/css/admin/users/wali-siswa-edit.css'])
+    @vite(['resources/css/admin/users/wali-siswa-edit.css', 'resources/css/admin/users/form-feedback.css'])
 @endsection
 
 @section('content')
@@ -47,6 +47,7 @@
     @endif
 
     {{-- Display Success Message --}}
+@include('admin.users.partials.form-validation-feedback')
 
 
     {{-- Info Box --}}
@@ -58,7 +59,7 @@
         </div>
     </div>
 
-    <form action="{{ route('admin.users.update-wali-siswa', $orangTua->id) }}" method="POST">
+    <form action="{{ route('admin.users.update-wali-siswa', $orangTua->id) }}" method="POST" data-admin-user-form novalidate>
         @csrf
         @method('PUT')
         <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.users.wali-siswa')) }}">
@@ -119,14 +120,14 @@
             <div class="form-group">
                 <label class="form-label">Password <small class="text-muted">(Kosongkan jika tidak ingin
                         diubah)</small></label>
-                <input type="password" name="password" class="form-control" placeholder="Masukkan password baru (opsional)">
+                <input type="password" name="password" class="form-control" minlength="8" placeholder="Masukkan password baru (opsional)">
             </div>
 
             <div class="form-group">
                 <label class="form-label">Status Akun <span class="required-mark">*</span></label>
                 <select name="is_active" class="form-control">
-                    <option value="1" {{ $orangTua->is_active ? 'selected' : '' }}><i class="fas fa-check"></i> Aktif - Dapat Login</option>
-                    <option value="0" {{ !$orangTua->is_active ? 'selected' : '' }}><i class="fas fa-times"></i> Non-Aktif - Tidak Dapat Login</option>
+                    <option value="1" {{ old('is_active', $orangTua->is_active ? '1' : '0') == '1' ? 'selected' : '' }}><i class="fas fa-check"></i> Aktif - Dapat Login</option>
+                    <option value="0" {{ old('is_active', $orangTua->is_active ? '1' : '0') == '0' ? 'selected' : '' }}><i class="fas fa-times"></i> Non-Aktif - Tidak Dapat Login</option>
                 </select>
             </div>
         </div>
@@ -223,5 +224,5 @@
 @endsection
 
 @section('scripts')
-    @vite(['resources/js/admin/users/wali-siswa-form.js'])
+    @vite(['resources/js/admin/users/wali-siswa-form.js', 'resources/js/admin/users/form-validation-feedback.js'])
 @endsection

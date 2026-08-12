@@ -8,7 +8,7 @@
 @endsection
 
 @section('styles')
-    @vite(['resources/css/admin/users/wali-siswa-create.css'])
+    @vite(['resources/css/admin/users/wali-siswa-create.css', 'resources/css/admin/users/form-feedback.css'])
 @endsection
 
 @section('content')
@@ -47,7 +47,9 @@
             </div>
         </div>
 
-        <form action="{{ route('admin.users.wali-siswa.store') }}" method="POST" id="orangTuaCreateForm"
+        @include('admin.users.partials.form-validation-feedback')
+
+        <form action="{{ route('admin.users.wali-siswa.store') }}" method="POST" id="orangTuaCreateForm" data-admin-user-form novalidate
             data-wali-siswa-create-form>
             @csrf
 
@@ -76,7 +78,7 @@
                     </label>
                     <div class="password-field-wrap">
                         <input type="password" class="form-control password-input" id="passwordField" name="password"
-                            placeholder="Masukkan password" required>
+                            minlength="6" placeholder="Masukkan password" required>
                         <button type="button" class="password-toggle-btn"
                             data-toggle-password data-field="passwordField" data-icon="togglePasswordIcon">
                             <i id="togglePasswordIcon" class="fas fa-eye"></i>
@@ -91,7 +93,7 @@
                     </label>
                     <div class="password-field-wrap">
                         <input type="password" class="form-control password-input" id="passwordConfirmField" name="password_confirmation"
-                            placeholder="Ketik ulang password" required>
+                            minlength="6" placeholder="Ketik ulang password" required>
                         <button type="button" class="password-toggle-btn"
                             data-toggle-password data-field="passwordConfirmField" data-icon="togglePasswordConfirmIcon">
                             <i id="togglePasswordConfirmIcon" class="fas fa-eye"></i>
@@ -234,7 +236,7 @@
                                 data-nisn="{{ strtolower($siswa->nisn) }}" data-jenjang="{{ $siswa->kelas->jenjang ?? '' }}"
                                 data-cabang="{{ $siswa->cabang->nama_cabang ?? '' }}"
                                 data-kelas="{{ $siswa->kelas->nama_kelas ?? '' }}">
-                                <input type="checkbox" name="siswa_ids[]" value="{{ $siswa->id }}">
+                                <input type="checkbox" name="siswa_ids[]" value="{{ $siswa->id }}" {{ in_array($siswa->id, old('siswa_ids', [])) ? 'checked' : '' }}>
                                 <div class="student-info">
                                     <div class="student-name">
                                         {{ $siswa->user->name ?? $siswa->nama_lengkap }}
@@ -261,12 +263,12 @@
                         <select class="form-control" id="hubungan_keluarga" name="hubungan_keluarga"
                             >
                             <option value="">-- Pilih Hubungan (jika menghubungkan dengan siswa) --</option>
-                            <option value="ayah_kandung">Ayah Kandung</option>
-                            <option value="ibu_kandung">Ibu Kandung</option>
-                            <option value="wali">Wali</option>
-                            <option value="ayah_tiri">Ayah Tiri</option>
-                            <option value="ibu_tiri">Ibu Tiri</option>
-                            <option value="lainnya">Lainnya</option>
+                            <option value="ayah_kandung" {{ old('hubungan_keluarga') == 'ayah_kandung' ? 'selected' : '' }}>Ayah Kandung</option>
+                            <option value="ibu_kandung" {{ old('hubungan_keluarga') == 'ibu_kandung' ? 'selected' : '' }}>Ibu Kandung</option>
+                            <option value="wali" {{ old('hubungan_keluarga') == 'wali' ? 'selected' : '' }}>Wali</option>
+                            <option value="ayah_tiri" {{ old('hubungan_keluarga') == 'ayah_tiri' ? 'selected' : '' }}>Ayah Tiri</option>
+                            <option value="ibu_tiri" {{ old('hubungan_keluarga') == 'ibu_tiri' ? 'selected' : '' }}>Ibu Tiri</option>
+                            <option value="lainnya" {{ old('hubungan_keluarga') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
                         </select>
                         <small class="text-muted">Hubungan keluarga akan diterapkan untuk semua siswa yang dipilih</small>
                     </div>
@@ -277,7 +279,7 @@
                                 Sebutkan Hubungan Keluarga Lainnya
                             </label>
                             <input type="text" class="form-control" id="hubungan_keluarga_lainnya"
-                                name="hubungan_keluarga_lainnya" placeholder="Contoh: Kakek, Nenek, Paman, Bibi, dll">
+                                name="hubungan_keluarga_lainnya" data-required-when-visible="true" value="{{ old('hubungan_keluarga_lainnya') }}" placeholder="Contoh: Kakek, Nenek, Paman, Bibi, dll">
                         </div>
                     </div>
                 </div>
@@ -329,5 +331,5 @@
 @endsection
 
 @section('scripts')
-    @vite(['resources/js/admin/users/wali-siswa-form.js'])
+    @vite(['resources/js/admin/users/wali-siswa-form.js', 'resources/js/admin/users/form-validation-feedback.js'])
 @endsection

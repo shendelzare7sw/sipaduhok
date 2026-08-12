@@ -118,6 +118,10 @@
                                 <td>Pilih salah satu: KB, TKA, TKB, SD, SMP, SMA</td>
                             </tr>
                             <tr>
+                                <td><code class="format-code">filter_agama</code></td>
+                                <td><span class="text-optional">Opsional</span></td>
+                                <td>Islam/Kristen/Katolik/Hindu/Buddha/Konghucu, kosongkan untuk semua siswa</td>
+                            </tr>                            <tr>
                                 <td><code class="format-code">deskripsi</code></td>
                                 <td><span class="text-optional">Opsional</span></td>
                                 <td>Deskripsi tambahan tentang mata pelajaran</td>

@@ -76,6 +76,16 @@
                         </td>
                     </tr>
                     <tr>
+                        <th>Filter Agama:</th>
+                        <td>
+                            @if($mataPelajaran->filter_agama)
+                                <span class="badge bg-label-primary">{{ $mataPelajaran->filter_agama }}</span>
+                            @else
+                                <span class="text-muted">Semua siswa</span>
+                            @endif
+                        </td>
+                    </tr>
+                    <tr>
                         <th>Deskripsi:</th>
                         <td>{{ $mataPelajaran->deskripsi ?? '-' }}</td>
                     </tr>

@@ -11,13 +11,28 @@ class MataPelajaran extends Model
 
     protected $table = 'mata_pelajaran';
 
+    public const AGAMA_FILTERS = [
+        'Islam',
+        'Kristen',
+        'Katolik',
+        'Hindu',
+        'Buddha',
+        'Konghucu',
+    ];
+
     protected $fillable = [
         'kode_mapel',
         'nama_mapel',
         'jenjang',
         'kelompok',
+        'filter_agama',
         'deskripsi',
     ];
+
+    public function isFilteredByAgama(): bool
+    {
+        return ! empty($this->filter_agama);
+    }
 
     // Relationships
     public function jadwalPelajaran()

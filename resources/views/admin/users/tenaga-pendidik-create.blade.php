@@ -8,11 +8,23 @@
 @endsection
 
 @section('styles')
-    @vite(['resources/css/admin/users/tenaga-pendidik-create.css', 'resources/css/shared/searchable-combobox.css'])
+    @vite(['resources/css/admin/users/tenaga-pendidik-create.css', 'resources/css/admin/users/form-feedback.css', 'resources/css/shared/searchable-combobox.css'])
 @endsection
 
 @section('content')
-<form action="{{ route('admin.users.store-tenaga-pendidik') }}" method="POST">
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <strong><i class="fas fa-exclamation-circle"></i> Data belum bisa disimpan:</strong>
+        <ul class="validation-list">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+@include('admin.users.partials.form-validation-feedback')
+
+<form action="{{ route('admin.users.store-tenaga-pendidik') }}" method="POST" data-admin-user-form novalidate>
         @csrf
 
         {{-- CARD 1: INFORMASI AKUN --}}
@@ -39,7 +51,7 @@
                     <div class="form-group">
                         <label class="form-label">Password <span class="required-mark">*</span></label>
                         <div class="password-wrapper">
-                            <input type="password" name="password" id="password" class="form-control" required>
+                            <input type="password" name="password" id="password" class="form-control" minlength="8" required>
                             <button type="button" class="toggle-password" data-toggle-password data-target="password">
                                 <i class="fas fa-eye" id="password-icon"></i>
                             </button>
@@ -167,5 +179,5 @@
 @endsection
 
 @section('scripts')
-    @vite(['resources/js/admin/users/tenaga-pendidik-form.js'])
+    @vite(['resources/js/admin/users/tenaga-pendidik-form.js', 'resources/js/admin/users/form-validation-feedback.js'])
 @endsection

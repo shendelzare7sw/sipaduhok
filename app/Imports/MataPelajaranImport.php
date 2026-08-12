@@ -36,6 +36,12 @@ class MataPelajaranImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
+            $filterAgama = $this->normalizeFilterAgama($row['filter_agama'] ?? null);
+            if (! empty($row['filter_agama']) && ! $filterAgama) {
+                $this->skippedCount++;
+                continue;
+            }
+
             // Skip if already exists (by kode_mapel or nama_mapel+jenjang)
             $exists = false;
             if (!empty($row['kode_mapel'])) {
@@ -57,6 +63,7 @@ class MataPelajaranImport implements ToCollection, WithHeadingRow
                     'kode_mapel' => $row['kode_mapel'] ?? null,
                     'nama_mapel' => $row['nama_mapel'],
                     'jenjang' => $jenjang,
+                    'filter_agama' => $filterAgama,
                     'deskripsi' => $row['deskripsi'] ?? null,
                 ]);
 
@@ -68,6 +75,21 @@ class MataPelajaranImport implements ToCollection, WithHeadingRow
         }
     }
 
+    private function normalizeFilterAgama($value): ?string
+    {
+        $value = trim((string) ($value ?? ''));
+        if ($value === '') {
+            return null;
+        }
+
+        foreach (MataPelajaran::AGAMA_FILTERS as $agama) {
+            if (strcasecmp($value, $agama) === 0) {
+                return $agama;
+            }
+        }
+
+        return null;
+    }
     public function getSkippedCount(): int
     {
         return $this->skippedCount;
