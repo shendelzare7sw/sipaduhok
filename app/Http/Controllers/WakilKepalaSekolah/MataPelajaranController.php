@@ -17,13 +17,19 @@ class MataPelajaranController extends Controller
 
         // Capture jenjang filter value
         $jenjang = $request->input('jenjang', null);
+        $search = trim((string) $request->input('search', ''));
 
         if ($request->filled('jenjang')) {
             $query->where('jenjang', $request->jenjang);
         }
 
-        if ($request->filled('search')) {
-            $query->where('nama_mapel', 'like', '%'.$request->search.'%');
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_mapel', 'like', "%{$search}%")
+                    ->orWhere('kode_mapel', 'like', "%{$search}%")
+                    ->orWhere('deskripsi', 'like', "%{$search}%")
+                    ->orWhere('filter_agama', 'like', "%{$search}%");
+            });
         }
 
         $mataPelajaranList = $query->orderBy('jenjang')->orderBy('nama_mapel')->paginate(20);
@@ -39,7 +45,7 @@ class MataPelajaranController extends Controller
             'sma' => MataPelajaran::where('jenjang', 'SMA')->count(),
         ];
 
-        return view('waka.mata-pelajaran.index', compact('mataPelajaranList', 'stats', 'jenjang'));
+        return view('waka.mata-pelajaran.index', compact('mataPelajaranList', 'stats', 'jenjang', 'search'));
     }
 
     public function create()
@@ -121,6 +127,7 @@ class MataPelajaranController extends Controller
     public function print(Request $request)
     {
         $jenjangFilter = $request->input('jenjang');
+        $search = trim((string) $request->input('search', ''));
 
         if ($jenjangFilter && ! is_array($jenjangFilter)) {
             $jenjangFilter = [$jenjangFilter];
@@ -132,6 +139,15 @@ class MataPelajaranController extends Controller
             $query->whereIn('jenjang', $jenjangFilter);
         }
 
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_mapel', 'like', "%{$search}%")
+                    ->orWhere('kode_mapel', 'like', "%{$search}%")
+                    ->orWhere('deskripsi', 'like', "%{$search}%")
+                    ->orWhere('filter_agama', 'like', "%{$search}%");
+            });
+        }
         $mataPelajaranList = $query->get();
 
         $stats = MataPelajaran::selectRaw('jenjang, count(*) as total')
