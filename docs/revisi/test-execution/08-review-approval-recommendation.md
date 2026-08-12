@@ -69,7 +69,7 @@ Tanggal retest aktual tidak dipindahkan ke April 2026 dan tidak dipakai sebagai 
 - Tanggal dan hasil review Test Case oleh ketiga reviewer.
 - Tanggal dan hasil review SIT oleh ketiga reviewer.
 - Keputusan apakah Perwakilan Mitra perlu dilibatkan pada dokumen teknis internal.
-- Konfirmasi/koreksi tujuh ID Test Case yang hilang.
+- Review manusia atas rekonsiliasi tujuh ID Test Case yang sudah diturunkan dari rule baseline; tidak ada lagi placeholder kosong.
 - SIT completion dan exit criteria setelah seluruh manual/external item selesai.
 - UAT, acceptance mitra, deployment verification, BAST terkait, dan final handover.
 

@@ -30,13 +30,11 @@ Label status mengikuti vocabulary dokumen eksekusi. Kebutuhan aktualnya adalah *
 
 Test Case external yang terkait dan berstatus BLOCKED mencakup pemulihan akun/email, Turnstile, Midtrans aktif/Sandbox, sinkronisasi eksternal Midtrans, serta AI provider. Tidak ada secret yang dicatat dan tidak ada transaksi finansial riil dilakukan.
 
-## Gap sumber Test Case
+## Rekonsiliasi gap sumber Test Case
 
-DOCX menyatakan 171 skenario, tetapi hanya mempunyai 164 baris. ID berikut tidak mempunyai scenario/expected result untuk dieksekusi:
+Defect dokumentasi `DEF-001` telah ditutup. Tujuh ID yang sebelumnya tidak mempunyai baris direkonsiliasi satu-ke-satu dari inventaris aturan otorisasi yang sudah ada: `TC-N-038`–`TC-N-043` berasal dari `RULE-038`–`RULE-043`, sedangkan `TC-N-050` berasal dari `RULE-050`.
 
-`TC-N-038`, `TC-N-039`, `TC-N-040`, `TC-N-041`, `TC-N-042`, `TC-N-043`, dan `TC-N-050`.
-
-Ketujuh ID dipertahankan sebagai placeholder administratif `BLOCKED` pada CSV. Isi skenario tidak direkayasa. Lihat `DEF-001`.
+DOCX sekarang mempunyai **171 baris skenario unik**. Tiga skenario (`TC-N-039`–`TC-N-041`) mempunyai evidence otomatis dan berstatus `PASS`; empat lainnya tetap `NOT EXECUTED` karena cakupan expected result belum dibuktikan penuh. Rincian sumber tersedia pada `09-test-case-id-reconciliation.md`.
 
 ## Item teknis yang belum dieksekusi penuh
 
@@ -49,6 +47,7 @@ Ketujuh ID dipertahankan sebagai placeholder administratif `BLOCKED` pada CSV. I
 - Alumni active-route restriction dan siswa cross-mapel secara targeted end-to-end.
 - Observer submission LMS → rekap nilai untuk seluruh tipe tugas/ujian.
 - DOMPDF, Laravel Excel file round-trip, PDF text extraction, dan delivery broadcast aktual.
+- Login/session akun nonaktif, akses siswa lintas mapel/kelas/agama, toggle jenjang LMS, dan direct URL seluruh pengaturan sensitif.
 
 ## Verifikasi deployment/production yang tetap terpisah
 
