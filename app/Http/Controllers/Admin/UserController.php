@@ -1426,7 +1426,7 @@ class UserController extends Controller
 
             $message = "Berhasil mengimport {$imported} siswa.";
             if ($skipped > 0) {
-                $message .= " {$skipped} data dilewati (sudah ada).";
+                $message .= " {$skipped} data dilewati.";
             }
 
             // Collect warnings

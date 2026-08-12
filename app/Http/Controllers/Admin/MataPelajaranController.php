@@ -74,7 +74,7 @@ class MataPelajaranController extends Controller
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kelompok' => 'nullable|in:A,B',
             'filter_agama' => 'nullable|in:'.implode(',', MataPelajaran::AGAMA_FILTERS),
-            'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel',
+            'kode_mapel' => 'required|string|max:20|unique:mata_pelajaran,kode_mapel',
             'deskripsi' => 'nullable|string',
         ]);
 
@@ -122,7 +122,7 @@ class MataPelajaranController extends Controller
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kelompok' => 'nullable|in:A,B',
             'filter_agama' => 'nullable|in:'.implode(',', MataPelajaran::AGAMA_FILTERS),
-            'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel,'.$mataPelajaran->id,
+            'kode_mapel' => 'required|string|max:20|unique:mata_pelajaran,kode_mapel,'.$mataPelajaran->id,
             'deskripsi' => 'nullable|string',
         ]);
 
@@ -177,26 +177,22 @@ class MataPelajaranController extends Controller
 
             $imported = $import->getImportedCount();
             $skipped = $import->getSkippedCount();
+            $warnings = $import->getWarnings();
 
             $message = "Berhasil mengimport {$imported} mata pelajaran.";
-
             if ($skipped > 0) {
-                $message .= " {$skipped} data dilewati (sudah ada atau format salah).";
+                $message .= " {$skipped} data dilewati.";
             }
 
+            $flashType = $skipped > 0 ? 'warning' : 'success';
+
             return redirect_to_previous('admin.mata-pelajaran.index')
-                ->with('warning', $message); // Using warning color to indicate mixed results if any
-        } catch (\Exception $e) {
-
-            return redirect()
-                ->route('admin.mata-pelajaran.index')
-                ->with('success', $message);
-
+                ->with($flashType, $message)
+                ->with('import_warnings', $warnings);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimport data: '.$e->getMessage());
         }
     }
-
     /**
      * Download the import template.
      */

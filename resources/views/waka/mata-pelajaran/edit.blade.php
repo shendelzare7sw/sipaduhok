@@ -112,16 +112,17 @@
                     {{-- Kode Mata Pelajaran --}}
                     <div class="mb-3">
                         <label for="kode_mapel" class="form-label">
-                            Kode Mata Pelajaran <span class="text-muted">(Opsional)</span>
+                            Kode Mata Pelajaran <span class="text-danger">*</span>
                         </label>
                         <input type="text"
                                class="form-control @error('kode_mapel') is-invalid @enderror"
                                id="kode_mapel"
                                name="kode_mapel"
                                value="{{ old('kode_mapel', $mataPelajaran->kode_mapel) }}"
-                               placeholder="Contoh: MTK, IPA, BIN, dll">
+                               placeholder="Contoh: MTK-SD, PAI-SD, BIN-SMP"
+                                   required>
                         <small class="form-text text-muted">
-                            Kode unik untuk mata pelajaran (maksimal 20 karakter)
+                            Kode wajib dan unik untuk mata pelajaran (maksimal 20 karakter)
                         </small>
                         @error('kode_mapel')
                             <div class="invalid-feedback">{{ $message }}</div>

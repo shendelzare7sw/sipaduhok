@@ -109,7 +109,7 @@
                     {{-- Kode Mata Pelajaran --}}
                     <div class="mb-3">
                         <label for="kode_mapel" class="form-label">
-                            Kode Mata Pelajaran <span class="text-muted">(Opsional)</span>
+                            Kode Mata Pelajaran <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
                             <input type="text"
@@ -117,13 +117,14 @@
                                    id="kode_mapel"
                                    name="kode_mapel"
                                    value="{{ old('kode_mapel') }}"
-                                   placeholder="Contoh: MTK, IPA, BIN, dll">
+                                   placeholder="Contoh: MTK-SD, PAI-SD, BIN-SMP"
+                                   required>
                             <button class="btn btn-outline-primary" type="button" id="btnAutoGenerate">
                                 <i class="fas fa-magic me-1"></i> Generate
                             </button>
                         </div>
                         <small class="form-text text-muted">
-                            Kode unik untuk mata pelajaran (maksimal 20 karakter). Klik "Generate" untuk melihat saran.
+                            Kode wajib dan unik untuk mata pelajaran (maksimal 20 karakter). Klik "Generate" untuk melihat saran.
                         </small>
                         @error('kode_mapel')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -190,7 +191,7 @@
                 <ul class="mb-0">
                     <li>Field yang bertanda <span class="text-danger">*</span> wajib diisi</li>
                     <li>Nama mata pelajaran harus unik dan jelas</li>
-                    <li>Kode mata pelajaran bersifat opsional, tetapi harus unik jika diisi</li>
+                    <li>Kode mata pelajaran wajib diisi dan harus unik</li>
                     <li>Pilih jenjang sesuai dengan kurikulum (SD, SMP, atau SMA)</li>
                 </ul>
             </div>

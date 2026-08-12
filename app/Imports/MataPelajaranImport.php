@@ -11,66 +11,70 @@ class MataPelajaranImport implements ToCollection, WithHeadingRow
 {
     private $skippedCount = 0;
     private $importedCount = 0;
+    private $warnings = [];
 
     public function collection(Collection $rows)
     {
+        $rowNumber = 1;
+
         foreach ($rows as $row) {
+            $rowNumber++;
             $row = $row->toArray();
 
-            // Skip empty rows
-            if (empty($row['nama_mapel']) || trim($row['nama_mapel']) === '') {
+            $kodeMapel = trim((string) ($row['kode_mapel'] ?? ''));
+            $namaMapel = trim((string) ($row['nama_mapel'] ?? ''));
+            $jenjang = strtoupper(trim((string) ($row['jenjang'] ?? '')));
+            $deskripsi = trim((string) ($row['deskripsi'] ?? ''));
+
+            if ($namaMapel === '') {
                 continue;
             }
 
-            // Validate jenjang
-            $jenjang = strtoupper(trim($row['jenjang'] ?? ''));
-            if (!in_array($jenjang, ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'])) {
+            if ($kodeMapel === '') {
                 $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Mata pelajaran '{$namaMapel}' dilewati karena kode_mapel wajib diisi.";
                 continue;
             }
 
-            // kode_mapel NOT NULL + unique di DB. Sel kosong -> error SQL kriptik.
-            // Beri pesan jelas & lewati.
-            if (empty($row['kode_mapel']) || trim($row['kode_mapel']) === '') {
+            if (! in_array($jenjang, ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'], true)) {
                 $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Mata pelajaran '{$namaMapel}' dilewati karena jenjang harus KB, TKA, TKB, SD, SMP, atau SMA.";
                 continue;
             }
 
             $filterAgama = $this->normalizeFilterAgama($row['filter_agama'] ?? null);
             if (! empty($row['filter_agama']) && ! $filterAgama) {
                 $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Mata pelajaran '{$namaMapel}' dilewati karena filter_agama harus Islam, Kristen, Katolik, Hindu, Buddha, atau Konghucu.";
                 continue;
             }
 
-            // Skip if already exists (by kode_mapel or nama_mapel+jenjang)
-            $exists = false;
-            if (!empty($row['kode_mapel'])) {
-                $exists = MataPelajaran::where('kode_mapel', $row['kode_mapel'])->exists();
-            }
-            if (!$exists) {
-                $exists = MataPelajaran::where('nama_mapel', $row['nama_mapel'])
-                    ->where('jenjang', $jenjang)
-                    ->exists();
+            if (MataPelajaran::where('kode_mapel', $kodeMapel)->exists()) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Mata pelajaran '{$namaMapel}' dilewati karena kode_mapel '{$kodeMapel}' sudah ada.";
+                continue;
             }
 
-            if ($exists) {
+            if (MataPelajaran::where('nama_mapel', $namaMapel)->where('jenjang', $jenjang)->exists()) {
                 $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Mata pelajaran '{$namaMapel}' jenjang {$jenjang} dilewati karena sudah ada.";
                 continue;
             }
 
             try {
                 MataPelajaran::create([
-                    'kode_mapel' => $row['kode_mapel'] ?? null,
-                    'nama_mapel' => $row['nama_mapel'],
+                    'kode_mapel' => $kodeMapel,
+                    'nama_mapel' => $namaMapel,
                     'jenjang' => $jenjang,
                     'filter_agama' => $filterAgama,
-                    'deskripsi' => $row['deskripsi'] ?? null,
+                    'deskripsi' => $deskripsi !== '' ? $deskripsi : null,
                 ]);
 
                 $this->importedCount++;
             } catch (\Exception $e) {
                 $this->skippedCount++;
-                \Log::error('MataPelajaran Import Error: ' . $e->getMessage() . ' | Row: ' . json_encode($row));
+                $this->warnings[] = "Baris {$rowNumber}: Error - ".$e->getMessage();
+                \Log::error('MataPelajaran Import Error: '.$e->getMessage().' | Row: '.json_encode($row));
             }
         }
     }
@@ -90,12 +94,19 @@ class MataPelajaranImport implements ToCollection, WithHeadingRow
 
         return null;
     }
+
     public function getSkippedCount(): int
     {
         return $this->skippedCount;
     }
+
     public function getImportedCount(): int
     {
         return $this->importedCount;
+    }
+
+    public function getWarnings(): array
+    {
+        return $this->warnings;
     }
 }

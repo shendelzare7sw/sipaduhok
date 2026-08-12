@@ -14,6 +14,19 @@
 
 @section('content')
 
+    @if(session('import_warnings'))
+        <div class="alert alert-warning import-warning">
+            <div class="fw-bold mb-2">
+                <i class="fas fa-exclamation-triangle me-1"></i> Beberapa baris import dilewati
+            </div>
+            <ul class="mb-0 ps-3">
+                @foreach(session('import_warnings') as $warning)
+                    <li>{{ $warning }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- Stats Chips -->
     <div class="stat-scroll">
         <div class="stat-chip">

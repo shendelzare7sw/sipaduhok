@@ -40,12 +40,12 @@ class TenagaPendidikTemplate implements FromArray, WithHeadings, WithStyles, Wit
 
         $sheet->setCellValue('A5', 'PETUNJUK:');
         $sheet->setCellValue('A6', '1. Hapus baris contoh (baris 2-3) sebelum mengisi data');
-        $sheet->setCellValue('A7', '2. WAJIB: nama_lengkap harus diisi');
+        $sheet->setCellValue('A7', '2. WAJIB: nama_lengkap, email, jenis_kelamin, tempat_lahir, tanggal_lahir, alamat, telepon, pendidikan_terakhir, role, nama_cabang');
         $sheet->setCellValue('A8', '3. jenis_kelamin: L atau P');
         $sheet->setCellValue('A9', '4. tanggal_lahir format: YYYY-MM-DD');
-        $sheet->setCellValue('A10', '5. NIP/email yang sudah ada akan DILEWATI (tidak duplikat)');
-        $sheet->setCellValue('A11', '6. User account dibuat otomatis dengan password: password');
-        $sheet->setCellValue('A12', '7. Cabang opsional - jika tidak ditemukan, tetap dibuat tanpa cabang');
+        $sheet->setCellValue('A10', '5. role dan nama_cabang harus sama dengan daftar tersedia di bawah');
+        $sheet->setCellValue('A11', '6. NIP/email yang sudah ada akan DILEWATI (tidak duplikat)');
+        $sheet->setCellValue('A12', '7. User account dibuat otomatis. Username dari NIP/nama, password default: password');
 
         $sheet->setCellValue('A14', 'ROLE TERSEDIA:');
         $roles = Role::pluck('name')->implode(', ');

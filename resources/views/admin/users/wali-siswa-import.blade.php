@@ -17,6 +17,7 @@
             'Nama wali siswa WAJIB diisi',
             'Username & email opsional (auto-generate jika kosong)',
             'nis_anak: NIS siswa yang akan dihubungkan (pisah koma jika lebih dari satu)',
+            'hubungan diisi jika nis_anak diisi, contoh: Ayah, Ibu, atau Wali',
             'Password default: <code>password</code>',
         ],
         'templateRoute' => route('admin.users.wali-siswa-template'),

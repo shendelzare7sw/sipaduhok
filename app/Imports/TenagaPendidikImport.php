@@ -25,7 +25,9 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
     public function __construct()
     {
         $this->cabangList = Cabang::pluck('id', 'nama_cabang')->toArray();
-        $this->roleList = Role::pluck('id', 'name')->toArray();
+        $this->roleList = Role::pluck('id', 'name')
+            ->mapWithKeys(fn ($id, $name) => [strtolower(trim((string) $name)) => $id])
+            ->toArray();
     }
 
     public function collection(Collection $rows)
@@ -35,102 +37,114 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
         foreach ($rows as $row) {
             $rowNumber++;
             $row = $row->toArray();
+            $namaLengkap = trim((string) ($row['nama_lengkap'] ?? ''));
 
-            // Skip empty rows - check nama_lengkap
-            if (empty($row['nama_lengkap']) || trim($row['nama_lengkap']) === '') {
+            if ($namaLengkap === '') {
                 continue;
             }
 
-            // Check for duplicate NIP or email in TenagaPendidik
-            $exists = false;
-            if (!empty($row['nip'])) {
-                $exists = TenagaPendidik::where('nip', $row['nip'])->exists();
+            $requiredFields = [
+                'email',
+                'jenis_kelamin',
+                'tempat_lahir',
+                'tanggal_lahir',
+                'alamat',
+                'telepon',
+                'pendidikan_terakhir',
+                'role',
+                'nama_cabang',
+            ];
+
+            $missingFields = [];
+            foreach ($requiredFields as $field) {
+                if (trim((string) ($row[$field] ?? '')) === '') {
+                    $missingFields[] = $field;
+                }
             }
-            if (!$exists && !empty($row['email'])) {
-                $exists = TenagaPendidik::where('email', $row['email'])->exists();
+
+            if (! empty($missingFields)) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Tenaga pendidik dilewati karena kolom wajib kosong: ".implode(', ', $missingFields).'.';
+                continue;
+            }
+
+            $jenisKelamin = strtoupper(trim((string) $row['jenis_kelamin']));
+            if (! in_array($jenisKelamin, ['L', 'P'], true)) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Tenaga pendidik dilewati karena jenis_kelamin harus L atau P.";
+                continue;
+            }
+
+            $tanggalLahir = $this->parseDate($row['tanggal_lahir'] ?? null);
+            if (! $tanggalLahir) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Tenaga pendidik dilewati karena tanggal_lahir tidak valid. Gunakan format YYYY-MM-DD.";
+                continue;
+            }
+
+            $cabangId = $this->findCabang($row['nama_cabang']);
+            if (! $cabangId) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Tenaga pendidik dilewati karena Cabang '{$row['nama_cabang']}' tidak ditemukan.";
+                continue;
+            }
+
+            $roleName = strtolower(trim((string) $row['role']));
+            $roleId = $this->roleList[$roleName] ?? null;
+            if (! $roleId) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Tenaga pendidik dilewati karena role '{$row['role']}' tidak tersedia.";
+                continue;
+            }
+
+            $nip = trim((string) ($row['nip'] ?? ''));
+            $email = trim((string) $row['email']);
+
+            $exists = false;
+            if ($nip !== '') {
+                $exists = TenagaPendidik::where('nip', $nip)->exists();
+            }
+            if (! $exists) {
+                $exists = TenagaPendidik::where('email', $email)->exists();
             }
 
             if ($exists) {
                 $this->skippedCount++;
-                $this->warnings[] = "Baris {$rowNumber}: Tenaga Pendidik dilewati karena NIP '{$row['nip']}' atau Email '{$row['email']}' sudah ada.";
+                $this->warnings[] = "Baris {$rowNumber}: Tenaga pendidik dilewati karena NIP '{$nip}' atau Email '{$email}' sudah ada.";
                 continue;
             }
 
-            // Lookup cabang
-            // Lookup cabang
-            $cabangId = null;
-            if (!empty($row['nama_cabang'])) {
-                $searchName = trim($row['nama_cabang']);
-                
-                // Normalization for matching
-                $normalizedSearch = strtolower($searchName);
-                $normalizedSearch = str_replace(['pkbm hok', 'hok'], ['pkbm house of knowledge', 'house of knowledge'], $normalizedSearch);
-
-                if (isset($this->cabangList[$searchName])) {
-                    $cabangId = $this->cabangList[$searchName];
-                } else {
-                    foreach ($this->cabangList as $dbName => $id) {
-                        $normalizedDb = strtolower(trim($dbName));
-                        
-                        // Exact match
-                        if ($normalizedDb === strtolower($searchName)) {
-                            $cabangId = $id;
-                            break;
-                        }
-                        
-                        // Match with expanded abbreviations
-                        if ($normalizedDb === $normalizedSearch) {
-                           $cabangId = $id;
-                            break; 
-                        }
-
-                        // Containment match (e.g. "PKBM House of Knowledge" in "PKBM House of Knowledge (Gedung Utama)")
-                        if (str_contains($normalizedDb, $normalizedSearch)) {
-                            $cabangId = $id;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // Lookup role
-            $roleName = strtolower(trim($row['role'] ?? 'guru_pengajar'));
-            $roleId = $this->roleList[$roleName] ?? $this->roleList['guru_pengajar'] ?? null;
-
-            // Prepare User data
-            $username = !empty($row['nip']) ? $row['nip'] : Str::slug($row['nama_lengkap']) . '-' . rand(100, 999);
-            $email = !empty($row['email']) ? $row['email'] : $username . '@guru.sipaduhok.com';
+            $username = $nip !== '' ? $nip : Str::slug($namaLengkap).'-'.rand(100, 999);
 
             DB::beginTransaction();
             try {
-                // Check if user already exists
                 $user = User::where('email', $email)->orWhere('username', $username)->first();
 
-                if (!$user) {
+                if (! $user) {
                     $user = User::create([
-                        'name' => $row['nama_lengkap'],
+                        'name' => $namaLengkap,
                         'email' => $email,
                         'username' => $username,
                         'password' => Hash::make('password'),
                         'role' => $roleName,
                         'role_id' => $roleId,
                         'cabang_id' => $cabangId,
+                        'phone' => $row['telepon'],
                         'is_active' => true,
                     ]);
                 }
 
-                // Create TenagaPendidik
                 TenagaPendidik::create([
                     'user_id' => $user->id,
-                    'nip' => $row['nip'] ?? null,
-                    'nama_lengkap' => $row['nama_lengkap'],
+                    'nip' => $nip !== '' ? $nip : null,
+                    'nama_lengkap' => $namaLengkap,
                     'email' => $email,
-                    'telepon' => $row['telepon'] ?? null,
-                    'jenis_kelamin' => strtoupper($row['jenis_kelamin'] ?? 'L') === 'P' ? 'P' : 'L',
-                    'tempat_lahir' => $row['tempat_lahir'] ?? null,
-                    'tanggal_lahir' => $this->parseDate($row['tanggal_lahir'] ?? null),
-                    'alamat' => $row['alamat'] ?? null,
-                    'pendidikan_terakhir' => $row['pendidikan_terakhir'] ?? null,
+                    'telepon' => $row['telepon'],
+                    'jenis_kelamin' => $jenisKelamin,
+                    'tempat_lahir' => $row['tempat_lahir'],
+                    'tanggal_lahir' => $tanggalLahir,
+                    'alamat' => $row['alamat'],
+                    'pendidikan_terakhir' => $row['pendidikan_terakhir'],
                 ]);
 
                 DB::commit();
@@ -139,15 +153,50 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
             } catch (\Exception $e) {
                 DB::rollBack();
                 $this->skippedCount++;
-                $this->warnings[] = "Baris {$rowNumber}: Error - " . $e->getMessage();
+                $this->warnings[] = "Baris {$rowNumber}: Error - ".$e->getMessage();
             }
         }
     }
 
+    private function findCabang($name)
+    {
+        $searchName = trim((string) $name);
+        if ($searchName === '') {
+            return null;
+        }
+
+        if (isset($this->cabangList[$searchName])) {
+            return $this->cabangList[$searchName];
+        }
+
+        $normalizedSearch = strtolower($searchName);
+        $normalizedSearch = str_replace(['pkbm hok', 'hok'], ['pkbm house of knowledge', 'house of knowledge'], $normalizedSearch);
+
+        foreach ($this->cabangList as $dbName => $id) {
+            $normalizedDb = strtolower(trim((string) $dbName));
+
+            if ($normalizedDb === strtolower($searchName)) {
+                return $id;
+            }
+
+            if ($normalizedDb === $normalizedSearch) {
+                return $id;
+            }
+
+            if (str_contains($normalizedDb, $normalizedSearch)) {
+                return $id;
+            }
+        }
+
+        return null;
+    }
+
     private function parseDate($value)
     {
-        if (empty($value))
+        if (empty($value)) {
             return null;
+        }
+
         if (is_numeric($value)) {
             try {
                 return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format('Y-m-d');
@@ -155,8 +204,14 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
                 return null;
             }
         }
+
         try {
-            return date('Y-m-d', strtotime($value));
+            $timestamp = strtotime((string) $value);
+            if ($timestamp === false) {
+                return null;
+            }
+
+            return date('Y-m-d', $timestamp);
         } catch (\Exception $e) {
             return null;
         }
@@ -166,10 +221,12 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
     {
         return $this->skippedCount;
     }
+
     public function getImportedCount(): int
     {
         return $this->importedCount;
     }
+
     public function getWarnings(): array
     {
         return $this->warnings;
