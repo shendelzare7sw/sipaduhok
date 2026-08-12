@@ -165,6 +165,15 @@ class NotificationService
 
         foreach ($siswaList as $siswa) {
             if ($siswa->user_id) {
+                $alreadySent = Notification::where('user_id', $siswa->user_id)
+                    ->where('tipe', Notification::TIPE_DEADLINE)
+                    ->where('data->tugas_id', $tugas->id)
+                    ->exists();
+
+                if ($alreadySent) {
+                    continue;
+                }
+
                 $this->create(
                     $siswa->user_id,
                     Notification::TIPE_DEADLINE,
@@ -699,6 +708,15 @@ class NotificationService
 
         $targetUsers = $query->get();
         foreach ($targetUsers as $user) {
+            $alreadySent = Notification::where('user_id', $user->id)
+                ->where('tipe', Notification::TIPE_PENGUMUMAN)
+                ->where('data->kalender_id', $kalenderAkademik->id)
+                ->exists();
+
+            if ($alreadySent) {
+                continue;
+            }
+
             $route = match ($user->role) {
                 'siswa' => route('siswa.lms.kalender'),
                 'guru_pengajar' => route('guru.dashboard'),
@@ -709,7 +727,7 @@ class NotificationService
             $this->create(
                 $user->id,
                 Notification::TIPE_PENGUMUMAN,
-                'Pengumuman: ' . $kalenderAkademik->judul,
+                'Pengumuman: ' . $kalenderAkademik->nama_kegiatan,
                 'Tanggal: ' . $kalenderAkademik->tanggal_mulai->copy()->locale('id')->translatedFormat('d M Y'),
                 $route,
                 ['kalender_id' => $kalenderAkademik->id]

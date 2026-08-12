@@ -55,7 +55,7 @@ class NotificationScheduler extends Command
         $tomorrow = Carbon::tomorrow()->toDateString();
 
         $tugasExpiring = Tugas::where('tanggal_deadline', $tomorrow)
-            ->where('status', 'aktif')
+            ->whereDate('tanggal_mulai', '<=', Carbon::tomorrow())
             ->with(['mataPelajaran', 'kelas'])
             ->get();
 
@@ -76,8 +76,8 @@ class NotificationScheduler extends Command
         $threesDaysAhead = Carbon::now()->addDays(3)->toDateString();
 
         $events = KalenderAkademik::whereDate('tanggal_mulai', $threesDaysAhead)
-            ->where('is_published', true)
-            ->whereDoesntHave('notifications') // Avoid duplicate notifications
+            ->where('status', 'aktif')
+            ->where('is_hidden_siswa', false)
             ->get();
 
         $count = 0;

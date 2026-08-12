@@ -1,0 +1,23 @@
+SIPADUHOK SIT CLOSURE PASS — FINAL REGRESSION
+Actual execution date: 2026-08-12 (Asia/Jakarta)
+
+Command:
+php artisan test
+
+Actual result:
+Tests: 1 failed, 99 passed (550 assertions)
+Duration: 8.88s
+Exit code: 1
+
+Existing failure retained transparently:
+Tests\Feature\SiswaImportStatusTest
+test_status_nonaktif_tidak_gagal_dan_akun_dinonaktifkan
+
+Failure detail:
+Expected importedCount=2, actual importedCount=0. Both fixture rows were skipped because required columns nama_kelas and agama are empty.
+
+Interpretation:
+- This is the previously registered DEF-002 test-asset defect.
+- Tests\Feature\SiswaImportStatusValidFixtureTest passed in the same full run.
+- New closure tests and the DEF-005 scheduler correction passed.
+- The existing failure was not edited, suppressed, or excluded.

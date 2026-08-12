@@ -1,0 +1,33 @@
+SIPADUHOK SIT CLOSURE PASS — TARGETED AUTOMATED EVIDENCE
+Actual execution date: 2026-08-12 (Asia/Jakarta)
+
+Command:
+php artisan test tests/Feature/SITClosureAccessControlTest.php tests/Feature/SITClosureDomainIntegrationTest.php tests/Feature/SITClosureNotificationSchedulerTest.php tests/Feature/SITClosurePromotionSchedulerTest.php tests/Feature/SITClosureDocumentRuntimeTest.php
+
+Result:
+PASS Tests\Feature\SITClosureAccessControlTest (6 tests)
+PASS Tests\Feature\SITClosureDomainIntegrationTest (4 tests)
+PASS Tests\Feature\SITClosureNotificationSchedulerTest (1 test)
+PASS Tests\Feature\SITClosurePromotionSchedulerTest (1 test)
+PASS Tests\Feature\SITClosureDocumentRuntimeTest (3 tests)
+
+Tests: 15 passed (100 assertions)
+Duration: 2.46s
+Exit code: 0
+
+Verified behavior:
+- inactive session invalidation;
+- missing profile/class and LMS-disabled guards;
+- sensitive direct URL authorization;
+- file traversal/type/expired token rejection;
+- login limiter attempt six and 300-second decay;
+- tugas/ujian observer to nilai sync;
+- carryover balance/link/idempotency;
+- repeated signed webhook, duplicate pending, audit, notification transition;
+- rapor request/approval/token/parent ownership;
+- notification scheduler schema, H-1/H-3, rerun deduplication;
+- promotion due state once and withoutOverlapping registration;
+- XLSX round-trip, DOMPDF binary, and pdftotext digital extraction.
+
+Environment caveat:
+Tests use local MySQL db_sipaduhok with per-test transaction rollback. See open test-infrastructure risk DEF-004. No production financial transaction or external provider credential was used.
