@@ -48,7 +48,9 @@ class MidtransService
      */
     public function isConfigured()
     {
-        return $this->infoPembayaran->hasMidtrans();
+        // Server-side gate: complete credentials are not sufficient when the
+        // administrator has explicitly disabled the Midtrans channel.
+        return $this->infoPembayaran->isMidtransEnabled();
     }
 
     /**

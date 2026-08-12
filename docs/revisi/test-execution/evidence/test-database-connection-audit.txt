@@ -1,0 +1,81 @@
+﻿Retest / Technical Verification: 2026-08-12
+Command: rg -l "database.default.*mysql|database.connections.mysql.database" tests
+Files overriding PHPUnit database config: 38
+tests\Feature\AiGeneratorSoalTidakRusakTest.php
+tests\Feature\BendaharaAlumniMenunggakFilterTest.php
+tests\Feature\AksesUjianTidakTerkunciWaliTest.php
+tests\Feature\BendaharaTagihanStatusFilterPaginationTest.php
+tests\Feature\CheckRoleForbidsWithoutLogoutTest.php
+tests\Feature\ForumReplyParentScopeTest.php
+tests\Feature\GuruArsipSalinBulkTest.php
+tests\Feature\GuruArsipSalinUjianTest.php
+tests\Feature\GuruForumIdorTest.php
+tests\Feature\GuruKoreksiIdorTest.php
+tests\Feature\GuruMateriUploadTypeTest.php
+tests\Feature\GuruNilaiDecimalKomaTest.php
+tests\Feature\GuruNilaiDecimalTest.php
+tests\Feature\GuruSerahTerimaKontenTest.php
+tests\Feature\GuruNilaiIdorTest.php
+tests\Feature\GuruUjianSoalIdorTest.php
+tests\Feature\HapusHubDataGuardTest.php
+tests\Feature\NilaiImportScopeTest.php
+tests\Feature\NotificationMoreTriggersTest.php
+tests\Feature\NotificationOwnershipTest.php
+tests\Feature\NotificationParentAndKenaikanTest.php
+tests\Feature\OrangTuaBayarTagihanIdorTest.php
+tests\Feature\NotifikasiPembayaranDigitalTest.php
+tests\Feature\OrangTuaSnapFinishForgeryTest.php
+tests\Feature\PromotionSystemTest.php
+tests\Feature\PromotionCicilanFinancialTest.php
+tests\Feature\SiswaImportStatusTest.php
+tests\Feature\RaporDownloadTokenSecurityTest.php
+tests\Feature\WaliValidasiAksesIdorTest.php
+tests\Feature\SiswaImportStatusValidFixtureTest.php
+tests\Feature\WaliApplyTemplateBatchTest.php
+tests\Feature\WaliTemplateCapaianDeleteTest.php
+tests\Feature\SiswaNonaktifDanHapusBersihTest.php
+tests\Feature\WakaJadwalIdorTest.php
+tests\Feature\WaliRaporIdorTest.php
+tests\Feature\UjianTidakBocorKunciTest.php
+tests\Feature\WaliApplyTemplateIdorTest.php
+tests\Feature\WaliPresensiIdorTest.php
+
+Transaction guard audit:
+tests\Feature\AiGeneratorSoalTidakRusakTest.php | beginTransaction=False | rollBack=False
+tests\Feature\BendaharaAlumniMenunggakFilterTest.php | beginTransaction=True | rollBack=True
+tests\Feature\AksesUjianTidakTerkunciWaliTest.php | beginTransaction=True | rollBack=True
+tests\Feature\BendaharaTagihanStatusFilterPaginationTest.php | beginTransaction=True | rollBack=True
+tests\Feature\CheckRoleForbidsWithoutLogoutTest.php | beginTransaction=True | rollBack=True
+tests\Feature\ForumReplyParentScopeTest.php | beginTransaction=True | rollBack=True
+tests\Feature\GuruArsipSalinBulkTest.php | beginTransaction=True | rollBack=True
+tests\Feature\GuruArsipSalinUjianTest.php | beginTransaction=True | rollBack=True
+tests\Feature\GuruForumIdorTest.php | beginTransaction=True | rollBack=True
+tests\Feature\GuruKoreksiIdorTest.php | beginTransaction=True | rollBack=True
+tests\Feature\GuruMateriUploadTypeTest.php | beginTransaction=True | rollBack=True
+tests\Feature\GuruNilaiDecimalKomaTest.php | beginTransaction=True | rollBack=True
+tests\Feature\GuruNilaiDecimalTest.php | beginTransaction=True | rollBack=True
+tests\Feature\GuruSerahTerimaKontenTest.php | beginTransaction=True | rollBack=True
+tests\Feature\GuruNilaiIdorTest.php | beginTransaction=True | rollBack=True
+tests\Feature\GuruUjianSoalIdorTest.php | beginTransaction=True | rollBack=True
+tests\Feature\HapusHubDataGuardTest.php | beginTransaction=True | rollBack=True
+tests\Feature\NilaiImportScopeTest.php | beginTransaction=True | rollBack=True
+tests\Feature\NotificationMoreTriggersTest.php | beginTransaction=True | rollBack=True
+tests\Feature\NotificationOwnershipTest.php | beginTransaction=True | rollBack=True
+tests\Feature\NotificationParentAndKenaikanTest.php | beginTransaction=True | rollBack=True
+tests\Feature\OrangTuaBayarTagihanIdorTest.php | beginTransaction=True | rollBack=True
+tests\Feature\NotifikasiPembayaranDigitalTest.php | beginTransaction=True | rollBack=True
+tests\Feature\OrangTuaSnapFinishForgeryTest.php | beginTransaction=True | rollBack=True
+tests\Feature\PromotionSystemTest.php | beginTransaction=True | rollBack=True
+tests\Feature\PromotionCicilanFinancialTest.php | beginTransaction=True | rollBack=True
+tests\Feature\SiswaImportStatusTest.php | beginTransaction=True | rollBack=True
+tests\Feature\RaporDownloadTokenSecurityTest.php | beginTransaction=True | rollBack=True
+tests\Feature\WaliValidasiAksesIdorTest.php | beginTransaction=True | rollBack=True
+tests\Feature\SiswaImportStatusValidFixtureTest.php | beginTransaction=True | rollBack=True
+tests\Feature\WaliApplyTemplateBatchTest.php | beginTransaction=True | rollBack=True
+tests\Feature\WaliTemplateCapaianDeleteTest.php | beginTransaction=True | rollBack=True
+tests\Feature\SiswaNonaktifDanHapusBersihTest.php | beginTransaction=True | rollBack=True
+tests\Feature\WakaJadwalIdorTest.php | beginTransaction=True | rollBack=True
+tests\Feature\WaliRaporIdorTest.php | beginTransaction=True | rollBack=True
+tests\Feature\UjianTidakBocorKunciTest.php | beginTransaction=True | rollBack=True
+tests\Feature\WaliApplyTemplateIdorTest.php | beginTransaction=True | rollBack=True
+tests\Feature\WaliPresensiIdorTest.php | beginTransaction=True | rollBack=True
