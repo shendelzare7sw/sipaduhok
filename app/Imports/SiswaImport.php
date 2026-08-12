@@ -182,7 +182,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
                     'telepon_orangtua' => $row['telepon_orangtua'] ?? null,
                     'status' => $siswaStatus,
                     'tanggal_masuk' => $this->parseDate($row['tanggal_masuk'] ?? now()), // Default to now if missing
-                    'agama' => $row['agama'] ?? null,
+                    'agama' => $this->normalizeAgama($row['agama'] ?? null),
                 ]);
 
                 DB::commit();
@@ -281,5 +281,49 @@ class SiswaImport implements ToCollection, WithHeadingRow
     public function getWarnings(): array
     {
         return $this->warnings;
+    }
+
+    /**
+     * Normalize agama value from import to one of 6 official religions.
+     */
+    private function normalizeAgama(?string $agama): ?string
+    {
+        if (!$agama) return null;
+
+        $agama = strtolower(trim($agama));
+
+        $map = [
+            'islam' => 'Islam',
+            'muslim' => 'Islam',
+            'kristen' => 'Kristen',
+            'kristen protestan' => 'Kristen',
+            'protestan' => 'Kristen',
+            'katolik' => 'Katolik',
+            'katholik' => 'Katolik',
+            'kristen katolik' => 'Katolik',
+            'hindu' => 'Hindu',
+            'buddha' => 'Buddha',
+            'budha' => 'Buddha',
+            'buddhis' => 'Buddha',
+            'konghucu' => 'Konghucu',
+            'khonghucu' => 'Konghucu',
+            'kong hu cu' => 'Konghucu',
+            'konfusius' => 'Konghucu',
+        ];
+
+        // Exact match first
+        if (isset($map[$agama])) {
+            return $map[$agama];
+        }
+
+        // Partial match fallback
+        foreach ($map as $keyword => $standardized) {
+            if (str_contains($agama, $keyword)) {
+                return $standardized;
+            }
+        }
+
+        // Return null if unrecognized — will show as warning
+        return null;
     }
 }

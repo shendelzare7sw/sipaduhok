@@ -15,11 +15,11 @@
 @endsection
 
 @section('styles')
-    @vite(['resources/css/admin/users/siswa-edit.css', 'resources/css/shared/searchable-combobox.css'])
+    @vite(['resources/css/admin/users/siswa-edit.css', 'resources/css/admin/users/form-feedback.css', 'resources/css/shared/searchable-combobox.css'])
 @endsection
 
 @section('scripts')
-    @vite(['resources/js/admin/users/siswa-edit.js'])
+    @vite(['resources/js/admin/users/siswa-edit.js', 'resources/js/admin/users/form-validation-feedback.js'])
 @endsection
 
 @section('content')
@@ -51,6 +51,7 @@
     @endif
 
     {{-- Display Success Message --}}
+@include('admin.users.partials.form-validation-feedback')
 
 
     {{-- Info Box --}}
@@ -63,7 +64,7 @@
         </div>
     </div>
 
-    <form action="{{ route('admin.users.update-siswa', $siswa->id) }}" method="POST">
+    <form action="{{ route('admin.users.update-siswa', $siswa->id) }}" method="POST" data-admin-user-form novalidate>
         @csrf
         @method('PUT')
         <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.users.siswa')) }}">
@@ -102,7 +103,7 @@
                 <label class="form-label">Password <small class="text-muted">(Kosongkan jika tidak ingin
                         diubah)</small></label>
                 <div class="password-wrap">
-                    <input type="password" id="passwordField" name="password" class="form-control password-input"
+                    <input type="password" id="passwordField" name="password" class="form-control password-input" minlength="8"
                         placeholder="Masukkan password baru (opsional)">
                     <button type="button" class="password-toggle" data-toggle-password data-field="passwordField" data-icon="togglePasswordIcon">
                         <i id="togglePasswordIcon" class="fas fa-eye"></i>
@@ -113,8 +114,8 @@
             <div class="form-group">
                 <label class="form-label">Status Akun <span class="required-mark">*</span></label>
                 <select name="is_active" class="form-control">
-                    <option value="1" {{ $siswa->user->is_active ? 'selected' : '' }}><i class="fas fa-check"></i> Aktif - Dapat Login</option>
-                    <option value="0" {{ !$siswa->user->is_active ? 'selected' : '' }}><i class="fas fa-times"></i> Non-Aktif - Tidak Dapat Login
+                    <option value="1" {{ old('is_active', $siswa->user->is_active ? '1' : '0') == '1' ? 'selected' : '' }}><i class="fas fa-check"></i> Aktif - Dapat Login</option>
+                    <option value="0" {{ old('is_active', $siswa->user->is_active ? '1' : '0') == '0' ? 'selected' : '' }}><i class="fas fa-times"></i> Non-Aktif - Tidak Dapat Login
                     </option>
                 </select>
             </div>
@@ -196,8 +197,19 @@
                 <div class="col">
                     <div class="form-group">
                         <label class="form-label">Agama <span class="required-mark">*</span></label>
-                        <input type="text" name="agama" class="form-control" value="{{ old('agama', $siswa->agama) }}"
-                            placeholder="Contoh: Kristen, Islam, dll" required>
+                        <select name="agama" class="form-control @error('agama') is-invalid @enderror" required>
+                            <option value="">-- Pilih Agama --</option>
+                            @php $currentAgama = old('agama', $siswa->agama); @endphp
+                            <option value="Islam" {{ $currentAgama == 'Islam' ? 'selected' : '' }}>Islam</option>
+                            <option value="Kristen" {{ $currentAgama == 'Kristen' ? 'selected' : '' }}>Kristen</option>
+                            <option value="Katolik" {{ $currentAgama == 'Katolik' ? 'selected' : '' }}>Katolik</option>
+                            <option value="Hindu" {{ $currentAgama == 'Hindu' ? 'selected' : '' }}>Hindu</option>
+                            <option value="Buddha" {{ $currentAgama == 'Buddha' ? 'selected' : '' }}>Buddha</option>
+                            <option value="Konghucu" {{ $currentAgama == 'Konghucu' ? 'selected' : '' }}>Konghucu</option>
+                        </select>
+                        @error('agama')
+                            <div class="text-danger field-error">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -251,10 +263,10 @@
             <div class="form-group">
                 <label class="form-label">Status Siswa <span class="required-mark">*</span></label>
                 <select name="status" class="form-control">
-                    <option value="aktif" {{ $siswa->status == 'aktif' ? 'selected' : '' }}><i class="fas fa-check"></i> Aktif - Sedang Belajar</option>
-                    <option value="lulus" {{ $siswa->status == 'lulus' ? 'selected' : '' }}><i class="fas fa-graduation-cap"></i> Lulus</option>
-                    <option value="pindah" {{ $siswa->status == 'pindah' ? 'selected' : '' }}><i class="fas fa-exchange-alt"></i> Pindah Sekolah</option>
-                    <option value="keluar" {{ $siswa->status == 'keluar' ? 'selected' : '' }}><i class="fas fa-times"></i> Keluar</option>
+                    <option value="aktif" {{ old('status', $siswa->status) == 'aktif' ? 'selected' : '' }}><i class="fas fa-check"></i> Aktif - Sedang Belajar</option>
+                    <option value="lulus" {{ old('status', $siswa->status) == 'lulus' ? 'selected' : '' }}><i class="fas fa-graduation-cap"></i> Lulus</option>
+                    <option value="pindah" {{ old('status', $siswa->status) == 'pindah' ? 'selected' : '' }}><i class="fas fa-exchange-alt"></i> Pindah Sekolah</option>
+                    <option value="keluar" {{ old('status', $siswa->status) == 'keluar' ? 'selected' : '' }}><i class="fas fa-times"></i> Keluar</option>
                 </select>
             </div>
         </div>
@@ -350,8 +362,8 @@
                 <label class="form-label">Tambah Wali Siswa</label>
                 <select name="add_parent_option" id="addParentOption" class="form-control">
                     <option value="">-- Pilih Aksi --</option>
-                    <option value="existing">Hubungkan dengan Wali Siswa yang Sudah Ada</option>
-                    <option value="new">Buat Akun Wali Siswa Baru</option>
+                    <option value="existing" {{ old('add_parent_option') == 'existing' ? 'selected' : '' }}>Hubungkan dengan Wali Siswa yang Sudah Ada</option>
+                    <option value="new" {{ old('add_parent_option') == 'new' ? 'selected' : '' }}>Buat Akun Wali Siswa Baru</option>
                 </select>
             </div>
 
@@ -400,8 +412,8 @@
                                 data-username="{{ strtolower($ortu->username) }}"
                                 data-status="{{ $hasChildren ? 'has_children' : 'available' }}"
                                 data-already-linked="{{ $isAlreadyLinked ? 'true' : 'false' }}">
-                                <input type="radio" name="add_existing_parent_id" value="{{ $ortu->id }}"
-                                    {{ $isAlreadyLinked ? 'disabled' : '' }}>
+                                <input type="radio" name="add_existing_parent_id" value="{{ $ortu->id }}" data-required-when-visible="true"
+                                    {{ old('add_existing_parent_id') == $ortu->id ? 'checked' : '' }} {{ $isAlreadyLinked ? 'disabled' : '' }}>
                                 <div class="parent-option-body">
                                     <div class="parent-option-title">
                                         <i class="fas fa-user parent-option-icon"></i>
@@ -432,21 +444,21 @@
 
                 <div class="form-group">
                     <label class="form-label">Hubungan</label>
-                    <select name="add_existing_relationship" class="form-control" id="add_existing_relationship">
-                        <option value="ayah_kandung">Ayah Kandung</option>
-                        <option value="ibu_kandung">Ibu Kandung</option>
-                        <option value="wali">Wali</option>
-                        <option value="ayah_tiri">Ayah Tiri</option>
-                        <option value="ibu_tiri">Ibu Tiri</option>
-                        <option value="lainnya">Lainnya</option>
+                    <select name="add_existing_relationship" class="form-control" id="add_existing_relationship" data-required-when-visible="true">
+                        <option value="ayah_kandung" {{ old('add_existing_relationship', 'ayah_kandung') == 'ayah_kandung' ? 'selected' : '' }}>Ayah Kandung</option>
+                        <option value="ibu_kandung" {{ old('add_existing_relationship', 'ayah_kandung') == 'ibu_kandung' ? 'selected' : '' }}>Ibu Kandung</option>
+                        <option value="wali" {{ old('add_existing_relationship', 'ayah_kandung') == 'wali' ? 'selected' : '' }}>Wali</option>
+                        <option value="ayah_tiri" {{ old('add_existing_relationship', 'ayah_kandung') == 'ayah_tiri' ? 'selected' : '' }}>Ayah Tiri</option>
+                        <option value="ibu_tiri" {{ old('add_existing_relationship', 'ayah_kandung') == 'ibu_tiri' ? 'selected' : '' }}>Ibu Tiri</option>
+                        <option value="lainnya" {{ old('add_existing_relationship', 'ayah_kandung') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
                     </select>
                 </div>
 
                 <div id="addExistingRelationshipOtherField" class="relationship-extra d-none">
                     <div class="form-group">
                         <label class="form-label">Sebutkan Hubungan Keluarga Lainnya</label>
-                        <input type="text" class="form-control" name="add_existing_relationship_lainnya"
-                            placeholder="Contoh: Kakek, Nenek, Paman, Bibi, dll">
+                        <input type="text" class="form-control" name="add_existing_relationship_lainnya" data-required-when-visible="true"
+                            value="{{ old('add_existing_relationship_lainnya') }}" placeholder="Contoh: Kakek, Nenek, Paman, Bibi, dll">
                     </div>
                 </div>
             </div>
@@ -457,13 +469,13 @@
                     <div class="col">
                         <div class="form-group">
                             <label class="form-label">Nama Lengkap</label>
-                            <input type="text" name="add_new_parent_name" class="form-control">
+                            <input type="text" name="add_new_parent_name" class="form-control" data-required-when-visible="true" value="{{ old('add_new_parent_name') }}">
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-group">
                             <label class="form-label">Username</label>
-                            <input type="text" name="add_new_parent_username" class="form-control">
+                            <input type="text" name="add_new_parent_username" class="form-control" data-required-when-visible="true" value="{{ old('add_new_parent_username') }}">
                         </div>
                     </div>
                 </div>
@@ -471,8 +483,8 @@
                     <div class="col">
                         <div class="form-group">
                             <label class="form-label">Email</label>
-                            <input type="email" name="add_new_parent_email" class="form-control"
-                                placeholder="contoh@email.com">
+                            <input type="email" name="add_new_parent_email" class="form-control" data-required-when-visible="true"
+                                value="{{ old('add_new_parent_email') }}" placeholder="contoh@email.com">
                         </div>
                     </div>
                     <div class="col">
@@ -480,7 +492,7 @@
                             <label class="form-label">Password</label>
                             <div class="password-wrap">
                                 <input type="password" id="newParentPasswordField" name="add_new_parent_password"
-                                    class="form-control password-input" placeholder="Minimal 8 karakter">
+                                    class="form-control password-input" data-required-when-visible="true" minlength="8" placeholder="Minimal 8 karakter">
                                 <button type="button" class="password-toggle" data-toggle-password data-field="newParentPasswordField" data-icon="toggleNewParentPasswordIcon">
                                     <i id="toggleNewParentPasswordIcon" class="fas fa-eye"></i>
                                 </button>
@@ -493,7 +505,7 @@
                         <div class="form-group">
                             <label class="form-label">No. Telepon/WA</label>
                             <input type="text" name="add_new_parent_phone" class="form-control"
-                                placeholder="Contoh: 08123456789">
+                                value="{{ old('add_new_parent_phone') }}" placeholder="Contoh: 08123456789">
                             <small class="text-muted">
                                 Nomor telepon/WhatsApp untuk komunikasi dengan sekolah
                             </small>
@@ -502,21 +514,21 @@
                     <div class="col">
                         <div class="form-group">
                             <label class="form-label">Hubungan dengan Siswa</label>
-                            <select name="add_new_relationship" class="form-control" id="add_new_relationship">
-                                <option value="ayah_kandung">Ayah Kandung</option>
-                                <option value="ibu_kandung">Ibu Kandung</option>
-                                <option value="wali">Wali</option>
-                                <option value="ayah_tiri">Ayah Tiri</option>
-                                <option value="ibu_tiri">Ibu Tiri</option>
-                                <option value="lainnya">Lainnya</option>
+                            <select name="add_new_relationship" class="form-control" id="add_new_relationship" data-required-when-visible="true">
+                                <option value="ayah_kandung" {{ old('add_new_relationship', 'ayah_kandung') == 'ayah_kandung' ? 'selected' : '' }}>Ayah Kandung</option>
+                                <option value="ibu_kandung" {{ old('add_new_relationship', 'ayah_kandung') == 'ibu_kandung' ? 'selected' : '' }}>Ibu Kandung</option>
+                                <option value="wali" {{ old('add_new_relationship', 'ayah_kandung') == 'wali' ? 'selected' : '' }}>Wali</option>
+                                <option value="ayah_tiri" {{ old('add_new_relationship', 'ayah_kandung') == 'ayah_tiri' ? 'selected' : '' }}>Ayah Tiri</option>
+                                <option value="ibu_tiri" {{ old('add_new_relationship', 'ayah_kandung') == 'ibu_tiri' ? 'selected' : '' }}>Ibu Tiri</option>
+                                <option value="lainnya" {{ old('add_new_relationship', 'ayah_kandung') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
                             </select>
                         </div>
 
                         <div id="addNewRelationshipOtherField" class="relationship-extra d-none">
                             <div class="form-group">
                                 <label class="form-label">Sebutkan Hubungan Keluarga Lainnya</label>
-                                <input type="text" class="form-control" name="add_new_relationship_lainnya"
-                                    placeholder="Contoh: Kakek, Nenek, Paman, Bibi, dll">
+                                <input type="text" class="form-control" name="add_new_relationship_lainnya" data-required-when-visible="true"
+                                    value="{{ old('add_new_relationship_lainnya') }}" placeholder="Contoh: Kakek, Nenek, Paman, Bibi, dll">
                             </div>
                         </div>
                     </div>

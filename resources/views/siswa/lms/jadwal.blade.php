@@ -94,9 +94,16 @@
                                             @else
                                                 @foreach($cell['data'] as $jadwal)
                                                     <div class="mb-2 last:mb-0">
-                                                        <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="text-decoration-none text-dark d-block">
-                                                            <strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong>
-                                                        </a>
+                                                        @php($canOpenMapel = $siswa->canAccessMapel($jadwal->mataPelajaran))
+                                                        @if($canOpenMapel)
+                                                            <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="text-decoration-none text-dark d-block">
+                                                                <strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong>
+                                                            </a>
+                                                        @else
+                                                            <div class="text-dark d-block">
+                                                                <strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong>
+                                                            </div>
+                                                        @endif
                                                         <div class="small text-muted">
                                                             {{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '(-)' }}
                                                         </div>
@@ -137,10 +144,16 @@
                 </div>
                 <div class="section-body">
                     @forelse($jadwalHariIni as $jadwal)
-                        <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="today-link">
-                            {{ $jadwal->mataPelajaran->nama_mapel }}
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
+                        @if($siswa->canAccessMapel($jadwal->mataPelajaran))
+                            <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="today-link">
+                                {{ $jadwal->mataPelajaran->nama_mapel }}
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        @else
+                            <div class="today-link text-muted pe-none">
+                                {{ $jadwal->mataPelajaran->nama_mapel }}
+                            </div>
+                        @endif
                     @empty
                         <div class="empty-state">
                             <i class="fas fa-calendar-times fa-2x mb-2 d-block"></i>
@@ -167,11 +180,18 @@
                     {{-- Subject Grid --}}
                     <div class="subject-grid" id="subjectGrid">
                         @forelse($mataPelajaranList as $mapel)
-                            <a href="{{ route('siswa.lms.mapel.show', $mapel->id) }}" class="subject-item"
-                                data-name="{{ strtolower($mapel->nama_mapel) }}">
-                                {{ $mapel->nama_mapel }}
-                                <i class="fas fa-chevron-right ms-1 subject-item-icon"></i>
-                            </a>
+                            @if($siswa->canAccessMapel($mapel))
+                                <a href="{{ route('siswa.lms.mapel.show', $mapel->id) }}" class="subject-item"
+                                    data-name="{{ strtolower($mapel->nama_mapel) }}">
+                                    {{ $mapel->nama_mapel }}
+                                    <i class="fas fa-chevron-right ms-1 subject-item-icon"></i>
+                                </a>
+                            @else
+                                <div class="subject-item text-muted"
+                                    data-name="{{ strtolower($mapel->nama_mapel) }}">
+                                    {{ $mapel->nama_mapel }}
+                                </div>
+                            @endif
                         @empty
                             <div class="empty-state w-100">
                                 Belum ada mata pelajaran

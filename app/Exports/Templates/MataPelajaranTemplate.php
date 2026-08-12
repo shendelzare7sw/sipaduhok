@@ -19,9 +19,9 @@ class MataPelajaranTemplate implements FromArray, WithHeadings, WithStyles, With
     public function array(): array
     {
         return [
-            ['MTK-SD', 'Matematika', 'SD', 'Pelajaran matematika untuk jenjang SD'],
-            ['BIN-SMP', 'Bahasa Indonesia', 'SMP', 'Pelajaran bahasa Indonesia untuk jenjang SMP'],
-            ['IPA-SMA', 'Ilmu Pengetahuan Alam', 'SMA', 'Pelajaran IPA untuk jenjang SMA'],
+            ['MTK-SD', 'Matematika', 'SD', '', 'Pelajaran matematika untuk jenjang SD'],
+            ['PAI-SD', 'Pendidikan Agama Islam', 'SD', 'Islam', 'Pelajaran agama Islam untuk jenjang SD'],
+            ['BIN-SMP', 'Bahasa Indonesia', 'SMP', '', 'Pelajaran bahasa Indonesia untuk jenjang SMP'],
         ];
     }
 
@@ -34,6 +34,7 @@ class MataPelajaranTemplate implements FromArray, WithHeadings, WithStyles, With
             'kode_mapel',
             'nama_mapel',
             'jenjang',
+            'filter_agama',
             'deskripsi',
         ];
     }
@@ -44,7 +45,7 @@ class MataPelajaranTemplate implements FromArray, WithHeadings, WithStyles, With
     public function styles(Worksheet $sheet)
     {
         // Header styling
-        $sheet->getStyle('A1:D1')->applyFromArray([
+        $sheet->getStyle('A1:E1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -60,7 +61,7 @@ class MataPelajaranTemplate implements FromArray, WithHeadings, WithStyles, With
         ]);
 
         // Sample data styling (light gray background)
-        $sheet->getStyle('A2:D4')->applyFromArray([
+        $sheet->getStyle('A2:E4')->applyFromArray([
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => 'F3F4F6'],
@@ -72,7 +73,7 @@ class MataPelajaranTemplate implements FromArray, WithHeadings, WithStyles, With
         ]);
 
         // Add border to all cells
-        $sheet->getStyle('A1:D4')->applyFromArray([
+        $sheet->getStyle('A1:E4')->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
@@ -86,11 +87,12 @@ class MataPelajaranTemplate implements FromArray, WithHeadings, WithStyles, With
         $sheet->setCellValue('A7', '1. Hapus baris contoh (baris 2-4) sebelum mengisi data Anda');
         $sheet->setCellValue('A8', '2. Kolom "nama_mapel" dan "jenjang" wajib diisi');
         $sheet->setCellValue('A9', '3. Jenjang harus salah satu dari: KB, TKA, TKB, SD, SMP, SMA');
-        $sheet->setCellValue('A10', '4. Kolom "kode_mapel" dan "deskripsi" opsional');
+        $sheet->setCellValue('A10', '4. Kolom "kode_mapel", "filter_agama", dan "deskripsi" opsional');
+        $sheet->setCellValue('A11', '5. filter_agama hanya diisi untuk mapel agama: Islam, Kristen, Katolik, Hindu, Buddha, Konghucu');
 
         $sheet->getStyle('A6')->getFont()->setBold(true);
-        $sheet->getStyle('A6:A10')->getFont()->setSize(10);
-        $sheet->getStyle('A7:A10')->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('6B7280'));
+        $sheet->getStyle('A6:A11')->getFont()->setSize(10);
+        $sheet->getStyle('A7:A11')->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('6B7280'));
 
         return [];
     }
@@ -104,7 +106,8 @@ class MataPelajaranTemplate implements FromArray, WithHeadings, WithStyles, With
             'A' => 15,
             'B' => 30,
             'C' => 12,
-            'D' => 50,
+            'D' => 18,
+            'E' => 50,
         ];
     }
 }

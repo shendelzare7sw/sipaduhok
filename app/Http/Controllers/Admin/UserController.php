@@ -35,6 +35,91 @@ class UserController extends Controller
         return view('admin.users.index', compact('tenagaPendidik', 'siswa', 'orangTua', 'stats'));
     }
 
+    private function userValidationMessages(): array
+    {
+        return [
+            'required' => ':attribute wajib diisi agar data bisa disimpan.',
+            'required_with' => ':attribute wajib diisi jika :values sudah dipilih.',
+            'exclude_unless' => ':attribute wajib diisi sesuai opsi yang dipilih.',
+            'email' => ':attribute harus berupa alamat email yang valid.',
+            'unique' => ':attribute sudah digunakan. Gunakan data lain.',
+            'min' => ':attribute minimal :min karakter.',
+            'max' => ':attribute maksimal :max karakter.',
+            'in' => ':attribute tidak sesuai pilihan yang tersedia.',
+            'exists' => ':attribute tidak ditemukan pada data sistem.',
+            'date' => ':attribute harus berupa tanggal yang valid.',
+            'boolean' => ':attribute harus bernilai aktif/nonaktif yang valid.',
+            'confirmed' => 'Konfirmasi password harus sama dengan password.',
+            'array' => ':attribute harus berupa pilihan data yang valid.',
+            'string' => ':attribute harus berupa teks.',
+            'nullable' => ':attribute boleh dikosongkan.',
+        ];
+    }
+
+    private function userValidationAttributes(): array
+    {
+        return [
+            'username' => 'Username',
+            'email' => 'Email',
+            'personal_email' => 'Email pemulihan',
+            'password' => 'Password',
+            'password_confirmation' => 'Konfirmasi password',
+            'role' => 'Role/Jabatan',
+            'cabang_id' => 'Cabang penempatan',
+            'nama_lengkap' => 'Nama lengkap',
+            'name' => 'Nama lengkap wali siswa',
+            'nip' => 'NIP',
+            'jenis_kelamin' => 'Jenis kelamin',
+            'telepon' => 'No. telepon/WA',
+            'phone' => 'No. telepon/WA',
+            'tempat_lahir' => 'Tempat lahir',
+            'tanggal_lahir' => 'Tanggal lahir',
+            'pendidikan_terakhir' => 'Pendidikan terakhir',
+            'alamat' => 'Alamat lengkap',
+            'address' => 'Alamat',
+            'kelas_id' => 'Kelas',
+            'nisn' => 'NISN',
+            'nis' => 'NIS',
+            'tanggal_masuk' => 'Tanggal masuk',
+            'agama' => 'Agama',
+            'status' => 'Status siswa',
+            'is_active' => 'Status akun',
+            'nama_ayah' => 'Nama ayah',
+            'nama_ibu' => 'Nama ibu',
+            'telepon_orangtua' => 'No. telepon wali siswa',
+            'parent_option' => 'Opsi akun wali siswa',
+            'parent_id' => 'Wali siswa yang dipilih',
+            'existing_relationship' => 'Hubungan wali siswa',
+            'existing_relationship_lainnya' => 'Hubungan keluarga lainnya',
+            'parent_name' => 'Nama lengkap wali siswa baru',
+            'parent_username' => 'Username wali siswa baru',
+            'parent_email' => 'Email wali siswa baru',
+            'parent_password' => 'Password wali siswa baru',
+            'parent_phone' => 'No. telepon wali siswa baru',
+            'new_relationship' => 'Hubungan wali siswa baru',
+            'new_relationship_lainnya' => 'Hubungan keluarga lainnya',
+            'remove_parents' => 'Data wali siswa yang dihapus',
+            'add_parent_option' => 'Opsi tambah wali siswa',
+            'add_existing_parent_id' => 'Wali siswa yang akan dihubungkan',
+            'add_existing_relationship' => 'Hubungan wali siswa yang dihubungkan',
+            'add_existing_relationship_lainnya' => 'Hubungan keluarga lainnya',
+            'add_new_parent_name' => 'Nama lengkap wali siswa baru',
+            'add_new_parent_username' => 'Username wali siswa baru',
+            'add_new_parent_email' => 'Email wali siswa baru',
+            'add_new_parent_password' => 'Password wali siswa baru',
+            'add_new_parent_phone' => 'No. telepon wali siswa baru',
+            'add_new_relationship' => 'Hubungan wali siswa baru',
+            'add_new_relationship_lainnya' => 'Hubungan keluarga lainnya',
+            'siswa_ids' => 'Siswa yang dipilih',
+            'siswa_ids.*' => 'Siswa yang dipilih',
+            'hubungan_keluarga' => 'Hubungan keluarga',
+            'hubungan_keluarga_lainnya' => 'Hubungan keluarga lainnya',
+            'relationships' => 'Hubungan keluarga',
+            'relationships.*' => 'Hubungan keluarga',
+            'relationships_lainnya' => 'Hubungan keluarga lainnya',
+            'relationships_lainnya.*' => 'Hubungan keluarga lainnya',
+        ];
+    }
     // --- TENAGA PENDIDIK ---
 
     public function tenagaPendidik(Request $request)
@@ -142,7 +227,7 @@ class UserController extends Controller
             'alamat' => 'required|string',
             'telepon' => 'required|string|max:20',
             'pendidikan_terakhir' => 'required|string|max:100',
-        ]);
+        ], $this->userValidationMessages(), $this->userValidationAttributes());
 
         $user = User::create([
             'name' => $validated['nama_lengkap'],
@@ -242,7 +327,7 @@ class UserController extends Controller
             'telepon' => 'required|string|max:20',
             'pendidikan_terakhir' => 'required|string|max:100',
             'is_active' => 'required|boolean',
-        ]);
+        ], $this->userValidationMessages(), $this->userValidationAttributes());
 
         $userData = [
             'name' => $validated['nama_lengkap'],
@@ -583,11 +668,11 @@ class UserController extends Controller
             'nama_ibu' => 'nullable|string|max:255',
             'telepon_orangtua' => 'nullable|string|max:20',
             'tanggal_masuk' => 'required|date',
-            'agama' => 'required|string|max:50',
+            'agama' => 'required|string|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
             'parent_option' => 'nullable|in:existing,new,none',
             'parent_id' => 'exclude_unless:parent_option,existing|required|exists:users,id',
             'existing_relationship' => 'exclude_unless:parent_option,existing|required|string',
-            'existing_relationship_lainnya' => 'nullable|string|max:100',
+            'existing_relationship_lainnya' => 'required_if:existing_relationship,lainnya|nullable|string|max:100',
 
             'parent_name' => 'exclude_unless:parent_option,new|required|string|max:255',
             'parent_username' => 'exclude_unless:parent_option,new|required|string|unique:users,username|max:50',
@@ -595,11 +680,11 @@ class UserController extends Controller
             'parent_password' => 'exclude_unless:parent_option,new|required|string|min:8',
             'parent_phone' => 'nullable|string|max:20',
             'new_relationship' => 'exclude_unless:parent_option,new|required|string',
-            'new_relationship_lainnya' => 'nullable|string|max:100',
+            'new_relationship_lainnya' => 'required_if:new_relationship,lainnya|nullable|string|max:100',
 
             'is_primary' => 'nullable|boolean',
             'can_access_academic' => 'nullable|boolean',
-        ]);
+        ], $this->userValidationMessages(), $this->userValidationAttributes());
 
         // Get cabang from kelas relationship
         $kelas = Kelas::findOrFail($validated['kelas_id']);
@@ -724,21 +809,21 @@ class UserController extends Controller
             'nama_ibu' => 'nullable|string|max:255',
             'telepon_orangtua' => 'nullable|string|max:20',
             'tanggal_masuk' => 'required|date',
-            'agama' => 'required|string|max:50',
+            'agama' => 'required|string|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
             'status' => 'required|in:aktif,lulus,pindah,keluar',
             'is_active' => 'required|boolean',
             'remove_parents' => 'nullable|array',
             'add_parent_option' => 'nullable|in:existing,new',
-            'add_existing_parent_id' => 'nullable|exists:users,id',
-            'add_existing_relationship' => 'nullable|string',
-            'add_existing_relationship_lainnya' => 'nullable|string|max:100',
-            'add_new_parent_name' => 'nullable|string|max:255',
-            'add_new_parent_username' => 'nullable|string|unique:users,username|max:50',
-            'add_new_parent_email' => 'nullable|email|unique:users,email',
-            'add_new_parent_password' => 'nullable|string|min:8',
-            'add_new_relationship' => 'nullable|string',
-            'add_new_relationship_lainnya' => 'nullable|string|max:100',
-        ]);
+            'add_existing_parent_id' => 'exclude_unless:add_parent_option,existing|required|exists:users,id',
+            'add_existing_relationship' => 'exclude_unless:add_parent_option,existing|required|string',
+            'add_existing_relationship_lainnya' => 'required_if:add_existing_relationship,lainnya|nullable|string|max:100',
+            'add_new_parent_name' => 'exclude_unless:add_parent_option,new|required|string|max:255',
+            'add_new_parent_username' => 'exclude_unless:add_parent_option,new|required|string|unique:users,username|max:50',
+            'add_new_parent_email' => 'exclude_unless:add_parent_option,new|required|email|unique:users,email',
+            'add_new_parent_password' => 'exclude_unless:add_parent_option,new|required|string|min:8',
+            'add_new_relationship' => 'exclude_unless:add_parent_option,new|required|string',
+            'add_new_relationship_lainnya' => 'required_if:add_new_relationship,lainnya|nullable|string|max:100',
+        ], $this->userValidationMessages(), $this->userValidationAttributes());
 
         // Get cabang from kelas relationship
         $kelas = Kelas::findOrFail($validated['kelas_id']);
@@ -1177,8 +1262,8 @@ class UserController extends Controller
             'siswa_ids' => 'nullable|array',
             'siswa_ids.*' => 'exists:siswa,id',
             'hubungan_keluarga' => 'required_with:siswa_ids|nullable|string|max:50',
-            'hubungan_keluarga_lainnya' => 'nullable|string|max:100',
-        ]);
+            'hubungan_keluarga_lainnya' => 'required_if:hubungan_keluarga,lainnya|nullable|string|max:100',
+        ], $this->userValidationMessages(), $this->userValidationAttributes());
 
         // Create parent user account
         $orangTua = User::create([
@@ -1271,7 +1356,7 @@ class UserController extends Controller
             'relationships.*' => 'nullable|string|max:100',
             'relationships_lainnya' => 'nullable|array',
             'relationships_lainnya.*' => 'nullable|string|max:100',
-        ]);
+        ], $this->userValidationMessages(), $this->userValidationAttributes());
 
         // Update user data
         $orangTua->name = $validated['name'];

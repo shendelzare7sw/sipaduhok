@@ -15,7 +15,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
 @endsection
 
 @section('styles')
-    @vite(['resources/css/admin/users/tenaga-pendidik-edit.css', 'resources/css/shared/searchable-combobox.css'])
+    @vite(['resources/css/admin/users/tenaga-pendidik-edit.css', 'resources/css/admin/users/form-feedback.css', 'resources/css/shared/searchable-combobox.css'])
 @endsection
 
 @section('content')
@@ -43,9 +43,10 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
 @endif
 
 {{-- Display Success Message --}}
+@include('admin.users.partials.form-validation-feedback')
 
 
-<form action="{{ route('admin.users.update-tenaga-pendidik', $tenagaPendidik->user_id) }}" method="POST">
+<form action="{{ route('admin.users.update-tenaga-pendidik', $tenagaPendidik->user_id) }}" method="POST" data-admin-user-form novalidate>
     @csrf
     @method('PUT')
     <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.users.tenaga-pendidik')) }}">
@@ -75,7 +76,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
                 <div class="form-group">
                     <label class="form-label">Password <small class="text-muted">(Kosongkan jika tidak ingin diubah)</small></label>
                     <div class="password-wrapper">
-                        <input type="password" name="password" id="password" class="form-control" placeholder="Masukkan password baru (opsional)">
+                        <input type="password" name="password" id="password" class="form-control" minlength="8" placeholder="Masukkan password baru (opsional)">
                         <button type="button" class="toggle-password" data-toggle-password data-target="password">
                             <i class="fas fa-eye" id="password-icon"></i>
                         </button>
@@ -87,7 +88,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
                     <label class="form-label">Role / Jabatan <span class="required-mark">*</span></label>
                     <select name="role" class="form-control" required>
                         @foreach($roles as $role)
-                            <option value="{{ $role }}" {{ $tenagaPendidik->user->role == $role ? 'selected' : '' }}>
+                            <option value="{{ $role }}" {{ old('role', $tenagaPendidik->user->role) == $role ? 'selected' : '' }}>
                                 {{ ucwords(str_replace('_', ' ', $role)) }}
                             </option>
                         @endforeach
@@ -100,7 +101,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
                     <label class="form-label">Cabang Penempatan <span class="required-mark">*</span></label>
                     <select name="cabang_id" id="cabangSelect" class="form-control" required>
                         @foreach($cabangList as $cabang)
-                            <option value="{{ $cabang->id }}" {{ $tenagaPendidik->user->cabang_id == $cabang->id ? 'selected' : '' }}>
+                            <option value="{{ $cabang->id }}" {{ old('cabang_id', $tenagaPendidik->user->cabang_id) == $cabang->id ? 'selected' : '' }}>
                                 {{ $cabang->nama_cabang }}
                             </option>
                         @endforeach
@@ -114,8 +115,8 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
                 <div class="form-group">
                     <label class="form-label">Status Akun <span class="required-mark">*</span></label>
                     <select name="is_active" class="form-control">
-                        <option value="1" {{ $tenagaPendidik->user->is_active ? 'selected' : '' }}>Aktif</option>
-                        <option value="0" {{ !$tenagaPendidik->user->is_active ? 'selected' : '' }}>Non-Aktif</option>
+                        <option value="1" {{ old('is_active', $tenagaPendidik->user->is_active ? '1' : '0') == '1' ? 'selected' : '' }}>Aktif</option>
+                        <option value="0" {{ old('is_active', $tenagaPendidik->user->is_active ? '1' : '0') == '0' ? 'selected' : '' }}>Non-Aktif</option>
                     </select>
                 </div>
             </div>
@@ -148,8 +149,8 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
                     <label class="form-label">Jenis Kelamin <span class="required-mark">*</span></label>
                     <select name="jenis_kelamin" class="form-control" required>
                         <option value="">-- Pilih Jenis Kelamin --</option>
-                        <option value="L" {{ $tenagaPendidik->jenis_kelamin == 'L' ? 'selected' : '' }}>Laki-laki</option>
-                        <option value="P" {{ $tenagaPendidik->jenis_kelamin == 'P' ? 'selected' : '' }}>Perempuan</option>
+                        <option value="L" {{ old('jenis_kelamin', $tenagaPendidik->jenis_kelamin) == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                        <option value="P" {{ old('jenis_kelamin', $tenagaPendidik->jenis_kelamin) == 'P' ? 'selected' : '' }}>Perempuan</option>
                     </select>
                 </div>
             </div>
@@ -216,5 +217,5 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
 @endsection
 
 @section('scripts')
-    @vite(['resources/js/admin/users/tenaga-pendidik-form.js'])
+    @vite(['resources/js/admin/users/tenaga-pendidik-form.js', 'resources/js/admin/users/form-validation-feedback.js'])
 @endsection

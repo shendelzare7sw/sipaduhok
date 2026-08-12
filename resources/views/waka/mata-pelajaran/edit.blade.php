@@ -89,6 +89,26 @@
                         </small>
                     </div>
 
+                    {{-- Filter Agama --}}
+                    <div class="mb-3">
+                        <label for="filter_agama" class="form-label">
+                            Filter Agama <span class="text-muted">(Opsional)</span>
+                        </label>
+                        <select name="filter_agama" id="filter_agama" class="form-select @error('filter_agama') is-invalid @enderror">
+                            <option value="">Semua siswa</option>
+                            @foreach($agamaList as $agama)
+                                <option value="{{ $agama }}" {{ old('filter_agama', $mataPelajaran->filter_agama) == $agama ? 'selected' : '' }}>
+                                    {{ $agama }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('filter_agama')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="form-text text-muted">
+                            Isi hanya untuk mata pelajaran agama agar akses LMS siswa mengikuti agama masing-masing.
+                        </small>
+                    </div>
                     {{-- Kode Mata Pelajaran --}}
                     <div class="mb-3">
                         <label for="kode_mapel" class="form-label">

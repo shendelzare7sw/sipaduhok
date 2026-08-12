@@ -391,9 +391,7 @@ class LmsDashboardController extends Controller
             })
             ->with(['mataPelajaran', 'guru'])
             ->orderBy('jam_mulai')
-            ->get()
-            ->filter(fn($j) => $siswa->canAccessMapel($j->mataPelajaran))
-            ->values();
+            ->get();
 
         // Get break times for this jenjang
         $istirahatList = PengaturanIstirahat::jenjang($kelas->jenjang)
