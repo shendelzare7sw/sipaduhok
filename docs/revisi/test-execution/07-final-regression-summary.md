@@ -8,20 +8,20 @@ Full regression akhir **bukan ALL PASS**. Command aktual `php artisan test` meng
 
 | Metrik | Jumlah |
 |---|---:|
-| Total administratif sesuai klaim dokumen | 171 |
-| Baris skenario nyata dalam DOCX | 164 |
-| Automated | 13 |
-| Partial | 26 |
-| Manual | 121 |
+| Total Test Case | 171 |
+| Baris skenario nyata dan unik dalam DOCX | 171 |
+| Automated | 16 |
+| Partial | 27 |
+| Manual | 124 |
 | External | 4 |
-| Blocked karena skenario sumber hilang | 7 |
-| PASS | 13 |
+| Placeholder/gap sumber | 0 |
+| PASS | 16 |
 | FAIL | 0 |
-| BLOCKED | 12 |
-| NOT EXECUTED | 146 |
+| BLOCKED | 5 |
+| NOT EXECUTED | 150 |
 | MANUAL/UAT REQUIRED | 0 |
 
-Ketujuh ID tanpa baris sumber tetap dihitung dalam total 171 sebagai placeholder `BLOCKED`, bukan sebagai skenario buatan. `PASS + FAIL + BLOCKED + NOT EXECUTED = 171`.
+Ketujuh ID yang sebelumnya hilang telah direkonsiliasi dari `RULE-038`–`RULE-043` dan `RULE-050`. Tiga di antaranya PASS berdasarkan evidence otomatis; empat tetap NOT EXECUTED. `PASS + FAIL + BLOCKED + NOT EXECUTED = 171`.
 
 ## SIT
 
@@ -41,10 +41,10 @@ Total status SIT adalah 45. Defect Midtrans disabled ditemukan saat targeted exe
 
 | Metrik | Jumlah | Keterangan |
 |---|---:|---|
-| Open | 3 | DEF-001, DEF-002, DEF-004 |
-| Fixed | 1 | DEF-003 |
+| Open | 1 | DEF-002 |
+| Fixed | 2 | DEF-001, DEF-003 |
 | Retested after implementation fix | 1 | DEF-003 PASS |
-| Deferred | 2 | DEF-001 dan DEF-004 |
+| Deferred | 1 | DEF-004 |
 
 `DEF-002` tetap open sebagai test-asset defect. Implementation-nya diverifikasi PASS melalui fixture valid, tetapi existing failing test tidak dihapus, dilonggarkan, atau diubah demi membuat suite hijau.
 
@@ -78,7 +78,7 @@ Kesimpulan: root cause adalah **fixture test tertinggal**, bukan importer terlal
 - UAT pengguna dan acceptance mitra secara terpisah; tidak dilakukan pada tugas ini.
 - Midtrans Sandbox end-to-end, Groq/Gemini, Turnstile, mail server, dan private broadcast runtime.
 - Production deployment verification, termasuk host cron, HTTPS/domain, callback, storage permission, worker, backup, dan monitoring.
-- Perbaikan tujuh test case yang hilang pada DOCX sumber.
+- Empat Test Case hasil rekonsiliasi yang belum dieksekusi penuh: `TC-N-038`, `TC-N-042`, `TC-N-043`, dan `TC-N-050`.
 - Hardening test infrastructure menjadi database testing khusus yang benar-benar terisolasi.
 
 ## Kontrol tanggal
