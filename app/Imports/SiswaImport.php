@@ -74,14 +74,55 @@ class SiswaImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
+            // Field wajib (konsisten dgn form manual dan kebutuhan LMS).
+            $jenisKelamin = strtoupper(trim((string) ($row['jenis_kelamin'] ?? '')));
+            $tanggalLahir = $this->parseDate($row['tanggal_lahir'] ?? null);
+            $agama = $this->normalizeAgama($row['agama'] ?? null);
+
+            $wajibKosong = [];
+            if (empty($row['nama_kelas'])) $wajibKosong[] = 'nama_kelas';
+            if (empty($row['jenis_kelamin'])) $wajibKosong[] = 'jenis_kelamin';
+            if (empty($row['tempat_lahir'])) $wajibKosong[] = 'tempat_lahir';
+            if (empty($row['tanggal_lahir'])) $wajibKosong[] = 'tanggal_lahir';
+            if (empty($row['alamat'])) $wajibKosong[] = 'alamat';
+            if (empty($row['agama'])) $wajibKosong[] = 'agama';
+            if (!empty($wajibKosong)) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: dilewati karena kolom wajib kosong: " . implode(', ', $wajibKosong) . ".";
+                continue;
+            }
+
+            if (! in_array($jenisKelamin, ['L', 'P'], true)) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: dilewati karena jenis_kelamin harus L atau P.";
+                continue;
+            }
+
+            if (! $tanggalLahir) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: dilewati karena tanggal_lahir tidak valid. Gunakan format YYYY-MM-DD.";
+                continue;
+            }
+
+            if (! $agama) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: dilewati karena agama harus salah satu: Islam, Kristen, Katolik, Hindu, Buddha, Konghucu.";
+                continue;
+            }
+
             // Lookup cabang dulu (kelas dicari di bawah dibatasi ke cabang ini, supaya
             // nama kelas yang sama di cabang lain tidak ikut cocok).
             $cabangId = null;
             if (!empty($row['nama_cabang'])) {
                 $cabangId = $this->findCabang($row['nama_cabang']);
+                if (! $cabangId) {
+                    $this->skippedCount++;
+                    $this->warnings[] = "Baris {$rowNumber}: Siswa dilewati karena Cabang '{$row['nama_cabang']}' tidak ditemukan.";
+                    continue;
+                }
             }
 
-            // Lookup kelas (optional - siswa tetap dibuat)
+            // Lookup kelas wajib agar data siswa konsisten dengan form manual.
             $kelasId = null;
             if (!empty($row['nama_kelas'])) {
                 $kelasId = $this->findKelas($row['nama_kelas'], $cabangId);
@@ -90,7 +131,9 @@ class SiswaImport implements ToCollection, WithHeadingRow
                     if (!in_array($kelasName, $this->missingKelas)) {
                         $this->missingKelas[] = $kelasName;
                     }
-                    $this->warnings[] = "Baris {$rowNumber}: Kelas '{$kelasName}' tidak ditemukan, siswa dibuat tanpa kelas";
+                    $this->skippedCount++;
+                    $this->warnings[] = "Baris {$rowNumber}: Siswa dilewati karena kelas '{$kelasName}' tidak ditemukan atau ambigu. Isi nama_cabang jika nama kelas ada di beberapa cabang.";
+                    continue;
                 }
             }
 
@@ -104,19 +147,6 @@ class SiswaImport implements ToCollection, WithHeadingRow
             if (!$cabangId) {
                 $this->skippedCount++;
                 $this->warnings[] = "Baris {$rowNumber}: Siswa dilewati karena Cabang tidak ditemukan (isi kolom nama_cabang atau pastikan nama_kelas valid).";
-                continue;
-            }
-
-            // Field wajib (konsisten dgn form manual & constraint NOT NULL di DB).
-            // Tanpa pra-validasi ini, sel kosong -> error SQL kriptik lalu baris di-skip
-            // tanpa penjelasan. Beri pesan jelas agar admin tahu kolom mana yang kurang.
-            $wajibKosong = [];
-            if (empty($row['tempat_lahir'])) $wajibKosong[] = 'tempat_lahir';
-            if (empty($row['tanggal_lahir'])) $wajibKosong[] = 'tanggal_lahir';
-            if (empty($row['alamat'])) $wajibKosong[] = 'alamat';
-            if (!empty($wajibKosong)) {
-                $this->skippedCount++;
-                $this->warnings[] = "Baris {$rowNumber}: dilewati karena kolom wajib kosong: " . implode(', ', $wajibKosong) . ".";
                 continue;
             }
 
@@ -173,16 +203,16 @@ class SiswaImport implements ToCollection, WithHeadingRow
                     'nis' => $row['nis'] ?? null,
                     'nisn' => $row['nisn'] ?? null,
                     'nama_lengkap' => $row['nama_lengkap'],
-                    'jenis_kelamin' => strtoupper($row['jenis_kelamin'] ?? 'L') === 'P' ? 'P' : 'L',
+                    'jenis_kelamin' => $jenisKelamin,
                     'tempat_lahir' => $row['tempat_lahir'] ?? null,
-                    'tanggal_lahir' => $this->parseDate($row['tanggal_lahir'] ?? null),
+                    'tanggal_lahir' => $tanggalLahir,
                     'alamat' => $row['alamat'] ?? null,
                     'nama_ayah' => $row['nama_ayah'] ?? null,
                     'nama_ibu' => $row['nama_ibu'] ?? null,
                     'telepon_orangtua' => $row['telepon_orangtua'] ?? null,
                     'status' => $siswaStatus,
-                    'tanggal_masuk' => $this->parseDate($row['tanggal_masuk'] ?? now()), // Default to now if missing
-                    'agama' => $this->normalizeAgama($row['agama'] ?? null),
+                    'tanggal_masuk' => $this->parseDate($row['tanggal_masuk'] ?? null) ?? now()->toDateString(),
+                    'agama' => $agama,
                 ]);
 
                 DB::commit();
@@ -211,6 +241,10 @@ class SiswaImport implements ToCollection, WithHeadingRow
             }
             // Cabang diketahui tapi tidak ada kelas dgn nama ini di cabang tsb -> jangan
             // jatuh ke kelas cabang lain yg kebetulan namanya sama.
+            return null;
+        }
+
+        if ($candidates->count() > 1) {
             return null;
         }
 
@@ -260,7 +294,12 @@ class SiswaImport implements ToCollection, WithHeadingRow
             }
         }
         try {
-            return date('Y-m-d', strtotime($value));
+            $timestamp = strtotime((string) $value);
+            if ($timestamp === false) {
+                return null;
+            }
+
+            return date('Y-m-d', $timestamp);
         } catch (\Exception $e) {
             return null;
         }
@@ -323,7 +362,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
             }
         }
 
-        // Return null if unrecognized — will show as warning
+        // Return null if unrecognized; caller will show a row warning.
         return null;
     }
 }

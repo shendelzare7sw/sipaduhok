@@ -60,7 +60,7 @@ class MataPelajaranController extends Controller
     {
         $validated = $request->validate([
             'nama_mapel' => 'required|string|max:100',
-            'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel',
+            'kode_mapel' => 'required|string|max:20|unique:mata_pelajaran,kode_mapel',
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kelompok' => 'nullable|in:A,B',
             'filter_agama' => 'nullable|in:'.implode(',', MataPelajaran::AGAMA_FILTERS),
@@ -99,7 +99,7 @@ class MataPelajaranController extends Controller
     {
         $validated = $request->validate([
             'nama_mapel' => 'required|string|max:100',
-            'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel,'.$mataPelajaran->id,
+            'kode_mapel' => 'required|string|max:20|unique:mata_pelajaran,kode_mapel,'.$mataPelajaran->id,
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kelompok' => 'nullable|in:A,B',
             'filter_agama' => 'nullable|in:'.implode(',', MataPelajaran::AGAMA_FILTERS),
@@ -181,18 +181,22 @@ class MataPelajaranController extends Controller
 
             $count = $import->getImportedCount();
             $skipped = $import->getSkippedCount();
+            $warnings = $import->getWarnings();
 
             $message = "Import selesai! {$count} data berhasil diimport.";
             if ($skipped > 0) {
-                $message .= " {$skipped} data dilewati (duplikat/invalid).";
+                $message .= " {$skipped} data dilewati.";
             }
 
-            return redirect_to_previous('waka.mata-pelajaran.index')->with('success', $message);
+            $flashType = $skipped > 0 ? 'warning' : 'success';
+
+            return redirect_to_previous('waka.mata-pelajaran.index')
+                ->with($flashType, $message)
+                ->with('import_warnings', $warnings);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal import: '.$e->getMessage());
         }
     }
-
     /**
      * Get suggested kode mapel based on jenjang.
      */

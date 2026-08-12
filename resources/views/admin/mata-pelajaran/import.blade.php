@@ -21,6 +21,7 @@
                 <li><strong>Isi Data</strong> - Buka file Excel dan isi data mata pelajaran sesuai kolom yang tersedia. Hapus baris contoh terlebih dahulu.</li>
                 <li><strong>Upload File</strong> - Pilih file Excel yang sudah diisi dan klik tombol "Import"</li>
                 <li><strong>Validasi Otomatis</strong> - Sistem akan memvalidasi data dan melewati baris yang sudah ada</li>
+                <li><strong>Mapel Agama</strong> - Isi <code>filter_agama</code> hanya untuk mapel agama agar LMS siswa menampilkan agama sesuai data siswa</li>
             </ol>
         </div>
 
@@ -104,7 +105,7 @@
                         <tbody>
                             <tr>
                                 <td><code class="format-code">kode_mapel</code></td>
-                                <td><span class="text-optional">Opsional</span></td>
+                                <td><span class="text-required">Ya</span></td>
                                 <td>Kode unik mata pelajaran (contoh: MTK-SD)</td>
                             </tr>
                             <tr>
@@ -121,7 +122,8 @@
                                 <td><code class="format-code">filter_agama</code></td>
                                 <td><span class="text-optional">Opsional</span></td>
                                 <td>Islam/Kristen/Katolik/Hindu/Buddha/Konghucu, kosongkan untuk semua siswa</td>
-                            </tr>                            <tr>
+                            </tr>
+                            <tr>
                                 <td><code class="format-code">deskripsi</code></td>
                                 <td><span class="text-optional">Opsional</span></td>
                                 <td>Deskripsi tambahan tentang mata pelajaran</td>

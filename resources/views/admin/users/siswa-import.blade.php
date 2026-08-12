@@ -15,8 +15,9 @@
         'heading' => 'Petunjuk Import Siswa',
         'instructions' => [
             'Download template Excel dengan format yang benar',
-            'Isi data siswa. Kolom <strong>nama_lengkap</strong> wajib diisi',
-            'nama_kelas harus sesuai dengan kelas yang ada di sistem',
+            'Isi data siswa. Kolom <strong>nama_lengkap, nama_kelas, jenis_kelamin, tempat_lahir, tanggal_lahir, alamat, agama</strong> wajib diisi',
+            'nama_kelas harus sesuai tahun ajaran aktif. Isi nama_cabang jika nama kelas sama di beberapa cabang',
+            'agama wajib salah satu: Islam, Kristen, Katolik, Hindu, Buddha, atau Konghucu',
             'User account akan dibuat otomatis dengan password: <code>password</code>',
         ],
         'templateRoute' => route('admin.users.siswa-template'),

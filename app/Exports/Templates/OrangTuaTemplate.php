@@ -39,7 +39,7 @@ class OrangTuaTemplate implements FromArray, WithHeadings, WithStyles, WithColum
         $sheet->setCellValue('A6', '1. nama WAJIB diisi');
         $sheet->setCellValue('A7', '2. username & email opsional (auto-generate jika kosong)');
         $sheet->setCellValue('A8', '3. nis_anak: NIS siswa yang akan dihubungkan (pisah koma jika >1)');
-        $sheet->setCellValue('A9', '4. hubungan: Ayah, Ibu, Wali, dll');
+        $sheet->setCellValue('A9', '4. hubungan diisi jika nis_anak diisi: Ayah, Ibu, Wali, dll');
         $sheet->setCellValue('A10', '5. Password default: password');
 
         $sheet->getStyle('A5')->getFont()->setBold(true);

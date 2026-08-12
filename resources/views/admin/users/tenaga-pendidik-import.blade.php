@@ -15,8 +15,8 @@
         'heading' => 'Petunjuk Import Tenaga Pendidik',
         'instructions' => [
             'Download template Excel berisi referensi role dan cabang',
-            'Isi data. Kolom <strong>nama_lengkap</strong> wajib diisi',
-            'Role harus sesuai: guru_pengajar, wali_kelas, dll',
+            'Isi data. Kolom <strong>nama_lengkap, email, jenis_kelamin, tempat_lahir, tanggal_lahir, alamat, telepon, pendidikan_terakhir, role, nama_cabang</strong> wajib diisi',
+            'Role dan nama_cabang harus sesuai daftar di template',
             'User account akan dibuat otomatis dengan password: <code>password</code>',
         ],
         'templateRoute' => route('admin.users.tenaga-pendidik-template'),

@@ -39,13 +39,14 @@ class SiswaTemplate implements FromArray, WithHeadings, WithStyles, WithColumnWi
 
         $sheet->setCellValue('A5', 'PETUNJUK:');
         $sheet->setCellValue('A6', '1. Hapus baris contoh (baris 2-3) sebelum mengisi data');
-        $sheet->setCellValue('A7', '2. WAJIB: nama_lengkap harus diisi');
+        $sheet->setCellValue('A7', '2. WAJIB: nama_lengkap, nama_kelas, jenis_kelamin, tempat_lahir, tanggal_lahir, alamat, agama');
         $sheet->setCellValue('A8', '3. jenis_kelamin: L (Laki-laki) atau P (Perempuan)');
         $sheet->setCellValue('A9', '4. tanggal_lahir & tanggal_masuk format: YYYY-MM-DD (contoh: 2010-05-15)');
-        $sheet->setCellValue('A10', '5. status: aktif atau nonaktif');
-        $sheet->setCellValue('A11', '6. agama: Islam, Kristen, Katolik, Hindu, Buddha, atau Konghucu');
-        $sheet->setCellValue('A12', '7. User account dibuat otomatis dengan password: password. Username/email opsional (auto-generate jika kosong)');
-        $sheet->setCellValue('A13', '8. NIS/NISN yang sudah ada akan DILEWATI (tidak duplikat)');
+        $sheet->setCellValue('A10', '5. status: aktif, nonaktif, lulus, pindah, atau keluar');
+        $sheet->setCellValue('A11', '6. agama WAJIB: Islam, Kristen, Katolik, Hindu, Buddha, atau Konghucu');
+        $sheet->setCellValue('A12', '7. nama_cabang diisi jika nama kelas sama di beberapa cabang');
+        $sheet->setCellValue('A13', '8. User account dibuat otomatis dengan password: password. Username/email opsional (auto-generate jika kosong)');
+        $sheet->setCellValue('A14', '9. NIS/NISN yang sudah ada akan DILEWATI (tidak duplikat)');
 
         $sheet->setCellValue('A15', 'DAFTAR CABANG (Pilih salah satu di kolom nama_cabang):');
         $sheet->setCellValue('A16', '1. PKBM HOK');

@@ -85,14 +85,15 @@ class MataPelajaranTemplate implements FromArray, WithHeadings, WithStyles, With
         // Add instruction comment
         $sheet->setCellValue('A6', 'PETUNJUK:');
         $sheet->setCellValue('A7', '1. Hapus baris contoh (baris 2-4) sebelum mengisi data Anda');
-        $sheet->setCellValue('A8', '2. Kolom "nama_mapel" dan "jenjang" wajib diisi');
+        $sheet->setCellValue('A8', '2. Kolom "kode_mapel", "nama_mapel", dan "jenjang" wajib diisi');
         $sheet->setCellValue('A9', '3. Jenjang harus salah satu dari: KB, TKA, TKB, SD, SMP, SMA');
-        $sheet->setCellValue('A10', '4. Kolom "kode_mapel", "filter_agama", dan "deskripsi" opsional');
+        $sheet->setCellValue('A10', '4. Kolom "filter_agama" dan "deskripsi" opsional');
         $sheet->setCellValue('A11', '5. filter_agama hanya diisi untuk mapel agama: Islam, Kristen, Katolik, Hindu, Buddha, Konghucu');
+        $sheet->setCellValue('A12', '6. Kosongkan filter_agama untuk mapel umum yang boleh dilihat semua siswa');
 
         $sheet->getStyle('A6')->getFont()->setBold(true);
-        $sheet->getStyle('A6:A11')->getFont()->setSize(10);
-        $sheet->getStyle('A7:A11')->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('6B7280'));
+        $sheet->getStyle('A6:A12')->getFont()->setSize(10);
+        $sheet->getStyle('A7:A12')->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('6B7280'));
 
         return [];
     }
