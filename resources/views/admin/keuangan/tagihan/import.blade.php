@@ -41,7 +41,7 @@
                     <select name="tahun_ajaran_id" class="form-select" required>
                         @foreach($tahunAjarans as $ta)
                             <option value="{{ $ta->id }}" {{ $ta->is_active ? 'selected' : '' }}>
-                                {{ $ta->nama_tahun_ajaran }}
+                                {{ $ta->nama_tahun_ajaran }} ({{ $ta->tanggal_mulai->format('d/m/Y') }} - {{ $ta->tanggal_selesai->format('d/m/Y') }})
                                 {{ $ta->is_active ? '(Aktif)' : '' }}
                             </option>
                         @endforeach

@@ -2,21 +2,27 @@
 
 namespace App\Exports\Templates;
 
+use App\Models\TahunAjaran;
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class TagihanTemplate implements FromArray, WithHeadings, WithStyles, WithColumnWidths
+class TagihanTemplate implements FromArray, WithColumnWidths, WithHeadings, WithStyles
 {
     public function array(): array
     {
+        $tahunAjaran = TahunAjaran::where('is_active', true)
+            ->orderByDesc('tanggal_mulai')
+            ->first();
+        $defaultDate = $tahunAjaran?->getDefaultTagihanDueDate() ?? now()->addMonthNoOverflow();
+
         return [
-            ['12345', '', 'Ahmad Fajar', 'SPP Bulanan', 500000, '2025-02-28'],
-            ['12346', '', 'Putri Rahayu', 'Uang Bangunan', 1500000, '2025-03-15'],
-            ['', '1234567890', 'Budi Santoso', 'Seragam', 350000, '2025-02-28'],
+            ['12345', '', 'Ahmad Fajar', 'SPP Bulanan', 500000, $defaultDate->toDateString()],
+            ['12346', '', 'Putri Rahayu', 'Uang Bangunan', 1500000, $defaultDate->copy()->addDays(7)->min($tahunAjaran?->tanggal_selesai ?? $defaultDate)->toDateString()],
+            ['', '1234567890', 'Budi Santoso', 'Seragam', 350000, $defaultDate->toDateString()],
         ];
     }
 
@@ -41,7 +47,11 @@ class TagihanTemplate implements FromArray, WithHeadings, WithStyles, WithColumn
         $sheet->setCellValue('A8', '2. WAJIB: Isi NIS atau NISN atau nama_siswa (salah satu) - siswa HARUS sudah ada di database');
         $sheet->setCellValue('A9', '3. WAJIB: jenis_tagihan dan jumlah harus diisi');
         $sheet->setCellValue('A10', '4. jumlah dalam Rupiah tanpa titik/koma (contoh: 500000)');
-        $sheet->setCellValue('A11', '5. tanggal_jatuh_tempo format: YYYY-MM-DD');
+        $tahunAjaran = TahunAjaran::where('is_active', true)->first();
+        $periode = $tahunAjaran
+            ? $tahunAjaran->tanggal_mulai->format('Y-m-d').' s.d. '.$tahunAjaran->tanggal_selesai->format('Y-m-d')
+            : 'tahun ajaran yang dipilih saat import';
+        $sheet->setCellValue('A11', '5. tanggal_jatuh_tempo format YYYY-MM-DD dan harus berada dalam periode '.$periode);
         $sheet->setCellValue('A12', '6. Status tagihan otomatis: belum_bayar');
         $sheet->setCellValue('A13', '7. Jika siswa tidak ditemukan → baris akan DILEWATI');
 

@@ -18,8 +18,7 @@ class TunggakanCarryoverService
 {
     public function __construct(
         protected NotificationService $notifications
-    ) {
-    }
+    ) {}
 
     /**
      * Daftar siswa yang punya tunggakan asli (belum dialihkan) di TA selain TA aktif.
@@ -30,7 +29,7 @@ class TunggakanCarryoverService
     public function getKandidatTunggakan(?int $cabangId = null)
     {
         $taAktif = TahunAjaran::where('is_active', true)->first();
-        if (!$taAktif) {
+        if (! $taAktif) {
             return collect();
         }
 
@@ -42,7 +41,7 @@ class TunggakanCarryoverService
             ->with(['siswa.kelas', 'siswa.cabang', 'tahunAjaran']);
 
         if ($cabangId) {
-            $tagihanQuery->whereHas('siswa', fn($q) => $q->where('cabang_id', $cabangId));
+            $tagihanQuery->whereHas('siswa', fn ($q) => $q->where('cabang_id', $cabangId));
         }
 
         $tagihanList = $tagihanQuery->get();
@@ -58,8 +57,9 @@ class TunggakanCarryoverService
         $tagihanList = $tagihanList->map(function ($t) use ($bayarBy) {
             $terbayar = (float) ($bayarBy[$t->id] ?? 0);
             $t->setRelation('sisa', max(0, (float) $t->jumlah - $terbayar));
+
             return $t;
-        })->filter(fn($t) => $t->sisa > 0)->values();
+        })->filter(fn ($t) => $t->sisa > 0)->values();
 
         // Group per siswa
         $grouped = $tagihanList->groupBy('siswa_id')->map(function ($items) {
@@ -87,7 +87,7 @@ class TunggakanCarryoverService
     /**
      * Pratinjau tagihan baru yang akan dibuat (tanpa menulis ke DB).
      *
-     * @param int[] $siswaIds
+     * @param  int[]  $siswaIds
      */
     public function previewCarryover(array $siswaIds, int $taTujuan): array
     {
@@ -118,7 +118,7 @@ class TunggakanCarryoverService
      * Eksekusi: buat tagihan baru di TA tujuan + tandai tagihan asal sebagai dialihkan.
      * Notifikasi wali siswa dikirim per tagihan baru.
      *
-     * @param int[] $siswaIds
+     * @param  int[]  $siswaIds
      */
     public function executeCarryover(array $siswaIds, int $taTujuan, User $eksekutor): array
     {
@@ -143,6 +143,7 @@ class TunggakanCarryoverService
                 // Skip kalau ternyata sudah pernah dialihkan (race condition)
                 if ($asal->dialihkan_ke_id !== null) {
                     $skipped++;
+
                     continue;
                 }
 
@@ -154,7 +155,7 @@ class TunggakanCarryoverService
                     'jenis_tagihan' => $asal->jenis_tagihan,
                     'keterangan' => $this->bangunKeterangan($asal),
                     'jumlah' => $asal->sisa,
-                    'tanggal_jatuh_tempo' => now()->addDays(30)->toDateString(),
+                    'tanggal_jatuh_tempo' => $taTujuanModel->getDefaultTagihanDueDate()->toDateString(),
                     'status' => 'belum_bayar',
                 ]);
 
@@ -168,15 +169,16 @@ class TunggakanCarryoverService
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('TunggakanCarryover gagal: ' . $e->getMessage(), [
+            Log::error('TunggakanCarryover gagal: '.$e->getMessage(), [
                 'siswa_ids' => $siswaIds,
                 'ta_tujuan' => $taTujuan,
                 'eksekutor' => $eksekutor->id,
             ]);
+
             return [
                 'success' => false,
                 'created' => 0,
-                'message' => 'Gagal mengeksekusi carryover: ' . $e->getMessage(),
+                'message' => 'Gagal mengeksekusi carryover: '.$e->getMessage(),
             ];
         }
 
@@ -188,7 +190,7 @@ class TunggakanCarryoverService
                     $this->notifications->notifyTunggakanDialihkan($tagihanBaru);
                 }
             } catch (\Throwable $e) {
-                Log::warning('Notif carryover gagal untuk tagihan #' . $id . ': ' . $e->getMessage());
+                Log::warning('Notif carryover gagal untuk tagihan #'.$id.': '.$e->getMessage());
             }
         }
 
@@ -196,8 +198,8 @@ class TunggakanCarryoverService
             'success' => true,
             'created' => $created,
             'skipped' => $skipped,
-            'message' => "Berhasil mengalihkan {$created} tagihan tunggakan ke TA " . $taTujuanModel->nama_tahun_ajaran
-                . ($skipped > 0 ? " ({$skipped} dilewati karena sudah pernah dialihkan)" : '') . '.',
+            'message' => "Berhasil mengalihkan {$created} tagihan tunggakan ke TA ".$taTujuanModel->nama_tahun_ajaran
+                .($skipped > 0 ? " ({$skipped} dilewati karena sudah pernah dialihkan)" : '').'.',
         ];
     }
 
@@ -225,14 +227,16 @@ class TunggakanCarryoverService
         return $tagihanList->map(function ($t) use ($bayarBy) {
             $terbayar = (float) ($bayarBy[$t->id] ?? 0);
             $t->setRelation('sisa', max(0, (float) $t->jumlah - $terbayar));
+
             return $t;
-        })->filter(fn($t) => $t->sisa > 0)->values();
+        })->filter(fn ($t) => $t->sisa > 0)->values();
     }
 
     protected function bangunKeterangan(Tagihan $asal): string
     {
         $namaTa = $asal->tahunAjaran->nama_tahun_ajaran ?? 'TA Lama';
         $base = $asal->keterangan ?: ucwords(str_replace('_', ' ', $asal->jenis_tagihan));
+
         return "Tunggakan {$namaTa}: {$base}";
     }
 }

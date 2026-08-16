@@ -2,8 +2,8 @@
 
 namespace App\Imports;
 
-use App\Models\Tagihan;
 use App\Models\Siswa;
+use App\Models\Tagihan;
 use App\Models\TahunAjaran;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -12,17 +12,24 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 class TagihanImport implements ToCollection, WithHeadingRow
 {
     private $skippedCount = 0;
+
     private $importedCount = 0;
+
     private $siswaList;
+
     private $tahunAjaranId;
+
+    private TahunAjaran $tahunAjaran;
 
     // Tracking
     private $missingSiswa = [];
+
     private $warnings = [];
 
     public function __construct($tahunAjaranId = null)
     {
         $this->tahunAjaranId = $tahunAjaranId ?? TahunAjaran::where('is_active', true)->first()?->id;
+        $this->tahunAjaran = TahunAjaran::findOrFail($this->tahunAjaranId);
         $this->siswaList = Siswa::pluck('id', 'nis')->toArray();
     }
 
@@ -43,27 +50,28 @@ class TagihanImport implements ToCollection, WithHeadingRow
             $siswaId = null;
             $searchTerm = '';
 
-            if (!empty($row['nis'])) {
+            if (! empty($row['nis'])) {
                 $searchTerm = $row['nis'];
                 $siswaId = $this->siswaList[$row['nis']] ?? null;
             }
-            if (!$siswaId && !empty($row['nisn'])) {
+            if (! $siswaId && ! empty($row['nisn'])) {
                 $searchTerm = $row['nisn'];
                 $siswa = Siswa::where('nisn', $row['nisn'])->first();
                 $siswaId = $siswa ? $siswa->id : null;
             }
-            if (!$siswaId && !empty($row['nama_siswa'])) {
+            if (! $siswaId && ! empty($row['nama_siswa'])) {
                 $searchTerm = $row['nama_siswa'];
-                $siswa = Siswa::where('nama_lengkap', 'like', '%' . trim($row['nama_siswa']) . '%')->first();
+                $siswa = Siswa::where('nama_lengkap', 'like', '%'.trim($row['nama_siswa']).'%')->first();
                 $siswaId = $siswa ? $siswa->id : null;
             }
 
-            if (!$siswaId) {
-                if (!in_array($searchTerm, $this->missingSiswa)) {
+            if (! $siswaId) {
+                if (! in_array($searchTerm, $this->missingSiswa)) {
                     $this->missingSiswa[] = $searchTerm;
                 }
                 $this->warnings[] = "Baris {$rowNumber}: Siswa '{$searchTerm}' tidak ditemukan";
                 $this->skippedCount++;
+
                 continue;
             }
 
@@ -75,6 +83,7 @@ class TagihanImport implements ToCollection, WithHeadingRow
 
             if ($exists) {
                 $this->skippedCount++;
+
                 continue;
             }
 
@@ -91,26 +100,29 @@ class TagihanImport implements ToCollection, WithHeadingRow
                 $this->importedCount++;
             } catch (\Exception $e) {
                 $this->skippedCount++;
-                $this->warnings[] = "Baris {$rowNumber}: Error - " . $e->getMessage();
+                $this->warnings[] = "Baris {$rowNumber}: Error - ".$e->getMessage();
             }
         }
     }
 
     private function parseDate($value)
     {
-        if (empty($value))
-            return now()->addMonth();
+        if (empty($value)) {
+            return $this->tahunAjaran->getDefaultTagihanDueDate()->toDateString();
+        }
+
         if (is_numeric($value)) {
             try {
-                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format('Y-m-d');
-            } catch (\Exception $e) {
-                return now()->addMonth()->format('Y-m-d');
+                $value = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value);
+            } catch (\Throwable) {
+                return $this->tahunAjaran->getDefaultTagihanDueDate()->toDateString();
             }
         }
+
         try {
-            return date('Y-m-d', strtotime($value));
-        } catch (\Exception $e) {
-            return now()->addMonth()->format('Y-m-d');
+            return $this->tahunAjaran->normalizeTagihanDueDate($value)->toDateString();
+        } catch (\Throwable) {
+            return $this->tahunAjaran->getDefaultTagihanDueDate()->toDateString();
         }
     }
 
@@ -118,14 +130,17 @@ class TagihanImport implements ToCollection, WithHeadingRow
     {
         return $this->skippedCount;
     }
+
     public function getImportedCount(): int
     {
         return $this->importedCount;
     }
+
     public function getMissingSiswa(): array
     {
         return $this->missingSiswa;
     }
+
     public function getWarnings(): array
     {
         return $this->warnings;

@@ -293,20 +293,16 @@
                                         Bulan Mulai <span class="text-danger">*</span>
                                     </label>
                                     <select name="bulan_mulai" id="bulan_mulai" class="form-select" required>
-                                        <option value="1">Januari</option>
-                                        <option value="2">Februari</option>
-                                        <option value="3">Maret</option>
-                                        <option value="4">April</option>
-                                        <option value="5">Mei</option>
-                                        <option value="6">Juni</option>
-                                        <option value="7" selected>Juli</option>
-                                        <option value="8">Agustus</option>
-                                        <option value="9">September</option>
-                                        <option value="10">Oktober</option>
-                                        <option value="11">November</option>
-                                        <option value="12">Desember</option>
+                                        @foreach($sppMonths as $month)
+                                            <option value="{{ $month['value'] }}"
+                                                {{ old('bulan_mulai', $sppMonths[0]['value'] ?? '') === $month['value'] ? 'selected' : '' }}>
+                                                {{ $month['label'] }}
+                                            </option>
+                                        @endforeach
                                     </select>
-                                    <small class="text-muted">SPP akan dimulai dari bulan ini</small>
+                                    @error('bulan_mulai')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
 
                                 {{-- Jumlah Bulan (untuk SPP Sebagian) --}}
@@ -315,7 +311,7 @@
                                         Jumlah Bulan <span class="text-danger">*</span>
                                     </label>
                                     <select name="jumlah_bulan" id="jumlah_bulan" class="form-select">
-                                        @for($i = 1; $i <= 12; $i++)
+                                        @for($i = 1; $i <= count($sppMonths); $i++)
                                             <option value="{{ $i }}">{{ $i }} Bulan</option>
                                         @endfor
                                     </select>
@@ -353,7 +349,7 @@
                                     <i class="fas fa-exclamation-triangle me-2"></i>
                                     <strong>Perhatian:</strong>
                                     <ul class="mb-0 mt-2 small" id="previewList">
-                                        <li id="previewBulan">Akan dibuat <span id="totalBulanText">12</span> tagihan SPP</li>
+                                        <li id="previewBulan">Akan dibuat <span id="totalBulanText">{{ count($sppMonths) }}</span> tagihan SPP</li>
                                         <li>Jika tagihan sudah ada, nominal akan diperbarui</li>
                                         <li>Status tagihan baru = "Belum Bayar"</li>
                                     </ul>

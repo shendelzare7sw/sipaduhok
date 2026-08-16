@@ -200,7 +200,8 @@
                                     </label>
                                     <input type="date" name="tanggal_jatuh_tempo" id="tanggal_jatuh_tempo"
                                         class="form-control @error('tanggal_jatuh_tempo') is-invalid @enderror"
-                                        value="{{ old('tanggal_jatuh_tempo', now()->addMonth()->format('Y-m-d')) }}"
+                                        value="{{ old('tanggal_jatuh_tempo', $defaultDueDate) }}"
+                                        min="{{ $tagihanDateMin }}" max="{{ $tagihanDateMax }}"
                                         required>
                                     @error('tanggal_jatuh_tempo')
                                         <div class="invalid-feedback">{{ $message }}</div>

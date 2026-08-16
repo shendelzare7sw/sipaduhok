@@ -50,7 +50,8 @@ const createRemoveButton = () => {
 const addTagihanField = () => {
     const container = document.getElementById('tagihan-fields-container');
     const globalDate = document.getElementById('globalJatuhTempo')?.value;
-    const defaultDate = document.querySelector('[data-add-tagihan-field]')?.dataset.defaultDate || '';
+    const addButton = document.querySelector('[data-add-tagihan-field]');
+    const defaultDate = addButton?.dataset.defaultDate || '';
 
     if (!container) {
         return;
@@ -85,6 +86,8 @@ const addTagihanField = () => {
         {
             type: 'date',
             value: globalDate || defaultDate,
+            min: addButton?.dataset.dateMin || '',
+            max: addButton?.dataset.dateMax || '',
         },
     );
     const note = document.createElement('small');
