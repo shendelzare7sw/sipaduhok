@@ -336,6 +336,9 @@ class TagihanController extends Controller
             'jenisTagihan' => $jenisTagihanWithExisting,
             'standardJenisTagihan' => array_keys($this->jenisTagihan), // Pass standard keys for identification
             'allYears' => $allYears,
+            'defaultDueDate' => $tahunAjaranAktif->getDefaultTagihanDueDate()->toDateString(),
+            'tagihanDateMin' => $tahunAjaranAktif->tanggal_mulai->toDateString(),
+            'tagihanDateMax' => $tahunAjaranAktif->tanggal_selesai->toDateString(),
         ]);
     }
 
@@ -360,7 +363,8 @@ class TagihanController extends Controller
             'tagihan.*' => 'nullable|numeric|min:0',
             'tanggal_jatuh_tempo' => 'required|array',
             'tanggal_jatuh_tempo.*' => 'nullable|date',
-            'tahun_ajaran_id' => 'nullable|array', // Optional validation
+            'tahun_ajaran_id' => 'nullable|array',
+            'tahun_ajaran_id.*' => 'nullable|exists:tahun_ajaran,id',
         ]);
 
         DB::beginTransaction();
@@ -371,6 +375,8 @@ class TagihanController extends Controller
             foreach ($submittedTagihan as $key => $jumlah) {
                 $jatuhTempo = $request->input("tanggal_jatuh_tempo.{$key}");
                 $targetYearId = $request->input("tahun_ajaran_id.{$key}") ?? $tahunAjaranAktif->id;
+                $targetYear = TahunAjaran::findOrFail($targetYearId);
+                $jatuhTempo = $targetYear->normalizeTagihanDueDate($jatuhTempo)->toDateString();
 
                 // Cek apakah tagihan sudah ada di TAHUN AKTIF (karena form edit load data tahun aktif)
                 // Jika user mengubah tahun, kita update record yang ada di tahun aktif ini ke tahun baru.
@@ -395,7 +401,7 @@ class TagihanController extends Controller
                     // Update jika ada (bisa pindah tahun)
                     $tagihan->update([
                         'jumlah' => $jumlah ?? 0,
-                        'tanggal_jatuh_tempo' => $jatuhTempo ?? now()->addMonth(),
+                        'tanggal_jatuh_tempo' => $jatuhTempo,
                         'tahun_ajaran_id' => $targetYearId,
                     ]);
                     // Update status based on new amount
@@ -407,7 +413,7 @@ class TagihanController extends Controller
                         'tahun_ajaran_id' => $targetYearId,
                         'jenis_tagihan' => $key,
                         'jumlah' => $jumlah ?? 0,
-                        'tanggal_jatuh_tempo' => $jatuhTempo ?? now()->addMonth(),
+                        'tanggal_jatuh_tempo' => $jatuhTempo,
                         'status' => 'belum_bayar',
                     ]);
                     // Update status based on amount
@@ -547,9 +553,9 @@ class TagihanController extends Controller
                 'tagihan' => 'required|array',
                 'tagihan.*' => 'nullable|numeric|min:0',
                 'tanggal_jatuh_tempo' => 'required|array',
-                'tanggal_jatuh_tempo.*' => 'required|date',
+                'tanggal_jatuh_tempo.*' => 'required|date|after_or_equal:'.$tahunAjaranAktif->tanggal_mulai->toDateString().'|before_or_equal:'.$tahunAjaranAktif->tanggal_selesai->toDateString(),
                 'custom_tanggal_jatuh_tempo' => 'nullable|array',
-                'custom_tanggal_jatuh_tempo.*' => 'nullable|date',
+                'custom_tanggal_jatuh_tempo.*' => 'nullable|date|after_or_equal:'.$tahunAjaranAktif->tanggal_mulai->toDateString().'|before_or_equal:'.$tahunAjaranAktif->tanggal_selesai->toDateString(),
             ]);
 
             $siswaList = Siswa::whereIn('kelas_id', $request->kelas_ids)
@@ -610,7 +616,9 @@ class TagihanController extends Controller
 
                     foreach ($customJenis as $index => $jenisNama) {
                         $jumlahCustom = $customTagihan[$index] ?? 0;
-                        $jatuhTempoCustom = $customJatuhTempo[$index] ?? now()->addMonth()->format('Y-m-d');
+                        $jatuhTempoCustom = $tahunAjaranAktif
+                            ->normalizeTagihanDueDate($customJatuhTempo[$index] ?? null)
+                            ->toDateString();
 
                         if (! empty($jenisNama) && $jumlahCustom > 0) {
                             // Create slug from jenis nama
@@ -675,6 +683,9 @@ class TagihanController extends Controller
             'kelasList' => $kelasList,
             'tahunAjaran' => $tahunAjaranAktif,
             'jenisTagihan' => $this->jenisTagihan,
+            'defaultDueDate' => $tahunAjaranAktif->getDefaultTagihanDueDate()->toDateString(),
+            'tagihanDateMin' => $tahunAjaranAktif->tanggal_mulai->toDateString(),
+            'tagihanDateMax' => $tahunAjaranAktif->tanggal_selesai->toDateString(),
         ]);
     }
 
@@ -707,6 +718,9 @@ class TagihanController extends Controller
             'kelasList' => $kelasList,
             'cabangList' => $cabangList,
             'tahunAjaran' => $tahunAjaranAktif,
+            'defaultDueDate' => $tahunAjaranAktif->getDefaultTagihanDueDate()->toDateString(),
+            'tagihanDateMin' => $tahunAjaranAktif->tanggal_mulai->toDateString(),
+            'tagihanDateMax' => $tahunAjaranAktif->tanggal_selesai->toDateString(),
         ]);
     }
 
@@ -717,20 +731,20 @@ class TagihanController extends Controller
     {
         normalisasi_input_rupiah($request, ['jumlah']);
 
-        $request->validate([
-            'siswa_ids' => 'required|array|min:1',
-            'siswa_ids.*' => 'exists:siswa,id',
-            'jenis_tagihan' => 'required|string|max:255',
-            'jumlah' => 'required|numeric|min:1',
-            'tanggal_jatuh_tempo' => 'required|date',
-            'keterangan' => 'nullable|string',
-        ]);
-
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
         if (! $tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
+
+        $request->validate([
+            'siswa_ids' => 'required|array|min:1',
+            'siswa_ids.*' => 'exists:siswa,id',
+            'jenis_tagihan' => 'required|string|max:255',
+            'jumlah' => 'required|numeric|min:1',
+            'tanggal_jatuh_tempo' => 'required|date|after_or_equal:'.$tahunAjaranAktif->tanggal_mulai->toDateString().'|before_or_equal:'.$tahunAjaranAktif->tanggal_selesai->toDateString(),
+            'keterangan' => 'nullable|string',
+        ]);
 
         // Buat slug dari jenis tagihan (tanpa prefix "custom_")
         $jenisTagihanSlug = str()->slug($request->jenis_tagihan);
@@ -871,6 +885,7 @@ class TagihanController extends Controller
             'kelasList' => $kelasList,
             'siswaList' => $siswaList,
             'tahunAjaran' => $tahunAjaranAktif,
+            'sppMonths' => $tahunAjaranAktif->getTagihanMonths(),
         ]);
     }
 
@@ -881,6 +896,15 @@ class TagihanController extends Controller
     {
         normalisasi_input_rupiah($request, ['jumlah_spp']);
 
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+
+        if (! $tahunAjaranAktif) {
+            return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
+        }
+
+        $availableMonths = collect($tahunAjaranAktif->getTagihanMonths())->pluck('value')->values();
+        $maxMonths = max(1, $availableMonths->count());
+
         // Validasi berbeda berdasarkan target_type
         if ($request->target_type === 'siswa') {
             $request->validate([
@@ -890,8 +914,8 @@ class TagihanController extends Controller
                 'siswa_ids.*' => 'exists:siswa,id',
                 'jumlah_spp' => 'required|numeric|min:1',
                 'tanggal_jatuh_tempo' => 'required|integer|min:1|max:31',
-                'bulan_mulai' => 'required|integer|min:1|max:12',
-                'jumlah_bulan' => 'required_if:tipe_spp,sebagian|nullable|integer|min:1|max:12',
+                'bulan_mulai' => 'required|date_format:Y-m',
+                'jumlah_bulan' => 'required_if:tipe_spp,sebagian|nullable|integer|min:1|max:'.$maxMonths,
             ]);
         } else {
             $request->validate([
@@ -901,15 +925,9 @@ class TagihanController extends Controller
                 'kelas_ids.*' => 'exists:kelas,id',
                 'jumlah_spp' => 'required|numeric|min:1',
                 'tanggal_jatuh_tempo' => 'required|integer|min:1|max:31',
-                'bulan_mulai' => 'required|integer|min:1|max:12',
-                'jumlah_bulan' => 'required_if:tipe_spp,sebagian|nullable|integer|min:1|max:12',
+                'bulan_mulai' => 'required|date_format:Y-m',
+                'jumlah_bulan' => 'required_if:tipe_spp,sebagian|nullable|integer|min:1|max:'.$maxMonths,
             ]);
-        }
-
-        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-
-        if (! $tahunAjaranAktif) {
-            return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
         // Tentukan daftar siswa berdasarkan target
@@ -944,27 +962,39 @@ class TagihanController extends Controller
             12 => 'Desember',
         ];
 
+        $startMonthIndex = $request->tipe_spp === 'setahun'
+            ? 0
+            : $availableMonths->search($request->bulan_mulai);
+        $jumlahBulanGenerate = $request->tipe_spp === 'setahun'
+            ? $availableMonths->count()
+            : (int) $request->jumlah_bulan;
+
+        if ($startMonthIndex === false || $startMonthIndex + $jumlahBulanGenerate > $availableMonths->count()) {
+            return redirect()->back()->withInput()->withErrors([
+                'bulan_mulai' => 'Rentang bulan SPP harus berada di dalam tahun ajaran '.$tahunAjaranAktif->nama_tahun_ajaran.'.',
+            ]);
+        }
+
         DB::beginTransaction();
         try {
             $totalCreated = 0;
             $totalSkipped = 0;
             $notifSiswaIds = []; // siswa yang dapat/diperbarui SPP → dinotif ke ortu
-            $bulanMulai = $request->bulan_mulai;
-
-            // Tentukan jumlah bulan yang akan digenerate
-            $jumlahBulanGenerate = $request->tipe_spp === 'setahun' ? 12 : $request->jumlah_bulan;
-
             // Tentukan apakah ini operasi BULK (multiple siswa) atau INDIVIDUAL (single siswa)
             $isBulkOperation = $siswaList->count() > 1;
 
             foreach ($siswaList as $siswa) {
                 // Generate SPP sesuai jumlah bulan
                 for ($i = 0; $i < $jumlahBulanGenerate; $i++) {
-                    $bulanIndex = (($bulanMulai + $i - 1) % 12) + 1;
-                    $tahunSPP = date('Y') + floor(($bulanMulai + $i - 1) / 12);
+                    $yearMonth = $availableMonths[$startMonthIndex + $i];
+                    $monthDate = \Carbon\Carbon::createFromFormat('Y-m-d', $yearMonth.'-01');
+                    $bulanIndex = $monthDate->month;
+                    $tahunSPP = $monthDate->year;
 
                     // Hitung tanggal jatuh tempo
-                    $tanggalJatuhTempo = date('Y-m-d', strtotime("$tahunSPP-$bulanIndex-{$request->tanggal_jatuh_tempo}"));
+                    $tanggalJatuhTempo = $tahunAjaranAktif
+                        ->getTagihanDueDateForMonth($yearMonth, (int) $request->tanggal_jatuh_tempo)
+                        ->toDateString();
 
                     $sppKey = 'spp_'.strtolower($namaBulan[$bulanIndex]);
 
@@ -1121,7 +1151,9 @@ class TagihanController extends Controller
                         ]);
 
                         $targetTagihan->jumlah = $tagihan->jumlah;
-                        $targetTagihan->tanggal_jatuh_tempo = $tagihan->tanggal_jatuh_tempo;
+                        $targetTagihan->tanggal_jatuh_tempo = $tahunAjaranAktif
+                            ->normalizeTagihanDueDate($tagihan->tanggal_jatuh_tempo)
+                            ->toDateString();
                         $targetTagihan->keterangan = $tagihan->keterangan;
 
                         if (! $targetTagihan->exists) {
@@ -1144,7 +1176,9 @@ class TagihanController extends Controller
                                 'tahun_ajaran_id' => $tahunAjaranAktif->id,
                                 'jenis_tagihan' => $tagihan->jenis_tagihan,
                                 'jumlah' => $tagihan->jumlah,
-                                'tanggal_jatuh_tempo' => $tagihan->tanggal_jatuh_tempo,
+                                'tanggal_jatuh_tempo' => $tahunAjaranAktif
+                                    ->normalizeTagihanDueDate($tagihan->tanggal_jatuh_tempo)
+                                    ->toDateString(),
                                 'status' => 'belum_bayar',
                                 'keterangan' => $tagihan->keterangan,
                             ]);

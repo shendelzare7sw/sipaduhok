@@ -107,9 +107,13 @@
                                         @endif
                                     </td>
                                     <td class="align-middle" data-label="Tahun Ajaran">
-                                        <select name="tahun_ajaran_id[{{ $key }}]" class="form-select form-select-sm" {{ $isReadOnly ? 'disabled' : '' }}>
+                                        <select name="tahun_ajaran_id[{{ $key }}]" class="form-select form-select-sm academic-year-select" {{ $isReadOnly ? 'disabled' : '' }}>
                                             @foreach($allYears as $thn)
-                                                <option value="{{ $thn->id }}" {{ ($tahunAjaran->id == $thn->id) ? 'selected' : '' }}>
+                                                <option value="{{ $thn->id }}"
+                                                        data-start="{{ $thn->tanggal_mulai->toDateString() }}"
+                                                        data-end="{{ $thn->tanggal_selesai->toDateString() }}"
+                                                        data-default-date="{{ $thn->getDefaultTagihanDueDate()->toDateString() }}"
+                                                        {{ old('tahun_ajaran_id.'.$key, $tagihanRecord?->tahun_ajaran_id ?? $tahunAjaran->id) == $thn->id ? 'selected' : '' }}>
                                                     {{ $thn->nama_tahun_ajaran }}
                                                 </option>
                                             @endforeach
@@ -135,7 +139,9 @@
                                     <td class="align-middle" data-label="Jatuh Tempo">
                                         <input type="date"
                                                name="tanggal_jatuh_tempo[{{ $key }}]"
-                                               value="{{ old('tanggal_jatuh_tempo.'.$key, now()->addMonth()->format('Y-m-d')) }}"
+                                               value="{{ old('tanggal_jatuh_tempo.'.$key, $tagihanRecord?->tanggal_jatuh_tempo?->toDateString() ?? $defaultDueDate) }}"
+                                               min="{{ $tagihanDateMin }}"
+                                               max="{{ $tagihanDateMax }}"
                                                class="form-control form-control-sm due-date-input"
                                                {{ $isReadOnly ? 'disabled' : '' }}>
                                     </td>

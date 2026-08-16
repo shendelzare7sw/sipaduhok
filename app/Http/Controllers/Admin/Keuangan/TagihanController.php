@@ -99,6 +99,7 @@ class TagihanController extends BendaharaTagihanController
         if ($response instanceof \Illuminate\View\View) {
             return view('admin.keuangan.tagihan.cetak-laporan', $response->getData());
         }
+
         return $response;
     }
 
@@ -108,6 +109,7 @@ class TagihanController extends BendaharaTagihanController
     public function importForm()
     {
         $tahunAjarans = \App\Models\TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
+
         return view('admin.keuangan.tagihan.import', compact('tahunAjarans'));
     }
 
@@ -128,6 +130,7 @@ class TagihanController extends BendaharaTagihanController
             $imported = $import->getImportedCount();
             $skipped = $import->getSkippedCount();
             $missingSiswa = $import->getMissingSiswa();
+            $warnings = $import->getWarnings();
 
             $message = "Berhasil mengimport {$imported} tagihan.";
             if ($skipped > 0) {
@@ -136,11 +139,13 @@ class TagihanController extends BendaharaTagihanController
 
             // Build warning message
             $warningMessage = '';
-            if (!empty($missingSiswa)) {
-                $warningMessage .= "Siswa tidak ditemukan: " . implode(', ', $missingSiswa) . ". ";
+            if (! empty($warnings)) {
+                $warningMessage .= implode(' | ', $warnings);
+            } elseif (! empty($missingSiswa)) {
+                $warningMessage .= 'Siswa tidak ditemukan: '.implode(', ', $missingSiswa).'.';
             }
 
-            if (!empty($warningMessage)) {
+            if (! empty($warningMessage)) {
                 return redirect()->route('admin.keuangan.tagihan.index')
                     ->with('success', $message)
                     ->with('warning', $warningMessage);
@@ -149,7 +154,7 @@ class TagihanController extends BendaharaTagihanController
             return redirect()->route('admin.keuangan.tagihan.index')
                 ->with('success', $message);
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengimport: '.$e->getMessage());
         }
     }
 
@@ -159,7 +164,7 @@ class TagihanController extends BendaharaTagihanController
     public function downloadTemplate()
     {
         return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\Templates\TagihanTemplate(),
+            new \App\Exports\Templates\TagihanTemplate,
             'template_tagihan.xlsx'
         );
     }
@@ -220,7 +225,7 @@ class TagihanController extends BendaharaTagihanController
 
         $siswaIds = json_decode($request->siswa_ids, true);
 
-        if (empty($siswaIds) || !is_array($siswaIds)) {
+        if (empty($siswaIds) || ! is_array($siswaIds)) {
             return redirect()->back()->with('error', 'Tidak ada siswa yang dipilih.');
         }
 
@@ -245,12 +250,13 @@ class TagihanController extends BendaharaTagihanController
             \Illuminate\Support\Facades\DB::commit();
 
             $siswaCount = count($siswaIds);
+
             return redirect()->route('admin.keuangan.tagihan.index', ['tahun_ajaran_id' => $tahunAjaranId])
                 ->with('success', "Reset berhasil! {$deletedTagihan} tagihan dan {$deletedPembayaran} pembayaran dari {$siswaCount} siswa telah dihapus. Status kembali ke \"KOSONG\".");
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal mereset tagihan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal mereset tagihan: '.$e->getMessage());
         }
     }
 }
-

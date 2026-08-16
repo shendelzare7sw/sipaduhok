@@ -1,21 +1,6 @@
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
-const monthNames = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-];
-
 const fireAlert = (options) => Swal.fire(options);
 
 const visibleSiswaCheckboxes = () => Array.from(document.querySelectorAll('[data-siswa-checkbox]'))
@@ -165,19 +150,32 @@ const updateTargetType = () => {
 };
 
 const updateJumlahBulan = () => {
-    const jumlahBulan = document.getElementById('jumlah_bulan')?.value || '12';
-    const bulanMulai = document.getElementById('bulan_mulai')?.value || '1';
+    const jumlahBulanSelect = document.getElementById('jumlah_bulan');
+    const bulanMulai = document.getElementById('bulan_mulai');
     const totalBulanText = document.getElementById('totalBulanText');
     const bulanRangeInfo = document.getElementById('bulanRangeInfo');
-    const bulanAkhir = parseInt(bulanMulai, 10) + parseInt(jumlahBulan, 10) - 1;
-    const bulanAkhirIndex = (bulanAkhir - 1) % 12;
+    const startIndex = Math.max(0, bulanMulai?.selectedIndex || 0);
+    const remainingMonths = Math.max(1, (bulanMulai?.options.length || 1) - startIndex);
+
+    jumlahBulanSelect?.querySelectorAll('option').forEach((option) => {
+        option.disabled = parseInt(option.value, 10) > remainingMonths;
+    });
+
+    if (parseInt(jumlahBulanSelect?.value || '1', 10) > remainingMonths) {
+        jumlahBulanSelect.value = String(remainingMonths);
+    }
+
+    const jumlahBulan = jumlahBulanSelect?.value || '1';
+    const endIndex = Math.min((bulanMulai?.options.length || 1) - 1, startIndex + parseInt(jumlahBulan, 10) - 1);
 
     if (totalBulanText) {
         totalBulanText.textContent = jumlahBulan;
     }
 
     if (bulanRangeInfo) {
-        bulanRangeInfo.innerHTML = `<i class="fas fa-calendar me-1"></i>${monthNames[parseInt(bulanMulai, 10) - 1]} - ${monthNames[bulanAkhirIndex]}`;
+        const startLabel = bulanMulai?.options[startIndex]?.textContent.trim() || '-';
+        const endLabel = bulanMulai?.options[endIndex]?.textContent.trim() || '-';
+        bulanRangeInfo.innerHTML = `<i class="fas fa-calendar me-1"></i>${startLabel} - ${endLabel}`;
     }
 };
 
@@ -189,8 +187,12 @@ const updateTipeSpp = () => {
     jumlahBulanSection?.classList.toggle('is-hidden', isSetahun);
 
     if (isSetahun) {
+        const bulanMulai = document.getElementById('bulan_mulai');
+        if (bulanMulai) {
+            bulanMulai.selectedIndex = 0;
+        }
         if (totalBulanText) {
-            totalBulanText.textContent = '12';
+            totalBulanText.textContent = String(document.getElementById('bulan_mulai')?.options.length || 12);
         }
         return;
     }
@@ -303,9 +305,11 @@ const confirmGenerate = () => {
         return;
     }
 
-    const totalBulan = tipeSpp === 'setahun' ? '12' : document.getElementById('jumlah_bulan')?.value || '1';
+    const totalBulan = tipeSpp === 'setahun'
+        ? String(document.getElementById('bulan_mulai')?.options.length || 12)
+        : document.getElementById('jumlah_bulan')?.value || '1';
     const infoText = tipeSpp === 'setahun'
-        ? 'Proses ini akan membuat tagihan untuk satu tahun ajaran penuh (12 bulan).'
+        ? `Proses ini akan membuat tagihan untuk satu tahun ajaran penuh (${totalBulan} bulan).`
         : `Proses ini akan membuat tagihan untuk ${totalBulan} bulan.`;
 
     fireAlert({
@@ -335,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSelectAllRowVisibility();
     updateSelectAllSiswaUI();
     updateSelectAllKelasUI();
+    updateJumlahBulan();
 
     document.querySelectorAll('input[name="target_type"]').forEach((radio) => {
         radio.addEventListener('change', updateTargetType);

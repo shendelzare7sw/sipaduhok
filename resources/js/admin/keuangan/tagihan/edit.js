@@ -3,6 +3,25 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 const fireAlert = (options) => Swal.fire(options);
 
+const syncDueDateWithAcademicYear = (select, replaceOutOfRange = false) => {
+    const option = select.options[select.selectedIndex];
+    const dueDate = select.closest('tr')?.querySelector('.due-date-input');
+
+    if (!option || !dueDate) {
+        return;
+    }
+
+    dueDate.min = option.dataset.start || '';
+    dueDate.max = option.dataset.end || '';
+
+    const isOutOfRange = dueDate.value
+        && ((dueDate.min && dueDate.value < dueDate.min) || (dueDate.max && dueDate.value > dueDate.max));
+
+    if (!dueDate.value || (replaceOutOfRange && isOutOfRange)) {
+        dueDate.value = option.dataset.defaultDate || '';
+    }
+};
+
 const deleteTagihan = (button) => {
     const tagihanLabel = button.dataset.tagihanLabel;
     const deleteUrl = button.dataset.deleteUrl;
@@ -60,6 +79,11 @@ const deleteTagihan = (button) => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.academic-year-select').forEach((select) => {
+        syncDueDateWithAcademicYear(select);
+        select.addEventListener('change', () => syncDueDateWithAcademicYear(select, true));
+    });
+
     document.querySelectorAll('.delete-tagihan-btn').forEach((button) => {
         button.addEventListener('click', () => deleteTagihan(button));
     });

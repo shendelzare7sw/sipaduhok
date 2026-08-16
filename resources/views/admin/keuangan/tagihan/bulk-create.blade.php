@@ -158,7 +158,8 @@
                                 <label class="form-label fw-bold">Jatuh Tempo Global (Opsional)</label>
                                 <input type="date" id="globalJatuhTempo"
                                     class="form-control border-start border-success border-3 shadow-sm"
-                                    value="{{ old('global_jatuh_tempo', now()->addMonth()->format('Y-m-d')) }}">
+                                    value="{{ old('global_jatuh_tempo', $defaultDueDate) }}"
+                                    min="{{ $tagihanDateMin }}" max="{{ $tagihanDateMax }}">
                                 <small class="text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
                                     Isi field ini untuk mengisi semua tanggal jatuh tempo sekaligus
@@ -180,7 +181,8 @@
                             <h5 class="mb-0 text-gray-800">
                                 <i class="fas fa-money-bill-wave text-warning me-2"></i>Nominal Tagihan
                             </h5>
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-add-tagihan-field data-default-date="{{ now()->addMonth()->format('Y-m-d') }}">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-add-tagihan-field
+                                data-default-date="{{ $defaultDueDate }}" data-date-min="{{ $tagihanDateMin }}" data-date-max="{{ $tagihanDateMax }}">
                                 <i class="fas fa-plus me-1"></i> Tambah Jenis Tagihan
                             </button>
                         </div>
@@ -203,7 +205,8 @@
                                             <label class="form-label small mb-1">Jatuh Tempo</label>
                                             <input type="date" name="tanggal_jatuh_tempo[{{ $key }}]"
                                                 class="form-control form-control-sm jatuh-tempo-input"
-                                                value="{{ old('tanggal_jatuh_tempo.' . $key, now()->addMonth()->format('Y-m-d')) }}">
+                                                value="{{ old('tanggal_jatuh_tempo.' . $key, $defaultDueDate) }}"
+                                                min="{{ $tagihanDateMin }}" max="{{ $tagihanDateMax }}">
                                         </div>
                                         <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-field-button" data-remove-field>
                                             <i class="fas fa-times"></i>
