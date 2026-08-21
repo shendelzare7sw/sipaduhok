@@ -421,16 +421,16 @@
                             <div class="mb-4">
                                 <label class="form-label fw-bold mb-2">Pilihan Metode Pembayaran</label>
                                 <div class="row g-2">
-                                    {{-- Midtrans Option --}}
-                                    @if($infoPembayaran->isMidtransEnabled())
+                                    {{-- Pembayaran digital otomatis --}}
+                                    @if($infoPembayaran->isPaywuzEnabled() && count($paymentMethods) > 0)
                                         <div class="col-md-4">
-                                            <input type="radio" class="btn-check" name="metode_pembayaran" id="methodMidtrans"
-                                                value="midtrans" autocomplete="off" required>
+                                            <input type="radio" class="btn-check" name="metode_pembayaran" id="methodPaywuz"
+                                                value="paywuz" autocomplete="off" required>
                                             <label
                                                 class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3"
-                                                for="methodMidtrans">
+                                                for="methodPaywuz">
                                                 <i class="fas fa-credit-card fa-2x mb-2"></i>
-                                                <span class="small fw-bold">Digital / QRIS</span>
+                                                <span class="small fw-bold">Pembayaran Digital</span>
                                             </label>
                                         </div>
                                     @endif
@@ -465,7 +465,7 @@
                                     {{-- Tunai Option Removed from Selection --}}
                                 </div>
 
-                                    @if(!$infoPembayaran->isMidtransEnabled() && !$infoPembayaran->hasRekeningBank())
+                                    @if((!$infoPembayaran->isPaywuzEnabled() || count($paymentMethods) === 0) && !$infoPembayaran->hasRekeningBank())
                                         <div class="alert alert-warning d-flex align-items-center mt-3 mb-0" role="alert">
                                             <i class="fas fa-exclamation-triangle me-2"></i>
                                             <div class="small">
@@ -478,16 +478,32 @@
 
                             {{-- CONTENT SECTIONS --}}
 
-                            {{-- 1. Midtrans Info --}}
-                            <div id="infoMidtrans" class="method-info d-none">
-                                <div class="alert alert-primary d-flex align-items-center" role="alert">
-                                    <i class="fas fa-info-circle me-2 text-primary"></i>
-                                    <div class="small">
-                                        Anda akan diarahkan ke halaman pembayaran digital. Pembayaran akan terverifikasi
-                                        secara <strong>otomatis</strong>.
+                            {{-- 1. Pembayaran digital --}}
+                            <div id="infoPaywuz" class="method-info d-none">
+                                <div class="alert alert-primary" role="alert">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <i class="fas fa-shield-alt me-2 mt-1"></i>
+                                        <div class="small">Pilih kanal, lalu selesaikan pembayaran pada halaman aman. Status tagihan akan diperbarui <strong>otomatis</strong>.</div>
                                     </div>
+                                    <label for="paymentMethod" class="form-label fw-bold">Kanal Pembayaran <span class="text-danger">*</span></label>
+                                    <select name="payment_method" id="paymentMethod" class="form-select">
+                                        <option value="">Pilih kanal pembayaran</option>
+                                        @foreach($paymentMethods as $method)
+                                            <option value="{{ $method['code'] }}">
+                                                {{ $method['name'] }}{{ $method['type'] === 'meta' ? ' — pilih bank di halaman berikutnya' : '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="d-block mt-2">Biaya kanal, jika ada, ditampilkan sebelum Anda menyelesaikan pembayaran.</small>
                                 </div>
                             </div>
+
+                            @if($infoPembayaran->isPaywuzEnabled() && count($paymentMethods) === 0)
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Kanal pembayaran digital sedang tidak dapat dimuat. Silakan gunakan Direct Transfer atau coba kembali nanti.
+                                </div>
+                            @endif
 
                             {{-- 2. Direct Transfer Info --}}
                             @if($infoPembayaran->hasRekeningBank())
@@ -576,7 +592,7 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
                             <button type="submit" class="btn btn-primary" id="btnSubmitBulk"
-                                @if(!$infoPembayaran->isMidtransEnabled() && !$infoPembayaran->hasRekeningBank())
+                                @if((!$infoPembayaran->isPaywuzEnabled() || count($paymentMethods) === 0) && !$infoPembayaran->hasRekeningBank())
                                     disabled
                                 @endif
                             >
@@ -618,12 +634,10 @@
                             <tbody>
                                 @foreach($riwayatPembayaran as $bayar)
                                     @php
-                                        $canContinue = $bayar->metode_pembayaran == 'midtrans'
+                                        $canContinue = $bayar->metode_pembayaran == 'paywuz'
                                             && $bayar->status_validasi == 'pending'
-                                            && $bayar->created_at >= now()->subHours(24);
+                                            && (!$bayar->payment_expires_at || $bayar->payment_expires_at->isFuture());
 
-                                        $expiredAt = $bayar->created_at->addHours(24);
-                                        $remainingTime = $expiredAt->copy()->locale('id')->diffForHumans(now(), ['parts' => 2]);
                                     @endphp
                                     <tr>
                                         <td data-label="TANGGAL" class="text-end text-md-start text-nowrap">
@@ -641,7 +655,7 @@
                                                 <span class="badge bg-label-secondary"><i class="fas fa-money-bill-wave me-1"></i> Tunai</span>
                                             @elseif($bayar->metode_pembayaran == 'transfer')
                                                 <span class="badge bg-label-info"><i class="fas fa-university me-1"></i> Direct Transfer</span>
-                                            @elseif($bayar->metode_pembayaran == 'midtrans')
+                                            @elseif($bayar->metode_pembayaran == 'paywuz')
                                                 <span class="badge bg-label-primary"><i class="fas fa-credit-card me-1"></i> Digital</span>
                                             @endif
                                         </td>
@@ -650,7 +664,7 @@
                                                 <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Lunas</span>
                                             @elseif($bayar->status_validasi == 'ditolak')
                                                 <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>Ditolak</span>
-                                            @elseif($bayar->status_validasi == 'pending' && $bayar->metode_pembayaran == 'midtrans')
+                                            @elseif($bayar->status_validasi == 'pending' && $bayar->metode_pembayaran == 'paywuz')
                                                 @if($canContinue)
                                                     <span class="badge bg-warning"><i class="fas fa-hourglass-half me-1"></i>Menunggu
                                                         Bayar</span>
@@ -668,12 +682,12 @@
                                                     <form action="{{ route('wali-siswa.pembayaran.continue', $bayar->id) }}" method="POST">
                                                         @csrf
                                                         <button type="submit" class="btn btn-sm btn-primary payment-history-action" title="Lanjutkan Pembayaran">
-                                                            <i class="fas fa-credit-card"></i> Pay
+                                                        <i class="fas fa-credit-card"></i> Lanjut Bayar
                                                         </button>
                                                     </form>
                                                 @endif
 
-                                                {{-- Tombol Invoice untuk Non-Tunai (Direct Transfer/Midtrans) --}}
+                                                {{-- Tombol invoice untuk pembayaran non-tunai --}}
                                                 @if($bayar->metode_pembayaran != 'tunai')
                                                     <a href="{{ route('wali-siswa.pembayaran.invoice', $bayar->id) }}"
                                                        target="_blank"

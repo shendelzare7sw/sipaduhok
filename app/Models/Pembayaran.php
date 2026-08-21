@@ -23,12 +23,18 @@ class Pembayaran extends Model
         'divalidasi_oleh',
         'tanggal_validasi',
         'catatan',
-        // Midtrans fields
+        // Data payment gateway
         'payment_gateway',
         'order_id',
         'transaction_id',
         'payment_type',
         'gateway_response',
+        'payment_url',
+        'gateway_total',
+        'payment_environment',
+        'gateway_status',
+        'payment_expires_at',
+        'gateway_settled_at',
         'paid_by_parent_id',
     ];
 
@@ -36,6 +42,10 @@ class Pembayaran extends Model
         'jumlah_bayar' => 'decimal:2',
         'tanggal_bayar' => 'datetime',
         'tanggal_validasi' => 'datetime',
+        'gateway_response' => 'array',
+        'gateway_total' => 'decimal:2',
+        'payment_expires_at' => 'datetime',
+        'gateway_settled_at' => 'datetime',
     ];
 
     // Relationships

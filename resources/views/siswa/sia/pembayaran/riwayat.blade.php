@@ -49,7 +49,7 @@
                 <option value="">Semua Metode</option>
                 <option value="tunai" {{ request('metode') === 'tunai' ? 'selected' : '' }}>Tunai</option>
                 <option value="transfer" {{ request('metode') === 'transfer' ? 'selected' : '' }}>Direct Transfer</option>
-                <option value="midtrans" {{ request('metode') === 'midtrans' ? 'selected' : '' }}>Midtrans</option>
+                <option value="paywuz" {{ request('metode') === 'paywuz' ? 'selected' : '' }}>Digital</option>
             </select>
         </div>
         <div class="col-md-4">

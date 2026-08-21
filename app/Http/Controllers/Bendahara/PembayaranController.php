@@ -165,6 +165,15 @@ class PembayaranController extends Controller
     {
         $targetPembayaran = Pembayaran::findOrFail($id);
 
+        if ($targetPembayaran->payment_gateway === 'paywuz') {
+            app(\App\Services\PaywuzPaymentStatusService::class)->sync((string) $targetPembayaran->order_id);
+
+            return redirect()->back()->with(
+                'info',
+                'Pembayaran digital diverifikasi otomatis dari penyedia pembayaran dan tidak dapat disetujui atau ditolak manual.',
+            );
+        }
+
         $request->validate([
             'status_validasi' => 'required|in:disetujui,ditolak',
             'catatan' => 'nullable|string|max:500',

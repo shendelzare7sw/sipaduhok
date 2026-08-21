@@ -13,18 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
- * Regresi notifikasi pembayaran digital (Midtrans).
- *
- * Pembayaran lunas lewat Midtrans bisa diselesaikan oleh DUA jalur:
- *   1. webhook  (POST /midtrans/notification, bertanda tangan - otoritatif)
- *   2. snapFinish (redirect balik ke wali siswa, status diverifikasi ke API)
- *
- * Yang mana pun jalan lebih dulu, dialah yang mengubah status jadi "disetujui".
- * Dulu HANYA webhook yang mengirim notifikasi, dan webhook itu pun hanya
- * mengirim kalau status berubah. Jadi kalau snapFinish menang duluan (kasus
- * paling umum, karena wali langsung diarahkan balik setelah bayar), webhook
- * menyusul dengan status yang sudah sama -> dianggap "tidak ada perubahan" ->
- * notifikasi ke Admin/Bendahara/Wali tidak pernah terkirim sama sekali.
+ * Regresi notifikasi pembayaran digital yang dipicu status terverifikasi.
  *
  * Menjalankan: php artisan test --filter=NotifikasiPembayaranDigitalTest
  */
@@ -70,42 +59,32 @@ class NotifikasiPembayaranDigitalTest extends TestCase
         }
     }
 
-    public function test_jalur_snapfinish_juga_mengirim_notifikasi(): void
+    public function test_status_service_mengirim_notifikasi_pembayaran_digital(): void
     {
-        // Penjaga struktural: snapFinish menyetujui pembayaran (memanggil
-        // updateStatusBayar dan menulis audit log), jadi ia WAJIB ikut
-        // mengirim notifikasi. Kalau tidak, pembayaran yang diselesaikan
-        // lewat jalur ini akan senyap total.
-        $isi = file_get_contents(app_path('Http/Controllers/OrangTua/OrangTuaController.php'));
+        $isi = file_get_contents(app_path('Services/PaywuzPaymentStatusService.php'));
 
         $this->assertStringContainsString(
             'notifyPembayaranDigitalBerhasil',
             $isi,
-            'snapFinish harus mengirim notifikasi pembayaran digital - jalur ini sering '
-            . 'menyelesaikan transaksi lebih dulu daripada webhook.'
+            'Status settlement/success harus mengirim notifikasi pembayaran digital.'
         );
     }
 
     public function test_webhook_memeriksa_status_per_pembayaran(): void
     {
-        // Dulu webhook memutuskan berdasarkan status pembayaran PERTAMA saja.
-        // Pada pembayaran borongan, kalau item pertama sudah disetujui lebih
-        // dulu (mis. oleh snapFinish) sementara sisanya masih pending, seluruh
-        // proses dilewati dan item sisanya tidak pernah ikut diperbarui.
-        $isi = file_get_contents(app_path('Http/Controllers/MidtransWebhookController.php'));
+        $isi = file_get_contents(app_path('Services/PaywuzPaymentStatusService.php'));
 
         $this->assertStringNotContainsString(
             'if ($oldStatus !== $newStatus) {',
             $isi,
-            'Webhook tidak boleh memutuskan berdasarkan status pembayaran pertama saja; '
-            . 'periksa per pembayaran agar item lain di order yang sama tidak terlewat.'
+            'Status grup tidak boleh diputuskan berdasarkan pembayaran pertama saja.'
         );
 
         $this->assertStringContainsString(
             '$baruDisetujui',
             $isi,
             'Webhook harus melacak pembayaran yang BARU disetujui agar notifikasi '
-            . 'tidak terkirim ganda saat Midtrans mengirim ulang webhook.'
+            .'tidak terkirim ganda saat webhook dikirim ulang.'
         );
     }
 
@@ -114,7 +93,7 @@ class NotifikasiPembayaranDigitalTest extends TestCase
         // getOriginal() SESUDAH update() sudah berisi nilai baru (Laravel
         // menyinkronkan original setiap kali save berhasil), sehingga audit
         // log dulu mencatat old == new dan jejaknya jadi tidak berguna.
-        $isi = file_get_contents(app_path('Http/Controllers/MidtransWebhookController.php'));
+        $isi = file_get_contents(app_path('Services/PaywuzPaymentStatusService.php'));
 
         $this->assertStringNotContainsString(
             "getOriginal('status_validasi')",
@@ -146,12 +125,12 @@ class NotifikasiPembayaranDigitalTest extends TestCase
         $pembayaran = Pembayaran::create([
             'tagihan_id' => $tagihan->id,
             'siswa_id' => $siswa->id,
-            'kode_pembayaran' => 'UJI-' . uniqid(),
+            'kode_pembayaran' => 'UJI-'.uniqid(),
             'jumlah_bayar' => 500000,
             'tanggal_bayar' => now(),
             'metode_pembayaran' => 'transfer',
-            'payment_gateway' => 'midtrans',
-            'order_id' => 'ORDER-UJI-' . uniqid(),
+            'payment_gateway' => 'paywuz',
+            'order_id' => 'ORDER-UJI-'.uniqid(),
             'payment_type' => 'qris',
             'status_validasi' => 'disetujui',
         ]);

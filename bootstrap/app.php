@@ -43,11 +43,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'student.active' => \App\Http\Middleware\CheckStudentActive::class,
         ]);
 
-        // Exclude Midtrans webhook from CSRF verification
-        // This is required because Midtrans sends POST requests from external servers
+        // Webhook server-to-server diverifikasi menggunakan HMAC, bukan CSRF browser.
         $middleware->validateCsrfTokens(except: [
-            'midtrans/*',
-            'midtrans/notification',
+            'payments/paywuz/webhook',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

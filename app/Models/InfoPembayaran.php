@@ -16,11 +16,11 @@ class InfoPembayaran extends Model
         'nama_bank',
         'rekening_bank',
         'atas_nama',
-        'midtrans_merchant_id',
-        'midtrans_server_key',
-        'midtrans_client_key',
-        'midtrans_is_production',
-        'midtrans_enabled',
+        'paywuz_sandbox_api_key',
+        'paywuz_production_api_key',
+        'paywuz_is_production',
+        'paywuz_enabled',
+        'paywuz_fee_by_merchant',
         'tunai_lokasi',
         'tunai_jam_operasional',
         'tunai_deskripsi',
@@ -28,8 +28,9 @@ class InfoPembayaran extends Model
     ];
 
     protected $casts = [
-        'midtrans_is_production' => 'boolean',
-        'midtrans_enabled' => 'boolean',
+        'paywuz_is_production' => 'boolean',
+        'paywuz_enabled' => 'boolean',
+        'paywuz_fee_by_merchant' => 'boolean',
     ];
 
     /**
@@ -47,11 +48,11 @@ class InfoPembayaran extends Model
     public static function getInstance()
     {
         $info = self::first();
-        
-        if (!$info) {
+
+        if (! $info) {
             $info = self::create([]);
         }
-        
+
         return $info;
     }
 
@@ -60,52 +61,47 @@ class InfoPembayaran extends Model
      */
     public function hasRekeningBank()
     {
-        return !empty($this->rekening_bank) && 
-               !empty($this->nama_bank) && 
-               !empty($this->atas_nama);
+        return ! empty($this->rekening_bank) &&
+               ! empty($this->nama_bank) &&
+               ! empty($this->atas_nama);
     }
 
     /**
-     * Check apakah Midtrans sudah dikonfigurasi
+     * Cek kesiapan konfigurasi Paywuz untuk environment yang sedang aktif.
      */
-    public function hasMidtrans()
+    public function hasPaywuz(): bool
     {
-        return !empty($this->midtrans_merchant_id) && 
-               !empty($this->midtrans_server_key) && 
-               !empty($this->midtrans_client_key);
+        return filled($this->getPaywuzApiKey($this->paywuz_is_production ? 'production' : 'sandbox'));
     }
 
-    /**
-     * Check apakah Midtrans aktif (dikonfigurasi DAN di-enable)
-     * Digunakan untuk menentukan apakah opsi Midtrans ditampilkan ke wali siswa
-     */
-    public function isMidtransEnabled()
+    public function isPaywuzEnabled(): bool
     {
-        return $this->hasMidtrans() && ($this->midtrans_enabled ?? true);
+        return $this->hasPaywuz() && (bool) $this->paywuz_enabled;
     }
 
-    /**
-     * Get display text untuk mode Midtrans
-     */
-    public function getMidtransModeAttribute()
+    public function getPaywuzApiKey(string $environment): ?string
     {
-        return $this->midtrans_is_production ? 'Production' : 'Sandbox';
-    }
+        $column = $environment === 'production'
+            ? 'paywuz_production_api_key'
+            : 'paywuz_sandbox_api_key';
+        $encrypted = $this->{$column};
 
-    /**
-     * Get decrypted server key
-     */
-    public function getDecryptedServerKey()
-    {
-        if (empty($this->midtrans_server_key)) {
-            return null;
+        if (blank($encrypted)) {
+            return $environment === 'production'
+                ? config('services.paywuz.production_api_key')
+                : config('services.paywuz.sandbox_api_key');
         }
-        
+
         try {
-            return Crypt::decryptString($this->midtrans_server_key);
-        } catch (\Exception $e) {
+            return Crypt::decryptString($encrypted);
+        } catch (\Throwable) {
             return null;
         }
+    }
+
+    public function getPaywuzModeAttribute(): string
+    {
+        return $this->paywuz_is_production ? 'Production' : 'Sandbox';
     }
 
     /**
@@ -121,25 +117,13 @@ class InfoPembayaran extends Model
     }
 
     /**
-     * Accessor untuk mendapatkan info Midtrans dalam format array
-     */
-    public function getMidtransInfoAttribute()
-    {
-        return [
-            'merchant_id' => $this->midtrans_merchant_id,
-            'client_key' => $this->midtrans_client_key,
-            'is_production' => $this->midtrans_is_production,
-        ];
-    }
-
-    /**
      * Check apakah info tunai sudah diatur
      */
     public function hasTunaiInfo()
     {
-        return !empty($this->tunai_lokasi) ||
-               !empty($this->tunai_jam_operasional) ||
-               !empty($this->tunai_deskripsi);
+        return ! empty($this->tunai_lokasi) ||
+               ! empty($this->tunai_jam_operasional) ||
+               ! empty($this->tunai_deskripsi);
     }
 
     /**

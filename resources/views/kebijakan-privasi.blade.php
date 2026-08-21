@@ -167,7 +167,7 @@
                         <p class="text-gray-600 leading-relaxed mb-4">Kami <strong>tidak menjual</strong> data pribadi Anda kepada pihak ketiga. Data hanya dapat dibagikan dalam kondisi berikut:</p>
                         <ul class="list-disc list-inside text-gray-600 space-y-2 ml-4">
                             <li><strong>Kementerian Pendidikan:</strong> Pelaporan data siswa sesuai regulasi pendidikan nasional (Dapodik)</li>
-                            <li><strong>Payment Gateway:</strong> Data transaksi yang diperlukan untuk memproses pembayaran online (Midtrans)</li>
+                            <li><strong>Payment Gateway:</strong> Data transaksi minimum yang diperlukan untuk memproses pembayaran sekolah secara online.</li>
                             <li><strong>Kewajiban Hukum:</strong> Jika diwajibkan oleh hukum, regulasi, atau proses hukum yang berlaku</li>
                         </ul>
                     </div>

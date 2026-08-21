@@ -13,7 +13,8 @@ use App\Models\Rapor;
 use App\Models\Presensi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Services\MidtransService;
+use App\Services\PaywuzPaymentStatusService;
+use App\Services\PaywuzService;
 use App\Models\RequestDownloadRapor;
 
 class OrangTuaController extends Controller
@@ -86,55 +87,8 @@ class OrangTuaController extends Controller
             ]);
         }
 
-        // --- SYNC PENDING MIDTRANS PAYMENTS FOR ALL CHILDREN ---
         $childIds = $children->pluck('id')->toArray();
-        $pendingMidtrans = Pembayaran::whereIn('siswa_id', $childIds)
-            ->where('payment_gateway', 'midtrans')
-            ->where('status_validasi', 'pending')
-            ->whereNotNull('order_id')
-            ->get();
-
-        if ($pendingMidtrans->isNotEmpty()) {
-            $midtransService = new \App\Services\MidtransService();
-            if ($midtransService->isConfigured()) {
-                foreach ($pendingMidtrans as $payment) {
-                    try {
-                        $status = $midtransService->getTransactionStatus($payment->order_id);
-                        $transactionStatus = $status->transaction_status ?? null;
-                        $fraudStatus = $status->fraud_status ?? 'accept';
-
-                        $newStatus = $midtransService->mapTransactionStatus($transactionStatus, $fraudStatus);
-
-                        if ($newStatus !== 'pending') {
-                            $payment->update([
-                                'status_validasi' => $newStatus,
-                                'transaction_id' => $status->transaction_id ?? null,
-                                'payment_type' => $status->payment_type ?? null,
-                                'gateway_response' => json_encode($status),
-                                'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
-                            ]);
-
-                            if ($newStatus === 'disetujui') {
-                                $payment->tagihan->updateStatusBayar();
-
-                                // Batalkan pembayaran pending lainnya untuk tagihan yang sama
-                                Pembayaran::where('tagihan_id', $payment->tagihan_id)
-                                    ->where('siswa_id', $payment->siswa_id)
-                                    ->where('id', '!=', $payment->id)
-                                    ->where('status_validasi', 'pending')
-                                    ->update([
-                                        'status_validasi' => 'ditolak',
-                                        'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $payment->order_id . ')',
-                                    ]);
-                            }
-                        }
-                    } catch (\Exception $e) {
-                        \Log::error('Dashboard Sync Midtrans Status Error: ' . $e->getMessage());
-                    }
-                }
-            }
-        }
-        // --- END SYNC ---
+        $this->syncPendingDigitalPayments($childIds);
 
         // Hitung total tagihan dan pembayaran untuk semua anak
         $summary = [];
@@ -170,55 +124,7 @@ class OrangTuaController extends Controller
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
-        // --- SYNC PENDING MIDTRANS PAYMENTS ---
-        $pendingMidtrans = Pembayaran::where('siswa_id', $siswa->id)
-            ->where('payment_gateway', 'midtrans')
-            ->where('status_validasi', 'pending')
-            ->whereNotNull('order_id')
-            ->get();
-
-        if ($pendingMidtrans->isNotEmpty()) {
-            $midtransService = new \App\Services\MidtransService();
-            if ($midtransService->isConfigured()) {
-                foreach ($pendingMidtrans as $payment) {
-                    try {
-                        $status = $midtransService->getTransactionStatus($payment->order_id);
-                        $transactionStatus = $status->transaction_status ?? null;
-                        $fraudStatus = $status->fraud_status ?? 'accept';
-
-                        $newStatus = $midtransService->mapTransactionStatus($transactionStatus, $fraudStatus);
-
-                        if ($newStatus !== 'pending') {
-                            $payment->update([
-                                'status_validasi' => $newStatus,
-                                'transaction_id' => $status->transaction_id ?? null,
-                                'payment_type' => $status->payment_type ?? null,
-                                'gateway_response' => json_encode($status),
-                                'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
-                            ]);
-
-                            if ($newStatus === 'disetujui') {
-                                $payment->tagihan->updateStatusBayar();
-
-                                // Batalkan pembayaran pending lainnya untuk tagihan yang sama
-                                Pembayaran::where('tagihan_id', $payment->tagihan_id)
-                                    ->where('siswa_id', $payment->siswa_id)
-                                    ->where('id', '!=', $payment->id)
-                                    ->where('status_validasi', 'pending')
-                                    ->update([
-                                        'status_validasi' => 'ditolak',
-                                        'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $payment->order_id . ')',
-                                    ]);
-                            }
-                        }
-                    } catch (\Exception $e) {
-                        // Jika transaction belum ada (misal di sandbox API belum siap), kita biarkan saja
-                        \Log::error('Tagihan Sync Midtrans Status Error: ' . $e->getMessage());
-                    }
-                }
-            }
-        }
-        // --- END SYNC ---
+        $this->syncPendingDigitalPayments([$siswa->id]);
 
         // Info tahun ajaran aktif
         $activeYear = \App\Models\TahunAjaran::where('is_active', true)->first();
@@ -281,6 +187,16 @@ class OrangTuaController extends Controller
 
         // Info pembayaran
         $infoPembayaran = \App\Models\InfoPembayaran::getInstance();
+        $paymentMethods = [];
+        if ($infoPembayaran->isPaywuzEnabled()) {
+            try {
+                $paymentMethods = app(PaywuzService::class)->paymentMethods();
+            } catch (\Throwable $exception) {
+                \Log::warning('Metode pembayaran digital tidak dapat dimuat.', [
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        }
 
         return view('wali-siswa.tagihan.index', [
             'siswa' => $siswa,
@@ -295,354 +211,9 @@ class OrangTuaController extends Controller
             'totalBayarCurrent' => $totalBayarCurrent,
             'riwayatPembayaran' => $riwayatPembayaran,
             'infoPembayaran' => $infoPembayaran,
+            'paymentMethods' => $paymentMethods,
             'activeYear' => $activeYear
         ]);
-    }
-
-    /**
-     * Proses Pembayaran untuk Anak
-     * Hanya wali siswa yang bisa melakukan pembayaran
-     */
-    public function prosesBayar(Request $request, $siswaId)
-    {
-        $user = Auth::user();
-
-        // Pastikan siswa ini adalah anak dari wali siswa yang login
-        $siswa = $user->children()->find($siswaId);
-
-        if (!$siswa) {
-            return redirect()->route('wali-siswa.dashboard')
-                ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
-        }
-
-        // Cek jika user mencoba submit dengan metode tunai (bypass JS)
-        if ($request->metode_pembayaran === 'tunai') {
-            return redirect()->back()
-                ->with('error', 'Pembayaran tunai tidak dapat diajukan secara online. Silakan datang langsung ke loket pembayaran sekolah.')
-                ->withInput();
-        }
-
-        // Validation rules dengan conditional untuk bukti_bayar
-        // Note: wali siswa hanya bisa pilih 'transfer' atau 'midtrans'
-        // 'tunai' hanya bisa diinput oleh admin/bendahara
-        $rules = [
-            'tagihan_id' => 'required|exists:tagihan,id',
-            'jumlah_bayar' => 'required|numeric|min:1000',
-            'metode_pembayaran' => 'required|in:transfer,midtrans',
-            'catatan' => 'nullable|string',
-        ];
-
-        // Bukti bayar WAJIB untuk transfer, OPSIONAL untuk midtrans
-        if ($request->metode_pembayaran === 'transfer') {
-            $rules['bukti_bayar'] = 'required|image|mimes:jpeg,png,jpg|max:10240';
-        } else {
-            $rules['bukti_bayar'] = 'nullable|image|mimes:jpeg,png,jpg|max:10240';
-        }
-
-        $validated = $request->validate($rules);
-
-        // IDOR guard: tagihan HARUS milik anak ini (processBulkPay sudah cek serupa;
-        // samakan di jalur pembayaran tunggal agar tak bisa membayar tagihan siswa lain).
-        $tagihanCheck = Tagihan::find($validated['tagihan_id']);
-        if (!$tagihanCheck || $tagihanCheck->siswa_id != $siswa->id) {
-            return redirect()->back()
-                ->with('error', 'Tagihan tidak valid untuk siswa ini.')
-                ->withInput();
-        }
-
-        // Guard: tagihan original TA lama yang belum dialihkan TIDAK boleh dibayar via wali siswa
-        // Harus di-carryover dulu oleh admin/bendahara
-        $taAktifId = TahunAjaran::where('is_active', true)->value('id');
-        if ($tagihanCheck && $taAktifId && $tagihanCheck->tahun_ajaran_id != $taAktifId
-            && empty($tagihanCheck->dialihkan_ke_id) && empty($tagihanCheck->tagihan_asal_id)) {
-            return redirect()->back()
-                ->with('error', 'Tagihan tunggakan TA lama belum dialihkan ke TA aktif. Hubungi bendahara untuk pengalihan terlebih dahulu.')
-                ->withInput();
-        }
-
-        // Generate kode pembayaran unik
-        $validated['kode_pembayaran'] = $this->generateKodePembayaran();
-        $validated['siswa_id'] = $siswa->id;
-        $validated['tanggal_bayar'] = now();
-        $validated['status_validasi'] = 'pending';
-
-        // Upload bukti pembayaran jika ada
-        if ($request->hasFile('bukti_bayar')) {
-            $validated['bukti_pembayaran'] = $request->file('bukti_bayar')
-                ->store('pembayaran/bukti', 'public');
-        }
-
-        // Untuk metode midtrans, redirect ke payment gateway
-        if ($validated['metode_pembayaran'] === 'midtrans') {
-            try {
-                $midtransService = new MidtransService();
-
-                // Check if Midtrans is configured
-                if (!$midtransService->isConfigured()) {
-                    return redirect()->route('wali-siswa.tagihan.anak', $siswa->id)
-                        ->with('error', 'Pembayaran digital belum dikonfigurasi. Silakan gunakan metode pembayaran lainnya.');
-                }
-
-                // Get tagihan detail
-                $tagihan = Tagihan::findOrFail($validated['tagihan_id']);
-
-                // Cek apakah sudah ada transaksi pending untuk tagihan ini yang belum expired (24 jam)
-                $existingPendingPayment = Pembayaran::where('tagihan_id', $validated['tagihan_id'])
-                    ->where('siswa_id', $siswa->id)
-                    ->where('metode_pembayaran', 'midtrans')
-                    ->where('status_validasi', 'pending')
-                    ->where('created_at', '>=', now()->subHours(24))
-                    ->first();
-
-                if ($existingPendingPayment) {
-                    // Gunakan transaksi yang sudah ada, tapi generate order_id BARU
-                    // Midtrans tidak mengizinkan reuse order_id yang sudah pernah disubmit
-                    $newOrderId = $existingPendingPayment->kode_pembayaran . '-R' . time();
-
-                    // Update pembayaran dengan order_id baru
-                    $existingPendingPayment->update(['order_id' => $newOrderId]);
-
-                    // Build customer details
-                    $customerDetails = [
-                        'first_name' => $siswa->nama_lengkap,
-                        'email' => $user->email ?? 'noreply@sipaduhok.sch.id',
-                        'phone' => $user->no_hp ?? '08123456789',
-                    ];
-
-                    // Build item details
-                    $itemDetails = [
-                        [
-                            'id' => 'TAGIHAN-' . $tagihan->id,
-                            'price' => (int) $existingPendingPayment->jumlah_bayar,
-                            'quantity' => 1,
-                            'name' => $tagihan->keterangan ?: ucwords(str_replace('_', ' ', $tagihan->jenis_tagihan)),
-                        ]
-                    ];
-
-                    // Build transaction params dengan order_id baru
-                    $transactionParams = $midtransService->buildTransactionParams(
-                        $newOrderId,
-                        (int) $existingPendingPayment->jumlah_bayar,
-                        $customerDetails,
-                        $itemDetails
-                    );
-
-                    // Get Snap token
-                    $snapToken = $midtransService->createSnapToken($transactionParams);
-
-                    // Redirect to existing payment
-                    return redirect()->route('wali-siswa.pembayaran.snap', [
-                        'pembayaran' => $existingPendingPayment->id,
-                        'token' => encrypt($snapToken)
-                    ]);
-                }
-
-                // Tidak ada transaksi pending, buat baru
-                $orderId = $validated['kode_pembayaran'];
-
-                // Build customer details
-                $customerDetails = [
-                    'first_name' => $siswa->nama_lengkap,
-                    'email' => $user->email ?? 'noreply@sipaduhok.sch.id',
-                    'phone' => $user->no_hp ?? '08123456789',
-                ];
-
-                // Build item details
-                $itemDetails = [
-                    [
-                        'id' => 'TAGIHAN-' . $tagihan->id,
-                        'price' => (int) $validated['jumlah_bayar'],
-                        'quantity' => 1,
-                        'name' => $tagihan->keterangan ?: ucwords(str_replace('_', ' ', $tagihan->jenis_tagihan)),
-                    ]
-                ];
-
-                // Build transaction params
-                $transactionParams = $midtransService->buildTransactionParams(
-                    $orderId,
-                    (int) $validated['jumlah_bayar'],
-                    $customerDetails,
-                    $itemDetails
-                );
-
-                // Get Snap token
-                $snapToken = $midtransService->createSnapToken($transactionParams);
-
-                // Save pembayaran with pending status and additional fields
-                $validated['payment_gateway'] = 'midtrans';
-                $validated['order_id'] = $orderId;
-                $validated['paid_by_parent_id'] = $user->id;
-
-                $pembayaran = Pembayaran::create($validated);
-
-                // Redirect to Snap payment page with token as query parameter (encrypted)
-                return redirect()->route('wali-siswa.pembayaran.snap', [
-                    'pembayaran' => $pembayaran->id,
-                    'token' => encrypt($snapToken)
-                ]);
-
-            } catch (\Exception $e) {
-                \Log::error('Midtrans Payment Error: ' . $e->getMessage());
-
-                return redirect()->route('wali-siswa.tagihan.anak', $siswa->id)
-                    ->with('error', 'Layanan pembayaran sedang offline atau terjadi gangguan sistem. Silakan coba beberapa saat lagi.');
-            }
-        }
-
-        // Untuk metode manual (tunai & transfer)
-        $pembayaran = Pembayaran::create($validated);
-
-        // Beritahu bendahara & admin bahwa ada pembayaran menunggu validasi
-        // (sebelumnya jalur tunggal ini senyap; hanya jalur bulk yang mengirim notif).
-        app(\App\Services\NotificationService::class)->notifyPembayaranBaru($pembayaran);
-
-        return redirect()->route('wali-siswa.tagihan.anak', $siswa->id)
-            ->with('success', 'Pembayaran berhasil diajukan. Menunggu validasi dari bendahara.');
-    }
-
-    /**
-     * Proses Pembayaran Massal (Bulk Payment)
-     */
-    public function processBulkPay(Request $request, $siswaId)
-    {
-        $user = Auth::user();
-
-        // Pastikan siswa ini adalah anak dari wali siswa yang login
-        $siswa = $user->children()->find($siswaId);
-
-        if (!$siswa) {
-            return redirect()->route('wali-siswa.dashboard')
-                ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
-        }
-
-        $validated = $request->validate([
-            'items' => 'required|array|min:1',
-            'items.*.tagihan_id' => 'required|exists:tagihan,id',
-            'items.*.jumlah_bayar' => 'required|numeric|min:1',
-            'total_bayar' => 'required|numeric|min:1',
-            'metode_pembayaran' => 'required|in:transfer,midtrans',
-            'bukti_bayar' => 'required_if:metode_pembayaran,transfer|image|mimes:jpeg,png,jpg|max:10240',
-        ]);
-
-        // Guard: blokir pembayaran tagihan tunggakan TA lama yang belum dialihkan
-        $taAktifId = TahunAjaran::where('is_active', true)->value('id');
-        $blockedIds = collect($validated['items'])->pluck('tagihan_id')->all();
-        $blocked = Tagihan::whereIn('id', $blockedIds)
-            ->where('tahun_ajaran_id', '!=', $taAktifId)
-            ->whereNull('dialihkan_ke_id')
-            ->whereNull('tagihan_asal_id')
-            ->exists();
-        if ($blocked) {
-            return redirect()->back()
-                ->with('error', 'Sebagian tagihan adalah tunggakan TA lama yang belum dialihkan. Hubungi bendahara untuk pengalihan terlebih dahulu.')
-                ->withInput();
-        }
-
-        $orderId = 'ORD-' . strtoupper(\Illuminate\Support\Str::random(10)) . '-' . date('YmdHis'); // Distinct Order ID
-        $buktiPath = null;
-
-        if ($request->hasFile('bukti_bayar')) {
-            $buktiPath = $request->file('bukti_bayar')->store('pembayaran/bukti', 'public');
-        }
-
-        DB::beginTransaction();
-        try {
-            $pembayaranIds = [];
-            $itemDetails = [];
-
-            // Generate base payment code once to ensure sequence
-            $basePaymentCode = $this->generateKodePembayaran();
-
-            foreach ($validated['items'] as $index => $item) {
-                $tagihan = Tagihan::findOrFail($item['tagihan_id']);
-
-                // Security check: tagihan must belong to siswa
-                if ($tagihan->siswa_id != $siswa->id)
-                    continue;
-
-                // Generate unique code using base + suffix
-                // This prevents DB hit inside loop and ensures consistent naming
-                $uniqueKode = $basePaymentCode . '-' . ($index + 1);
-
-                $pembayaran = Pembayaran::create([
-                    'kode_pembayaran' => $uniqueKode, // Unique per record
-                    'siswa_id' => $siswa->id,
-                    'tagihan_id' => $tagihan->id,
-                    'tanggal_bayar' => now(),
-                    'jumlah_bayar' => $item['jumlah_bayar'],
-                    'metode_pembayaran' => $validated['metode_pembayaran'],
-                    'status_validasi' => 'pending',
-                    'bukti_pembayaran' => $buktiPath,
-                    'payment_gateway' => $validated['metode_pembayaran'] === 'midtrans' ? 'midtrans' : null,
-                    'order_id' => $orderId, // Shared Order ID for Bulk Group
-                    'paid_by_parent_id' => $user->id,
-                ]);
-
-                $pembayaranIds[] = $pembayaran->id;
-
-                if ($validated['metode_pembayaran'] === 'midtrans') {
-                    $itemDetails[] = [
-                        'id' => 'TAGIHAN-' . $tagihan->id,
-                        'price' => (int) $item['jumlah_bayar'],
-                        'quantity' => 1,
-                        'name' => mb_substr($tagihan->keterangan ?: ucwords(str_replace('_', ' ', $tagihan->jenis_tagihan)), 0, 50),
-                    ];
-                }
-            }
-
-            if (empty($pembayaranIds)) {
-                throw new \Exception('Tidak ada tagihan valid yang dipilih.');
-            }
-
-            if ($validated['metode_pembayaran'] === 'midtrans') {
-                $midtransService = new MidtransService();
-                $customerDetails = [
-                    'first_name' => $siswa->nama_lengkap,
-                    'email' => $user->email ?? 'noreply@sipaduhok.sch.id',
-                    'phone' => $user->no_hp ?? '',
-                ];
-
-                $transactionParams = $midtransService->buildTransactionParams(
-                    $orderId,
-                    (int) $validated['total_bayar'],
-                    $customerDetails,
-                    $itemDetails
-                );
-
-                $snapToken = $midtransService->createSnapToken($transactionParams);
-
-                DB::commit();
-
-                // Redirect to snap (using the first pembayaran ID for the route placeholder, but token covers all)
-                return redirect()->route('wali-siswa.pembayaran.snap', [
-                    'pembayaran' => $pembayaranIds[0],
-                    'token' => encrypt($snapToken)
-                ]);
-            }
-
-            DB::commit();
-
-            // Notify Admin & Bendahara
-            try {
-                $notificationService = app(\App\Services\NotificationService::class);
-                $notificationService->notifyNewPayment($pembayaranIds, $user);
-            } catch (\Exception $e) {
-                \Log::error('Gagal mengirim notifikasi pembayaran: ' . $e->getMessage());
-            }
-
-            $count = count($pembayaranIds);
-            $message = $count > 1 
-                ? "Pembayaran massal ($count tagihan) berhasil diajukan. Menunggu validasi."
-                : "Pembayaran berhasil diajukan. Menunggu validasi.";
-
-            return redirect()->route('wali-siswa.tagihan.anak', $siswa->id)
-                ->with('success', $message);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Midtrans Bulk Payment Error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Layanan pembayaran sedang offline atau terjadi gangguan sistem. Silakan coba beberapa saat lagi.');
-        }
     }
 
     /**
@@ -1041,390 +612,6 @@ class OrangTuaController extends Controller
     }
 
     /**
-     * Show Midtrans Snap Payment Page
-     */
-    public function snapPayment(Request $request, $pembayaranId)
-    {
-        $user = Auth::user();
-
-        // Get pembayaran with relationships
-        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])
-            ->findOrFail($pembayaranId);
-
-        // Check if user is the parent of the student
-        $isMyChild = $user->children()->where('siswa.id', $pembayaran->siswa_id)->exists();
-
-        if (!$isMyChild) {
-            abort(403, 'Anda tidak memiliki akses ke halaman ini.');
-        }
-
-        // Fetch ALL payments with same order_id (for bulk display)
-        $allPayments = Pembayaran::with('tagihan')
-            ->where('order_id', $pembayaran->order_id)
-            ->get();
-
-        $totalBayar = $allPayments->sum('jumlah_bayar');
-
-        // Check if payment is already rejected/expired or approved
-        if ($pembayaran->status_validasi === 'ditolak') {
-            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
-                ->with('error', 'Sesi pembayaran telah kadaluarsa. Silakan ajukan pembayaran baru.');
-        }
-
-        if ($pembayaran->status_validasi === 'disetujui') {
-            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
-                ->with('success', 'Pembayaran ini sudah berhasil diproses.');
-        }
-
-        // Get snap token from query parameter or regenerate
-        $snapToken = null;
-
-        if ($request->has('token')) {
-            try {
-                $snapToken = decrypt($request->query('token'));
-            } catch (\Exception $e) {
-                \Log::error('Failed to decrypt snap token', ['error' => $e->getMessage()]);
-            }
-        }
-
-        // If no token or decryption failed, regenerate token
-        if (!$snapToken) {
-            try {
-                $midtransService = new MidtransService();
-
-                // Build transaction params again
-                $customerDetails = [
-                    'first_name' => $pembayaran->siswa->nama_lengkap,
-                    'email' => $user->email ?? 'noreply@sipaduhok.sch.id',
-                    'phone' => $user->no_hp ?? '08123456789',
-                ];
-
-                // Build item details from ALL payments for BULK
-                $itemDetails = [];
-                foreach ($allPayments as $item) {
-                    $itemDetails[] = [
-                        'id' => 'TAGIHAN-' . $item->tagihan_id,
-                        'price' => (int) $item->jumlah_bayar,
-                        'quantity' => 1,
-                        'name' => mb_substr($item->tagihan->keterangan ?: ucwords(str_replace('_', ' ', $item->tagihan->jenis_tagihan)), 0, 50),
-                    ];
-                }
-
-                $transactionParams = $midtransService->buildTransactionParams(
-                    $pembayaran->order_id,
-                    (int) $totalBayar,
-                    $customerDetails,
-                    $itemDetails
-                );
-
-                $snapToken = $midtransService->createSnapToken($transactionParams);
-            } catch (\Exception $e) {
-                \Log::error('Failed to regenerate snap token', [
-                    'error' => $e->getMessage(),
-                    'order_id' => $pembayaran->order_id,
-                    'pembayaran_id' => $pembayaran->id,
-                ]);
-
-                // If token generation fails (possibly due to expiration), redirect with clear message
-                return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
-                    ->with('error', 'Sesi pembayaran telah kadaluarsa atau tidak valid. Silakan ajukan pembayaran baru.');
-            }
-        }
-
-        $midtransService = new MidtransService();
-        $clientKey = $midtransService->isConfigured()
-            ? \App\Models\InfoPembayaran::getInstance()->midtrans_client_key
-            : null;
-
-        return view('wali-siswa.pembayaran.snap', [
-            'pembayaran' => $pembayaran,
-            'allPayments' => $allPayments,
-            'totalBayar' => $totalBayar,
-            'snapToken' => $snapToken,
-            'clientKey' => $clientKey
-        ]);
-    }
-
-    /**
-     * Handle Midtrans Finish/Success Redirect
-     */
-    public function snapFinish(Request $request)
-    {
-        $orderId = $request->query('order_id');
-        $statusCode = $request->query('status_code');
-        $transactionStatus = $request->query('transaction_status');
-
-        \Log::info('Midtrans Snap Finish Redirect', [
-            'order_id' => $orderId,
-            'status_code' => $statusCode,
-            'transaction_status' => $transactionStatus,
-        ]);
-
-        // Find ALL pembayaran by order_id
-        $payments = Pembayaran::where('order_id', $orderId)->get();
-
-        if ($payments->isEmpty()) {
-            \Log::error('Pembayaran (Bulk) not found in snapFinish', ['order_id' => $orderId]);
-
-            return redirect()->route('wali-siswa.dashboard')
-                ->with('error', 'Data pembayaran tidak ditemukan. Order ID: ' . $orderId);
-        }
-
-        // Use the first record to identify student and generic details
-        $firstPayment = $payments->first();
-
-        // OTORISASI: order ini harus milik anak dari wali siswa yang login.
-        // (Redirect finish tidak boleh dipakai menyentuh transaksi orang lain.)
-        $user = Auth::user();
-        $isMyChild = $user && $user->children()->where('siswa.id', $firstPayment->siswa_id)->exists();
-        if (!$isMyChild) {
-            abort(403, 'Anda tidak memiliki akses ke transaksi ini.');
-        }
-
-        // F-19: URL "finish" Midtrans TIDAK bertanda tangan, jadi `transaction_status` dari
-        // query TIDAK boleh dipercaya untuk mengubah status. Jalur otoritatif adalah webhook
-        // (bertanda tangan). Sebagai fallback UX, ambil status SEBENARNYA via API Midtrans
-        // (pola sama seperti dashboard()/tagihanAnak()); kalau tak tersedia, jangan ubah data.
-        $newStatus = null; // null = tidak diketahui/otoritatif tak tersedia → jangan sentuh DB
-        $midtransService = new MidtransService();
-        if ($midtransService->isConfigured()) {
-            try {
-                $status = $midtransService->getTransactionStatus($orderId);
-                $newStatus = $midtransService->mapTransactionStatus(
-                    $status->transaction_status ?? null,
-                    $status->fraud_status ?? 'accept'
-                );
-            } catch (\Exception $e) {
-                \Log::error('snapFinish get authoritative status failed: ' . $e->getMessage(), [
-                    'order_id' => $orderId,
-                ]);
-            }
-        }
-
-        // Update status untuk SEMUA pembayaran di order ini bila webhook belum menyentuhnya.
-        // Kumpulkan yang BARU disetujui di sini supaya notifikasinya ikut terkirim:
-        // jalur finish ini kerap menyelesaikan transaksi lebih dulu daripada webhook,
-        // dan dulu hanya webhook yang mengirim notifikasi. Akibatnya webhook menyusul
-        // dengan status yang sudah sama, dianggap "tidak ada perubahan", lalu
-        // notifikasi ke Admin/Bendahara/Wali tidak pernah terkirim sama sekali.
-        $baruDisetujui = collect();
-
-        if ($newStatus !== null) {
-            foreach ($payments as $pembayaran) {
-                $oldStatus = $pembayaran->status_validasi;
-
-                // Only update if webhook hasn't updated it yet
-                if ($oldStatus === 'pending' && $newStatus !== 'pending') {
-                    $pembayaran->update([
-                        'status_validasi' => $newStatus,
-                        'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
-                    ]);
-
-                    // Create audit log for bendahara tracking
-                    \App\Models\FinancialAuditLog::create([
-                        'user_id' => Auth::id(),
-                        'action' => 'update_status',
-                        'model_type' => 'Pembayaran',
-                        'model_id' => $pembayaran->id,
-                        'old_values' => json_encode(['status_validasi' => $oldStatus]),
-                        'new_values' => json_encode(['status_validasi' => $newStatus]),
-                        'description' => "Pembayaran digital {$orderId} status updated from finish (verified via Midtrans API): {$newStatus}",
-                        'ip_address' => request()->ip(),
-                        'user_agent' => request()->userAgent(),
-                    ]);
-
-                    // Auto-update status tagihan if payment approved
-                    if ($newStatus === 'disetujui') {
-                        $baruDisetujui->push($pembayaran);
-                        $pembayaran->tagihan->updateStatusBayar();
-
-                        \Log::info('Tagihan status auto-updated from snapFinish', [
-                            'tagihan_id' => $pembayaran->tagihan_id,
-                            'new_tagihan_status' => $pembayaran->tagihan->fresh()->status,
-                        ]);
-
-                        // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
-                        $cancelledCount = Pembayaran::where('tagihan_id', $pembayaran->tagihan_id)
-                            ->where('siswa_id', $pembayaran->siswa_id)
-                            ->where('id', '!=', $pembayaran->id)
-                            ->where('status_validasi', 'pending')
-                            ->update([
-                                'status_validasi' => 'ditolak',
-                                'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $orderId . ')',
-                            ]);
-
-                        if ($cancelledCount > 0) {
-                            \App\Models\FinancialAuditLog::create([
-                                'user_id' => Auth::id(),
-                                'action' => 'auto_cancel_duplicates',
-                                'model_type' => 'Pembayaran',
-                                'model_id' => $pembayaran->id,
-                                'old_values' => null,
-                                'new_values' => json_encode([
-                                    'cancelled_count' => $cancelledCount,
-                                    'reason' => 'duplicate_payment_prevention',
-                                ]),
-                                'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama",
-                                'ip_address' => request()->ip(),
-                                'user_agent' => request()->userAgent(),
-                            ]);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Kirim notifikasi ke Admin, Bendahara, dan Wali Siswa untuk pembayaran
-        // yang baru disetujui lewat jalur ini. Kalau webhook yang lebih dulu
-        // menyetujui, daftar ini kosong dan notifikasinya sudah dikirim di sana -
-        // jadi tidak ada notifikasi ganda.
-        if ($baruDisetujui->isNotEmpty()) {
-            try {
-                app(\App\Services\NotificationService::class)
-                    ->notifyPembayaranDigitalBerhasil($baruDisetujui);
-            } catch (\Exception $e) {
-                \Log::error('Gagal mengirim notifikasi pembayaran (snapFinish): ' . $e->getMessage());
-            }
-        }
-
-        // Pesan berdasarkan status OTORITATIF (bukan query). Bila tak tersedia → status terkini record.
-        $effectiveStatus = $newStatus ?? $firstPayment->fresh()->status_validasi;
-        if ($effectiveStatus === 'disetujui') {
-            return redirect()->route('wali-siswa.tagihan.anak', $firstPayment->siswa_id)
-                ->with('success', 'Pembayaran berhasil! Transaksi telah dikonfirmasi.');
-        } elseif ($effectiveStatus === 'ditolak') {
-            return redirect()->route('wali-siswa.tagihan.anak', $firstPayment->siswa_id)
-                ->with('warning', 'Pembayaran dibatalkan atau gagal.');
-        }
-
-        return redirect()->route('wali-siswa.tagihan.anak', $firstPayment->siswa_id)
-            ->with('info', 'Pembayaran Anda sedang diproses. Mohon tunggu konfirmasi dari bank.');
-    }
-
-    /**
-     * Lanjutkan pembayaran Midtrans yang pending
-     */
-    public function continuePayment($pembayaranId)
-    {
-        $user = Auth::user();
-
-        // Get pembayaran with relationships
-        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])
-            ->findOrFail($pembayaranId);
-
-        // Check if user is the parent of the student
-        $isMyChild = $user->children()->where('siswa.id', $pembayaran->siswa_id)->exists();
-
-        if (!$isMyChild) {
-            return redirect()->route('wali-siswa.dashboard')
-                ->with('error', 'Anda tidak memiliki akses ke pembayaran ini.');
-        }
-
-        // Validasi: harus metode midtrans dan status pending
-        if ($pembayaran->metode_pembayaran !== 'midtrans') {
-            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
-                ->with('error', 'Pembayaran ini bukan menggunakan metode Midtrans.');
-        }
-
-        if ($pembayaran->status_validasi !== 'pending') {
-            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
-                ->with('error', 'Pembayaran ini sudah tidak dalam status pending.');
-        }
-
-        // Cek apakah masih dalam waktu 24 jam
-        if ($pembayaran->created_at < now()->subHours(24)) {
-            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
-                ->with('error', 'Sesi pembayaran telah kadaluarsa. Silakan buat pembayaran baru.');
-        }
-
-        try {
-            $midtransService = new MidtransService();
-
-            if (!$midtransService->isConfigured()) {
-                return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
-                    ->with('error', 'Pembayaran digital belum dikonfigurasi. Silakan hubungi admin.');
-            }
-
-            // Build customer details
-            $customerDetails = [
-                'first_name' => $pembayaran->siswa->nama_lengkap,
-                'email' => $user->email ?? 'noreply@sipaduhok.sch.id',
-                'phone' => $user->no_hp ?? '08123456789',
-            ];
-
-            // Build item details
-            $itemDetails = [
-                [
-                    'id' => 'TAGIHAN-' . $pembayaran->tagihan_id,
-                    'price' => (int) $pembayaran->jumlah_bayar,
-                    'quantity' => 1,
-                    'name' => $pembayaran->tagihan->jenis_tagihan . ' - ' . ($pembayaran->tagihan->keterangan ?? $pembayaran->tagihan->nama_tagihan),
-                ]
-            ];
-
-            // Generate NEW order_id untuk continue payment
-            // Midtrans tidak mengizinkan reuse order_id yang sudah pernah disubmit
-            $newOrderId = $pembayaran->kode_pembayaran . '-R' . time();
-
-            // Update pembayaran dengan order_id baru
-            $pembayaran->update(['order_id' => $newOrderId]);
-
-            // Build transaction params dengan order_id baru
-            $transactionParams = $midtransService->buildTransactionParams(
-                $newOrderId,
-                (int) $pembayaran->jumlah_bayar,
-                $customerDetails,
-                $itemDetails
-            );
-
-            // Get new Snap token
-            $snapToken = $midtransService->createSnapToken($transactionParams);
-
-            // Redirect to Snap payment page
-            return redirect()->route('wali-siswa.pembayaran.snap', [
-                'pembayaran' => $pembayaran->id,
-                'token' => encrypt($snapToken)
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Continue Payment Error: ' . $e->getMessage(), [
-                'pembayaran_id' => $pembayaran->id,
-                'order_id' => $pembayaran->order_id,
-            ]);
-
-            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
-                ->with('error', 'Gagal melanjutkan pembayaran: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Generate kode pembayaran unik
-     * Format: PAY-YYYYMMDD-XXXXX
-     */
-    private function generateKodePembayaran()
-    {
-        $prefix = 'PAY';
-        $date = now()->format('Ymd');
-        $searchPrefix = "{$prefix}-{$date}";
-
-        // Cari kode terakhir hari ini berdasarkan format string, bukan created_at
-        // Ini menangani kasus suffix (-1) dan timestamp offset
-        $lastPayment = \App\Models\Pembayaran::where('kode_pembayaran', 'LIKE', "{$searchPrefix}%")
-            ->orderBy('id', 'desc')
-            ->first();
-
-        if ($lastPayment && preg_match('/PAY-\d{8}-(\d{5})/', $lastPayment->kode_pembayaran, $matches)) {
-            $lastNumber = intval($matches[1]);
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
-
-        $sequence = str_pad($newNumber, 5, '0', STR_PAD_LEFT);
-
-        return "{$prefix}-{$date}-{$sequence}";
-    }
-    /**
      * Cetak Invoice Pembayaran Digital
      */
     public function cetakInvoice($id)
@@ -1452,6 +639,8 @@ class OrangTuaController extends Controller
         if (!empty($mainPayment->order_id)) {
             $items = Pembayaran::with(['tagihan.tahunAjaran'])
                 ->where('order_id', $mainPayment->order_id)
+                ->where('siswa_id', $mainPayment->siswa_id)
+                ->where('payment_gateway', $mainPayment->payment_gateway)
                 ->get();
         }
 
@@ -1558,5 +747,26 @@ class OrangTuaController extends Controller
 
         // Return printable view (user can Ctrl+P from browser)
         return view($viewName, compact('rapor'));
+    }
+
+    /** @param list<int> $studentIds */
+    private function syncPendingDigitalPayments(array $studentIds): void
+    {
+        $orderIds = Pembayaran::query()
+            ->whereIn('siswa_id', $studentIds)
+            ->where('payment_gateway', 'paywuz')
+            ->where('status_validasi', 'pending')
+            ->whereNotNull('order_id')
+            ->distinct()
+            ->pluck('order_id');
+
+        if ($orderIds->isEmpty()) {
+            return;
+        }
+
+        $service = app(PaywuzPaymentStatusService::class);
+        foreach ($orderIds as $orderId) {
+            $service->sync((string) $orderId);
+        }
     }
 }

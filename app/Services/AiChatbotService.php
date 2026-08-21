@@ -557,7 +557,7 @@ PROMPT;
             'tunggakan',
             'tarik tunggakan',
             'pembayaran',
-            'midtrans',
+            'paywuz',
             'rekening',
             'dispensasi',
             'kenaikan kelas',

@@ -10,6 +10,11 @@
     @vite(['resources/css/wali-siswa/tagihan/invoice.css', 'resources/js/wali-siswa/tagihan/invoice.js'])
 </head>
 <body class="wali-siswa-invoice-page">
+    @php
+        $invoiceSubtotal = (int) $items->sum('jumlah_bayar');
+        $gatewayTotal = (int) ($pembayaran->gateway_total ?: $invoiceSubtotal);
+        $channelFee = max(0, $gatewayTotal - $invoiceSubtotal);
+    @endphp
 
     <div class="no-print action-buttons">
         <button type="button" class="invoice-action-button invoice-action-button-primary" data-print-invoice>
@@ -54,8 +59,8 @@
                     <div class="meta-row">
                         <span class="meta-label">Metode:</span>
                         <span class="meta-value">
-                            @if($pembayaran->metode_pembayaran == 'midtrans')
-                                Digital Payment (Midtrans)
+                            @if($pembayaran->metode_pembayaran == 'paywuz')
+                                Pembayaran Digital
                             @elseif($pembayaran->metode_pembayaran == 'transfer')
                                 Direct Transfer
                             @else
@@ -123,17 +128,17 @@
             <div class="total-box">
                 <div class="total-row">
                     <span>Subtotal</span>
-                    <span>Rp {{ number_format($items->sum('jumlah_bayar'), 0, ',', '.') }}</span>
+                    <span>Rp {{ number_format($invoiceSubtotal, 0, ',', '.') }}</span>
                 </div>
-                {{-- 
-                <div class="total-row">
-                    <span>Biaya Admin</span>
-                    <span>Rp 0</span>
-                </div>
-                --}}
+                @if($channelFee > 0)
+                    <div class="total-row">
+                        <span>Biaya Kanal Pembayaran</span>
+                        <span>Rp {{ number_format($channelFee, 0, ',', '.') }}</span>
+                    </div>
+                @endif
                 <div class="total-row grand-total">
                     <span>TOTAL BAYAR</span>
-                    <span>Rp {{ number_format($items->sum('jumlah_bayar'), 0, ',', '.') }}</span>
+                    <span>Rp {{ number_format($gatewayTotal, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>

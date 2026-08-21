@@ -106,7 +106,7 @@
                             <option value="">Semua Metode</option>
                             <option value="tunai"    {{ ($filters['metode'] ?? '') == 'tunai'    ? 'selected' : '' }}>Tunai</option>
                             <option value="transfer" {{ ($filters['metode'] ?? '') == 'transfer' ? 'selected' : '' }}>Direct Transfer</option>
-                            <option value="midtrans" {{ ($filters['metode'] ?? '') == 'midtrans' ? 'selected' : '' }}>Midtrans</option>
+                            <option value="paywuz" {{ ($filters['metode'] ?? '') == 'paywuz' ? 'selected' : '' }}>Pembayaran Digital</option>
                         </select>
                     </div>
                     <div class="mb-2">
@@ -202,7 +202,7 @@
                                 @elseif($pembayaran->metode_pembayaran === 'transfer')
                                     <span class="badge bg-success badge-pill">DIRECT TRANSFER</span>
                                 @else
-                                    <span class="badge bg-info badge-pill">MIDTRANS</span>
+                                    <span class="badge bg-info badge-pill">DIGITAL</span>
                                 @endif
                             </td>
                             <td data-label="Tanggal" class="small fw-semibold payment-main-text">
@@ -210,8 +210,8 @@
                             </td>
                             <td data-label="Status" class="text-center">
                                 @if($pembayaran->status_validasi === 'pending')
-                                    @if($pembayaran->metode_pembayaran === 'midtrans')
-                                        @php $isExpired = $pembayaran->created_at < now()->subHours(24); @endphp
+                                    @if($pembayaran->metode_pembayaran === 'paywuz')
+                                        @php $isExpired = $pembayaran->payment_expires_at?->isPast() ?? false; @endphp
                                         @if($isExpired)
                                             <span class="badge bg-secondary badge-pill"><i class="fas fa-times-circle me-1"></i>Kadaluarsa</span>
                                         @else

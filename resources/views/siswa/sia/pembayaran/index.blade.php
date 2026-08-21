@@ -138,7 +138,6 @@
                             <option value="">-- Pilih Metode --</option>
                             <option value="tunai">Tunai (Bayar di Sekolah)</option>
                             <option value="transfer">Direct Transfer</option>
-                            <option value="midtrans">Midtrans (Online)</option>
                         </select>
                     </div>
 

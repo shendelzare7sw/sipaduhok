@@ -60,7 +60,7 @@
                                 @elseif($pembayaran->metode_pembayaran === 'transfer')
                                     <span class="badge bg-success badge-custom shadow-sm">DIRECT TRANSFER</span>
                                 @else
-                                    <span class="badge bg-info badge-custom shadow-sm">MIDTRANS</span>
+                                    <span class="badge bg-info badge-custom shadow-sm">DIGITAL</span>
                                 @endif
                             </td>
                         </tr>
@@ -68,9 +68,9 @@
                             <td>Status</td>
                             <td>
                                 @if($pembayaran->status_validasi === 'pending')
-                                    @if($pembayaran->metode_pembayaran === 'midtrans')
+                                    @if($pembayaran->metode_pembayaran === 'paywuz')
                                         @php
-                                            $isExpired = $pembayaran->created_at < now()->subHours(24);
+                                            $isExpired = $pembayaran->payment_expires_at?->isPast() ?? false;
                                         @endphp
                                         @if($isExpired)
                                             <span class="badge bg-secondary badge-custom shadow-sm"><i class="fas fa-times-circle me-1"></i> KADALUARSA</span>
@@ -78,7 +78,11 @@
                                         @else
                                             <span class="badge bg-info badge-custom shadow-sm"><i class="fas fa-hourglass-half me-1"></i> MENUNGGU BAYAR</span>
                                             <div class="small text-muted mt-1">
-                                                Berlaku hingga {{ $pembayaran->created_at->addHours(24)->format('d M Y H:i') }}
+                                                @if($pembayaran->payment_expires_at)
+                                                    Berlaku hingga {{ $pembayaran->payment_expires_at->format('d M Y H:i') }}
+                                                @else
+                                                    Menunggu kanal pembayaran dibuat
+                                                @endif
                                             </div>
                                         @endif
                                     @else
@@ -175,7 +179,8 @@
 
     {{-- Cek status kadaluarsa --}}
     @php
-        $isKadaluarsa = $pembayaran->metode_pembayaran === 'midtrans' && $pembayaran->status_validasi === 'pending' && $pembayaran->created_at < now()->subHours(24);
+        $isDigital = $pembayaran->payment_gateway === 'paywuz';
+        $isKadaluarsa = $isDigital && $pembayaran->status_validasi === 'pending' && ($pembayaran->payment_expires_at?->isPast() ?? false);
     @endphp
 
     {{-- Info Kadaluarsa --}}
@@ -187,7 +192,7 @@
                     <div>
                         <h6 class="fw-bold text-secondary mb-1">Pembayaran Kadaluarsa</h6>
                         <p class="mb-0 text-muted small">
-                            Sesi pembayaran Midtrans ini telah melewati batas waktu 24 jam dan tidak memerlukan validasi.
+                            Sesi pembayaran digital ini telah melewati batas waktu kanal dan tidak memerlukan validasi manual.
                             Siswa perlu membuat transaksi pembayaran baru jika ingin melanjutkan.
                         </p>
                     </div>
@@ -197,7 +202,7 @@
     @endif
 
     {{-- Form Validasi (jika masih pending dan belum kadaluarsa) --}}
-    @if($pembayaran->status_validasi === 'pending' && !$isKadaluarsa)
+    @if($pembayaran->status_validasi === 'pending' && !$isKadaluarsa && !$isDigital)
         <div class="card shadow mb-4 validation-card">
             <div class="card-body">
                 <h5 class="mb-4 fw-bold">
@@ -265,7 +270,7 @@
 </div>
 </div>
 
-@if($pembayaran->status_validasi === 'pending' && !$isKadaluarsa)
+@if($pembayaran->status_validasi === 'pending' && !$isKadaluarsa && !$isDigital)
 {{-- Modal Setujui --}}
 <div class="modal fade" id="setujuiModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

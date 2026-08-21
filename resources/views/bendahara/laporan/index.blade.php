@@ -17,7 +17,7 @@
         $metodeLabels = [
             'tunai' => 'Tunai',
             'transfer' => 'Direct Transfer',
-            'midtrans' => 'Midtrans',
+            'paywuz' => 'Pembayaran Digital',
         ];
     @endphp
 
@@ -52,7 +52,7 @@
                             <option value="">Semua Metode</option>
                             <option value="tunai" {{ request('metode') == 'tunai' ? 'selected' : '' }}>Tunai</option>
                             <option value="transfer" {{ request('metode') == 'transfer' ? 'selected' : '' }}>Direct Transfer</option>
-                            <option value="midtrans" {{ request('metode') == 'midtrans' ? 'selected' : '' }}>Midtrans</option>
+                            <option value="paywuz" {{ request('metode') == 'paywuz' ? 'selected' : '' }}>Pembayaran Digital</option>
                         </select>
                     </div>
                 </div>
@@ -202,7 +202,7 @@
                         <div class="stat-value">Rp {{ number_format($totalNonTunai, 0, ',', '.') }}</div>
                         <div class="stat-label">Direct Transfer & Digital</div>
                     </div>
-                    <div class="stat-icon-wrapper stat-icon-digital">
+                    <div class="stat-icon-wrapper stat-icon-gateway">
                         <i class="fas fa-university"></i>
                     </div>
                 </div>
@@ -289,7 +289,7 @@
                                     @elseif($bayar->metode_pembayaran === 'transfer')
                                         <span class="badge bg-warning text-white fw-bold method-badge">DIRECT TRANSFER</span>
                                     @else
-                                        <span class="badge bg-success fw-bold method-badge">MIDTRANS</span>
+                                        <span class="badge bg-success fw-bold method-badge">DIGITAL</span>
                                     @endif
                                 </td>
                                 <td data-label="Validator" class="small fw-semibold">
@@ -354,13 +354,13 @@
         <div class="col-md-4">
             <div class="dashboard-card">
                 <div class="stat-widget">
-                    <div class="stat-icon-wrapper stat-icon-midtrans">
+                    <div class="stat-icon-wrapper stat-icon-digital">
                         <i class="fas fa-credit-card"></i>
                     </div>
                     <div class="stat-details">
                         <div class="stat-label">Payment Gateway</div>
-                        <div class="stat-value stat-value-compact">Rp {{ number_format($totalMidtrans, 0, ',', '.') }}</div>
-                        <small class="muted-text">{{ $jumlahMidtrans }} Transaksi</small>
+                        <div class="stat-value stat-value-compact">Rp {{ number_format($totalDigital, 0, ',', '.') }}</div>
+                        <small class="muted-text">{{ $jumlahDigital }} Transaksi</small>
                     </div>
                 </div>
             </div>

@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const infoSections = page.querySelectorAll('.method-info');
   const btnSubmit = page.querySelector('#btnSubmitBulk');
   const buktiInput = page.querySelector('#bulkBuktiInput');
+  const paymentMethod = page.querySelector('#paymentMethod');
 
   let totalBayar = 0;
 
@@ -167,8 +168,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const selectedValue = getCheckedValue(methodRadios);
 
-    if (selectedValue === 'midtrans') {
-      page.querySelector('#infoMidtrans')?.classList.remove('d-none');
+    if (paymentMethod) {
+      paymentMethod.required = false;
+    }
+
+    if (selectedValue === 'paywuz') {
+      page.querySelector('#infoPaywuz')?.classList.remove('d-none');
+      if (paymentMethod) {
+        paymentMethod.required = true;
+      }
       btnSubmit?.classList.remove('d-none');
       return;
     }

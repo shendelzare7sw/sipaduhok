@@ -185,7 +185,7 @@
                                                 @elseif($bayar->metode_pembayaran === 'transfer')
                                                     <span class="badge bg-warning"><i class="fas fa-university"></i> Direct Transfer</span>
                                                 @else
-                                                    <span class="badge bg-success"><i class="fas fa-credit-card"></i> Midtrans</span>
+                                                    <span class="badge bg-success"><i class="fas fa-credit-card"></i> Digital</span>
                                                 @endif
                                             </td>
                                             <td data-label="STATUS" class="align-middle text-end text-md-center">
@@ -195,9 +195,9 @@
                                                 @elseif($bayar->status_validasi === 'ditolak')
                                                     <span class="badge bg-danger shadow-sm"><i class="fas fa-times-circle"></i>
                                                         Ditolak</span>
-                                                @elseif($bayar->status_validasi === 'pending' && $bayar->metode_pembayaran === 'midtrans')
+                                                @elseif($bayar->status_validasi === 'pending' && $bayar->metode_pembayaran === 'paywuz')
                                                     @php
-                                                        $isExpired = $bayar->created_at < now()->subHours(24);
+                                                        $isExpired = $bayar->payment_expires_at?->isPast() ?? false;
                                                     @endphp
                                                     @if($isExpired)
                                                         <span class="badge bg-secondary shadow-sm"><i class="fas fa-times-circle"></i> Kadaluarsa</span>

@@ -66,7 +66,7 @@ class SiaPembayaranController extends Controller
         $request->validate([
             'tagihan_id' => 'required|exists:tagihan,id',
             'jumlah_bayar' => 'required|numeric|min:1',
-            'metode_pembayaran' => 'required|in:tunai,transfer,midtrans',
+            'metode_pembayaran' => 'required|in:tunai,transfer',
             'bukti_pembayaran' => 'required_if:metode_pembayaran,tunai,transfer|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
@@ -102,7 +102,7 @@ class SiaPembayaranController extends Controller
             'tanggal_bayar' => now()->toDateString(),
             'metode_pembayaran' => $request->metode_pembayaran,
             'bukti_pembayaran' => $buktiFoto,
-            'status_validasi' => $request->metode_pembayaran === 'midtrans' ? 'disetujui' : 'pending',
+            'status_validasi' => 'pending',
             'catatan' => $request->catatan,
         ]);
 

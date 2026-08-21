@@ -117,11 +117,11 @@ class LaporanPembayaranController extends Controller
         $jumlahTunai = (clone $baseQuery())->where('metode_pembayaran', 'tunai')->count();
         $totalTransfer = (clone $baseQuery())->where('metode_pembayaran', 'transfer')->sum('jumlah_bayar');
         $jumlahTransfer = (clone $baseQuery())->where('metode_pembayaran', 'transfer')->count();
-        $totalMidtrans = (clone $baseQuery())->where('metode_pembayaran', 'midtrans')->sum('jumlah_bayar');
-        $jumlahMidtrans = (clone $baseQuery())->where('metode_pembayaran', 'midtrans')->count();
+        $totalDigital = (clone $baseQuery())->where('metode_pembayaran', 'paywuz')->sum('jumlah_bayar');
+        $jumlahDigital = (clone $baseQuery())->where('metode_pembayaran', 'paywuz')->count();
 
-        $totalNonTunai = $totalTransfer + $totalMidtrans;
-        $jumlahNonTunai = $jumlahTransfer + $jumlahMidtrans;
+        $totalNonTunai = $totalTransfer + $totalDigital;
+        $jumlahNonTunai = $jumlahTransfer + $jumlahDigital;
 
         // Pembayaran per hari (untuk grafik) - Faster Grouped Query
         $pembayaranPerHari = collect();
@@ -167,8 +167,8 @@ class LaporanPembayaranController extends Controller
             'jumlahTunai' => $jumlahTunai,
             'totalTransfer' => $totalTransfer,
             'jumlahTransfer' => $jumlahTransfer,
-            'totalMidtrans' => $totalMidtrans,
-            'jumlahMidtrans' => $jumlahMidtrans,
+            'totalDigital' => $totalDigital,
+            'jumlahDigital' => $jumlahDigital,
             'totalNonTunai' => $totalNonTunai,
             'jumlahNonTunai' => $jumlahNonTunai,
             'pembayaranPerHari' => $pembayaranPerHari,

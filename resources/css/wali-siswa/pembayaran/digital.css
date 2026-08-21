@@ -1,0 +1,93 @@
+.digital-payment-page {
+    --digital-primary: #4361ee;
+    --digital-border: #e2e8f0;
+}
+
+.digital-payment-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.75rem;
+    color: #fff;
+    background: linear-gradient(135deg, #1d4ed8 0%, #0f766e 100%);
+}
+
+.digital-payment-hero p {
+    color: rgba(255, 255, 255, 0.82);
+    overflow-wrap: anywhere;
+}
+
+.digital-payment-eyebrow {
+    display: block;
+    margin-bottom: .5rem;
+    color: #fde047;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+}
+
+.digital-item-list {
+    border: 1px solid var(--digital-border);
+    border-radius: .75rem;
+    overflow: hidden;
+}
+
+.digital-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--digital-border);
+}
+
+.digital-item-row:last-child {
+    border-bottom: 0;
+}
+
+.digital-total-box {
+    padding: 1rem;
+    border-radius: .75rem;
+    background: #f8fafc;
+}
+
+.digital-meta > div {
+    display: grid;
+    grid-template-columns: minmax(90px, .8fr) 1.2fr;
+    gap: .75rem;
+    padding: .65rem 0;
+    border-bottom: 1px solid var(--digital-border);
+}
+
+.digital-meta > div:last-child {
+    border-bottom: 0;
+}
+
+.digital-meta dt {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.digital-meta dd {
+    margin: 0;
+    font-weight: 700;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 767.98px) {
+    .digital-payment-hero,
+    .digital-item-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .digital-payment-hero .badge {
+        white-space: normal;
+    }
+
+    .digital-item-row strong {
+        align-self: flex-end;
+    }
+}

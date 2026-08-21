@@ -479,7 +479,7 @@ class NotificationService
     }
 
     /**
-     * Notify Admin/Bendahara and Wali Siswa about successful digital payment (Midtrans)
+     * Notify Admin/Bendahara and Wali Siswa about successful digital payment.
      */
     public function notifyPembayaranDigitalBerhasil($pembayaranList)
     {

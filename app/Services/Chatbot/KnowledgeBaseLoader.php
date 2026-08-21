@@ -82,7 +82,7 @@ class KnowledgeBaseLoader
             'Dashboard => wali-siswa.dashboard: ringkasan tiap anak yang terhubung ke akun wali siswa + pengajuan izin',
             'Monitoring Anak: submenu per anak (bisa lebih dari satu anak per akun)',
             'Per anak — Presensi: riwayat kehadiran + AJUKAN/EDIT IZIN (sakit/izin) yang akan divalidasi Wali Kelas',
-            'Per anak — Tagihan: daftar tagihan & tunggakan, invoice, BAYAR online (Midtrans) atau Direct Transfer (upload bukti), status validasi pembayaran oleh Bendahara',
+            'Per anak — Tagihan: daftar tagihan & tunggakan, invoice, BAYAR online (pembayaran digital) atau Direct Transfer (upload bukti), status validasi pembayaran oleh Bendahara',
             'Per anak — Rapor: lihat & unduh rapor anak, HANYA bila akses rapor sudah divalidasi (lunas + persetujuan); jika belum, ajukan permintaan unduh ke Wali Kelas',
             'Wali siswa menerima notifikasi: tagihan baru, pembayaran divalidasi/ditolak, rapor terbit, status izin, anak absen alpha, hasil kenaikan kelas',
             'Route wali siswa memakai parameter anak; arahkan memilih anak dulu bila tombol langsung tak tersedia',
@@ -103,8 +103,8 @@ class KnowledgeBaseLoader
             'Dashboard => bendahara.dashboard: ringkasan keuangan (tagihan, pembayaran masuk menunggu validasi, tunggakan)',
             'Kelola Tagihan => bendahara.tagihan.index: daftar tagihan semua siswa (termasuk ALUMNI/lulus). Buat tagihan: Tagihan Massal, Generate SPP, Tagihan Custom, Duplikasi. Tombol "Alumni Menunggak": tampilkan alumni yang masih berhutang lintas TA (untuk penebusan ijazah). Cari siswa lewat NAMA. Sisa dihitung dari pembayaran disetujui (cicilan akurat)',
             'Tarik Tunggakan (carryover) => bendahara.tagihan.carryover: pindahkan tunggakan TA lama jadi tagihan di TA aktif (termasuk sisa cicilan)',
-            'Kelola Pembayaran => bendahara.pembayaran.index: validasi/tolak pembayaran masuk (manual/transfer/Midtrans); ortu dapat notifikasi hasil; Riwayat per siswa',
-            'Config/Info Pembayaran => bendahara.info-pembayaran.index: rekening, Midtrans, info pembayaran',
+            'Kelola Pembayaran => bendahara.pembayaran.index: validasi/tolak pembayaran masuk (manual/transfer/pembayaran digital); ortu dapat notifikasi hasil; Riwayat per siswa',
+            'Config/Info Pembayaran => bendahara.info-pembayaran.index: rekening, pembayaran digital, info pembayaran',
             'Validasi Akses => bendahara.validasi-akses.index: buka akses Ujian & Rapor siswa berdasarkan status LUNAS; bisa ajukan dispensasi ke Ketua PKBM',
             'Kenaikan Kelas: Validasi Dispensasi => bendahara.kenaikan-kelas.validation.index: ajukan dispensasi naik kelas untuk siswa menunggak ke Ketua PKBM (approval balik ke sini)',
             'Laporan: Laporan Pembayaran, Rekap Tagihan, Siswa Belum Lunas',
@@ -200,10 +200,10 @@ class KnowledgeBaseLoader
             'admin_view_route' => 'admin.keuangan.tagihan.carryover',
             'description' => 'Tarik tunggakan dari tahun ajaran lama ke tahun ajaran aktif dilakukan oleh Bendahara atau Admin',
         ],
-        'config pembayaran|info pembayaran|rekening|midtrans|direct transfer' => [
+        'config pembayaran|info pembayaran|rekening|pembayaran digital|direct transfer' => [
             'owner' => ['bendahara', 'admin'],
             'admin_view_route' => 'admin.keuangan.info-pembayaran.index',
-            'description' => 'Konfigurasi rekening, Midtrans, dan info pembayaran dikelola Bendahara atau Admin',
+            'description' => 'Konfigurasi rekening, pembayaran digital, dan info pembayaran dikelola Bendahara atau Admin',
         ],
         'laporan keuangan|laporan pembayaran|rekap tagihan|belum lunas|siswa belum lunas' => [
             'owner' => ['bendahara', 'admin'],
@@ -383,7 +383,7 @@ class KnowledgeBaseLoader
         'bayar spp|bayar tagihan|transfer pembayaran' => [
             'owner' => ['orang_tua'],
             'admin_view_route' => 'admin.keuangan.pembayaran.index',
-            'description' => 'Pembayaran SPP dilakukan oleh Wali Siswa via Dashboard Wali Siswa (online Midtrans atau Direct Transfer) atau langsung ke Bendahara',
+            'description' => 'Pembayaran SPP dilakukan oleh Wali Siswa via Dashboard Wali Siswa (online pembayaran digital atau Direct Transfer) atau langsung ke Bendahara',
         ],
     ];
 

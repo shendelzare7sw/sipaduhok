@@ -1,54 +1,44 @@
 const setPanelState = (type) => {
-    const viewPanel = document.getElementById(`${type}-view`);
-    const editPanel = document.getElementById(`${type}-edit`);
+  const viewPanel = document.getElementById(`${type}-view`);
+  const editPanel = document.getElementById(`${type}-edit`);
+  if (!viewPanel || !editPanel) return;
 
-    if (!viewPanel || !editPanel) {
-        return;
-    }
-
-    const shouldShowEdit = !editPanel.classList.contains('is-visible');
-
-    viewPanel.classList.toggle('is-hidden', shouldShowEdit);
-    editPanel.classList.toggle('is-visible', shouldShowEdit);
+  const editing = !editPanel.classList.contains('is-visible');
+  viewPanel.classList.toggle('is-hidden', editing);
+  editPanel.classList.toggle('is-visible', editing);
 };
 
 const updateModeDisplay = () => {
-    const checkbox = document.getElementById('is_production');
-    const modeLabel = document.getElementById('modeLabel');
-    const modeDescription = document.getElementById('modeDescription');
-    const modeCard = document.getElementById('modeSelectionCard');
+  const environment = document.getElementById('paywuzEnvironment');
+  const label = document.getElementById('modeLabel');
+  const description = document.getElementById('modeDescription');
+  const card = document.getElementById('modeSelectionCard');
+  if (!environment || !label || !description || !card) return;
 
-    if (!checkbox || !modeLabel || !modeDescription || !modeCard) {
-        return;
-    }
-
-    if (checkbox.checked) {
-        modeLabel.innerHTML = '<span class="text-danger"><i class="fas fa-broadcast-tower me-1"></i> Mode Production</span>';
-        modeDescription.textContent = 'Transaksi nyata dengan uang sungguhan.';
-        modeCard.classList.add('is-production');
-        modeCard.classList.remove('is-sandbox');
-        return;
-    }
-
-    modeLabel.innerHTML = '<span class="text-warning"><i class="fas fa-vial me-1"></i> Mode Sandbox</span>';
-    modeDescription.textContent = 'Simulasi pembayaran untuk testing.';
-    modeCard.classList.add('is-sandbox');
-    modeCard.classList.remove('is-production');
+  const production = environment.value === 'production';
+  label.textContent = production ? 'Mode Production' : 'Mode Sandbox';
+  description.textContent = production
+    ? 'Transaksi nyata dengan uang sungguhan.'
+    : 'Simulasi pembayaran untuk pengujian.';
+  card.classList.toggle('is-production', production);
+  card.classList.toggle('is-sandbox', !production);
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-toggle-edit]').forEach((button) => {
-        button.addEventListener('click', () => {
-            setPanelState(button.dataset.type);
-        });
+  document.querySelectorAll('[data-toggle-edit]').forEach((button) => {
+    button.addEventListener('click', () => setPanelState(button.dataset.type));
+  });
+  document.querySelectorAll('[data-submit-on-change]').forEach((input) => {
+    input.addEventListener('change', () => input.form?.submit());
+  });
+  document.querySelectorAll('[data-copy-value]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(button.dataset.copyValue || '');
+      const icon = button.querySelector('i');
+      icon?.classList.replace('fa-copy', 'fa-check');
+      setTimeout(() => icon?.classList.replace('fa-check', 'fa-copy'), 1500);
     });
-
-    document.querySelectorAll('[data-submit-on-change]').forEach((input) => {
-        input.addEventListener('change', () => {
-            input.form?.submit();
-        });
-    });
-
-    document.getElementById('is_production')?.addEventListener('change', updateModeDisplay);
-    updateModeDisplay();
+  });
+  document.getElementById('paywuzEnvironment')?.addEventListener('change', updateModeDisplay);
+  updateModeDisplay();
 });

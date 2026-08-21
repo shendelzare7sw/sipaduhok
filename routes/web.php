@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BeritaController;
-use App\Http\Controllers\MidtransWebhookController;
+use App\Http\Controllers\PaywuzWebhookController;
 
 // Admin Controllers
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -74,6 +74,7 @@ use App\Http\Controllers\Siswa\LmsDashboardController;
 
 // Wali Siswa Controllers
 use App\Http\Controllers\OrangTua\OrangTuaController;
+use App\Http\Controllers\OrangTua\PembayaranDigitalController;
 use App\Http\Controllers\Siswa\LmsMateriController;
 use App\Http\Controllers\Siswa\LmsTugasController;
 use App\Http\Controllers\Siswa\LmsUjianController;
@@ -84,8 +85,8 @@ use App\Http\Controllers\Siswa\LmsUjianController;
 |--------------------------------------------------------------------------
 */
 
-// Midtrans Webhook (outside auth middleware)
-Route::post('/midtrans/notification', [MidtransWebhookController::class, 'notification'])->name('midtrans.notification');
+// Webhook Paywuz berada di luar autentikasi; keasliannya diverifikasi dengan HMAC.
+Route::post('/payments/paywuz/webhook', PaywuzWebhookController::class)->name('paywuz.webhook');
 
 // Sitemap
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
@@ -523,7 +524,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/dispensasi', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'ajukanDispensasi'])->name('dispensasi');
             });
 
-            // Config Pembayaran (API Midtrans & Rekening Bank)
+            // Config Pembayaran Digital & Rekening Bank
             Route::redirect('info-pembayaran', '/admin/keuangan/config', 301)->name('info-pembayaran.legacy-index');
             Route::post('info-pembayaran/update', [\App\Http\Controllers\Admin\Keuangan\InfoPembayaranController::class, 'update'])->name('info-pembayaran.legacy-update');
             Route::prefix('config')->name('info-pembayaran.')->group(function () {
@@ -1442,9 +1443,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/bayar', [SiaPembayaranController::class, 'prosesBayar'])->name('bayar');
                 Route::get('/riwayat', [SiaPembayaranController::class, 'riwayat'])->name('riwayat');
                 Route::get('/cetak/{pembayaran}', [SiaPembayaranController::class, 'cetakBukti'])->name('cetak');
-                // Catatan: callback Midtrans siswa dihapus (metode controller tak ada & tak
-                // dipakai). Callback resmi: MidtransWebhookController (webhook bertanda tangan)
-                // & OrangTua\OrangTuaController@snapFinish.
+                // Pembayaran digital hanya dilakukan wali siswa.
             });
 
             // Rapor - DISABLED: Siswa tidak berhak mengelola rapor, hanya wali siswa
@@ -1553,15 +1552,15 @@ Route::middleware(['auth'])->group(function () {
         // Tagihan & Pembayaran Anak
         Route::prefix('tagihan')->name('tagihan.')->group(function () {
             Route::get('/anak/{siswa}', [OrangTuaController::class, 'tagihanAnak'])->name('anak');
-            Route::post('/anak/{siswa}/bayar', [OrangTuaController::class, 'prosesBayar'])->name('bayar');
-            Route::post('/anak/{siswa}/bulk-pay', [OrangTuaController::class, 'processBulkPay'])->name('bulk-pay');
+            Route::post('/anak/{siswa}/bayar', [PembayaranDigitalController::class, 'prosesBayar'])->name('bayar');
+            Route::post('/anak/{siswa}/bulk-pay', [PembayaranDigitalController::class, 'processBulkPay'])->name('bulk-pay');
         });
 
-        // Pembayaran Digital (Midtrans)
+        // Pembayaran Digital
         Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
-            Route::get('/snap-finish', [OrangTuaController::class, 'snapFinish'])->name('snap.finish');
-            Route::get('/snap/{pembayaran}', [OrangTuaController::class, 'snapPayment'])->name('snap');
-            Route::post('/continue/{pembayaran}', [OrangTuaController::class, 'continuePayment'])->name('continue');
+            Route::get('/digital/{pembayaran}', [PembayaranDigitalController::class, 'digitalPayment'])->name('digital');
+            Route::post('/sync/{pembayaran}', [PembayaranDigitalController::class, 'syncDigitalPayment'])->name('sync');
+            Route::post('/continue/{pembayaran}', [PembayaranDigitalController::class, 'continuePayment'])->name('continue');
             Route::get('/{pembayaran}/invoice', [OrangTuaController::class, 'cetakInvoice'])->name('invoice');
         });
 
