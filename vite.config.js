@@ -473,6 +473,7 @@ export default defineConfig({
                 'resources/css/wali-siswa/dashboard.css',
                 'resources/js/wali-siswa/dashboard.js',
                 'resources/css/wali-siswa/pembayaran/digital.css',
+                'resources/js/wali-siswa/pembayaran/digital.js',
                 'resources/css/wali-siswa/presensi/ajukan-izin.css',
                 'resources/css/wali-siswa/presensi/edit-izin.css',
                 'resources/css/wali-siswa/presensi/index.css',
