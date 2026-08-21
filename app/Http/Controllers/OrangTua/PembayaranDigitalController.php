@@ -39,7 +39,7 @@ class PembayaranDigitalController extends Controller
             'tagihan_id' => ['required', 'integer', 'exists:tagihan,id'],
             'jumlah_bayar' => ['required', 'integer', 'min:1000'],
             'metode_pembayaran' => ['required', 'in:transfer,paywuz'],
-            'payment_method' => ['required_if:metode_pembayaran,paywuz', 'nullable', 'string', 'max:50'],
+            'payment_method' => ['nullable', 'string', 'max:50'],
             'bukti_bayar' => ['required_if:metode_pembayaran,transfer', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:10240'],
             'catatan' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -85,6 +85,16 @@ class PembayaranDigitalController extends Controller
             return back()->with('error', 'Pembayaran digital belum dikonfigurasi. Silakan hubungi admin atau bendahara.')->withInput();
         }
 
+        try {
+            $paymentMethod = filled($validated['payment_method'] ?? null)
+                ? (string) $validated['payment_method']
+                : $paywuz->defaultPaymentMethod($amount);
+        } catch (Throwable $exception) {
+            return back()->withErrors([
+                'payment_method' => $exception->getMessage(),
+            ])->withInput();
+        }
+
         $pending = Pembayaran::query()
             ->where('tagihan_id', $tagihan->id)
             ->where('siswa_id', $siswa->id)
@@ -104,14 +114,14 @@ class PembayaranDigitalController extends Controller
         }
 
         try {
-            $paywuz->assertPaymentMethodAvailable((string) $validated['payment_method'], $amount);
+            $paywuz->assertPaymentMethodAvailable($paymentMethod, $amount);
         } catch (Throwable $exception) {
             return back()->withErrors([
                 'payment_method' => $exception->getMessage(),
             ])->withInput();
         }
 
-        $payment = DB::transaction(function () use ($tagihan, $siswa, $user, $amount, $validated, $paywuz): Pembayaran {
+        $payment = DB::transaction(function () use ($tagihan, $siswa, $user, $amount, $validated, $paymentMethod, $paywuz): Pembayaran {
             $lockedTagihan = Tagihan::query()->lockForUpdate()->findOrFail($tagihan->id);
             $this->guardTagihan($lockedTagihan, $siswa->id);
             $this->guardAmount($lockedTagihan, $amount);
@@ -134,7 +144,7 @@ class PembayaranDigitalController extends Controller
                 'tanggal_bayar' => now(),
                 'metode_pembayaran' => 'paywuz',
                 'payment_gateway' => 'paywuz',
-                'payment_type' => $validated['payment_method'],
+                'payment_type' => $paymentMethod,
                 'payment_environment' => $paywuz->environment(),
                 'order_id' => $this->generateGatewayOrderId(),
                 'status_validasi' => 'pending',
@@ -175,7 +185,7 @@ class PembayaranDigitalController extends Controller
             'items.*.jumlah_bayar' => ['required', 'integer', 'min:1'],
             'total_bayar' => ['required', 'integer', 'min:1'],
             'metode_pembayaran' => ['required', 'in:transfer,paywuz'],
-            'payment_method' => ['required_if:metode_pembayaran,paywuz', 'nullable', 'string', 'max:50'],
+            'payment_method' => ['nullable', 'string', 'max:50'],
             'bukti_bayar' => ['required_if:metode_pembayaran,transfer', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:10240'],
         ]);
 
@@ -210,6 +220,16 @@ class PembayaranDigitalController extends Controller
         if ($validated['metode_pembayaran'] === 'paywuz') {
             if (! $paywuz->isConfigured()) {
                 return back()->with('error', 'Pembayaran digital belum dikonfigurasi.')->withInput();
+            }
+
+            try {
+                $validated['payment_method'] = filled($validated['payment_method'] ?? null)
+                    ? (string) $validated['payment_method']
+                    : $paywuz->defaultPaymentMethod($total);
+            } catch (Throwable $exception) {
+                return back()->withErrors([
+                    'payment_method' => $exception->getMessage(),
+                ])->withInput();
             }
 
             $pending = Pembayaran::query()
@@ -394,10 +414,23 @@ class PembayaranDigitalController extends Controller
             ->where('order_id', $payment->order_id)
             ->get();
         $amount = (int) $group->sum('jumlah_bayar');
+        $paymentMethod = filled($payment->payment_type)
+            ? (string) $payment->payment_type
+            : $paywuz->defaultPaymentMethod($amount);
+
+        if (blank($payment->payment_type)) {
+            Pembayaran::query()
+                ->where('payment_gateway', 'paywuz')
+                ->where('order_id', $payment->order_id)
+                ->update(['payment_type' => $paymentMethod]);
+
+            $payment->payment_type = $paymentMethod;
+        }
+
         $transaction = $paywuz->createTransaction(
             (string) $payment->order_id,
             $amount,
-            (string) $payment->payment_type,
+            $paymentMethod,
             $payment->id,
             $payment->siswa_id,
             route('wali-siswa.pembayaran.digital', $payment),

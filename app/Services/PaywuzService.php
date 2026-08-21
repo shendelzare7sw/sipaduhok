@@ -94,6 +94,29 @@ class PaywuzService
         }
     }
 
+    public function defaultPaymentMethod(int $amount): string
+    {
+        $availableMethods = collect($this->paymentMethods())
+            ->filter(fn (array $method): bool => $amount >= $method['min_amount'] && $amount <= $method['max_amount'])
+            ->values();
+
+        if ($availableMethods->isEmpty()) {
+            throw new RuntimeException('Tidak ada kanal pembayaran digital yang cocok untuk nominal tagihan ini.');
+        }
+
+        foreach (['QRIS', 'VA'] as $preferredCode) {
+            $method = $availableMethods->first(
+                fn (array $method): bool => strtoupper((string) $method['code']) === $preferredCode
+            );
+
+            if ($method) {
+                return (string) $method['code'];
+            }
+        }
+
+        return (string) $availableMethods->first()['code'];
+    }
+
     /** @return array<string, mixed> */
     public function createTransaction(
         string $orderId,
@@ -106,6 +129,10 @@ class PaywuzService
     ): array {
         if (! $this->isConfigured()) {
             throw new RuntimeException('Pembayaran digital belum dikonfigurasi.');
+        }
+
+        if (blank($paymentMethod)) {
+            $paymentMethod = $this->defaultPaymentMethod($amount);
         }
 
         $this->assertPaymentMethodAvailable($paymentMethod, $amount);

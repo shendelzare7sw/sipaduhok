@@ -174,9 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (selectedValue === 'paywuz') {
       page.querySelector('#infoPaywuz')?.classList.remove('d-none');
-      if (paymentMethod) {
-        paymentMethod.required = true;
-      }
       btnSubmit?.classList.remove('d-none');
       return;
     }

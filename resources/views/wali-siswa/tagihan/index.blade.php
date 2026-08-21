@@ -481,20 +481,10 @@
                             {{-- 1. Pembayaran digital --}}
                             <div id="infoPaywuz" class="method-info d-none">
                                 <div class="alert alert-primary" role="alert">
-                                    <div class="d-flex align-items-start mb-3">
+                                    <div class="d-flex align-items-start">
                                         <i class="fas fa-shield-alt me-2 mt-1"></i>
-                                        <div class="small">Pilih kanal, lalu selesaikan pembayaran pada halaman aman. Status tagihan akan diperbarui <strong>otomatis</strong>.</div>
+                                        <div class="small">Setelah konfirmasi, Anda akan diarahkan ke halaman pembayaran aman. Status tagihan akan diperbarui <strong>otomatis</strong>.</div>
                                     </div>
-                                    <label for="paymentMethod" class="form-label fw-bold">Kanal Pembayaran <span class="text-danger">*</span></label>
-                                    <select name="payment_method" id="paymentMethod" class="form-select">
-                                        <option value="">Pilih kanal pembayaran</option>
-                                        @foreach($paymentMethods as $method)
-                                            <option value="{{ $method['code'] }}">
-                                                {{ $method['name'] }}{{ $method['type'] === 'meta' ? ' — pilih bank di halaman berikutnya' : '' }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <small class="d-block mt-2">Biaya kanal, jika ada, ditampilkan sebelum Anda menyelesaikan pembayaran.</small>
                                 </div>
                             </div>
 
