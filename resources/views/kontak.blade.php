@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <x-seo-meta title="Kontak - PKBM House Of Knowledge" description="Hubungi PKBM House Of Knowledge. Temukan lokasi cabang, alamat email, dan nomor telepon kami."></x-seo-meta>
+    <x-seo-meta title="Kontak - HOK Homeschooling" description="Hubungi HOK Homeschooling melalui WhatsApp, telepon, email, atau media sosial."></x-seo-meta>
 
     <!-- CDN Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,11 +25,6 @@
         $contactSection = $page->getSection('contact_info');
         $contactContent = $contactSection->content ?? [];
         $contactItems = $contactContent['items'] ?? [];
-
-        $locationsSection = $page->getSection('locations');
-        $locationsContent = $locationsSection->content ?? [];
-        $locationsHeader = $locationsContent['header'] ?? [];
-        $locationItems = $locationsContent['items'] ?? [];
 
         $socialSection = $page->getSection('social_media');
         $socialContent = $socialSection->content ?? [];
@@ -137,6 +132,8 @@
         </div>
     </section>
 
+    {{-- Alamat lama tidak ditampilkan sampai alamat layanan baru dikonfirmasi. --}}
+    @if(false)
     <section class="py-20 bg-white relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
@@ -216,6 +213,7 @@
             </div>
         </div>
     </section>
+    @endif
 
     <!-- ==================== SOCIAL MEDIA SECTION ==================== -->
     <section class="py-20 bg-white">
@@ -227,7 +225,7 @@
                 {{ $socialHeader['title'] ?? 'Ikuti Kami di Sosial Media' }}
             </h2>
             <p class="text-gray-600 mb-12">
-                {{ $socialHeader['subtitle'] ?? 'Dapatkan update terbaru tentang kegiatan dan informasi sekolah' }}
+                Dapatkan informasi terbaru tentang HOK Homeschooling
             </p>
 
             <div class="flex flex-wrap justify-center gap-6">
@@ -278,13 +276,13 @@
 
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-                Siap Bergabung dengan Kami?
+                Perlu Informasi Homeschooling?
             </h2>
             <p class="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
-                Hubungi kami sekarang untuk informasi lebih lanjut tentang program pendidikan dan pendaftaran
+                Hubungi kami untuk berkonsultasi mengenai pendampingan belajar dan proses pendaftaran.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="https://wa.me/6281234567890?text=Halo%20PKBM%20House%20Of%20Knowledge,%20saya%20ingin%20mendaftar"
+                <a href="https://wa.me/6285811258534?text=Halo%20HOK%20Homeschooling,%20saya%20ingin%20bertanya"
                     target="_blank"
                     class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -293,7 +291,7 @@
                     </svg>
                     Hubungi via WhatsApp
                 </a>
-                <a href="tel:02174427521"
+                <a href="tel:6285811258534"
                     class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-primary transition-all duration-300">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path

@@ -238,7 +238,7 @@ class LandingPageSeeder extends Seeder
                     'title' => 'Siap Bergabung Bersama Kami?',
                     'description' => 'Daftarkan putra-putri Anda sekarang dan berikan mereka pendidikan terbaik untuk masa depan yang cerah.',
                     'button_text_1' => 'Daftar Sekarang',
-                    'button_link_1' => '/ppdb',
+                    'button_link_1' => '/pendaftaran',
                     'button_text_2' => 'Hubungi Kami',
                     'button_link_2' => '/kontak'
                 ]
@@ -382,7 +382,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                     'title' => 'Tertarik Bergabung?',
                     'description' => 'Daftarkan putra-putri Anda sekarang dan berikan pendidikan terbaik untuk masa depan yang cerah',
                     'button_text' => 'Daftar Sekarang',
-                    'button_link' => '/ppdb'
+                    'button_link' => '/pendaftaran'
                 ]
             ]
         );
@@ -1117,7 +1117,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                     'title' => 'Setiap Anak Berhak Mendapat Pendidikan',
                     'description' => 'Konsultasikan kebutuhan anak Anda dengan tim ahli kami secara gratis.',
                     'button_text_1' => 'Daftar Sekarang',
-                    'button_link_1' => '/ppdb',
+                    'button_link_1' => '/pendaftaran',
                     'button_text_2' => 'Konsultasi Gratis',
                     'button_link_2' => '/kontak',
                     'background_gradient_start' => '#d45930',
@@ -1916,7 +1916,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                         ['label' => 'Tentang Kami', 'url' => '/tentang-sekolah'],
                         ['label' => 'Program', 'url' => '/program-sd-sma'],
                         ['label' => 'Fasilitas', 'url' => '/fasilitas'],
-                        ['label' => 'PPDB', 'url' => '/ppdb'],
+                        ['label' => 'Pendaftaran', 'url' => '/pendaftaran'],
                         ['label' => 'Galeri', 'url' => '/galeri'],
                         ['label' => 'Berita', 'url' => '/berita'],
                         ['label' => 'Kontak', 'url' => '/kontak'],

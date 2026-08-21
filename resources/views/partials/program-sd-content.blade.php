@@ -188,7 +188,7 @@
         </h2>
         <p class="text-white/90 mb-8">
             {{ $content['cta_description'] ?? 'Dapatkan ijazah resmi setara SD dengan program Paket A kami.' }}</p>
-        <a href="/ppdb"
+        <a href="{{ route('pendaftaran') }}"
             class="inline-block px-8 py-4 bg-white text-[#165fac] font-semibold rounded-full hover:bg-gray-100 transition"
             style="cursor: pointer;">
             Daftar Sekarang

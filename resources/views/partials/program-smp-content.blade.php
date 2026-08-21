@@ -191,7 +191,7 @@
         <p class="text-white/90 mb-8">
             {{ $content['cta_description'] ?? 'Daftarkan diri Anda sekarang dan mulai perjalanan pendidikan baru.' }}
         </p>
-        <a href="/ppdb"
+        <a href="{{ route('pendaftaran') }}"
             class="inline-block px-8 py-4 bg-white text-[#287f3b] font-semibold rounded-full hover:bg-gray-100 transition"
             style="cursor: pointer;">
             Daftar Sekarang

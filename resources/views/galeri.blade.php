@@ -170,7 +170,7 @@
                 Jadilah bagian dari momen-momen berharga dan prestasi gemilang di PKBM House Of Knowledge
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ url('/ppdb') }}"
+                <a href="{{ route('pendaftaran') }}"
                     class="inline-flex items-center justify-center px-8 py-4 bg-white text-primary hover:bg-cream font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
                     Daftar Sekarang
                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

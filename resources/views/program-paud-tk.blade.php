@@ -320,7 +320,7 @@
             <h2 class="text-3xl font-bold text-white mb-4">Daftarkan Anak Anda Sekarang</h2>
             <p class="text-white/90 mb-8">Berikan pendidikan terbaik untuk tumbuh kembang anak Anda sejak usia dini
                 hingga siap memasuki SD.</p>
-            <a href="/ppdb"
+            <a href="{{ route('pendaftaran') }}"
                 class="inline-flex items-center px-8 py-4 bg-white text-[#d45930] font-semibold rounded-full hover:bg-gray-100 transition">
                 Daftar Sekarang
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -336,4 +336,3 @@
 </body>
 
 </html>
-

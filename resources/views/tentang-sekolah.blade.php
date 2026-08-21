@@ -223,7 +223,7 @@
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">{{ $ctaContent['title'] ?? 'Tertarik Bergabung?' }}</h2>
             <p class="text-white/90 mb-8">{{ $ctaContent['description'] ?? 'Daftarkan putra-putri Anda sekarang dan berikan pendidikan terbaik untuk masa depan yang cerah' }}</p>
-            <a href="{{ $ctaContent['button_link'] ?? url('/ppdb') }}"
+            <a href="{{ $ctaContent['button_link'] ?? route('pendaftaran') }}"
                 class="inline-flex items-center px-8 py-4 bg-white text-[#165fac] font-semibold rounded-full hover:bg-gray-100 transition">
                 {{ $ctaContent['button_text'] ?? 'Daftar Sekarang' }}
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,4 +239,3 @@
 </body>
 
 </html>
-

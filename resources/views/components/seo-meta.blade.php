@@ -1,7 +1,7 @@
 @props([
-    'title' => 'SipaduHOK - PKBM House Of Knowledge',
-    'description' => 'PKBM House Of Knowledge adalah lembaga pendidikan non-formal yang berkomitmen untuk memberikan layanan pendidikan berkualitas bagi semua kalangan, termasuk anak-anak berkebutuhan khusus.',
-    'keywords' => 'PKBM, House Of Knowledge, Pendidikan Non Formal, Pendidikan Inklusi, Homeschooling, Sekolah Alternatif, PKBM Bekasi, Kejar Paket A, Kejar Paket B, Kejar Paket C',
+    'title' => 'HOK Homeschooling - LMS & Pembayaran',
+    'description' => 'Portal HOK Homeschooling untuk pembelajaran daring dan pembayaran tagihan orang tua.',
+    'keywords' => 'HOK Homeschooling, LMS homeschooling, pembayaran tagihan homeschooling',
     'image' => asset('img/hero-bg.jpg')
 ])
 
@@ -10,11 +10,11 @@
 <meta name="title" content="{{ $title }}">
 <meta name="description" content="{{ $description }}">
 <meta name="keywords" content="{{ $keywords }}">
-<meta name="author" content="PKBM House Of Knowledge">
+<meta name="author" content="HOK Homeschooling">
 
 <!-- Favicons -->
-<link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
-<link rel="apple-touch-icon" href="{{ asset('img/logo.png') }}">
+<link rel="icon" type="image/png" href="{{ asset('img/logo/logo.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('img/logo/logo.png') }}">
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
@@ -26,7 +26,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="{{ $title }}">
 <meta property="og:locale" content="id_ID">
-<meta property="og:site_name" content="PKBM House Of Knowledge">
+<meta property="og:site_name" content="HOK Homeschooling">
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
@@ -48,24 +48,16 @@
     {
       "@type": "Organization",
       "@id": "{{ config('app.url') }}#organization",
-      "name": "PKBM House Of Knowledge",
+      "name": "HOK Homeschooling",
       "alternateName": "SipaduHOK",
       "url": "{{ config('app.url') }}",
       "logo": {
         "@type": "ImageObject",
-        "url": "{{ asset('img/logo.png') }}",
+        "url": "{{ asset('img/logo/logo.png') }}",
         "width": 200,
         "height": 200
       },
       "description": "{{ $description }}",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Jl. Ruko Reni Jaya No.22, RW.23, Pamulang Bar., Kec. Pamulang",
-        "addressLocality": "Tangerang Selatan",
-        "addressRegion": "Banten",
-        "postalCode": "15417",
-        "addressCountry": "ID"
-      },
       "contactPoint": {
         "@type": "ContactPoint",
         "telephone": "+62-858-1125-8534",
@@ -74,17 +66,10 @@
       "sameAs": []
     },
     {
-      "@type": "EducationalOrganization",
-      "@id": "{{ config('app.url') }}#educational-org",
-      "name": "PKBM House Of Knowledge",
-      "url": "{{ config('app.url') }}",
-      "logo": "{{ asset('img/logo.png') }}"
-    },
-    {
       "@type": "WebSite",
       "@id": "{{ config('app.url') }}#website",
       "url": "{{ config('app.url') }}",
-      "name": "PKBM House Of Knowledge",
+      "name": "HOK Homeschooling",
       "description": "{{ $description }}"
     }
   ]

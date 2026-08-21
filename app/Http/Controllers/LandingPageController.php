@@ -28,14 +28,7 @@ class LandingPageController extends Controller
     public function home()
     {
         $page = $this->getPageContent('home');
-
-        // Fetch latest news for carousel
-        $beritaList = \App\Models\Berita::aktif()
-            ->latest('tanggal_berita') // Prioritize latest by date
-            ->take(6)
-            ->get();
-
-        return view('home', compact('page', 'beritaList'));
+        return view('home', compact('page'));
     }
 
     public function tentangSekolah()
@@ -72,6 +65,11 @@ class LandingPageController extends Controller
     {
         $page = $this->getPageContent('program-sd-sma');
         return view('program-sd-sma', compact('page'));
+    }
+
+    public function programHomeschooling()
+    {
+        return view('program-homeschooling');
     }
 
     public function programInklusi()

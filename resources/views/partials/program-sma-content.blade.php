@@ -176,7 +176,7 @@
         <p class="text-white/90 mb-8">
             {{ $content['cta_description'] ?? 'Dapatkan ijazah SMA dan buka pintu menuju masa depan yang lebih cerah.' }}
         </p>
-        <a href="/ppdb"
+        <a href="{{ route('pendaftaran') }}"
             class="inline-block px-8 py-4 bg-white text-[#d45930] font-semibold rounded-full hover:bg-gray-100 transition"
             style="cursor: pointer;">
             Daftar Sekarang

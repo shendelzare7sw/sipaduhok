@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <x-seo-meta title="Beranda - PKBM House Of Knowledge" description="PKBM House Of Knowledge adalah lembaga pendidikan non-formal terpercaya di Tangerang Selatan yang menyediakan program PAUD, SD, SMP, SMA, inklusi, dan terapi." keywords="PKBM House Of Knowledge, pendidikan non-formal, PPDB, sekolah alternatif, pendidikan inklusi"></x-seo-meta>
+    <x-seo-meta title="HOK Homeschooling - LMS & Pembayaran" description="Portal HOK Homeschooling untuk pembelajaran daring serta pembayaran tagihan orang tua." keywords="HOK Homeschooling, LMS homeschooling, pembayaran tagihan homeschooling"></x-seo-meta>
 
     <!-- CDN Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,17 +23,39 @@
     @php
         $hero = $page->getSection('hero');
         $heroContent = $hero->content ?? [];
-
-        $statsSection = $page->getSection('stats');
-        $statsItems = $statsSection->content ?? [];
+        $heroContent = array_merge($heroContent, [
+            'title_1' => 'Belajar',
+            'title_highlight_1' => 'Fleksibel',
+            'title_2' => 'dalam Satu',
+            'title_highlight_2' => 'Portal',
+            'description' => 'Akses LMS untuk kegiatan belajar dan pembayaran tagihan melalui satu akun.',
+            'button_text' => 'Masuk ke Portal',
+            'button_link' => route('login'),
+        ]);
 
         $program = $page->getSection('program');
         $programContent = $program->content ?? [];
-        $programHeader = $programContent['header'] ?? [];
-        $programItems = $programContent['items'] ?? [];
-
-        $newsHeaderSection = $page->getSection('news_header');
-        $newsHeader = $newsHeaderSection->content ?? [];
+        $programHeader = [
+            'badge' => 'Layanan Utama',
+            'title' => 'Portal HOK Homeschooling',
+            'description' => 'Layanan digital difokuskan pada pembelajaran homeschooling dan pembayaran tagihan orang tua.',
+        ];
+        $programItems = [
+            [
+                'title' => 'LMS Pembelajaran',
+                'description' => 'Materi, tugas, ujian, dan aktivitas belajar tersedia sesuai akun masing-masing.',
+                'link' => '/login',
+                'color' => 'primary',
+                'icon' => null,
+            ],
+            [
+                'title' => 'Pembayaran Tagihan',
+                'description' => 'Orang tua dapat melihat dan membayar tagihan yang tersedia melalui akun masing-masing.',
+                'link' => '/login',
+                'color' => 'secondary',
+                'icon' => null,
+            ],
+        ];
 
         $galeriPage = \App\Models\LandingPage::where('slug', 'galeri')->with('sections')->first();
         $gallerySection = $galeriPage ? $galeriPage->getSection('gallery_items') : null;
@@ -43,12 +65,6 @@
         // Ambil data item, balik urutannya (terbaru di awal), dan batasi maksimal 6
         $allGalleryItems = $galleryContent['items'] ?? [];
         $galleryItems = array_slice(array_reverse($allGalleryItems), 0, 6);
-
-        $kontakPage = \App\Models\LandingPage::where('slug', 'kontak')->with('sections')->first();
-        $contactSection = $kontakPage ? $kontakPage->getSection('locations') : null;
-        $contactContent = $contactSection->content ?? [];
-        $contactHeader = ['badge' => 'Lokasi Kami', 'title' => 'Kunjungi Cabang Terdekat', 'description' => 'PKBM House Of Knowledge hadir di lokasi strategis untuk memudahkan akses pendidikan bagi putra-putri Anda.']; // Fallback header
-        $contactItems = $contactContent['items'] ?? [];
 
         $ctaSection = $page->getSection('cta_section');
         $ctaContent = $ctaSection->content ?? [];
@@ -66,9 +82,6 @@
 
                 <!-- Left Content -->
                 <div class="text-center lg:text-left">
-                    <span class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full mb-6">
-                        {{ $heroContent['badge'] ?? 'Selamat Datang di SipaduHOK!' }}
-                    </span>
                     <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
                         {{ $heroContent['title_1'] ?? 'Sistem' }}<br>
                         <span class="text-accent-yellow">{{ $heroContent['title_highlight_1'] ?? 'Pembelajaran' }}</span><br>
@@ -85,39 +98,17 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </a>
-                        <!--tambahan button
-                        <a href="{{ url('/ppdb-alur') }}" class="inline-flex items-center justify-center px-8 py-4 bg-white text-primary hover:bg-cream font-semibold rounded-full shadow-lg transition-all duration-300 hover:-translate-y-1">
-                            Daftar Sekarang
-                        </a> -->
                     </div>
                 </div>
 
                 <!-- Right Content - Decorative Image -->
                 <div class="hidden lg:block">
                     <div class="decorative-frame-tilt relative">
-                        <img loading="lazy" decoding="async" src="{{ asset($heroContent['image'] ?? 'img/hero-img.jpg') }}" alt="PKBM House of Knowledge" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
+                        <img loading="lazy" decoding="async" src="{{ asset($heroContent['image'] ?? 'img/hero-img.jpg') }}" alt="HOK Homeschooling" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
 
-                        <!-- Floating Badge 1 -->
-                        <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-xl transform -rotate-6 hover:rotate-0 transition-transform duration-300">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-2xl font-bold text-gray-800">{{ $heroContent['experience_years'] ?? '14+' }}</p>
-                                    <p class="text-sm text-gray-500">Tahun Pengalaman</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Floating Badge 2 -->
-                        <div class="absolute -top-4 -right-4 bg-primary rounded-2xl p-4 shadow-xl transform rotate-6 hover:rotate-0 transition-transform duration-300">
-                            <div class="text-center text-white">
-                                <p class="text-2xl font-bold">{{ $heroContent['active_students'] ?? '200+' }}</p>
-                                <p class="text-xs">Siswa Aktif</p>
-                            </div>
+                        <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl px-5 py-4 shadow-xl transform -rotate-3">
+                            <p class="font-bold text-gray-800">LMS & Pembayaran</p>
+                            <p class="text-sm text-gray-500">Akses sesuai akun</p>
                         </div>
                     </div>
                 </div>
@@ -126,65 +117,12 @@
 
         <!-- Scroll Indicator -->
         <div class="absolute bottom-28 sm:bottom-24 md:bottom-20 left-1/2 transform -translate-x-1/2 z-20">
-            <a href="#stats" class="scroll-indicator flex flex-col items-center text-white/80 hover:text-white transition-all duration-300 group">
+            <a href="#program" class="scroll-indicator flex flex-col items-center text-white/80 hover:text-white transition-all duration-300 group">
                 <span class="text-xs sm:text-sm mb-2 sm:mb-3 font-medium tracking-wide">Scroll Down</span>
                 <div class="relative w-6 h-10 sm:w-8 sm:h-12 border-2 border-white rounded-full flex items-center justify-center group-hover:border-accent-yellow transition-colors duration-300">
                     <div class="scroll-wheel absolute w-1 h-2 sm:h-3 bg-white rounded-full top-2 sm:top-3 group-hover:bg-accent-yellow transition-colors duration-300"></div>
                 </div>
             </a>
-        </div>
-    </section>
-
-    <!-- ==================== STATS SECTION ==================== -->
-    <section id="stats" class="relative -mt-16 z-20 pb-12">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
-                {{-- Logic moved to top php block --}}
-
-                @foreach($statsItems as $index => $stat)
-                @php
-                    $isHex = isset($stat['icon_color']) && substr($stat['icon_color'], 0, 1) === '#';
-                    $themeColor = $stat['icon_color'] ?? 'primary';
-
-                    // Fallback for classes
-                    $bgClass = $isHex ? '' : 'bg-' . $themeColor . '/10';
-                    $textClass = $isHex ? '' : 'text-' . $themeColor;
-
-                    // Inline styles for Hex
-                    $bgStyle = $isHex ? "background-color: {$themeColor}1A;" : ""; // 10% opacity
-                    $textStyle = $isHex ? "color: $themeColor;" : "";
-                @endphp
-                <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center {{ $bgClass }}" style="{{ $bgStyle }}">
-                        {{-- Dynamic Icon or Fallback --}}
-                        @if(!empty($stat['icon']) && str_contains($stat['icon'], '/'))
-                             <img loading="lazy" decoding="async" src="{{ asset($stat['icon']) }}" alt="{{ $stat['label'] ?? 'Icon' }}" class="w-8 h-8 object-contain">
-                        @else
-                            {{-- Fallback SVGs with color --}}
-                            @if($index == 0)
-                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-                            </svg>
-                            @elseif($index == 1)
-                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
-                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                            </svg>
-                            @elseif($index == 2)
-                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-                            </svg>
-                            @else
-                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            @endif
-                        @endif
-                    </div>
-                    <p class="text-3xl font-bold text-gray-800">{{ $stat['value'] ?? '0' }}</p>
-                    <p class="text-gray-500 text-sm">{{ $stat['label'] ?? '' }}</p>
-                </div>
-                @endforeach
-            </div>
         </div>
     </section>
 
@@ -206,7 +144,7 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @foreach($programItems as $item)
                 @php
                     $isHex = isset($item['color']) && substr($item['color'], 0, 1) === '#';
@@ -298,13 +236,25 @@
             @php
                 $aboutSection = $page->getSection('about');
                 $aboutContent = $aboutSection->content ?? [];
-                $features = $aboutContent['features'] ?? [];
+                $aboutContent = array_merge($aboutContent, [
+                    'badge' => 'Tentang Layanan',
+                    'title' => 'HOK Homeschooling Perorangan',
+                    'description_1' => 'Layanan pendampingan homeschooling dengan proses belajar yang fleksibel dan lebih personal sesuai kebutuhan anak.',
+                    'description_2' => 'Portal ini digunakan untuk kegiatan LMS serta akses pembayaran tagihan orang tua melalui akun masing-masing.',
+                    'button_text' => 'Lihat Program',
+                    'button_link' => '/program-homeschooling',
+                ]);
+                $features = [
+                    'Pembelajaran fleksibel dan personal',
+                    'Materi serta aktivitas belajar dalam LMS',
+                    'Tagihan orang tua tersedia setelah login',
+                ];
             @endphp
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <!-- Left - Image -->
                 <div class="relative">
                     <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                        <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image'] ?? 'img/about-img.jpg') }}" alt="Tentang PKBM" class="w-full h-[450px] object-cover">
+                        <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image'] ?? 'img/about-img.jpg') }}" alt="HOK Homeschooling Perorangan" class="w-full h-[450px] object-cover">
                     </div>
 
                     <!-- Experience Badge -->
@@ -354,6 +304,8 @@
         </div>
     </section>
 
+    {{-- Berita sekolah disembunyikan pada versi homeschooling. --}}
+    @if(false)
     <!-- ==================== NEWS SECTION (3D CAROUSEL) ==================== -->
     <section class="py-12 sm:py-20" style="background: linear-gradient(135deg, #165fac 0%, #7cb5ec 100%);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -419,7 +371,10 @@
             </div>
         </div>
     </section>
+    @endif
 
+    {{-- Galeri sekolah disembunyikan pada versi homeschooling. --}}
+    @if(false)
     <!-- ==================== GALLERY SECTION ==================== -->
     <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -453,7 +408,10 @@
             </div>
         </div>
     </section>
+    @endif
 
+    {{-- Lokasi lama disembunyikan karena tempat layanan telah berpindah. --}}
+    @if(false)
     <!-- ==================== CONTACT SECTION ==================== -->
     <section class="py-20 bg-cream relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -557,39 +515,34 @@
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Dynamic CTA -->
     <section class="py-20" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-                {{ $ctaContent['title'] ?? 'Siap Bergabung Bersama Kami?' }}
+                Akses Layanan HOK Homeschooling
             </h2>
             <p class="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-                {{ $ctaContent['description'] ?? 'Daftarkan putra-putri Anda sekarang dan berikan mereka pendidikan terbaik untuk masa depan yang cerah.' }}
+                Masuk untuk mengikuti pembelajaran atau melihat tagihan yang telah diterbitkan melalui akun Anda.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ url($ctaContent['button_link_1'] ?? '/ppdb') }}"
+                <a href="{{ route('login') }}"
                     class="inline-flex items-center justify-center px-8 py-4 bg-white text-primary hover:bg-cream font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
-                    {{ $ctaContent['button_text_1'] ?? 'Daftar Sekarang' }}
+                    Masuk LMS
                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a href="{{ url($ctaContent['button_link_2'] ?? '/kontak') }}"
+                <a href="{{ url('/kontak') }}"
                     class="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary font-semibold rounded-full transition-all duration-300">
-                    {{ $ctaContent['button_text_2'] ?? 'Hubungi Kami' }}
+                    Hubungi Kami
                 </a>
             </div>
         </div>
     </section>
 
     <x-footer></x-footer>
-    <script>
-        window.PageData = {
-            newsData: @json($beritaList->map(fn($item) => ['title' => $item->judul, 'category' => $item->kategori_label]))
-        };
-    </script>
     @vite(['resources/js/navbar.js', 'resources/js/pages/home.js'])
 </body>
 </html>
-

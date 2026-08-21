@@ -257,7 +257,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a href="{{ url('/ppdb')}}"
+                <a href="{{ route('pendaftaran') }}"
                     class="inline-flex items-center justify-center px-8 py-4 bg-[#287f3b] text-white font-semibold rounded-full hover:bg-[#1f6a31] transition">
                     Daftar Sekarang
                 </a>
@@ -271,4 +271,3 @@
 </body>
 
 </html>
-

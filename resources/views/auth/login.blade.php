@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PKBM House Of Knowledge</title>
+    <title>Masuk LMS - HOK Homeschooling</title>
     <!-- Favicons -->
     <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/logo.png') }}">
@@ -37,23 +37,17 @@
             <div class="glass-effect w-full max-w-5xl mx-auto rounded-3xl shadow-2xl overflow-hidden slide-in">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
                     
-                    <!-- Left Side - Logo Section -->
+                    <!-- Left Side - Desktop Information -->
                     <div class="hidden lg:flex flex-col justify-center items-center p-12 text-white relative overflow-hidden bg-[#165fac] min-h-[600px] shadow-inner"
-                         style="background-image: linear-gradient(to bottom right, rgba(22, 95, 172, 0.85), rgba(14, 75, 138, 0.95)), url('{{ asset('img/logo/hok-watermark.png') }}'); background-size: cover, 140% auto; background-position: center, center; background-repeat: no-repeat;">
+                         style="background-image: linear-gradient(to bottom right, #165fac, #0e4b8a);">
                         
                         <div class="absolute top-10 right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                         <div class="absolute bottom-10 left-10 w-60 h-60 bg-yellow-300/10 rounded-full blur-3xl"></div>
                         
                         <div class="relative z-10 text-center">
-                            <div class="logo-container mb-8">
-                                <div class="w-32 h-32 mx-auto bg-white rounded-3xl shadow-2xl flex items-center justify-center transform hover:rotate-12 transition-transform duration-300">
-                                    <svg class="w-20 h-20 text-[#165fac]" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
-                                    </svg>
-                                </div>
-                            </div>
                             <h1 class="text-4xl font-bold mb-4">Selamat Datang!</h1>
-                            <p class="text-xl text-white/90">PKBM House Of Knowledge</p>
+                            <p class="text-xl text-white/90">HOK Homeschooling</p>
+                            <p class="mt-4 text-white/70">LMS dan pembayaran dalam satu portal</p>
                         </div>
                     </div>
 
@@ -75,13 +69,13 @@
                                     <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z"/>
                                 </svg>
                             </div>
-                            <span class="text-sm font-semibold text-gray-700 leading-tight">PKBM House Of Knowledge</span>
+                            <span class="text-sm font-semibold text-gray-700 leading-tight">HOK Homeschooling</span>
                         </div>
 
                         <!-- Form Header -->
                         <div class="mb-4 sm:mb-5">
-                            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">Login Dashboard</h2>
-                            <p class="text-sm sm:text-base text-gray-500">Login Akun untuk melanjutkan</p>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">Masuk ke Portal</h2>
+                            <p class="text-sm sm:text-base text-gray-500">Masuk dengan akun Anda untuk melanjutkan</p>
                         </div>
 
                         <!-- Login Form -->
@@ -216,7 +210,7 @@
                         <span class="font-bold underline decoration-white/50 group-hover:decoration-white underline-offset-4">Hubungi Administrator</span>
                     @endif
                 </p>
-                <p class="opacity-70">&copy; 2026 PKBM House Of Knowledge. All rights reserved.</p>
+                <p class="opacity-70">&copy; 2026 HOK Homeschooling. All rights reserved.</p>
             </div>
         </div>
     </div>

@@ -105,13 +105,16 @@ Route::get('/profil-guru', [\App\Http\Controllers\LandingPageController::class, 
 // Menu Program
 Route::get('/program-paud-tk', [\App\Http\Controllers\LandingPageController::class, 'programPaudTk']);
 Route::get('/program-sd-sma', [\App\Http\Controllers\LandingPageController::class, 'programSdSma']);
+Route::get('/program-homeschooling', [\App\Http\Controllers\LandingPageController::class, 'programHomeschooling'])
+    ->name('program-homeschooling');
 Route::get('/program-inklusi', [\App\Http\Controllers\LandingPageController::class, 'programInklusi']);
 Route::get('/program-terapi', [\App\Http\Controllers\LandingPageController::class, 'programTerapi']);
 
 // Other Public Pages
 Route::get('/fasilitas', [\App\Http\Controllers\LandingPageController::class, 'fasilitas'])->name('fasilitas');
 
-Route::get('/ppdb', [\App\Http\Controllers\LandingPageController::class, 'ppdb'])->name('ppdb');
+Route::redirect('/ppdb', '/pendaftaran', 301);
+Route::get('/pendaftaran', [\App\Http\Controllers\LandingPageController::class, 'ppdb'])->name('pendaftaran');
 
 Route::get('/galeri', [\App\Http\Controllers\LandingPageController::class, 'galeri'])->name('galeri');
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <x-seo-meta title="Program Homeschooling - PKBM House Of Knowledge" description="Program Homeschooling PKBM House Of Knowledge menawarkan pembelajaran fleksibel dan personal untuk siswa yang membutuhkan pendekatan pendidikan alternatif." keywords="homeschooling, pendidikan alternatif, belajar di rumah, program homeschooling, PKBM homeschooling"></x-seo-meta>
+    <x-seo-meta title="Homeschooling Perorangan - HOK" description="Layanan HOK Homeschooling Perorangan dengan pendampingan belajar fleksibel, LMS, dan akses tagihan orang tua." keywords="homeschooling perorangan, LMS homeschooling, pendampingan belajar"></x-seo-meta>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 
@@ -24,10 +24,10 @@
                 <span class="mx-2">/</span>
                 <span>Program</span>
                 <span class="mx-2">/</span>
-                <span class="font-semibold">Homeschooling</span>
+                <span class="font-semibold">Homeschooling Perorangan</span>
             </nav>
-            <h1 class="text-4xl md:text-5xl font-bold">Homeschooling</h1>
-            <p class="mt-4 text-lg text-white/90">Pendidikan Fleksibel Sesuai Kebutuhan Anak</p>
+            <h1 class="text-4xl md:text-5xl font-bold">Homeschooling Perorangan</h1>
+            <p class="mt-4 text-lg text-white/90">Pendampingan belajar fleksibel sesuai kebutuhan anak</p>
         </div>
     </section>
 
@@ -36,13 +36,13 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <span class="inline-block bg-[#165fac]/20 text-[#165fac] px-4 py-2 rounded-full text-sm font-semibold mb-4">Homeschooling</span>
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Belajar dari Rumah dengan Kualitas Terbaik</h2>
+                    <span class="inline-block bg-[#165fac]/20 text-[#165fac] px-4 py-2 rounded-full text-sm font-semibold mb-4">Layanan Perorangan</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Belajar Lebih Personal dan Terarah</h2>
                     <p class="text-gray-600 mb-6 leading-relaxed">
-                        Program Homeschooling kami menawarkan pendidikan yang fleksibel dan personal. Cocok untuk anak-anak yang memiliki aktivitas khusus seperti atlet, artis, atau anak dengan kebutuhan belajar khusus.
+                        HOK Homeschooling menyediakan pendampingan belajar yang fleksibel dan personal. Ritme, jadwal, serta aktivitas belajar dapat disesuaikan dengan kebutuhan setiap anak.
                     </p>
                     <p class="text-gray-600 mb-6 leading-relaxed">
-                        Dengan dukungan tutor berpengalaman dan kurikulum yang disesuaikan, anak dapat belajar dengan nyaman di rumah sambil tetap mendapatkan ijazah resmi.
+                        Kegiatan pembelajaran didukung melalui LMS, sedangkan orang tua dapat mengakses tagihan yang tersedia setelah login.
                     </p>
                     <div class="flex flex-wrap gap-4">
                         <div class="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full">
@@ -61,7 +61,7 @@
                             <svg class="w-5 h-5 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="text-gray-700 text-sm">Ijazah Resmi</span>
+                            <span class="text-gray-700 text-sm">Akses LMS</span>
                         </div>
                     </div>
                 </div>
@@ -76,32 +76,32 @@
     <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Jenjang Pendidikan</h2>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Fokus Pendampingan</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center border-b-4 border-[#fac030]">
                     <div class="w-20 h-20 bg-[#fac030]/20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <span class="text-4xl"><i class="fas fa-books"></i></span>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Paket A</h3>
-                    <p class="text-gray-600 mb-4">Setara SD</p>
-                    <p class="text-gray-500 text-sm">Untuk anak usia 7-12 tahun dengan kurikulum SD yang disesuaikan</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Tahap Dasar</h3>
+                    <p class="text-gray-600 mb-4">Fondasi belajar</p>
+                    <p class="text-gray-500 text-sm">Pendampingan untuk membangun kebiasaan, literasi, numerasi, dan rasa ingin tahu.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center border-b-4 border-[#165fac]">
                     <div class="w-20 h-20 bg-[#165fac]/20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <span class="text-4xl"><i class="fas fa-book-open"></i></span>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Paket B</h3>
-                    <p class="text-gray-600 mb-4">Setara SMP</p>
-                    <p class="text-gray-500 text-sm">Untuk anak usia 13-15 tahun dengan kurikulum SMP yang disesuaikan</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Tahap Pengembangan</h3>
+                    <p class="text-gray-600 mb-4">Belajar mandiri</p>
+                    <p class="text-gray-500 text-sm">Pendampingan untuk mengembangkan pemahaman, kemandirian, dan minat anak.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center border-b-4 border-[#287f3b]">
                     <div class="w-20 h-20 bg-[#287f3b]/20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <span class="text-4xl"><i class="fas fa-graduation-cap"></i></span>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Paket C</h3>
-                    <p class="text-gray-600 mb-4">Setara SMA</p>
-                    <p class="text-gray-500 text-sm">Untuk anak usia 16-18 tahun dengan pilihan jurusan IPA/IPS</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Tahap Lanjutan</h3>
+                    <p class="text-gray-600 mb-4">Persiapan masa depan</p>
+                    <p class="text-gray-500 text-sm">Pendampingan terarah sesuai tujuan belajar, minat, dan rencana lanjutan anak.</p>
                 </div>
             </div>
         </div>
@@ -147,8 +147,8 @@
                             <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
                     </div>
-                    <h3 class="font-bold text-gray-800 mb-2">Ijazah Resmi</h3>
-                    <p class="text-gray-600 text-sm">Mendapat ijazah yang diakui oleh negara</p>
+                    <h3 class="font-bold text-gray-800 mb-2">Portal Terintegrasi</h3>
+                    <p class="text-gray-600 text-sm">LMS dan informasi tagihan tersedia sesuai hak akses akun</p>
                 </div>
             </div>
         </div>
@@ -158,10 +158,10 @@
     <section class="py-16" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">Mulai Homeschooling Sekarang</h2>
-            <p class="text-white/90 mb-8">Konsultasikan kebutuhan pendidikan anak Anda dengan tim kami.</p>
+            <p class="text-white/90 mb-8">Hubungi kontak HOK untuk berkonsultasi mengenai kebutuhan belajar anak Anda.</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ url('/ppdb-formulir') }}" class="inline-flex items-center justify-center px-8 py-4 bg-white text-[#165fac] font-semibold rounded-full hover:bg-gray-100 transition">
-                    Daftar Sekarang
+                <a href="{{ route('pendaftaran') }}" class="inline-flex items-center justify-center px-8 py-4 bg-white text-[#165fac] font-semibold rounded-full hover:bg-gray-100 transition">
+                    Lihat Pendaftaran
                 </a>
                 <a href="{{ url('/kontak') }}" class="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-[#165fac] transition">
                     Konsultasi Gratis
@@ -175,4 +175,3 @@
     @vite(['resources/js/navbar.js'])
 </body>
 </html>
-

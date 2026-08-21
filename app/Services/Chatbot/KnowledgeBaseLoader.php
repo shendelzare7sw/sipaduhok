@@ -483,7 +483,7 @@ class KnowledgeBaseLoader
                 '/program-inklusi' => 'Program Pendidikan Inklusi (anak berkebutuhan khusus)',
                 '/program-terapi' => 'Program Terapi / Konseling',
                 '/fasilitas' => 'Fasilitas sekolah (ruang kelas, lab, dll)',
-                '/ppdb' => 'PPDB — Penerimaan Peserta Didik Baru (alur pendaftaran, syarat, biaya)',
+                '/pendaftaran' => 'Pendaftaran HOK Homeschooling — alur, persyaratan, dan kisaran biaya',
                 '/galeri' => 'Galeri foto kegiatan sekolah',
                 '/kontak' => 'Kontak sekolah (alamat, telepon, email, peta)',
                 '/berita' => 'Berita & Artikel sekolah',
@@ -504,7 +504,7 @@ class KnowledgeBaseLoader
         return [
             '/', '/tentang-sekolah', '/visi-misi', '/struktur-organisasi', '/profil-guru',
             '/program-paud-tk', '/program-sd-sma', '/program-inklusi', '/program-terapi',
-            '/fasilitas', '/ppdb', '/galeri', '/kontak', '/berita',
+            '/fasilitas', '/pendaftaran', '/galeri', '/kontak', '/berita',
         ];
     }
 

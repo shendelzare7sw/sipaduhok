@@ -179,7 +179,7 @@
             <h2 class="text-3xl font-bold text-white mb-4">{{ $ctaContent['title'] ?? 'Setiap Anak Berhak Mendapat Pendidikan' }}</h2>
             <p class="text-white/90 mb-8">{{ $ctaContent['description'] ?? 'Konsultasikan kebutuhan anak Anda dengan tim ahli kami secara gratis.' }}</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ url($ctaContent['button_link_1'] ?? '/ppdb') }}"
+                <a href="{{ url($ctaContent['button_link_1'] ?? '/pendaftaran') }}"
                     class="inline-flex items-center justify-center px-8 py-4 bg-white text-[#d45930] font-semibold rounded-full hover:bg-gray-100 transition"
                     style="color: {{ $ctaContent['background_gradient_start'] ?? '#d45930' }}">
                     {{ $ctaContent['button_text_1'] ?? 'Daftar Sekarang' }}
@@ -200,4 +200,3 @@
 </body>
 
 </html>
-
