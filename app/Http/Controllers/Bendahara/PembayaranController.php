@@ -10,8 +10,10 @@ use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\TahunAjaran;
 use App\Services\NotificationService;
+use App\Services\PaywuzPaymentStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PembayaranController extends Controller
@@ -223,6 +225,9 @@ class PembayaranController extends Controller
                             ->where('siswa_id', $pembayaran->siswa_id)
                             ->where('id', '!=', $pembayaran->id)
                             ->where('status_validasi', 'pending')
+                            ->where(fn ($query) => $query
+                                ->whereNull('payment_gateway')
+                                ->orWhere('payment_gateway', '!=', 'paywuz'))
                             ->update([
                                 'status_validasi' => 'ditolak',
                                 'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Kode: '.$pembayaran->kode_pembayaran.')',
@@ -254,6 +259,10 @@ class PembayaranController extends Controller
             }
 
             DB::commit();
+
+            if ($request->status_validasi === 'disetujui') {
+                $this->cancelPendingPaywuzDuplicates($relatedPayments);
+            }
 
             // Auto-validasi akses ujian/rapor jika siswa sudah lunas
             if ($request->status_validasi === 'disetujui') {
@@ -380,6 +389,7 @@ class PembayaranController extends Controller
             'catatan' => 'nullable|string|max:500',
         ]);
 
+        $approvedPayments = collect();
         DB::beginTransaction();
         try {
             $validasiLangsung = $request->has('validasi_langsung');
@@ -444,6 +454,10 @@ class PembayaranController extends Controller
                     'catatan' => $request->catatan,
                 ]);
 
+                if ($validasiLangsung) {
+                    $approvedPayments->push($pembayaran);
+                }
+
                 // Jika validasi langsung, update status tagihan dan batalkan pending lainnya
                 if ($validasiLangsung) {
                     $totalBayar = Pembayaran::where('tagihan_id', $tagihanId)
@@ -458,6 +472,9 @@ class PembayaranController extends Controller
                             ->where('siswa_id', $siswaId)
                             ->where('id', '!=', $pembayaran->id)
                             ->where('status_validasi', 'pending')
+                            ->where(fn ($query) => $query
+                                ->whereNull('payment_gateway')
+                                ->orWhere('payment_gateway', '!=', 'paywuz'))
                             ->update([
                                 'status_validasi' => 'ditolak',
                                 'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar tunai di loket (Kode: '.$kodePembayaran.')',
@@ -488,6 +505,10 @@ class PembayaranController extends Controller
             }
 
             DB::commit();
+
+            if ($validasiLangsung) {
+                $this->cancelPendingPaywuzDuplicates($approvedPayments);
+            }
 
             $message = $validasiLangsung
                 ? 'Pembayaran tunai berhasil dicatat dan divalidasi.'
@@ -549,6 +570,9 @@ class PembayaranController extends Controller
                     ->where('siswa_id', $siswaId)
                     ->where('id', '!=', $pembayaran->id)
                     ->where('status_validasi', 'pending')
+                    ->where(fn ($query) => $query
+                        ->whereNull('payment_gateway')
+                        ->orWhere('payment_gateway', '!=', 'paywuz'))
                     ->update([
                         'status_validasi' => 'ditolak',
                         'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar tunai di loket (Kode: '.$kodePembayaran.')',
@@ -577,6 +601,8 @@ class PembayaranController extends Controller
             }
 
             DB::commit();
+
+            $this->cancelPendingPaywuzDuplicates([$pembayaran]);
 
             return redirect()->route('bendahara.pembayaran.riwayat-siswa', $siswaId)
                 ->with('success', 'Pembayaran tunai berhasil dicatat dan divalidasi.');
@@ -663,5 +689,38 @@ class PembayaranController extends Controller
             'jenisTagihan' => $jenisTagihan,
             'parentName' => $parentName,
         ]);
+    }
+
+    /**
+     * Pembayaran digital hanya boleh ditutup setelah Paywuz mengonfirmasi
+     * pembatalannya. Jika API sedang bermasalah, status lokal tetap pending.
+     *
+     * @param  iterable<Pembayaran>  $approvedPayments
+     */
+    private function cancelPendingPaywuzDuplicates(iterable $approvedPayments): void
+    {
+        $orderIds = collect($approvedPayments)
+            ->flatMap(fn (Pembayaran $payment) => Pembayaran::query()
+                ->where('tagihan_id', $payment->tagihan_id)
+                ->where('siswa_id', $payment->siswa_id)
+                ->where('payment_gateway', 'paywuz')
+                ->where('status_validasi', 'pending')
+                ->when($payment->order_id, fn ($query) => $query->where('order_id', '!=', $payment->order_id))
+                ->whereNotNull('order_id')
+                ->pluck('order_id'))
+            ->filter()
+            ->unique();
+
+        $service = app(PaywuzPaymentStatusService::class);
+        foreach ($orderIds as $orderId) {
+            try {
+                $service->cancelIfPending((string) $orderId);
+            } catch (\Throwable $exception) {
+                Log::critical('Pembayaran Paywuz tetap pending setelah tagihan dilunasi melalui kanal lain.', [
+                    'order_id' => $orderId,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        }
     }
 }

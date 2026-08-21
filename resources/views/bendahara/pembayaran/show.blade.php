@@ -67,16 +67,15 @@
                         <tr>
                             <td>Status</td>
                             <td>
+                                <x-payment-status-badge :payment="$pembayaran" class="badge-custom shadow-sm" />
                                 @if($pembayaran->status_validasi === 'pending')
                                     @if($pembayaran->metode_pembayaran === 'paywuz')
                                         @php
                                             $isExpired = $pembayaran->payment_expires_at?->isPast() ?? false;
                                         @endphp
                                         @if($isExpired)
-                                            <span class="badge bg-secondary badge-custom shadow-sm"><i class="fas fa-times-circle me-1"></i> KADALUARSA</span>
                                             <div class="small text-muted mt-1">Sesi pembayaran digital telah berakhir</div>
                                         @else
-                                            <span class="badge bg-info badge-custom shadow-sm"><i class="fas fa-hourglass-half me-1"></i> MENUNGGU BAYAR</span>
                                             <div class="small text-muted mt-1">
                                                 @if($pembayaran->payment_expires_at)
                                                     Berlaku hingga {{ $pembayaran->payment_expires_at->format('d M Y H:i') }}
@@ -85,13 +84,7 @@
                                                 @endif
                                             </div>
                                         @endif
-                                    @else
-                                        <span class="badge bg-warning badge-custom text-white shadow-sm"><i class="fas fa-clock me-1"></i> MENUNGGU VALIDASI</span>
                                     @endif
-                                @elseif($pembayaran->status_validasi === 'disetujui')
-                                    <span class="badge bg-success badge-custom shadow-sm"><i class="fas fa-check-circle me-1"></i> DISETUJUI</span>
-                                @else
-                                    <span class="badge bg-danger badge-custom shadow-sm"><i class="fas fa-times-circle me-1"></i> DITOLAK</span>
                                 @endif
                             </td>
                         </tr>

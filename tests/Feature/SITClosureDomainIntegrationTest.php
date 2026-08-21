@@ -24,6 +24,7 @@ use App\Models\User;
 use App\Models\WaliKelasAssignment;
 use App\Services\NotificationService;
 use App\Services\TunggakanCarryoverService;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -213,6 +214,30 @@ class SITClosureDomainIntegrationTest extends TestCase
             'status_validasi' => 'pending',
         ]);
 
+        Http::fake(function (Request $request) use ($duplicate) {
+            if ($request->method() === 'GET' && str_ends_with($request->url(), '/transactions/'.$duplicate->order_id)) {
+                return Http::response(['data' => [
+                    'id' => 'SIT-DUP-TRX',
+                    'orderId' => $duplicate->order_id,
+                    'amount' => 1000000,
+                    'totalPayment' => 1000000,
+                    'paymentMethod' => 'QRIS',
+                    'paymentUrl' => 'https://paywuz.id/pay/SIT-DUP-TRX',
+                    'status' => 'pending',
+                ]]);
+            }
+
+            if ($request->method() === 'POST' && str_ends_with($request->url(), '/transactions/'.$duplicate->order_id.'/cancel')) {
+                return Http::response(['data' => [
+                    'id' => 'SIT-DUP-TRX',
+                    'orderId' => $duplicate->order_id,
+                    'status' => 'cancelled',
+                ]]);
+            }
+
+            return Http::response(['message' => 'Unexpected request'], 500);
+        });
+
         $notifications = Mockery::mock(NotificationService::class);
         $notifications->shouldReceive('notifyPembayaranDigitalBerhasil')->once();
         $this->app->instance(NotificationService::class, $notifications);
@@ -245,6 +270,7 @@ class SITClosureDomainIntegrationTest extends TestCase
         $tagihan->refresh();
         $this->assertSame('disetujui', $successful->status_validasi);
         $this->assertSame('ditolak', $duplicate->status_validasi);
+        $this->assertSame('cancelled', $duplicate->gateway_status);
         $this->assertSame('sudah_bayar', $tagihan->status);
         $auditCount = FinancialAuditLog::where('model_type', 'Pembayaran')
             ->where('model_id', $successful->id)
@@ -257,6 +283,8 @@ class SITClosureDomainIntegrationTest extends TestCase
             ->count());
         $this->assertSame('disetujui', $successful->fresh()->status_validasi);
         $this->assertSame('ditolak', $duplicate->fresh()->status_validasi);
+        Http::assertSent(fn (Request $request): bool => $request->method() === 'POST'
+            && str_ends_with($request->url(), '/transactions/'.$duplicate->order_id.'/cancel'));
     }
 
     public function test_webhook_paywuz_dengan_signature_palsu_ditolak(): void

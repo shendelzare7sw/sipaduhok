@@ -692,21 +692,7 @@
                                             @endif
                                         </td>
                                         <td data-label="STATUS" class="text-end text-md-center">
-                                            @if($bayar->status_validasi == 'disetujui')
-                                                <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Lunas</span>
-                                            @elseif($bayar->status_validasi == 'ditolak')
-                                                <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>Ditolak</span>
-                                            @elseif($bayar->status_validasi == 'pending' && $bayar->metode_pembayaran == 'paywuz')
-                                                @if($canContinue)
-                                                    <span class="badge bg-warning"><i class="fas fa-hourglass-half me-1"></i>Menunggu
-                                                        Bayar</span>
-                                                @else
-                                                    <span class="badge bg-secondary"><i
-                                                            class="fas fa-times-circle me-1"></i>Kadaluarsa</span>
-                                                @endif
-                                            @else
-                                                <span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Validasi</span>
-                                            @endif
+                                            <x-payment-status-badge :payment="$bayar" />
                                         </td>
                                         <td data-label="AKSI" class="text-center">
                                             <div class="d-flex justify-content-center justify-content-md-center gap-2 payment-history-actions">

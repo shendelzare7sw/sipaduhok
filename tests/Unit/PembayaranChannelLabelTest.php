@@ -39,4 +39,32 @@ class PembayaranChannelLabelTest extends TestCase
             'indomaret' => ['INDOMARET', 'Indomaret'],
         ];
     }
+
+    #[DataProvider('paymentStatuses')]
+    public function test_label_status_paywuz_mengikuti_status_gateway(
+        string $validationStatus,
+        string $gatewayStatus,
+        string $label,
+    ): void {
+        $payment = new Pembayaran([
+            'metode_pembayaran' => 'paywuz',
+            'payment_gateway' => 'paywuz',
+            'status_validasi' => $validationStatus,
+            'gateway_status' => $gatewayStatus,
+        ]);
+
+        $this->assertSame($label, $payment->payment_status_label);
+    }
+
+    public static function paymentStatuses(): array
+    {
+        return [
+            'pending' => ['pending', 'pending', 'Menunggu Pembayaran'],
+            'settlement' => ['disetujui', 'settlement', 'Lunas'],
+            'success' => ['disetujui', 'success', 'Lunas'],
+            'cancelled' => ['ditolak', 'cancelled', 'Dibatalkan'],
+            'expired' => ['ditolak', 'expired', 'Kedaluwarsa'],
+            'failed' => ['ditolak', 'failed', 'Gagal'],
+        ];
+    }
 }

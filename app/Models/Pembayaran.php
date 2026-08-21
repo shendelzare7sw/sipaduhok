@@ -111,6 +111,51 @@ class Pembayaran extends Model
         };
     }
 
+    public function getPaymentStatusLabelAttribute(): string
+    {
+        if ($this->payment_gateway === 'paywuz' || $this->metode_pembayaran === 'paywuz') {
+            $gatewayStatus = strtolower(trim((string) $this->gateway_status));
+
+            return match (true) {
+                $this->status_validasi === 'disetujui' || in_array($gatewayStatus, ['settlement', 'success'], true) => 'Lunas',
+                $gatewayStatus === 'cancelled' => 'Dibatalkan',
+                $gatewayStatus === 'expired' || ($this->status_validasi === 'pending' && $this->payment_expires_at?->isPast()) => 'Kedaluwarsa',
+                $gatewayStatus === 'failed' => 'Gagal',
+                $this->status_validasi === 'pending' => 'Menunggu Pembayaran',
+                default => 'Tidak Aktif',
+            };
+        }
+
+        return match ($this->status_validasi) {
+            'disetujui' => 'Disetujui',
+            'ditolak' => 'Ditolak',
+            default => 'Menunggu Validasi',
+        };
+    }
+
+    public function getPaymentStatusBadgeClassAttribute(): string
+    {
+        return match ($this->payment_status_label) {
+            'Lunas', 'Disetujui' => 'bg-success',
+            'Menunggu Pembayaran' => 'bg-info',
+            'Menunggu Validasi' => 'bg-warning text-white',
+            'Kedaluwarsa' => 'bg-secondary',
+            default => 'bg-danger',
+        };
+    }
+
+    public function getPaymentStatusIconAttribute(): string
+    {
+        return match ($this->payment_status_label) {
+            'Lunas', 'Disetujui' => 'fas fa-check-circle',
+            'Menunggu Pembayaran' => 'fas fa-hourglass-half',
+            'Menunggu Validasi' => 'fas fa-clock',
+            'Kedaluwarsa' => 'fas fa-hourglass-end',
+            'Dibatalkan' => 'fas fa-ban',
+            default => 'fas fa-times-circle',
+        };
+    }
+
     // Relationships
     public function tagihan()
     {

@@ -10,6 +10,7 @@ use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\TahunAjaran;
 use App\Models\User;
+use App\Services\PaywuzPaymentStatusService;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
@@ -161,6 +162,268 @@ class PaywuzSelectedChannelFlowTest extends TestCase
         } finally {
             DB::connection('mysql')->rollBack();
         }
+    }
+
+    public function test_transaksi_remote_tetap_dibatalkan_saat_referensi_lokal_belum_tersimpan(): void
+    {
+        $this->configureDatabase();
+        DB::connection('mysql')->beginTransaction();
+
+        try {
+            [$parent, $siswa, $tagihan] = $this->makeBillingFixture();
+            $this->enablePaywuz();
+
+            $oldPayment = $this->makePendingPayment($parent, $siswa, $tagihan, [
+                'transaction_id' => null,
+                'payment_url' => null,
+                'gateway_status' => null,
+            ]);
+
+            Http::fake(function (Request $request) use ($oldPayment) {
+                if ($request->method() === 'GET' && str_ends_with($request->url(), '/payment-methods')) {
+                    return $this->paymentMethodsResponse();
+                }
+
+                if ($request->method() === 'GET' && str_ends_with($request->url(), '/transactions/'.$oldPayment->order_id)) {
+                    return Http::response(['data' => $this->transactionData(
+                        'remote-orphan',
+                        (string) $oldPayment->order_id,
+                        'QRIS',
+                        'pending',
+                        'https://paywuz.id/pay/remote-orphan',
+                    )]);
+                }
+
+                if ($request->method() === 'POST' && str_ends_with($request->url(), '/transactions/'.$oldPayment->order_id.'/cancel')) {
+                    // Payload minimal sesuai dokumentasi resmi Paywuz.
+                    return Http::response(['data' => [
+                        'id' => 'remote-orphan',
+                        'orderId' => $oldPayment->order_id,
+                        'status' => 'cancelled',
+                    ]]);
+                }
+
+                if ($request->method() === 'POST' && str_ends_with($request->url(), '/transactions')) {
+                    return Http::response(['data' => $this->transactionData(
+                        'new-va-after-orphan',
+                        (string) $request['orderId'],
+                        (string) $request['paymentMethod'],
+                        'pending',
+                        'https://paywuz.id/pay/new-va-after-orphan',
+                    )]);
+                }
+
+                return Http::response(['message' => 'Unexpected request'], 500);
+            });
+
+            $response = $this->actingAs($parent)->withoutMiddleware()->post(
+                route('wali-siswa.tagihan.bulk-pay', $siswa->id),
+                [
+                    'items' => [['tagihan_id' => $tagihan->id, 'jumlah_bayar' => 50000]],
+                    'total_bayar' => 50000,
+                    'metode_pembayaran' => 'paywuz',
+                    'payment_method' => 'VA',
+                ],
+            );
+
+            $newPayment = Pembayaran::query()
+                ->whereKeyNot($oldPayment->id)
+                ->where('tagihan_id', $tagihan->id)
+                ->latest('id')
+                ->firstOrFail();
+
+            $response->assertRedirect(route('wali-siswa.pembayaran.digital', $newPayment));
+            $this->assertSame('ditolak', $oldPayment->fresh()->status_validasi);
+            $this->assertSame('cancelled', $oldPayment->fresh()->gateway_status);
+            $this->assertSame('new-va-after-orphan', $newPayment->transaction_id);
+
+            Http::assertSent(fn (Request $request): bool => $request->method() === 'POST'
+                && str_ends_with($request->url(), '/'.$oldPayment->order_id.'/cancel'));
+        } finally {
+            DB::connection('mysql')->rollBack();
+        }
+    }
+
+    public function test_gagal_membatalkan_remote_tidak_menolak_lokal_atau_membuat_transaksi_baru(): void
+    {
+        $this->configureDatabase();
+        DB::connection('mysql')->beginTransaction();
+
+        try {
+            [$parent, $siswa, $tagihan] = $this->makeBillingFixture();
+            $this->enablePaywuz();
+            $oldPayment = $this->makePendingPayment($parent, $siswa, $tagihan);
+
+            Http::fake(function (Request $request) use ($oldPayment) {
+                if ($request->method() === 'GET' && str_ends_with($request->url(), '/payment-methods')) {
+                    return $this->paymentMethodsResponse();
+                }
+
+                if ($request->method() === 'GET' && str_ends_with($request->url(), '/transactions/'.$oldPayment->order_id)) {
+                    return Http::response(['data' => $this->transactionData(
+                        (string) $oldPayment->transaction_id,
+                        (string) $oldPayment->order_id,
+                        'QRIS',
+                        'pending',
+                        (string) $oldPayment->payment_url,
+                    )]);
+                }
+
+                if ($request->method() === 'POST' && str_ends_with($request->url(), '/'.$oldPayment->order_id.'/cancel')) {
+                    return Http::response(['message' => 'Temporary gateway failure'], 503);
+                }
+
+                return Http::response(['message' => 'Unexpected request'], 500);
+            });
+
+            $response = $this->from(route('wali-siswa.tagihan.anak', $siswa->id))
+                ->actingAs($parent)
+                ->withoutMiddleware()
+                ->post(route('wali-siswa.tagihan.bulk-pay', $siswa->id), [
+                    'items' => [['tagihan_id' => $tagihan->id, 'jumlah_bayar' => 50000]],
+                    'total_bayar' => 50000,
+                    'metode_pembayaran' => 'paywuz',
+                    'payment_method' => 'VA',
+                ]);
+
+            $response->assertRedirect(route('wali-siswa.tagihan.anak', $siswa->id));
+            $response->assertSessionHas('error');
+            $this->assertSame('pending', $oldPayment->fresh()->status_validasi);
+            $this->assertSame('pending', $oldPayment->fresh()->gateway_status);
+            $this->assertSame(1, Pembayaran::query()->where('tagihan_id', $tagihan->id)->count());
+            Http::assertNotSent(fn (Request $request): bool => $request->method() === 'POST'
+                && str_ends_with($request->url(), '/transactions'));
+        } finally {
+            DB::connection('mysql')->rollBack();
+        }
+    }
+
+    public function test_status_remote_memperbaiki_penolakan_lokal_yang_keliru(): void
+    {
+        $this->configureDatabase();
+        DB::connection('mysql')->beginTransaction();
+
+        try {
+            [$parent, $siswa, $tagihan] = $this->makeBillingFixture();
+            $this->enablePaywuz();
+            $payment = $this->makePendingPayment($parent, $siswa, $tagihan, [
+                'status_validasi' => 'ditolak',
+                'gateway_status' => 'replaced',
+                'tanggal_validasi' => now(),
+            ]);
+
+            Http::fake(fn (Request $request) => Http::response(['data' => $this->transactionData(
+                (string) $payment->transaction_id,
+                (string) $payment->order_id,
+                'QRIS',
+                'pending',
+                (string) $payment->payment_url,
+            )]));
+
+            $this->assertTrue(app(PaywuzPaymentStatusService::class)->sync((string) $payment->order_id));
+            $this->assertSame('pending', $payment->fresh()->status_validasi);
+            $this->assertSame('pending', $payment->fresh()->gateway_status);
+            $this->assertNull($payment->fresh()->tanggal_validasi);
+        } finally {
+            DB::connection('mysql')->rollBack();
+        }
+    }
+
+    public function test_konfirmasi_bayar_terlambat_tetap_melunasi_transaksi_yang_pernah_salah_ditolak(): void
+    {
+        $this->configureDatabase();
+        DB::connection('mysql')->beginTransaction();
+
+        try {
+            [$parent, $siswa, $tagihan] = $this->makeBillingFixture();
+            $this->enablePaywuz();
+            $payment = $this->makePendingPayment($parent, $siswa, $tagihan, [
+                'status_validasi' => 'ditolak',
+                'gateway_status' => 'replaced',
+                'tanggal_validasi' => now(),
+            ]);
+
+            $transaction = $this->transactionData(
+                (string) $payment->transaction_id,
+                (string) $payment->order_id,
+                'QRIS',
+                'settlement',
+                (string) $payment->payment_url,
+            );
+
+            $this->assertTrue(app(PaywuzPaymentStatusService::class)->apply((string) $payment->order_id, $transaction));
+            $this->assertSame('disetujui', $payment->fresh()->status_validasi);
+            $this->assertSame('settlement', $payment->fresh()->gateway_status);
+            $this->assertSame('sudah_bayar', $tagihan->fresh()->status);
+        } finally {
+            DB::connection('mysql')->rollBack();
+        }
+    }
+
+    private function configureDatabase(): void
+    {
+        config([
+            'database.default' => 'mysql',
+            'database.connections.mysql.host' => '127.0.0.1',
+            'database.connections.mysql.port' => '3306',
+            'database.connections.mysql.database' => 'db_sipaduhok',
+            'database.connections.mysql.username' => 'root',
+            'database.connections.mysql.password' => '',
+            'services.paywuz.base_url' => 'https://api.paywuz.id/v1',
+        ]);
+        DB::purge('mysql');
+        Cache::flush();
+    }
+
+    private function enablePaywuz(): void
+    {
+        InfoPembayaran::getInstance()->update([
+            'paywuz_sandbox_api_key' => Crypt::encryptString('pk_sand_'.str_repeat('a', 32)),
+            'paywuz_is_production' => false,
+            'paywuz_enabled' => true,
+            'paywuz_fee_by_merchant' => false,
+        ]);
+    }
+
+    /** @param array<string, mixed> $overrides */
+    private function makePendingPayment(User $parent, Siswa $siswa, Tagihan $tagihan, array $overrides = []): Pembayaran
+    {
+        return Pembayaran::create(array_replace([
+            'tagihan_id' => $tagihan->id,
+            'siswa_id' => $siswa->id,
+            'paid_by_parent_id' => $parent->id,
+            'kode_pembayaran' => 'PAY-OLD-ORPHAN',
+            'jumlah_bayar' => 50000,
+            'tanggal_bayar' => now(),
+            'metode_pembayaran' => 'paywuz',
+            'payment_gateway' => 'paywuz',
+            'payment_type' => 'QRIS',
+            'payment_environment' => 'sandbox',
+            'order_id' => 'SPH-OLD-'.strtoupper(substr(md5(uniqid('', true)), 0, 8)),
+            'transaction_id' => 'trx-old-pending',
+            'payment_url' => 'https://paywuz.id/pay/trx-old-pending',
+            'gateway_status' => 'pending',
+            'payment_expires_at' => now()->addHour(),
+            'status_validasi' => 'pending',
+        ], $overrides));
+    }
+
+    private function paymentMethodsResponse(): mixed
+    {
+        return Http::response(['data' => [
+            [
+                'code' => 'QRIS',
+                'name' => 'QRIS',
+                'type' => 'qris',
+                'limits' => ['minIdr' => 1000, 'maxIdr' => 10000000],
+            ],
+            [
+                'code' => 'VA',
+                'name' => 'Virtual Account (Pilih Bank)',
+                'type' => 'meta',
+                'limits' => ['minIdr' => 10000, 'maxIdr' => 50000000],
+            ],
+        ]]);
     }
 
     /** @return array{0: User, 1: Siswa, 2: Tagihan} */

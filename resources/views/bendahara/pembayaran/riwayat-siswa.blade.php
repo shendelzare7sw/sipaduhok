@@ -189,24 +189,7 @@
                                                 @endif
                                             </td>
                                             <td data-label="STATUS" class="align-middle text-end text-md-center">
-                                                @if($bayar->status_validasi === 'disetujui')
-                                                    <span class="badge bg-success shadow-sm"><i class="fas fa-check-circle"></i>
-                                                        Disetujui</span>
-                                                @elseif($bayar->status_validasi === 'ditolak')
-                                                    <span class="badge bg-danger shadow-sm"><i class="fas fa-times-circle"></i>
-                                                        Ditolak</span>
-                                                @elseif($bayar->status_validasi === 'pending' && $bayar->metode_pembayaran === 'paywuz')
-                                                    @php
-                                                        $isExpired = $bayar->payment_expires_at?->isPast() ?? false;
-                                                    @endphp
-                                                    @if($isExpired)
-                                                        <span class="badge bg-secondary shadow-sm"><i class="fas fa-times-circle"></i> Kadaluarsa</span>
-                                                    @else
-                                                        <span class="badge bg-info shadow-sm"><i class="fas fa-hourglass-half"></i> Menunggu Bayar</span>
-                                                    @endif
-                                                @else
-                                                    <span class="badge bg-warning shadow-sm"><i class="fas fa-clock"></i> Menunggu Validasi</span>
-                                                @endif
+                                                <x-payment-status-badge :payment="$bayar" class="shadow-sm" />
                                             </td>
                                             <td data-label="DIVALIDASI" class="align-middle text-end text-md-start">
                                                 @if($bayar->tanggal_validasi)

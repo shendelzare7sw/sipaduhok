@@ -33,7 +33,7 @@
         @elseif($pembayaran->status_validasi == 'pending')
             <div class="watermark pending">PENDING</div>
         @else
-            <div class="watermark rejected">REJECTED</div>
+            <div class="watermark rejected">{{ strtoupper($pembayaran->payment_status_label) }}</div>
         @endif
 
         <div class="header">
@@ -82,13 +82,9 @@
             <div class="info-box payment-status-box">
                 <h3>Status Pembayaran:</h3>
                 <div class="payment-status-wrapper">
-                    @if($pembayaran->status_validasi == 'disetujui')
-                        <span class="status-badge status-paid">LUNAS / TERVERIFIKASI</span>
-                    @elseif($pembayaran->status_validasi == 'pending')
-                        <span class="status-badge status-pending">MENUNGGU PEMBAYARAN</span>
-                    @else
-                         <span class="status-badge status-failed">DIBATALKAN / DITOLAK</span>
-                    @endif
+                    <span class="status-badge status-{{ $pembayaran->status_validasi }}">
+                        {{ strtoupper($pembayaran->payment_status_label) }}
+                    </span>
                 </div>
                 @if($pembayaran->metode_pembayaran == 'transfer')
                     <p class="sub-text transfer-proof-note">Bukti Direct Transfer: Terlampir</p>

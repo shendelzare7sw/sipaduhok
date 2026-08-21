@@ -11,9 +11,11 @@ use App\Services\NotificationService;
 use App\Services\PaywuzPaymentStatusService;
 use App\Services\PaywuzService;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -506,6 +508,25 @@ class PembayaranDigitalController extends Controller
         PaywuzPaymentStatusService $statusService,
         PaywuzService $paywuz,
     ): RedirectResponse {
+        try {
+            return Cache::lock('paywuz:replace:'.sha1((string) ($payment->order_id ?: $payment->id)), 60)
+                ->block(5, fn (): RedirectResponse => $this->replacePendingPaymentMethodLocked(
+                    $payment->fresh(),
+                    $newMethod,
+                    $statusService,
+                    $paywuz,
+                ));
+        } catch (LockTimeoutException) {
+            return back()->with('error', 'Perubahan kanal yang sama sedang diproses. Silakan tunggu beberapa saat lalu muat ulang halaman.');
+        }
+    }
+
+    private function replacePendingPaymentMethodLocked(
+        Pembayaran $payment,
+        string $newMethod,
+        PaywuzPaymentStatusService $statusService,
+        PaywuzService $paywuz,
+    ): RedirectResponse {
 
         if ($payment->payment_gateway !== 'paywuz' || $payment->status_validasi !== 'pending') {
             return back()->with('error', 'Metode pembayaran ini sudah tidak dapat diubah.');
@@ -527,34 +548,21 @@ class PembayaranDigitalController extends Controller
             return $this->continuePayment($payment->id, $paywuz);
         }
 
-        if (filled($payment->transaction_id) || filled($payment->payment_url)) {
-            if (! $statusService->sync($oldOrderId)) {
-                $payment->refresh();
+        try {
+            // order_id tetap wajib diperiksa meskipun transaction_id/payment_url
+            // lokal kosong. API bisa sudah membuat transaksi sebelum proses lokal
+            // gagal menyimpan responsnya.
+            if (! $statusService->cancelIfPending($oldOrderId)) {
+                return back()->with('info', 'Pembayaran telah diterima. Kanal tidak dapat diganti dan status tagihan sudah diperbarui.');
             }
+        } catch (Throwable $exception) {
+            Log::warning('Penggantian kanal ditunda karena transaksi lama tidak dapat dibatalkan dengan aman.', [
+                'pembayaran_id' => $payment->id,
+                'order_id' => $oldOrderId,
+                'message' => $exception->getMessage(),
+            ]);
 
-            if ($payment->fresh()->status_validasi !== 'pending') {
-                return back()->with('info', 'Status transaksi telah berubah sehingga kanal tidak dapat diganti.');
-            }
-
-            try {
-                $transaction = $paywuz->getTransactionStatus($oldOrderId, $amount, $payment->payment_environment);
-                if ($paywuz->mapStatus((string) ($transaction['status'] ?? 'pending')) !== 'pending') {
-                    $statusService->apply($oldOrderId, $transaction);
-
-                    return back()->with('info', 'Status transaksi telah diperbarui. Kanal tidak perlu diganti.');
-                }
-
-                $cancelled = $paywuz->cancelTransaction($oldOrderId, $amount, $payment->payment_environment);
-                $statusService->apply($oldOrderId, $cancelled);
-            } catch (Throwable $exception) {
-                Log::warning('Penggantian kanal ditunda karena transaksi lama tidak dapat diverifikasi.', [
-                    'pembayaran_id' => $payment->id,
-                    'order_id' => $oldOrderId,
-                    'message' => $exception->getMessage(),
-                ]);
-
-                return back()->with('error', 'Transaksi lama belum dapat diverifikasi. Coba lagi beberapa saat agar tidak terjadi pembayaran ganda.');
-            }
+            return back()->with('error', 'Transaksi lama belum dapat dibatalkan dan tetap berstatus menunggu. Coba lagi beberapa saat agar tidak terjadi pembayaran ganda.');
         }
 
         $newPayment = DB::transaction(function () use ($oldOrderId, $newMethod, $paywuz): Pembayaran {
@@ -576,7 +584,7 @@ class PembayaranDigitalController extends Controller
                     $item->update([
                         'status_validasi' => 'ditolak',
                         'tanggal_validasi' => now(),
-                        'gateway_status' => $item->gateway_status ?: 'replaced',
+                        'gateway_status' => 'cancelled',
                         'catatan' => trim(($item->catatan ? $item->catatan."\n" : '').'Kanal pembayaran diganti oleh wali siswa.'),
                     ]);
                 }

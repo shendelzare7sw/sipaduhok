@@ -132,6 +132,42 @@ class PaywuzServiceContractTest extends TestCase
         $this->assertSame('https://paywuz.id/pay/trx-recovery-test', $transaction['paymentUrl']);
     }
 
+    public function test_status_404_dibedakan_dari_gangguan_api(): void
+    {
+        config(['services.paywuz.base_url' => 'https://api.paywuz.id/v1']);
+        $service = $this->makeService();
+
+        Http::fake([
+            'https://api.paywuz.id/v1/transactions/SPH-NOT-FOUND' => Http::response([
+                'message' => 'Order tidak ditemukan',
+                'code' => 'not_found',
+            ], 404),
+        ]);
+
+        $this->assertNull($service->findTransactionStatus('SPH-NOT-FOUND', 10000, 'sandbox'));
+    }
+
+    public function test_respons_cancel_minimal_resmi_tetap_valid(): void
+    {
+        config(['services.paywuz.base_url' => 'https://api.paywuz.id/v1']);
+        $service = $this->makeService();
+
+        Http::fake([
+            'https://api.paywuz.id/v1/transactions/SPH-CANCEL-001/cancel' => Http::response([
+                'data' => [
+                    'id' => 'trx-cancel-test',
+                    'orderId' => 'SPH-CANCEL-001',
+                    'status' => 'cancelled',
+                ],
+            ]),
+        ]);
+
+        $transaction = $service->cancelTransaction('SPH-CANCEL-001', 10000, 'sandbox');
+
+        $this->assertSame('cancelled', $transaction['status']);
+        $this->assertArrayNotHasKey('amount', $transaction);
+    }
+
     private function makeService(): PaywuzService
     {
         $info = new class extends InfoPembayaran

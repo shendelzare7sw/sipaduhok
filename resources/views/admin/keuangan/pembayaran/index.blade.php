@@ -55,7 +55,7 @@
                 <div class="stat-widget">
                     <div class="stat-details">
                         <div class="stat-value">{{ $stats['ditolak'] }}</div>
-                        <div class="stat-label">Pembayaran Ditolak</div>
+                        <div class="stat-label">Gagal / Dibatalkan</div>
                     </div>
                     <div class="stat-icon-wrapper stat-icon-danger">
                         <i class="fas fa-times-circle"></i>
@@ -97,7 +97,7 @@
                             <option value="">Semua Status</option>
                             <option value="pending"   {{ ($filters['status'] ?? '') == 'pending'   ? 'selected' : '' }}>Pending</option>
                             <option value="disetujui" {{ ($filters['status'] ?? '') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                            <option value="ditolak"   {{ ($filters['status'] ?? '') == 'ditolak'   ? 'selected' : '' }}>Ditolak</option>
+                            <option value="ditolak"   {{ ($filters['status'] ?? '') == 'ditolak'   ? 'selected' : '' }}>Gagal / Dibatalkan</option>
                         </select>
                     </div>
                     <div class="mb-2">
@@ -209,22 +209,7 @@
                                 {{ $pembayaran->tanggal_bayar ? $pembayaran->tanggal_bayar->format('d/m/Y') : '-' }}
                             </td>
                             <td data-label="Status" class="text-center">
-                                @if($pembayaran->status_validasi === 'pending')
-                                    @if($pembayaran->metode_pembayaran === 'paywuz')
-                                        @php $isExpired = $pembayaran->payment_expires_at?->isPast() ?? false; @endphp
-                                        @if($isExpired)
-                                            <span class="badge bg-secondary badge-pill"><i class="fas fa-times-circle me-1"></i>Kadaluarsa</span>
-                                        @else
-                                            <span class="badge bg-info badge-pill"><i class="fas fa-hourglass-half me-1"></i>Menunggu Bayar</span>
-                                        @endif
-                                    @else
-                                        <span class="badge bg-warning text-white badge-pill"><i class="fas fa-clock me-1"></i>Menunggu Validasi</span>
-                                    @endif
-                                @elseif($pembayaran->status_validasi === 'disetujui')
-                                    <span class="badge bg-success badge-pill"><i class="fas fa-check-circle me-1"></i>Disetujui</span>
-                                @else
-                                    <span class="badge bg-danger badge-pill"><i class="fas fa-times-circle me-1"></i>Ditolak</span>
-                                @endif
+                                <x-payment-status-badge :payment="$pembayaran" class="badge-pill" />
                             </td>
                             <td data-label="Aksi" class="text-center">
                                 <a href="{{ route('admin.keuangan.pembayaran.show', $pembayaran->id) }}"

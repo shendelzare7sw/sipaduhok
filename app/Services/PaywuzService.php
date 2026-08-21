@@ -174,7 +174,28 @@ class PaywuzService
     /** @return array<string, mixed> */
     public function getTransactionStatus(string $orderId, int $amount, ?string $environment = null): array
     {
-        $data = $this->data($this->client($environment)->get('/transactions/'.rawurlencode($orderId)));
+        $data = $this->findTransactionStatus($orderId, $amount, $environment);
+
+        if ($data === null) {
+            throw new RuntimeException('Transaksi pembayaran digital tidak ditemukan.');
+        }
+
+        return $data;
+    }
+
+    /** @return array<string, mixed>|null */
+    public function findTransactionStatus(string $orderId, int $amount, ?string $environment = null): ?array
+    {
+        $response = $this->client($environment)->get('/transactions/'.rawurlencode($orderId));
+
+        // Dokumentasi Paywuz mendefinisikan 404 sebagai order yang memang tidak
+        // ditemukan. Hanya kondisi ini yang aman diperlakukan sebagai "belum
+        // pernah terbentuk"; error jaringan/401/5xx tetap harus dilempar.
+        if ($response->notFound()) {
+            return null;
+        }
+
+        $data = $this->data($response);
         $this->assertTransactionResponse($data, $orderId, $amount, requirePaymentUrl: false);
 
         if (is_array($data) && $this->mapStatus((string) ($data['status'] ?? 'pending')) === 'pending') {
@@ -188,14 +209,23 @@ class PaywuzService
     public function cancelTransaction(string $orderId, int $amount, ?string $environment = null): array
     {
         $data = $this->data($this->client($environment)->post('/transactions/'.rawurlencode($orderId).'/cancel'));
-        $this->assertTransactionResponse($data, $orderId, $amount, requirePaymentUrl: false);
+
+        // Respons cancel resmi hanya wajib berisi id, orderId, dan status.
+        // Field amount/paymentUrl tidak selalu dikembalikan oleh endpoint ini.
+        if (! is_array($data)
+            || blank($data['id'] ?? null)
+            || blank($data['status'] ?? null)
+            || ! hash_equals($orderId, (string) ($data['orderId'] ?? ''))
+            || (array_key_exists('amount', $data) && (int) $data['amount'] !== $amount)) {
+            throw new RuntimeException('Respons pembatalan transaksi pembayaran digital tidak lengkap.');
+        }
 
         return $data;
     }
 
     public function mapStatus(string $status): string
     {
-        return match ($status) {
+        return match (strtolower(trim($status))) {
             'settlement', 'success' => 'disetujui',
             'failed', 'cancelled', 'expired' => 'ditolak',
             default => 'pending',
