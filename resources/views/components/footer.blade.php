@@ -41,7 +41,7 @@
     ];
     $contact = array_merge($contact, [
         'title' => 'Hubungi Kami',
-        'address' => null,
+        'address' => 'Komplek Ruko Reni Jaya Baru Jl.Ketapang III Blok AF 5 No 22-23 Pamulang Barat, Tangerang Selatan',
     ]);
 @endphp
 

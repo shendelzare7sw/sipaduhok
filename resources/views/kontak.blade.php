@@ -25,6 +25,7 @@
         $contactSection = $page->getSection('contact_info');
         $contactContent = $contactSection->content ?? [];
         $contactItems = $contactContent['items'] ?? [];
+        $serviceAddress = 'Komplek Ruko Reni Jaya Baru Jl.Ketapang III Blok AF 5 No 22-23 Pamulang Barat, Tangerang Selatan';
 
     @endphp
 
@@ -124,6 +125,20 @@
                         </a>
                     @endforeach
                 </div>
+                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($serviceAddress) }}" target="_blank" rel="noopener noreferrer"
+                    class="group flex flex-col sm:flex-row items-center gap-5 border-t border-gray-100 p-8 hover:bg-orange-50/50 transition-colors duration-300">
+                    <div class="w-14 h-14 flex-shrink-0 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors duration-300">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <div class="text-center sm:text-left">
+                        <h3 class="text-lg font-bold text-gray-800 mb-1">Alamat</h3>
+                        <p class="text-gray-600 leading-relaxed">{{ $serviceAddress }}</p>
+                        <span class="inline-block mt-2 text-sm font-semibold text-orange-600">Buka di Google Maps</span>
+                    </div>
+                </a>
             </div>
         </div>
     </section>

@@ -202,7 +202,7 @@ class LandingPageSeeder extends Seeder
                         [
                             'title' => 'Gedung Utama PKBM House Of Knowledge',
                             'subtitle' => 'Pamulang Barat',
-                            'address' => 'Jl. Ruko Reni Jaya Blok AF No. 22-23 Pamulang Barat, Tangerang Selatan Banten 15417',
+                            'address' => 'Komplek Ruko Reni Jaya Baru Jl.Ketapang III Blok AF 5 No 22-23 Pamulang Barat, Tangerang Selatan',
                             'color' => 'accent-orange',
                             'shade_color' => 'orange',
                             'icon' => null
@@ -1829,7 +1829,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                         [
                             'name' => 'Gedung Utama PKBM House Of Knowledge',
                             'area' => 'Pamulang Barat',
-                            'address' => 'RUKO CAT BIRU, Jl. Ruko Reni Jaya Blok AF No. 22-23, Pamulang Barat, Tangerang Selatan',
+                            'address' => 'Komplek Ruko Reni Jaya Baru Jl.Ketapang III Blok AF 5 No 22-23 Pamulang Barat, Tangerang Selatan',
                             'map_embed' => 'https://www.google.com/maps?q=-6.353980078518493,106.7322059&hl=id&z=15&output=embed',
                             'map_link' => 'https://maps.app.goo.gl/FKRUXijm2vaeMkEf6',
                             'color' => 'orange',
@@ -1951,7 +1951,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                 'order' => 4,
                 'content' => [
                     'title' => 'Hubungi Kami',
-                    'address' => 'Jl. Ruko Reni Jaya No.22, RW.23, Pamulang Bar., Kec. Pamulang, Kota Tangerang Selatan',
+                    'address' => 'Komplek Ruko Reni Jaya Baru Jl.Ketapang III Blok AF 5 No 22-23 Pamulang Barat, Tangerang Selatan',
                     'phone' => '+62 858-1125-8534',
                     'email' => 'hokhomeschool@gmail.com',
                     'hours' => 'Senin - Jumat: 08:00 - 14:00',
