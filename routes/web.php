@@ -1,83 +1,74 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\BeritaController;
-use App\Http\Controllers\PaywuzWebhookController;
-
-// Admin Controllers
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\AiSettingController; // Added
-use App\Http\Controllers\AiChatbotController; // AI Chatbot General Assistant
-use App\Http\Controllers\Admin\TahunAjaranController;
+use App\Http\Controllers\Admin\AiSettingController;
 use App\Http\Controllers\Admin\CabangController;
-use App\Http\Controllers\Admin\KelasController;
-use App\Http\Controllers\Admin\WaliKelasController as AdminWaliKelasController;
-use App\Http\Controllers\Admin\GuruPengajarController;
-use App\Http\Controllers\Admin\ManajemenSiswaController;
 use App\Http\Controllers\Admin\CetakLaporanController;
-
-// Ketua PKBM Controllers
-use App\Http\Controllers\Ketua\KetuaController;
-use App\Http\Controllers\Ketua\ValidasiRaporController as KetuaValidasiRaporController;
-
-// Wakil Kepala Sekolah Controllers
-use App\Http\Controllers\WakilKepalaSekolah\WakilKepalaSekolahController;
-use App\Http\Controllers\WakilKepalaSekolah\TahunAjaranController as WakaTahunAjaranController;
-use App\Http\Controllers\WakilKepalaSekolah\MataPelajaranController as WakaMataPelajaranController;
-use App\Http\Controllers\WakilKepalaSekolah\KelasController as WakaKelasController;
-use App\Http\Controllers\WakilKepalaSekolah\ManajemenSiswaController as WakaManajemenSiswaController;
-use App\Http\Controllers\WakilKepalaSekolah\WaliKelasController as WakaWaliKelasController;
-use App\Http\Controllers\WakilKepalaSekolah\JadwalPelajaranController as WakaJadwalPelajaranController;
-use App\Http\Controllers\WakilKepalaSekolah\PengaturanIstirahatController as WakaPengaturanIstirahatController;
-use App\Http\Controllers\WakilKepalaSekolah\GuruPengajarController as WakaGuruPengajarController;
-
-// Sekretaris Controllers
-use App\Http\Controllers\Sekretaris\SekretarisController;
-
-// Bendahara Controllers
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\GuruPengajarController;
+// Admin Controllers
+use App\Http\Controllers\Admin\KelasController;
+use App\Http\Controllers\Admin\ManajemenSiswaController;
+use App\Http\Controllers\Admin\TahunAjaranController; // Added
+use App\Http\Controllers\Admin\UserController; // AI Chatbot General Assistant
+use App\Http\Controllers\Admin\WaliKelasController as AdminWaliKelasController;
+use App\Http\Controllers\AiChatbotController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Bendahara\BendaharaController;
-use App\Http\Controllers\Bendahara\TagihanController;
-use App\Http\Controllers\Bendahara\PembayaranController;
 use App\Http\Controllers\Bendahara\InfoPembayaranController;
-use App\Http\Controllers\Bendahara\ValidasiAksesController as BendaharaValidasiAksesController;
 use App\Http\Controllers\Bendahara\LaporanPembayaranController;
-
-// Wali Kelas Controllers
-use App\Http\Controllers\WaliKelas\WaliKelasController;
-use App\Http\Controllers\WaliKelas\PilihKelasController;
-use App\Http\Controllers\WaliKelas\JadwalPelajaranController;
-use App\Http\Controllers\WaliKelas\PresensiController;
-use App\Http\Controllers\WaliKelas\NilaiController as WaliKelasNilaiController;
-use App\Http\Controllers\WaliKelas\RaporController;
-use App\Http\Controllers\WaliKelas\ValidasiAksesController as WaliKelasValidasiAksesController;
-
-// Guru Pengajar Controllers
+use App\Http\Controllers\Bendahara\PembayaranController;
+// Ketua PKBM Controllers
+use App\Http\Controllers\Bendahara\TagihanController;
+use App\Http\Controllers\Bendahara\ValidasiAksesController as BendaharaValidasiAksesController;
+// Wakil Kepala Sekolah Controllers
+use App\Http\Controllers\BeritaController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Guru\GuruForumController;
 use App\Http\Controllers\Guru\GuruKelasController;
+use App\Http\Controllers\Guru\GuruKoreksiController;
 use App\Http\Controllers\Guru\GuruLmsController;
 use App\Http\Controllers\Guru\GuruMateriController;
-use App\Http\Controllers\Guru\GuruTugasController;
-use App\Http\Controllers\Guru\GuruKoreksiController;
-use App\Http\Controllers\Guru\GuruUjianController;
 use App\Http\Controllers\Guru\GuruNilaiController;
-use App\Http\Controllers\Guru\GuruForumController;
-
-// Siswa Controllers
-use App\Http\Controllers\Siswa\SiswaDashboardController;
-use App\Http\Controllers\Siswa\SiaDashboardController;
-use App\Http\Controllers\Siswa\SiaPresensiController;
-use App\Http\Controllers\Siswa\SiaPembayaranController;
-// use App\Http\Controllers\Siswa\SiaRaporController; // Disabled - Siswa tidak berhak akses rapor
-use App\Http\Controllers\Siswa\LmsDashboardController;
-
-// Wali Siswa Controllers
+use App\Http\Controllers\Guru\GuruTugasController;
+// Sekretaris Controllers
+use App\Http\Controllers\Guru\GuruUjianController;
+// Bendahara Controllers
+use App\Http\Controllers\Ketua\KetuaController;
+use App\Http\Controllers\Ketua\ValidasiRaporController as KetuaValidasiRaporController;
 use App\Http\Controllers\OrangTua\OrangTuaController;
 use App\Http\Controllers\OrangTua\PembayaranDigitalController;
+use App\Http\Controllers\PaywuzWebhookController;
+use App\Http\Controllers\Sekretaris\SekretarisController;
+// Wali Kelas Controllers
+use App\Http\Controllers\Siswa\LmsDashboardController;
 use App\Http\Controllers\Siswa\LmsMateriController;
 use App\Http\Controllers\Siswa\LmsTugasController;
 use App\Http\Controllers\Siswa\LmsUjianController;
+use App\Http\Controllers\Siswa\SiaDashboardController;
+use App\Http\Controllers\Siswa\SiaPembayaranController;
+use App\Http\Controllers\Siswa\SiaPresensiController;
+// Guru Pengajar Controllers
+use App\Http\Controllers\Siswa\SiswaDashboardController;
+use App\Http\Controllers\WakilKepalaSekolah\GuruPengajarController as WakaGuruPengajarController;
+use App\Http\Controllers\WakilKepalaSekolah\JadwalPelajaranController as WakaJadwalPelajaranController;
+use App\Http\Controllers\WakilKepalaSekolah\KelasController as WakaKelasController;
+use App\Http\Controllers\WakilKepalaSekolah\ManajemenSiswaController as WakaManajemenSiswaController;
+use App\Http\Controllers\WakilKepalaSekolah\MataPelajaranController as WakaMataPelajaranController;
+use App\Http\Controllers\WakilKepalaSekolah\PengaturanIstirahatController as WakaPengaturanIstirahatController;
+use App\Http\Controllers\WakilKepalaSekolah\TahunAjaranController as WakaTahunAjaranController;
+// Siswa Controllers
+use App\Http\Controllers\WakilKepalaSekolah\WakilKepalaSekolahController;
+use App\Http\Controllers\WakilKepalaSekolah\WaliKelasController as WakaWaliKelasController;
+use App\Http\Controllers\WaliKelas\JadwalPelajaranController;
+use App\Http\Controllers\WaliKelas\NilaiController as WaliKelasNilaiController;
+// use App\Http\Controllers\Siswa\SiaRaporController; // Disabled - Siswa tidak berhak akses rapor
+use App\Http\Controllers\WaliKelas\PilihKelasController;
+// Wali Siswa Controllers
+use App\Http\Controllers\WaliKelas\PresensiController;
+use App\Http\Controllers\WaliKelas\RaporController;
+use App\Http\Controllers\WaliKelas\ValidasiAksesController as WaliKelasValidasiAksesController;
+use App\Http\Controllers\WaliKelas\WaliKelasController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -153,7 +144,7 @@ Route::middleware('guest')->group(function () {
             ->where('expires_at', '>', now())
             ->first();
 
-        if (!$ticket) {
+        if (! $ticket) {
             return redirect()->route('login')->with('error', 'Tautan reset password ini tidak valid, kedaluwarsa, atau sudah pernah digunakan.');
         }
 
@@ -173,7 +164,7 @@ Route::middleware('guest')->group(function () {
                 ->lockForUpdate()
                 ->first();
 
-            if (!$ticket) {
+            if (! $ticket) {
                 return redirect()->route('login')->with('error', 'Tautan reset sudah tidak valid atau kedaluwarsa.');
             }
 
@@ -388,7 +379,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/kelas/{kelas}', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'show'])->name('show');
             Route::get('/kelas/{kelas}/preview-print', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'previewPrint'])->name('preview-print');
             Route::get('/kelas/{kelas}/print', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'exportPdf'])->name('print');
-    Route::get('/kelas/{kelas}/export-excel', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'exportExcelClass'])->name('export-excel-class');
+            Route::get('/kelas/{kelas}/export-excel', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'exportExcelClass'])->name('export-excel-class');
             Route::get('/export-pdf', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'exportPdfAll'])->name('export-pdf');
             Route::get('/export-excel', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'exportExcel'])->name('export-excel');
             Route::post('/duplicate', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'duplicate'])->name('duplicate');
@@ -727,7 +718,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Promotion Approval
-        Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function() {
+        Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function () {
             Route::get('/approval', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'index'])->name('approval.index');
             Route::put('/approval/bulk', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'bulkUpdate'])->name('approval.bulk-update');
             Route::put('/approval/{id}', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'update'])->name('approval.update');
@@ -736,7 +727,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Validasi Rapor (NEW - 3rd level validation)
-        Route::prefix('validasi-rapor')->name('validasi-rapor.')->group(function() {
+        Route::prefix('validasi-rapor')->name('validasi-rapor.')->group(function () {
             Route::get('/', [KetuaValidasiRaporController::class, 'index'])->name('index');
             Route::post('/{siswa}/validasi', [KetuaValidasiRaporController::class, 'validasiRapor'])->name('validasi');
             Route::post('/{siswa}/batalkan', [KetuaValidasiRaporController::class, 'batalkanRapor'])->name('batalkan');
@@ -747,7 +738,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Dispensasi (Bendahara → Ketua)
-        Route::prefix('dispensasi')->name('dispensasi.')->group(function() {
+        Route::prefix('dispensasi')->name('dispensasi.')->group(function () {
             Route::get('/', [KetuaValidasiRaporController::class, 'dispensasiIndex'])->name('index');
             Route::post('/approve', [KetuaValidasiRaporController::class, 'approveDispensasi'])->name('approve');
             Route::post('/reject', [KetuaValidasiRaporController::class, 'rejectDispensasi'])->name('reject');
@@ -889,7 +880,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Promotion System Settings
-        Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function() {
+        Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function () {
             // Note: We use Admin controllers for shared functionality to ensure consistency
             // Settings and KKM are defined at the end of this group
 
@@ -1078,7 +1069,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Promotion Validation (Overrides)
-        Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function() {
+        Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function () {
             Route::get('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'index'])->name('validation.index');
             Route::post('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'store'])->name('validation.store');
             Route::post('/validation/bulk', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'bulkStore'])->name('validation.bulk-store');
@@ -1086,8 +1077,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/validation/history/bulk-delete', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'bulkDeleteHistory'])->name('validation.history.bulk-delete');
         });
     });
-
-
 
     /*
     |--------------------------------------------------------------------------
@@ -1552,15 +1541,16 @@ Route::middleware(['auth'])->group(function () {
         // Tagihan & Pembayaran Anak
         Route::prefix('tagihan')->name('tagihan.')->group(function () {
             Route::get('/anak/{siswa}', [OrangTuaController::class, 'tagihanAnak'])->name('anak');
-            Route::post('/anak/{siswa}/bayar', [PembayaranDigitalController::class, 'prosesBayar'])->name('bayar');
-            Route::post('/anak/{siswa}/bulk-pay', [PembayaranDigitalController::class, 'processBulkPay'])->name('bulk-pay');
+            Route::post('/anak/{siswa}/bayar', [PembayaranDigitalController::class, 'prosesBayar'])->middleware('throttle:10,1')->name('bayar');
+            Route::post('/anak/{siswa}/bulk-pay', [PembayaranDigitalController::class, 'processBulkPay'])->middleware('throttle:10,1')->name('bulk-pay');
         });
 
         // Pembayaran Digital
         Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
             Route::get('/digital/{pembayaran}', [PembayaranDigitalController::class, 'digitalPayment'])->name('digital');
-            Route::post('/sync/{pembayaran}', [PembayaranDigitalController::class, 'syncDigitalPayment'])->name('sync');
-            Route::post('/continue/{pembayaran}', [PembayaranDigitalController::class, 'continuePayment'])->name('continue');
+            Route::post('/sync/{pembayaran}', [PembayaranDigitalController::class, 'syncDigitalPayment'])->middleware('throttle:20,1')->name('sync');
+            Route::post('/continue/{pembayaran}', [PembayaranDigitalController::class, 'continuePayment'])->middleware('throttle:10,1')->name('continue');
+            Route::post('/change-method/{pembayaran}', [PembayaranDigitalController::class, 'changePaymentMethod'])->middleware('throttle:10,1')->name('change-method');
             Route::get('/{pembayaran}/invoice', [OrangTuaController::class, 'cetakInvoice'])->name('invoice');
         });
 

@@ -4,6 +4,7 @@ return [
 
     'paywuz' => [
         'base_url' => env('PAYWUZ_BASE_URL', 'https://api.paywuz.id/v1'),
+        'checkout_url' => env('PAYWUZ_CHECKOUT_URL', 'https://paywuz.id/pay'),
         'sandbox_api_key' => env('PAYWUZ_SANDBOX_API_KEY'),
         'production_api_key' => env('PAYWUZ_PRODUCTION_API_KEY'),
         'expiry_minutes' => (int) env('PAYWUZ_EXPIRY_MINUTES', 720),

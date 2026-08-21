@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Notification;
-use App\Models\User;
-use App\Models\Siswa;
-use App\Models\Pembayaran;
-use App\Models\TenagaPendidik;
-use App\Models\ForumReply;
 use App\Events\NotificationCreated;
+use App\Models\ForumReply;
+use App\Models\Notification;
+use App\Models\Siswa;
+use App\Models\TenagaPendidik;
+use App\Models\User;
 
 class NotificationService
 {
@@ -20,9 +19,9 @@ class NotificationService
         // Normalize link to a relative path so it stays valid across environments
         // (prevents storing http://sipaduhok.test/... in production DB)
         if ($link && filter_var($link, FILTER_VALIDATE_URL)) {
-            $path  = parse_url($link, PHP_URL_PATH) ?? '/';
+            $path = parse_url($link, PHP_URL_PATH) ?? '/';
             $query = parse_url($link, PHP_URL_QUERY);
-            $link  = $path . ($query ? '?' . $query : '');
+            $link = $path.($query ? '?'.$query : '');
         }
 
         $notification = Notification::create([
@@ -57,8 +56,8 @@ class NotificationService
                 $this->create(
                     $siswa->user_id,
                     Notification::TIPE_MATERI,
-                    'Materi Baru: ' . $materi->judul_materi,
-                    'Guru telah mengupload materi baru untuk ' . ($materi->mataPelajaran->nama_mapel ?? 'Mata Pelajaran'),
+                    'Materi Baru: '.$materi->judul_materi,
+                    'Guru telah mengupload materi baru untuk '.($materi->mataPelajaran->nama_mapel ?? 'Mata Pelajaran'),
                     route('siswa.lms.mapel.materi', [$materi->mata_pelajaran_id, $materi->id]),
                     ['materi_id' => $materi->id, 'mapel_id' => $materi->mata_pelajaran_id]
                 );
@@ -80,8 +79,8 @@ class NotificationService
                 $this->create(
                     $siswa->user_id,
                     Notification::TIPE_TUGAS,
-                    $label . ' Baru: ' . $tugas->judul_tugas,
-                    'Tenggat: ' . $tugas->tanggal_deadline->copy()->locale('id')->translatedFormat('d M Y'),
+                    $label.' Baru: '.$tugas->judul_tugas,
+                    'Tenggat: '.$tugas->tanggal_deadline->copy()->locale('id')->translatedFormat('d M Y'),
                     route('siswa.lms.mapel.tugas.show', [$tugas->mata_pelajaran_id, $tugas->id]),
                     ['tugas_id' => $tugas->id, 'mapel_id' => $tugas->mata_pelajaran_id, 'jenis' => $tugas->jenis_tugas]
                 );
@@ -106,8 +105,8 @@ class NotificationService
                 $this->create(
                     $siswa->user_id,
                     Notification::TIPE_UJIAN,
-                    $tipeLabel . ' Baru: ' . $ujian->judul_ujian,
-                    'Jadwal: ' . $ujian->tanggal_mulai->format('d M Y, H:i'),
+                    $tipeLabel.' Baru: '.$ujian->judul_ujian,
+                    'Jadwal: '.$ujian->tanggal_mulai->format('d M Y, H:i'),
                     route($routeName, [$ujian->mata_pelajaran_id, $ujian->id]),
                     ['ujian_id' => $ujian->id, 'mapel_id' => $ujian->mata_pelajaran_id, 'tipe' => $ujian->tipe_ujian]
                 );
@@ -121,7 +120,7 @@ class NotificationService
      */
     public function notifyKelasVirtualBaru($meeting)
     {
-        if (!$meeting || !$meeting->kelas_id) {
+        if (! $meeting || ! $meeting->kelas_id) {
             return;
         }
 
@@ -131,7 +130,7 @@ class NotificationService
         $mapelNama = $meeting->mataPelajaran->nama_mapel ?? 'Mata Pelajaran';
         $waktu = '';
         if ($meeting->waktu_mulai) {
-            $waktu = ' • ' . \Illuminate\Support\Carbon::parse($meeting->waktu_mulai)
+            $waktu = ' • '.\Illuminate\Support\Carbon::parse($meeting->waktu_mulai)
                 ->locale('id')->translatedFormat('d M Y, H:i');
         }
 
@@ -139,8 +138,8 @@ class NotificationService
             $this->create(
                 $siswa->user_id,
                 Notification::TIPE_MATERI,
-                'Kelas Virtual: ' . $meeting->judul,
-                $mapelNama . $waktu,
+                'Kelas Virtual: '.$meeting->judul,
+                $mapelNama.$waktu,
                 route('siswa.lms.mapel.meeting.index', [$meeting->mata_pelajaran_id]),
                 ['meeting_id' => $meeting->id, 'kelas_id' => $meeting->kelas_id]
             );
@@ -178,7 +177,7 @@ class NotificationService
                     $siswa->user_id,
                     Notification::TIPE_DEADLINE,
                     'Pengingat Tenggat',
-                    $tugas->judul_tugas . ' akan berakhir besok!',
+                    $tugas->judul_tugas.' akan berakhir besok!',
                     route('siswa.lms.mapel.tugas.show', [$tugas->mata_pelajaran_id, $tugas->id]),
                     ['tugas_id' => $tugas->id]
                 );
@@ -226,12 +225,12 @@ class NotificationService
                 $parent = $forumReply->parent;
                 if ($parent && $parent->user_id !== $forumReply->user_id) {
                     $parentIsTeacher = TenagaPendidik::where('user_id', $parent->user_id)->exists();
-                    if (!$parentIsTeacher) {
+                    if (! $parentIsTeacher) {
                         $this->create(
                             $parent->user_id,
                             Notification::TIPE_FORUM,
                             'Guru Menjawab Balasan Anda',
-                            'Di diskusi "' . $forumDiskusi->judul . '"',
+                            'Di diskusi "'.$forumDiskusi->judul.'"',
                             route('siswa.lms.mapel.forum.show', [$forumDiskusi->mata_pelajaran_id, $forumDiskusi->id]),
                             ['forum_id' => $forumDiskusi->id]
                         );
@@ -247,12 +246,12 @@ class NotificationService
 
                 foreach ($participantIds as $userId) {
                     $isTeacher = TenagaPendidik::where('user_id', $userId)->exists();
-                    if (!$isTeacher) {
+                    if (! $isTeacher) {
                         $this->create(
                             $userId,
                             Notification::TIPE_FORUM,
                             'Guru Membalas di Diskusi',
-                            'Di diskusi "' . $forumDiskusi->judul . '"',
+                            'Di diskusi "'.$forumDiskusi->judul.'"',
                             route('siswa.lms.mapel.forum.show', [$forumDiskusi->mata_pelajaran_id, $forumDiskusi->id]),
                             ['forum_id' => $forumDiskusi->id]
                         );
@@ -268,7 +267,7 @@ class NotificationService
                     $forumDiskusi->user_id,
                     Notification::TIPE_FORUM,
                     'Siswa Membalas Diskusi',
-                    ($forumReply->user->name ?? 'Siswa') . ' di "' . $forumDiskusi->judul . '"',
+                    ($forumReply->user->name ?? 'Siswa').' di "'.$forumDiskusi->judul.'"',
                     route('guru.lms.forum.show', [$forumDiskusi->kelas_id, $forumDiskusi->mata_pelajaran_id, $forumDiskusi->id]),
                     ['forum_id' => $forumDiskusi->id]
                 );
@@ -286,8 +285,8 @@ class NotificationService
             $this->create(
                 $tugasSiswa->siswa->user_id,
                 Notification::TIPE_NILAI,
-                'Nilai ' . ($tugas->getLabel() ?? 'Tugas') . ' Sudah Keluar',
-                'Nilai: ' . $tugasSiswa->nilai,
+                'Nilai '.($tugas->getLabel() ?? 'Tugas').' Sudah Keluar',
+                'Nilai: '.$tugasSiswa->nilai,
                 route('siswa.lms.mapel.tugas.show', [$tugas->mata_pelajaran_id, $tugas->id]),
                 ['tugas_id' => $tugas->id, 'nilai' => $tugasSiswa->nilai]
             );
@@ -300,8 +299,9 @@ class NotificationService
     public function notifyIzinBaru($presensi)
     {
         $siswa = $presensi->siswa;
-        if (!$siswa || !$siswa->kelas_id)
+        if (! $siswa || ! $siswa->kelas_id) {
             return;
+        }
 
         // Get wali kelas for this class
         $waliKelasAssignment = \App\Models\WaliKelasAssignment::where('kelas_id', $siswa->kelas_id)
@@ -312,8 +312,8 @@ class NotificationService
             $this->create(
                 $waliKelasAssignment->tenagaPendidik->user_id,
                 Notification::TIPE_IZIN,
-                'Pengajuan Izin: ' . $siswa->nama_lengkap,
-                'Izin ' . ucfirst($presensi->status) . ' untuk tanggal ' . $presensi->tanggal->format('d M Y'),
+                'Pengajuan Izin: '.$siswa->nama_lengkap,
+                'Izin '.ucfirst($presensi->status).' untuk tanggal '.$presensi->tanggal->format('d M Y'),
                 route('wali.presensi.validasi-izin'),
                 ['presensi_id' => $presensi->id, 'siswa_id' => $siswa->id]
             );
@@ -326,8 +326,9 @@ class NotificationService
     public function notifyIzinStatus($presensi)
     {
         $siswa = $presensi->siswa;
-        if (!$siswa)
+        if (! $siswa) {
             return;
+        }
 
         // Notify all parents of this student
         $parents = $siswa->orangTua;
@@ -337,8 +338,8 @@ class NotificationService
                 $this->create(
                     $parent->id,
                     Notification::TIPE_IZIN,
-                    'Status Izin: ' . $statusText,
-                    'Pengajuan izin ' . $siswa->nama_lengkap . ' telah ' . strtolower($statusText),
+                    'Status Izin: '.$statusText,
+                    'Pengajuan izin '.$siswa->nama_lengkap.' telah '.strtolower($statusText),
                     route('wali-siswa.presensi.riwayat-izin', $siswa->id),
                     ['presensi_id' => $presensi->id, 'status' => $presensi->status_validasi]
                 );
@@ -353,7 +354,7 @@ class NotificationService
     public function notifyAbsensiAlpha($presensi)
     {
         $siswa = $presensi->siswa;
-        if (!$siswa) {
+        if (! $siswa) {
             return;
         }
 
@@ -366,8 +367,8 @@ class NotificationService
                 $this->create(
                     $parent->id,
                     Notification::TIPE_IZIN,
-                    'Ketidakhadiran: ' . $siswa->nama_lengkap,
-                    $siswa->nama_lengkap . ' tercatat ALPHA (tanpa keterangan)' . ($tgl ? ' pada ' . $tgl : '') . '.',
+                    'Ketidakhadiran: '.$siswa->nama_lengkap,
+                    $siswa->nama_lengkap.' tercatat ALPHA (tanpa keterangan)'.($tgl ? ' pada '.$tgl : '').'.',
                     route('wali-siswa.presensi.riwayat-izin', $siswa->id),
                     ['presensi_id' => $presensi->id, 'siswa_id' => $siswa->id, 'status' => 'alpha']
                 );
@@ -393,7 +394,7 @@ class NotificationService
                 $this->create(
                     $user->id,
                     Notification::TIPE_CATATAN,
-                    'Catatan dari ' . $pengirimName,
+                    'Catatan dari '.$pengirimName,
                     $catatan->judul,
                     route('notifications.index'),
                     ['catatan_id' => $catatan->id, 'prioritas' => $catatan->prioritas]
@@ -408,7 +409,7 @@ class NotificationService
                 $this->create(
                     $user->id,
                     Notification::TIPE_CATATAN,
-                    'Catatan dari ' . $pengirimName,
+                    'Catatan dari '.$pengirimName,
                     $catatan->judul,
                     route('notifications.index'),
                     ['catatan_id' => $catatan->id, 'prioritas' => $catatan->prioritas]
@@ -419,7 +420,7 @@ class NotificationService
             $this->create(
                 $catatan->penerima_id,
                 Notification::TIPE_CATATAN,
-                'Catatan dari ' . $pengirimName,
+                'Catatan dari '.$pengirimName,
                 $catatan->judul,
                 route('notifications.index'),
                 ['catatan_id' => $catatan->id, 'prioritas' => $catatan->prioritas]
@@ -438,15 +439,15 @@ class NotificationService
         // Notify all bendahara and admin
         $targetUsers = User::whereIn('role', ['bendahara', 'admin'])->get();
         foreach ($targetUsers as $user) {
-            $route = $user->role === 'admin' 
+            $route = $user->role === 'admin'
                 ? route('admin.keuangan.pembayaran.show', $pembayaran->id)
                 : route('bendahara.pembayaran.show', $pembayaran->id);
 
             $this->create(
                 $user->id,
                 Notification::TIPE_PEMBAYARAN,
-                'Pembayaran Baru: ' . $siswaName,
-                'Rp ' . number_format($pembayaran->jumlah_bayar, 0, ',', '.') . ' (' . ucfirst($pembayaran->metode_pembayaran) . ')',
+                'Pembayaran Baru: '.$siswaName,
+                'Rp '.number_format($pembayaran->jumlah_bayar, 0, ',', '.').' ('.$pembayaran->payment_channel_label.')',
                 $route,
                 ['pembayaran_id' => $pembayaran->id, 'siswa_id' => $pembayaran->siswa_id]
             );
@@ -459,8 +460,9 @@ class NotificationService
     public function notifyPembayaranValidasi($pembayaran)
     {
         $siswa = $pembayaran->siswa;
-        if (!$siswa)
+        if (! $siswa) {
             return;
+        }
 
         // Notify all parents of this student
         $parents = $siswa->orangTua;
@@ -470,7 +472,7 @@ class NotificationService
                     $parent->id,
                     Notification::TIPE_PEMBAYARAN,
                     'Pembayaran Berhasil Divalidasi',
-                    'Pembayaran Rp ' . number_format($pembayaran->jumlah_bayar, 0, ',', '.') . ' telah divalidasi',
+                    'Pembayaran Rp '.number_format($pembayaran->jumlah_bayar, 0, ',', '.').' telah divalidasi',
                     route('wali-siswa.tagihan.anak', $siswa->id),
                     ['pembayaran_id' => $pembayaran->id]
                 );
@@ -483,28 +485,30 @@ class NotificationService
      */
     public function notifyPembayaranDigitalBerhasil($pembayaranList)
     {
-        if ($pembayaranList->isEmpty()) return;
+        if ($pembayaranList->isEmpty()) {
+            return;
+        }
 
         $first = $pembayaranList->first();
         $siswa = $first->siswa;
         $siswaName = $siswa ? $siswa->nama_lengkap : 'Siswa';
         $totalAmount = $pembayaranList->sum('jumlah_bayar');
         $count = $pembayaranList->count();
-        $metode = ucfirst($first->payment_type ?? 'Digital');
+        $metode = $first->payment_channel_label;
         $orderId = $first->order_id;
 
         // Notify Admin and Bendahara
         $targetAdmins = User::whereIn('role', ['admin', 'bendahara'])->get();
         foreach ($targetAdmins as $user) {
-            $route = $user->role === 'admin' 
+            $route = $user->role === 'admin'
                 ? ($count > 1 ? route('admin.keuangan.pembayaran.index') : route('admin.keuangan.pembayaran.show', $first->id))
                 : ($count > 1 ? route('bendahara.pembayaran.index') : route('bendahara.pembayaran.show', $first->id));
 
             $this->create(
                 $user->id,
                 Notification::TIPE_PEMBAYARAN,
-                'Pembayaran Digital Berhasil: ' . $siswaName,
-                ($count > 1 ? $count . ' Tagihan, Total ' : '') . 'Rp ' . number_format($totalAmount, 0, ',', '.') . ' (' . $metode . ')',
+                'Pembayaran '.$metode.' Berhasil: '.$siswaName,
+                ($count > 1 ? $count.' Tagihan, Total ' : '').'Rp '.number_format($totalAmount, 0, ',', '.').' ('.$metode.')',
                 $route,
                 ['order_id' => $orderId, 'siswa_id' => $first->siswa_id]
             );
@@ -518,8 +522,8 @@ class NotificationService
                     $this->create(
                         $parent->id,
                         Notification::TIPE_PEMBAYARAN,
-                        'Pembayaran Digital Berhasil',
-                        'Pembayaran sebesar Rp ' . number_format($totalAmount, 0, ',', '.') . ' telah berhasil diterima.',
+                        'Pembayaran '.$metode.' Berhasil',
+                        'Pembayaran melalui '.$metode.' sebesar Rp '.number_format($totalAmount, 0, ',', '.').' telah berhasil diterima.',
                         route('wali-siswa.tagihan.anak', $siswa->id),
                         ['order_id' => $orderId]
                     );
@@ -535,12 +539,12 @@ class NotificationService
     public function notifyTunggakanDialihkan($tagihanBaru)
     {
         $siswa = $tagihanBaru->siswa;
-        if (!$siswa) {
+        if (! $siswa) {
             return;
         }
 
         $namaTaAsal = $tagihanBaru->tagihanAsal?->tahunAjaran?->nama_tahun_ajaran ?? 'TA sebelumnya';
-        $jumlahFmt = 'Rp ' . number_format($tagihanBaru->jumlah, 0, ',', '.');
+        $jumlahFmt = 'Rp '.number_format($tagihanBaru->jumlah, 0, ',', '.');
 
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
@@ -567,8 +571,9 @@ class NotificationService
     public function notifyTagihanBaru($tagihan)
     {
         $siswa = $tagihan->siswa;
-        if (!$siswa)
+        if (! $siswa) {
             return;
+        }
 
         // Notify all parents of this student
         $parents = $siswa->orangTua;
@@ -577,8 +582,8 @@ class NotificationService
                 $this->create(
                     $parent->id,
                     Notification::TIPE_PEMBAYARAN,
-                    'Tagihan Baru: ' . $tagihan->jenis_tagihan,
-                    'Rp ' . number_format($tagihan->jumlah, 0, ',', '.') . ' - ' . $siswa->nama_lengkap,
+                    'Tagihan Baru: '.$tagihan->jenis_tagihan,
+                    'Rp '.number_format($tagihan->jumlah, 0, ',', '.').' - '.$siswa->nama_lengkap,
                     route('wali-siswa.tagihan.anak', $siswa->id),
                     ['tagihan_id' => $tagihan->id, 'siswa_id' => $siswa->id]
                 );
@@ -592,8 +597,9 @@ class NotificationService
     public function notifyRaporTerbit($rapor)
     {
         $siswa = $rapor->siswa;
-        if (!$siswa)
+        if (! $siswa) {
             return;
+        }
 
         $semesterText = $rapor->jenis_rapor === 'uts' ? 'Tengah Semester' : 'Akhir Semester';
 
@@ -616,8 +622,8 @@ class NotificationService
                 $this->create(
                     $parent->id,
                     Notification::TIPE_RAPOR,
-                    'Rapor ' . $siswa->nama_lengkap . ' Tersedia',
-                    'Rapor ' . $semesterText . ' sudah bisa dilihat',
+                    'Rapor '.$siswa->nama_lengkap.' Tersedia',
+                    'Rapor '.$semesterText.' sudah bisa dilihat',
                     route('wali-siswa.rapor.anak', $siswa->id),
                     ['rapor_id' => $rapor->id, 'siswa_id' => $siswa->id]
                 );
@@ -632,8 +638,9 @@ class NotificationService
     {
         $tugas = $tugasSiswa->tugas;
         $siswa = $tugasSiswa->siswa;
-        if (!$tugas || !$siswa)
+        if (! $tugas || ! $siswa) {
             return;
+        }
 
         // Get guru for this mapel and kelas
         $guruPengajarList = \App\Models\GuruPengajarKelas::where('kelas_id', $tugas->kelas_id)
@@ -646,7 +653,7 @@ class NotificationService
                 $this->create(
                     $gpk->tenagaPendidik->user_id,
                     Notification::TIPE_TUGAS,
-                    'Tugas Dikumpulkan: ' . $siswa->nama_lengkap,
+                    'Tugas Dikumpulkan: '.$siswa->nama_lengkap,
                     $tugas->judul_tugas,
                     route('guru.lms.tugas.koreksi', [$tugas->kelas_id, $tugas->mata_pelajaran_id, $tugas->id]),
                     ['tugas_id' => $tugas->id, 'tugas_siswa_id' => $tugasSiswa->id]
@@ -662,8 +669,9 @@ class NotificationService
     {
         $ujian = $ujianSiswa->ujian;
         $siswa = $ujianSiswa->siswa;
-        if (!$ujian || !$siswa)
+        if (! $ujian || ! $siswa) {
             return;
+        }
 
         // Determine if this is latihan or ujian based on tipe_ujian
         $isLatihan = $ujian->tipe_ujian === 'latihan';
@@ -683,8 +691,8 @@ class NotificationService
                 $this->create(
                     $gpk->tenagaPendidik->user_id,
                     Notification::TIPE_UJIAN,
-                    $tipeLabel . ' Selesai: ' . $siswa->nama_lengkap,
-                    $ujian->judul_ujian . ' - Nilai: ' . $ujianSiswa->nilai,
+                    $tipeLabel.' Selesai: '.$siswa->nama_lengkap,
+                    $ujian->judul_ujian.' - Nilai: '.$ujianSiswa->nilai,
                     route($routeName, [$ujian->kelas_id, $ujian->mata_pelajaran_id, $ujian->id]),
                     ['ujian_id' => $ujian->id, 'ujian_siswa_id' => $ujianSiswa->id, 'tipe' => $ujian->tipe_ujian]
                 );
@@ -727,8 +735,8 @@ class NotificationService
             $this->create(
                 $user->id,
                 Notification::TIPE_PENGUMUMAN,
-                'Pengumuman: ' . $kalenderAkademik->nama_kegiatan,
-                'Tanggal: ' . $kalenderAkademik->tanggal_mulai->copy()->locale('id')->translatedFormat('d M Y'),
+                'Pengumuman: '.$kalenderAkademik->nama_kegiatan,
+                'Tanggal: '.$kalenderAkademik->tanggal_mulai->copy()->locale('id')->translatedFormat('d M Y'),
                 $route,
                 ['kalender_id' => $kalenderAkademik->id]
             );
@@ -773,7 +781,9 @@ class NotificationService
         $count = count($pembayaranIds);
         $pembayaran = \App\Models\Pembayaran::find($pembayaranIds[0]);
 
-        if (!$pembayaran) return;
+        if (! $pembayaran) {
+            return;
+        }
 
         $amount = \App\Models\Pembayaran::whereIn('id', $pembayaranIds)->sum('jumlah_bayar');
         $siswaName = $pembayaran->siswa->nama_lengkap ?? 'Siswa';
@@ -789,8 +799,8 @@ class NotificationService
             $this->create(
                 $target->id,
                 Notification::TIPE_PEMBAYARAN,
-                'Pembayaran Baru (' . $count . ' Item)',
-                $user->name . ' membayar Rp ' . number_format($amount, 0, ',', '.') . ' untuk ' . $siswaName,
+                'Pembayaran Baru ('.$count.' Item)',
+                $user->name.' membayar Rp '.number_format($amount, 0, ',', '.').' untuk '.$siswaName,
                 $route, // Link to appropriate index based on role
                 ['siswa_id' => $pembayaran->siswa_id]
             );
@@ -803,16 +813,17 @@ class NotificationService
     public function notifyPembayaranDitolak($pembayaran, $alasan = null)
     {
         $siswa = $pembayaran->siswa;
-        if (!$siswa)
+        if (! $siswa) {
             return;
+        }
 
         // Notify all parents of this student
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
             if ($parent->id) {
-                $pesan = 'Pembayaran Rp ' . number_format($pembayaran->jumlah_bayar, 0, ',', '.') . ' ditolak';
+                $pesan = 'Pembayaran Rp '.number_format($pembayaran->jumlah_bayar, 0, ',', '.').' ditolak';
                 if ($alasan) {
-                    $pesan .= '. Alasan: ' . $alasan;
+                    $pesan .= '. Alasan: '.$alasan;
                 }
 
                 $this->create(
@@ -832,13 +843,14 @@ class NotificationService
      */
     public function notifyValidasiAksesUjian($siswa, $status = 'disetujui')
     {
-        if (!$siswa)
+        if (! $siswa) {
             return;
+        }
 
         $statusText = $status === 'disetujui' ? 'Diizinkan' : 'Dibatalkan';
         $pesan = $status === 'disetujui'
-            ? $siswa->nama_lengkap . ' sudah dapat mengikuti ujian'
-            : 'Akses ujian ' . $siswa->nama_lengkap . ' telah dibatalkan';
+            ? $siswa->nama_lengkap.' sudah dapat mengikuti ujian'
+            : 'Akses ujian '.$siswa->nama_lengkap.' telah dibatalkan';
 
         // Notify all parents of this student
         $parents = $siswa->orangTua;
@@ -847,7 +859,7 @@ class NotificationService
                 $this->create(
                     $parent->id,
                     Notification::TIPE_PEMBAYARAN,
-                    'Akses Ujian ' . $statusText,
+                    'Akses Ujian '.$statusText,
                     $pesan,
                     route('wali-siswa.tagihan.anak', $siswa->id),
                     ['siswa_id' => $siswa->id, 'status' => $status, 'tipe' => 'ujian']
@@ -860,7 +872,7 @@ class NotificationService
             $this->create(
                 $siswa->user_id,
                 Notification::TIPE_PEMBAYARAN,
-                'Akses Ujian ' . $statusText,
+                'Akses Ujian '.$statusText,
                 $pesan,
                 route('siswa.lms.dashboard'),
                 ['status' => $status, 'tipe' => 'ujian']
@@ -873,13 +885,14 @@ class NotificationService
      */
     public function notifyValidasiAksesRapor($siswa, $status = 'disetujui')
     {
-        if (!$siswa)
+        if (! $siswa) {
             return;
+        }
 
         $statusText = $status === 'disetujui' ? 'Diizinkan' : 'Dibatalkan';
         $pesan = $status === 'disetujui'
-            ? $siswa->nama_lengkap . ' sudah dapat mengakses rapor'
-            : 'Akses rapor ' . $siswa->nama_lengkap . ' telah dibatalkan';
+            ? $siswa->nama_lengkap.' sudah dapat mengakses rapor'
+            : 'Akses rapor '.$siswa->nama_lengkap.' telah dibatalkan';
 
         // Notify all parents of this student
         $parents = $siswa->orangTua;
@@ -888,7 +901,7 @@ class NotificationService
                 $this->create(
                     $parent->id,
                     Notification::TIPE_RAPOR,
-                    'Akses Rapor ' . $statusText,
+                    'Akses Rapor '.$statusText,
                     $pesan,
                     route('wali-siswa.rapor.anak', $siswa->id),
                     ['siswa_id' => $siswa->id, 'status' => $status, 'tipe' => 'rapor']
@@ -916,7 +929,7 @@ class NotificationService
                     $this->create(
                         $parent->id,
                         Notification::TIPE_PEMBAYARAN,
-                        'Tagihan Baru: ' . $siswa->nama_lengkap,
+                        'Tagihan Baru: '.$siswa->nama_lengkap,
                         $ringkasan,
                         route('wali-siswa.tagihan.anak', $siswa->id),
                         ['siswa_id' => $siswa->id]
@@ -934,14 +947,15 @@ class NotificationService
         $tenagaPendidik = $waliKelasAssignment->tenagaPendidik;
         $kelas = $waliKelasAssignment->kelas;
 
-        if (!$tenagaPendidik || !$tenagaPendidik->user_id || !$kelas)
+        if (! $tenagaPendidik || ! $tenagaPendidik->user_id || ! $kelas) {
             return;
+        }
 
         $this->create(
             $tenagaPendidik->user_id,
             Notification::TIPE_KELAS,
             'Penugasan Wali Kelas',
-            'Anda ditugaskan sebagai Wali Kelas ' . $kelas->nama_kelas,
+            'Anda ditugaskan sebagai Wali Kelas '.$kelas->nama_kelas,
             route('wali.dashboard'),
             ['kelas_id' => $kelas->id, 'wali_kelas_assignment_id' => $waliKelasAssignment->id]
         );
@@ -958,7 +972,7 @@ class NotificationService
 
         foreach ($byGuru as $tenagaPendidikId => $items) {
             $tp = TenagaPendidik::with('user')->find($tenagaPendidikId);
-            if (!$tp || !$tp->user_id) {
+            if (! $tp || ! $tp->user_id) {
                 continue;
             }
 
@@ -967,7 +981,7 @@ class NotificationService
                 $tp->user_id,
                 Notification::TIPE_KELAS,
                 'Penugasan Mengajar Baru',
-                'Anda ditugaskan mengajar pada ' . $count . ' kelas/mata pelajaran baru. Silakan cek jadwal & LMS Anda.',
+                'Anda ditugaskan mengajar pada '.$count.' kelas/mata pelajaran baru. Silakan cek jadwal & LMS Anda.',
                 route('guru.dashboard'),
                 ['count' => $count]
             );
@@ -979,8 +993,9 @@ class NotificationService
      */
     public function notifyPlottingSiswa($siswa)
     {
-        if (!$siswa || !$siswa->kelas)
+        if (! $siswa || ! $siswa->kelas) {
             return;
+        }
 
         $kelas = $siswa->kelas;
 
@@ -990,7 +1005,7 @@ class NotificationService
                 $siswa->user_id,
                 Notification::TIPE_KELAS,
                 'Penempatan Kelas',
-                'Anda telah ditempatkan di kelas ' . $kelas->nama_kelas,
+                'Anda telah ditempatkan di kelas '.$kelas->nama_kelas,
                 route('siswa.sia.dashboard'),
                 ['kelas_id' => $kelas->id]
             );
@@ -1003,8 +1018,8 @@ class NotificationService
                 $this->create(
                     $parent->id,
                     Notification::TIPE_KELAS,
-                    'Penempatan Kelas: ' . $siswa->nama_lengkap,
-                    $siswa->nama_lengkap . ' telah ditempatkan di kelas ' . $kelas->nama_kelas,
+                    'Penempatan Kelas: '.$siswa->nama_lengkap,
+                    $siswa->nama_lengkap.' telah ditempatkan di kelas '.$kelas->nama_kelas,
                     route('wali-siswa.dashboard'),
                     ['siswa_id' => $siswa->id, 'kelas_id' => $kelas->id]
                 );
@@ -1024,7 +1039,7 @@ class NotificationService
         $targetUsers = User::whereIn('role', $targetRoles)->get();
         foreach ($targetUsers as $user) {
             // Role-specific routes
-            $route = match($user->role) {
+            $route = match ($user->role) {
                 'siswa' => route('siswa.lms.kalender'),
                 'guru_pengajar' => route('guru.dashboard'),
                 'orang_tua' => route('wali-siswa.dashboard'),
@@ -1034,7 +1049,7 @@ class NotificationService
             $this->create(
                 $user->id,
                 Notification::TIPE_PENGUMUMAN,
-                'Pengumuman: ' . $pengumuman->judul,
+                'Pengumuman: '.$pengumuman->judul,
                 \Illuminate\Support\Str::limit(strip_tags($pengumuman->isi_pengumuman ?? ''), 100),
                 $route,
                 ['pengumuman_id' => $pengumuman->id]
@@ -1048,15 +1063,16 @@ class NotificationService
     public function notifyBeritaBaru($berita)
     {
         // Only notify featured/important news
-        if (!($berita->is_featured ?? false))
+        if (! ($berita->is_featured ?? false)) {
             return;
+        }
 
         $targetRoles = ['siswa', 'guru_pengajar', 'orang_tua'];
         $targetUsers = User::whereIn('role', $targetRoles)->get();
 
         foreach ($targetUsers as $user) {
             // Role-specific routes
-            $route = match($user->role) {
+            $route = match ($user->role) {
                 'siswa' => route('siswa.sia.dashboard'),
                 'guru_pengajar' => route('guru.dashboard'),
                 'orang_tua' => route('wali-siswa.dashboard'),
@@ -1066,7 +1082,7 @@ class NotificationService
             $this->create(
                 $user->id,
                 Notification::TIPE_PENGUMUMAN,
-                'Berita Terbaru: ' . $berita->judul,
+                'Berita Terbaru: '.$berita->judul,
                 \Illuminate\Support\Str::limit(strip_tags($berita->deskripsi_singkat ?? ''), 100),
                 $route,
                 ['berita_id' => $berita->id]
@@ -1079,10 +1095,11 @@ class NotificationService
      */
     public function notifyWelcome($user)
     {
-        if (!$user)
+        if (! $user) {
             return;
+        }
 
-        $roleLabel = match($user->role) {
+        $roleLabel = match ($user->role) {
             'admin' => 'Administrator',
             'ketua_pkbm' => 'Ketua PKBM',
             'wakil_kepala_sekolah' => 'Wakil Kepala Sekolah',
@@ -1096,7 +1113,7 @@ class NotificationService
         };
 
         // Role-specific routes
-        $route = match($user->role) {
+        $route = match ($user->role) {
             'admin' => route('admin.dashboard'),
             'ketua_pkbm' => route('ketua.dashboard'),
             'wakil_kepala_sekolah' => route('waka.dashboard'),
@@ -1113,7 +1130,7 @@ class NotificationService
             $user->id,
             Notification::TIPE_SISTEM,
             'Selamat Datang!',
-            'Selamat datang di SIPADUHOK sebagai ' . $roleLabel . '. Silakan lengkapi profil Anda dan mulai menggunakan sistem.',
+            'Selamat datang di SIPADUHOK sebagai '.$roleLabel.'. Silakan lengkapi profil Anda dan mulai menggunakan sistem.',
             $route
         );
     }
@@ -1125,24 +1142,24 @@ class NotificationService
      */
     public function notifyHasilKenaikanKelas($siswa, string $statusKelulusan, ?string $kelasTujuanNama = null)
     {
-        if (!$siswa) {
+        if (! $siswa) {
             return;
         }
 
         $map = [
-            'NAIK_KELAS'           => ['Selamat! Naik Kelas', 'dinyatakan NAIK KELAS'],
+            'NAIK_KELAS' => ['Selamat! Naik Kelas', 'dinyatakan NAIK KELAS'],
             'NAIK_KELAS_TUNGGAKAN' => ['Naik Kelas (dispensasi tunggakan)', 'dinyatakan naik kelas dengan dispensasi tunggakan'],
-            'LULUS'                => ['Selamat! Dinyatakan LULUS', 'dinyatakan LULUS'],
-            'LULUS_TUNGGAKAN'      => ['Dinyatakan LULUS (dispensasi tunggakan)', 'dinyatakan lulus dengan dispensasi tunggakan'],
+            'LULUS' => ['Selamat! Dinyatakan LULUS', 'dinyatakan LULUS'],
+            'LULUS_TUNGGAKAN' => ['Dinyatakan LULUS (dispensasi tunggakan)', 'dinyatakan lulus dengan dispensasi tunggakan'],
         ];
 
-        if (!isset($map[$statusKelulusan])) {
+        if (! isset($map[$statusKelulusan])) {
             return; // TIDAK_NAIK_KELAS atau status lain → tidak dinotifikasi
         }
 
         [$judul, $frasa] = $map[$statusKelulusan];
-        $tujuan = ($kelasTujuanNama && !in_array($kelasTujuanNama, ['ALUMNI', 'BELUM DITENTUKAN'], true))
-            ? ' ke kelas ' . $kelasTujuanNama
+        $tujuan = ($kelasTujuanNama && ! in_array($kelasTujuanNama, ['ALUMNI', 'BELUM DITENTUKAN'], true))
+            ? ' ke kelas '.$kelasTujuanNama
             : '';
 
         // Notif siswa (akun tetap aktif walau alumni → tetap bisa menerima)
@@ -1151,7 +1168,7 @@ class NotificationService
                 $siswa->user_id,
                 Notification::TIPE_KENAIKAN,
                 $judul,
-                'Anda ' . $frasa . $tujuan . '.',
+                'Anda '.$frasa.$tujuan.'.',
                 route('siswa.sia.dashboard'),
                 ['siswa_id' => $siswa->id, 'status_kelulusan' => $statusKelulusan]
             );
@@ -1163,8 +1180,8 @@ class NotificationService
                 $this->create(
                     $parent->id,
                     Notification::TIPE_KENAIKAN,
-                    $judul . ': ' . $siswa->nama_lengkap,
-                    $siswa->nama_lengkap . ' ' . $frasa . $tujuan . '.',
+                    $judul.': '.$siswa->nama_lengkap,
+                    $siswa->nama_lengkap.' '.$frasa.$tujuan.'.',
                     route('wali-siswa.dashboard'),
                     ['siswa_id' => $siswa->id, 'status_kelulusan' => $statusKelulusan]
                 );
@@ -1184,7 +1201,7 @@ class NotificationService
                 $ketua->id,
                 Notification::TIPE_KENAIKAN,
                 'Dispensasi Naik Kelas Baru',
-                $pengaju->name . ' mengajukan dispensasi naik kelas untuk ' . $count . ' siswa. Menunggu keputusan Anda.',
+                $pengaju->name.' mengajukan dispensasi naik kelas untuk '.$count.' siswa. Menunggu keputusan Anda.',
                 route('ketua.kenaikan-kelas.approval.index'),
                 ['count' => $count, 'pengaju_id' => $pengaju->id]
             );
@@ -1206,9 +1223,11 @@ class NotificationService
 
         foreach ($pengajuIds as $pengajuId) {
             $pengaju = User::find($pengajuId);
-            if (!$pengaju) continue;
+            if (! $pengaju) {
+                continue;
+            }
 
-            $route = match($pengaju->role) {
+            $route = match ($pengaju->role) {
                 'admin' => route('admin.keuangan.kenaikan-kelas.validation.history'),
                 'bendahara' => route('bendahara.kenaikan-kelas.validation.history'),
                 default => route('notifications.index'),
@@ -1218,7 +1237,7 @@ class NotificationService
                 $pengaju->id,
                 Notification::TIPE_KENAIKAN,
                 'Keputusan Dispensasi Naik Kelas',
-                'Ketua PKBM ' . $ketuaName . ' ' . $statusLabel . ' ' . $count . ' pengajuan dispensasi naik kelas.',
+                'Ketua PKBM '.$ketuaName.' '.$statusLabel.' '.$count.' pengajuan dispensasi naik kelas.',
                 $route,
                 ['status' => $status, 'count' => $count]
             );
@@ -1234,7 +1253,9 @@ class NotificationService
      */
     public function notifyRaporDikirimKeKetua($siswa, $pengirim = null)
     {
-        if (!$siswa) return;
+        if (! $siswa) {
+            return;
+        }
 
         $pengirimName = $pengirim ? $pengirim->name : 'Wali Kelas';
 
@@ -1245,7 +1266,7 @@ class NotificationService
                 $ketua->id,
                 Notification::TIPE_RAPOR,
                 'Rapor Menunggu Validasi',
-                $pengirimName . ' mengirim rapor ' . $siswa->nama_lengkap . ' (' . ($siswa->kelas->nama_kelas ?? '-') . ') untuk divalidasi',
+                $pengirimName.' mengirim rapor '.$siswa->nama_lengkap.' ('.($siswa->kelas->nama_kelas ?? '-').') untuk divalidasi',
                 route('ketua.validasi-rapor.index'),
                 ['siswa_id' => $siswa->id]
             );
@@ -1257,7 +1278,9 @@ class NotificationService
      */
     public function notifyRaporBulkDikirimKeKetua($count, $kelasName, $pengirim = null)
     {
-        if ($count <= 0) return;
+        if ($count <= 0) {
+            return;
+        }
 
         $pengirimName = $pengirim ? $pengirim->name : 'Wali Kelas';
 
@@ -1266,8 +1289,8 @@ class NotificationService
             $this->create(
                 $ketua->id,
                 Notification::TIPE_RAPOR,
-                'Rapor Menunggu Validasi (' . $count . ' Siswa)',
-                $pengirimName . ' mengirim ' . $count . ' rapor dari kelas ' . $kelasName . ' untuk divalidasi',
+                'Rapor Menunggu Validasi ('.$count.' Siswa)',
+                $pengirimName.' mengirim '.$count.' rapor dari kelas '.$kelasName.' untuk divalidasi',
                 route('ketua.validasi-rapor.index'),
                 ['count' => $count, 'kelas' => $kelasName]
             );
@@ -1279,7 +1302,9 @@ class NotificationService
      */
     public function notifyKetuaApproveRapor($siswa)
     {
-        if (!$siswa) return;
+        if (! $siswa) {
+            return;
+        }
 
         // Notify Wali Kelas of the student's class
         $waliKelasAssignment = \App\Models\WaliKelasAssignment::where('kelas_id', $siswa->kelas_id)
@@ -1291,7 +1316,7 @@ class NotificationService
                 $waliKelasAssignment->tenagaPendidik->user_id,
                 Notification::TIPE_RAPOR,
                 'Rapor Disetujui Ketua',
-                'Rapor ' . $siswa->nama_lengkap . ' telah disetujui oleh Ketua PKBM. Menunggu validasi Bendahara.',
+                'Rapor '.$siswa->nama_lengkap.' telah disetujui oleh Ketua PKBM. Menunggu validasi Bendahara.',
                 route('wali.rapor.index'),
                 ['siswa_id' => $siswa->id]
             );
@@ -1308,7 +1333,7 @@ class NotificationService
                 $target->id,
                 Notification::TIPE_RAPOR,
                 'Rapor Siap Divalidasi',
-                'Rapor ' . $siswa->nama_lengkap . ' (' . ($siswa->kelas->nama_kelas ?? '-') . ') sudah di-approve Ketua PKBM. Silakan validasi akses rapor.',
+                'Rapor '.$siswa->nama_lengkap.' ('.($siswa->kelas->nama_kelas ?? '-').') sudah di-approve Ketua PKBM. Silakan validasi akses rapor.',
                 $route,
                 ['siswa_id' => $siswa->id]
             );
@@ -1320,7 +1345,9 @@ class NotificationService
      */
     public function notifyKetuaBatalkanRapor($siswa)
     {
-        if (!$siswa) return;
+        if (! $siswa) {
+            return;
+        }
 
         $waliKelasAssignment = \App\Models\WaliKelasAssignment::where('kelas_id', $siswa->kelas_id)
             ->with('tenagaPendidik.user')
@@ -1331,7 +1358,7 @@ class NotificationService
                 $waliKelasAssignment->tenagaPendidik->user_id,
                 Notification::TIPE_RAPOR,
                 'Validasi Rapor Dibatalkan',
-                'Ketua PKBM membatalkan validasi rapor ' . $siswa->nama_lengkap . '. Validasi bendahara juga di-reset.',
+                'Ketua PKBM membatalkan validasi rapor '.$siswa->nama_lengkap.'. Validasi bendahara juga di-reset.',
                 route('wali.rapor.index'),
                 ['siswa_id' => $siswa->id]
             );
@@ -1343,7 +1370,9 @@ class NotificationService
      */
     public function notifyKetuaMintaRevisi($siswa, $catatan)
     {
-        if (!$siswa) return;
+        if (! $siswa) {
+            return;
+        }
 
         $waliKelasAssignment = \App\Models\WaliKelasAssignment::where('kelas_id', $siswa->kelas_id)
             ->with('tenagaPendidik.user')
@@ -1354,7 +1383,7 @@ class NotificationService
                 $waliKelasAssignment->tenagaPendidik->user_id,
                 Notification::TIPE_RAPOR,
                 'Rapor Perlu Revisi',
-                'Ketua PKBM meminta revisi rapor ' . $siswa->nama_lengkap . ': ' . \Str::limit($catatan, 80),
+                'Ketua PKBM meminta revisi rapor '.$siswa->nama_lengkap.': '.\Str::limit($catatan, 80),
                 route('wali.rapor.index'),
                 ['siswa_id' => $siswa->id]
             );
@@ -1366,12 +1395,16 @@ class NotificationService
      */
     public function notifyRequestDownloadRapor($downloadRequest)
     {
-        if (!$downloadRequest) return;
+        if (! $downloadRequest) {
+            return;
+        }
 
         $siswa = $downloadRequest->siswa;
         $parentName = $downloadRequest->user->name ?? 'Wali Siswa';
 
-        if (!$siswa) return;
+        if (! $siswa) {
+            return;
+        }
 
         $waliKelasAssignment = \App\Models\WaliKelasAssignment::where('kelas_id', $siswa->kelas_id)
             ->with('tenagaPendidik.user')
@@ -1382,7 +1415,7 @@ class NotificationService
                 $waliKelasAssignment->tenagaPendidik->user_id,
                 Notification::TIPE_RAPOR,
                 'Permintaan Unduh Rapor',
-                $parentName . ' mengajukan permintaan unduh rapor ' . $siswa->nama_lengkap,
+                $parentName.' mengajukan permintaan unduh rapor '.$siswa->nama_lengkap,
                 route('wali.rapor.request-download.index'),
                 ['request_id' => $downloadRequest->id, 'siswa_id' => $siswa->id]
             );
@@ -1394,7 +1427,9 @@ class NotificationService
      */
     public function notifyKeputusanDownloadRapor($downloadRequest)
     {
-        if (!$downloadRequest || !$downloadRequest->user_id) return;
+        if (! $downloadRequest || ! $downloadRequest->user_id) {
+            return;
+        }
 
         $siswa = $downloadRequest->siswa;
         $siswaName = $siswa ? $siswa->nama_lengkap : 'anak';
@@ -1402,8 +1437,8 @@ class NotificationService
 
         $judul = $isApproved ? 'Unduh Rapor Disetujui' : 'Unduh Rapor Ditolak';
         $pesan = $isApproved
-            ? 'Permintaan unduh rapor ' . $siswaName . ' telah disetujui. Tautan berlaku 24 jam.'
-            : 'Permintaan unduh rapor ' . $siswaName . ' telah ditolak.';
+            ? 'Permintaan unduh rapor '.$siswaName.' telah disetujui. Tautan berlaku 24 jam.'
+            : 'Permintaan unduh rapor '.$siswaName.' telah ditolak.';
 
         $link = $siswa ? route('wali-siswa.rapor.anak', $siswa->id) : route('wali-siswa.dashboard');
 
@@ -1422,7 +1457,9 @@ class NotificationService
      */
     public function notifyDispensasiDiajukan($count, $tipe, $pengaju)
     {
-        if ($count <= 0) return;
+        if ($count <= 0) {
+            return;
+        }
 
         $pengajuName = $pengaju ? $pengaju->name : 'Bendahara';
         $tipeLabel = $tipe === 'ujian' ? 'Ujian' : 'Rapor';
@@ -1432,8 +1469,8 @@ class NotificationService
             $this->create(
                 $ketua->id,
                 Notification::TIPE_RAPOR,
-                'Dispensasi ' . $tipeLabel . ' Baru',
-                $pengajuName . ' mengajukan dispensasi ' . strtolower($tipeLabel) . ' untuk ' . $count . ' siswa. Menunggu keputusan Anda.',
+                'Dispensasi '.$tipeLabel.' Baru',
+                $pengajuName.' mengajukan dispensasi '.strtolower($tipeLabel).' untuk '.$count.' siswa. Menunggu keputusan Anda.',
                 route('ketua.dispensasi.index'),
                 ['count' => $count, 'tipe' => $tipe]
             );
@@ -1445,7 +1482,9 @@ class NotificationService
      */
     public function notifyKeputusanDispensasi($pengajuanList, $status, $catatan = null)
     {
-        if ($pengajuanList->isEmpty()) return;
+        if ($pengajuanList->isEmpty()) {
+            return;
+        }
 
         $isApproved = $status === 'disetujui';
         $statusText = $isApproved ? 'Disetujui' : 'Ditolak';
@@ -1455,27 +1494,29 @@ class NotificationService
 
         foreach ($grouped as $pengajuId => $items) {
             $pengaju = User::find($pengajuId);
-            if (!$pengaju) continue;
+            if (! $pengaju) {
+                continue;
+            }
 
             $tipe = $items->first()->tipe;
             $tipeLabel = $tipe === 'ujian' ? 'Ujian' : 'Rapor';
             $count = $items->count();
 
-            $route = match($pengaju->role) {
+            $route = match ($pengaju->role) {
                 'admin' => route('admin.keuangan.validasi-akses.index'),
                 'bendahara' => route('bendahara.validasi-akses.index'),
                 default => route('notifications.index'),
             };
 
-            $pesan = 'Dispensasi ' . strtolower($tipeLabel) . ' untuk ' . $count . ' siswa telah ' . strtolower($statusText) . ' oleh Ketua PKBM.';
+            $pesan = 'Dispensasi '.strtolower($tipeLabel).' untuk '.$count.' siswa telah '.strtolower($statusText).' oleh Ketua PKBM.';
             if ($catatan) {
-                $pesan .= ' Catatan: ' . \Str::limit($catatan, 80);
+                $pesan .= ' Catatan: '.\Str::limit($catatan, 80);
             }
 
             $this->create(
                 $pengajuId,
                 Notification::TIPE_RAPOR,
-                'Dispensasi ' . $tipeLabel . ' ' . $statusText,
+                'Dispensasi '.$tipeLabel.' '.$statusText,
                 $pesan,
                 $route,
                 ['count' => $count, 'status' => $status, 'tipe' => $tipe]
@@ -1490,8 +1531,9 @@ class NotificationService
     {
         $ujian = $ujianSiswa->ujian;
         $siswa = $ujianSiswa->siswa;
-        if (!$ujian || !$siswa || !$siswa->user_id)
+        if (! $ujian || ! $siswa || ! $siswa->user_id) {
             return;
+        }
 
         $isLatihan = $ujian->tipe_ujian === 'latihan';
         $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
@@ -1500,13 +1542,13 @@ class NotificationService
         $this->create(
             $siswa->user_id,
             Notification::TIPE_NILAI,
-            'Nilai ' . $tipeLabel . ' Sudah Keluar',
-            $ujian->judul_ujian . ' - Nilai: ' . $ujianSiswa->nilai,
+            'Nilai '.$tipeLabel.' Sudah Keluar',
+            $ujian->judul_ujian.' - Nilai: '.$ujianSiswa->nilai,
             route($routeName, [$ujian->mata_pelajaran_id, $ujian->id]),
             ['ujian_id' => $ujian->id, 'nilai' => $ujianSiswa->nilai, 'tipe' => $ujian->tipe_ujian]
         );
     }
-    
+
     /**
      * Notify guru about a monitoring catatan from Kepsek/Wakepsek/Admin.
      */
@@ -1515,7 +1557,7 @@ class NotificationService
         $catatan->loadMissing(['guru.user', 'pengirim']);
 
         $guruUser = $catatan->guru?->user;
-        if (!$guruUser) {
+        if (! $guruUser) {
             return;
         }
 
@@ -1526,8 +1568,8 @@ class NotificationService
         $this->create(
             $guruUser->id,
             Notification::TIPE_CATATAN,
-            'Catatan Monitoring dari ' . $pengirimName,
-            $kontenLabel . ' "' . \Illuminate\Support\Str::limit($judulKonten, 60) . '": ' . \Illuminate\Support\Str::limit($catatan->isi_catatan, 100),
+            'Catatan Monitoring dari '.$pengirimName,
+            $kontenLabel.' "'.\Illuminate\Support\Str::limit($judulKonten, 60).'": '.\Illuminate\Support\Str::limit($catatan->isi_catatan, 100),
             route('guru.lms.catatan-monitoring.show', $catatan->id),
             [
                 'catatan_monitoring_id' => $catatan->id,
@@ -1544,12 +1586,12 @@ class NotificationService
     {
         $admins = User::where('role', 'admin')->get();
         $userName = $ticket->user->name ?? 'Pengguna';
-        
+
         foreach ($admins as $admin) {
             $this->create(
                 $admin->id,
                 Notification::TIPE_RECOVERY,
-                'Tiket Pemulihan: ' . $userName,
+                'Tiket Pemulihan: '.$userName,
                 'Pengguna membutuhkan bantuan pemulihan akun.',
                 route('admin.recovery-tickets.index'),
                 ['ticket_id' => $ticket->id]
@@ -1576,7 +1618,7 @@ class NotificationService
 
     private function siswaKelasYangBisaAksesMapel($kelasId, $mataPelajaran)
     {
-        if (!$kelasId) {
+        if (! $kelasId) {
             return collect();
         }
 
@@ -1586,6 +1628,7 @@ class NotificationService
             ->filter(fn ($siswa) => $siswa->canAccessMapel($mataPelajaran))
             ->values();
     }
+
     private function normalizeRoleAlias(?string $role): string
     {
         $role = trim((string) $role);

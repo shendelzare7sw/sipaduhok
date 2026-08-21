@@ -67,7 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const infoSections = page.querySelectorAll('.method-info');
   const btnSubmit = page.querySelector('#btnSubmitBulk');
   const buktiInput = page.querySelector('#bulkBuktiInput');
-  const paymentMethod = page.querySelector('#paymentMethod');
+  const paymentChannelInputs = page.querySelectorAll('.payment-channel-input');
+  const paymentChannelOptions = page.querySelectorAll('[data-payment-channel-option]');
+  const paymentChannelUnavailable = page.querySelector('#paymentChannelUnavailable');
 
   let totalBayar = 0;
 
@@ -156,7 +158,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     totalDisplay.textContent = formatRupiah(totalBayar);
     inputTotal.value = totalBayar;
+    updatePaymentChannels();
     bulkModal.show();
+  };
+
+  const updatePaymentChannels = () => {
+    let availableCount = 0;
+
+    paymentChannelOptions.forEach((option) => {
+      const input = option.querySelector('.payment-channel-input');
+      const min = Number.parseInt(option.dataset.min || '1', 10);
+      const max = Number.parseInt(option.dataset.max || `${Number.MAX_SAFE_INTEGER}`, 10);
+      const available = totalBayar >= min && totalBayar <= max;
+
+      option.classList.toggle('is-unavailable', !available);
+      if (input) {
+        input.disabled = !available || getCheckedValue(methodRadios) !== 'paywuz';
+        if (!available) {
+          input.checked = false;
+        }
+      }
+
+      if (available) {
+        availableCount += 1;
+      }
+    });
+
+    paymentChannelUnavailable?.classList.toggle('d-none', availableCount > 0);
+    return availableCount;
   };
 
   const handleMethodChange = () => {
@@ -168,13 +197,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const selectedValue = getCheckedValue(methodRadios);
 
-    if (paymentMethod) {
-      paymentMethod.required = false;
-    }
+    paymentChannelInputs.forEach((input) => {
+      input.required = false;
+      input.disabled = true;
+    });
 
     if (selectedValue === 'paywuz') {
       page.querySelector('#infoPaywuz')?.classList.remove('d-none');
-      btnSubmit?.classList.remove('d-none');
+      const availableCount = updatePaymentChannels();
+      paymentChannelInputs.forEach((input) => {
+        input.required = !input.disabled;
+      });
+      btnSubmit?.classList.toggle('d-none', availableCount === 0);
       return;
     }
 
@@ -218,6 +252,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnPaySelected?.addEventListener('click', openPaymentModal);
   methodRadios.forEach((radio) => radio.addEventListener('change', handleMethodChange));
+
+  page.querySelector('#formBulkPay')?.addEventListener('submit', (event) => {
+    if (getCheckedValue(methodRadios) === 'paywuz' && !getCheckedValue(paymentChannelInputs)) {
+      event.preventDefault();
+      page.querySelector('#infoPaywuz')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      paymentChannelUnavailable?.classList.remove('d-none');
+      paymentChannelUnavailable.textContent = 'Pilih salah satu kanal pembayaran yang tersedia.';
+      return;
+    }
+
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
+    }
+  });
 
   buktiInput?.addEventListener('change', () => {
     if (!buktiInput.files || !buktiInput.files[0]) {

@@ -104,6 +104,34 @@ class PaywuzServiceContractTest extends TestCase
         });
     }
 
+    public function test_status_transaksi_memulihkan_url_pembayaran_dari_id_terverifikasi(): void
+    {
+        config([
+            'services.paywuz.base_url' => 'https://api.paywuz.id/v1',
+            'services.paywuz.checkout_url' => 'https://paywuz.id/pay',
+        ]);
+
+        $service = $this->makeService();
+
+        Http::fake([
+            'https://api.paywuz.id/v1/transactions/SPH-RECOVERY-001' => Http::response([
+                'data' => [
+                    'id' => 'trx-recovery-test',
+                    'orderId' => 'SPH-RECOVERY-001',
+                    'amount' => 10000,
+                    'totalPayment' => 10360,
+                    'paymentMethod' => 'QRIS',
+                    'status' => 'pending',
+                    'expiresAt' => now()->addHour()->toIso8601String(),
+                ],
+            ]),
+        ]);
+
+        $transaction = $service->getTransactionStatus('SPH-RECOVERY-001', 10000, 'sandbox');
+
+        $this->assertSame('https://paywuz.id/pay/trx-recovery-test', $transaction['paymentUrl']);
+    }
+
     private function makeService(): PaywuzService
     {
         $info = new class extends InfoPembayaran

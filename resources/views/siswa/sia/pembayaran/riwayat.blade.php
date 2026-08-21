@@ -49,7 +49,7 @@
                 <option value="">Semua Metode</option>
                 <option value="tunai" {{ request('metode') === 'tunai' ? 'selected' : '' }}>Tunai</option>
                 <option value="transfer" {{ request('metode') === 'transfer' ? 'selected' : '' }}>Direct Transfer</option>
-                <option value="paywuz" {{ request('metode') === 'paywuz' ? 'selected' : '' }}>Digital</option>
+                <option value="paywuz" {{ request('metode') === 'paywuz' ? 'selected' : '' }}>Kanal Pembayaran (QRIS/VA/Retail)</option>
             </select>
         </div>
         <div class="col-md-4">
@@ -120,9 +120,7 @@
                         <i class="fas fa-times-circle"></i> Ditolak
                     @endif
                 </span>
-                <span class="metode-badge">
-                    {{ $pembayaran->metode_pembayaran === 'transfer' ? 'DIRECT TRANSFER' : strtoupper($pembayaran->metode_pembayaran) }}
-                </span>
+                <x-payment-method-badge :payment="$pembayaran" class="metode-badge" />
             </div>
 
             <!-- Detail -->

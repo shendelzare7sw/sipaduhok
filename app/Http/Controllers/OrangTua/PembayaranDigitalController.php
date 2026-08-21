@@ -39,9 +39,11 @@ class PembayaranDigitalController extends Controller
             'tagihan_id' => ['required', 'integer', 'exists:tagihan,id'],
             'jumlah_bayar' => ['required', 'integer', 'min:1000'],
             'metode_pembayaran' => ['required', 'in:transfer,paywuz'],
-            'payment_method' => ['nullable', 'string', 'max:50'],
+            'payment_method' => ['exclude_unless:metode_pembayaran,paywuz', 'required', 'string', 'max:50'],
             'bukti_bayar' => ['required_if:metode_pembayaran,transfer', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:10240'],
             'catatan' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'payment_method.required' => 'Silakan pilih kanal pembayaran.',
         ]);
 
         $tagihan = Tagihan::query()->findOrFail($validated['tagihan_id']);
@@ -85,15 +87,7 @@ class PembayaranDigitalController extends Controller
             return back()->with('error', 'Pembayaran digital belum dikonfigurasi. Silakan hubungi admin atau bendahara.')->withInput();
         }
 
-        try {
-            $paymentMethod = filled($validated['payment_method'] ?? null)
-                ? (string) $validated['payment_method']
-                : $paywuz->defaultPaymentMethod($amount);
-        } catch (Throwable $exception) {
-            return back()->withErrors([
-                'payment_method' => $exception->getMessage(),
-            ])->withInput();
-        }
+        $paymentMethod = (string) $validated['payment_method'];
 
         $pending = Pembayaran::query()
             ->where('tagihan_id', $tagihan->id)
@@ -185,8 +179,10 @@ class PembayaranDigitalController extends Controller
             'items.*.jumlah_bayar' => ['required', 'integer', 'min:1'],
             'total_bayar' => ['required', 'integer', 'min:1'],
             'metode_pembayaran' => ['required', 'in:transfer,paywuz'],
-            'payment_method' => ['nullable', 'string', 'max:50'],
+            'payment_method' => ['exclude_unless:metode_pembayaran,paywuz', 'required', 'string', 'max:50'],
             'bukti_bayar' => ['required_if:metode_pembayaran,transfer', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:10240'],
+        ], [
+            'payment_method.required' => 'Silakan pilih kanal pembayaran.',
         ]);
 
         if ($validated['metode_pembayaran'] === 'transfer' && ! InfoPembayaran::getInstance()->isDirectTransferEnabled()) {
@@ -220,16 +216,6 @@ class PembayaranDigitalController extends Controller
         if ($validated['metode_pembayaran'] === 'paywuz') {
             if (! $paywuz->isConfigured()) {
                 return back()->with('error', 'Pembayaran digital belum dikonfigurasi.')->withInput();
-            }
-
-            try {
-                $validated['payment_method'] = filled($validated['payment_method'] ?? null)
-                    ? (string) $validated['payment_method']
-                    : $paywuz->defaultPaymentMethod($total);
-            } catch (Throwable $exception) {
-                return back()->withErrors([
-                    'payment_method' => $exception->getMessage(),
-                ])->withInput();
             }
 
             $pending = Pembayaran::query()
@@ -356,8 +342,10 @@ class PembayaranDigitalController extends Controller
                 ->with('error', 'Pembayaran ini bukan pembayaran digital.');
         }
 
-        $statusService->sync((string) $payment->order_id);
-        $payment->refresh();
+        if (filled($payment->transaction_id) || filled($payment->payment_url)) {
+            $statusService->sync((string) $payment->order_id);
+            $payment->refresh();
+        }
 
         if ($payment->status_validasi === 'pending' && blank($payment->payment_url)) {
             try {
@@ -377,24 +365,50 @@ class PembayaranDigitalController extends Controller
             ->where('payment_gateway', 'paywuz')
             ->where('order_id', $payment->order_id)
             ->get();
+        $totalBayar = (int) $allPayments->sum('jumlah_bayar');
+        $paymentMethods = [];
+
+        if ($payment->status_validasi === 'pending') {
+            try {
+                $paymentMethods = $paywuz->availablePaymentMethods($totalBayar);
+            } catch (Throwable $exception) {
+                Log::warning('Pilihan kanal pembayaran tidak dapat dimuat.', [
+                    'pembayaran_id' => $payment->id,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        }
 
         return view('wali-siswa.pembayaran.digital', [
             'pembayaran' => $payment,
             'allPayments' => $allPayments,
-            'totalBayar' => (int) $allPayments->sum('jumlah_bayar'),
+            'totalBayar' => $totalBayar,
+            'paymentMethods' => $paymentMethods,
         ]);
     }
 
-    public function syncDigitalPayment(int $pembayaranId, PaywuzPaymentStatusService $statusService): RedirectResponse
-    {
+    public function syncDigitalPayment(
+        int $pembayaranId,
+        PaywuzPaymentStatusService $statusService,
+        PaywuzService $paywuz,
+    ): RedirectResponse {
         $payment = Pembayaran::findOrFail($pembayaranId);
         $this->guardParentAccess($payment);
+
+        if ($payment->status_validasi === 'pending' && blank($payment->payment_url)) {
+            try {
+                $this->openGatewayTransaction($payment, $paywuz);
+            } catch (Throwable $exception) {
+                return back()->with('error', $this->gatewayUserMessage($exception));
+            }
+        }
+
         $statusService->sync((string) $payment->order_id);
 
         return back()->with('success', 'Status pembayaran telah diperbarui.');
     }
 
-    public function continuePayment(int $pembayaranId): RedirectResponse
+    public function continuePayment(int $pembayaranId, PaywuzService $paywuz): RedirectResponse
     {
         $payment = Pembayaran::findOrFail($pembayaranId);
         $this->guardParentAccess($payment);
@@ -404,7 +418,148 @@ class PembayaranDigitalController extends Controller
                 ->with('error', 'Pembayaran ini sudah tidak dapat dilanjutkan.');
         }
 
+        if (blank($payment->payment_url)) {
+            try {
+                $this->openGatewayTransaction($payment, $paywuz);
+            } catch (Throwable $exception) {
+                return redirect()->route('wali-siswa.pembayaran.digital', $payment)
+                    ->with('error', $this->gatewayUserMessage($exception));
+            }
+        }
+
         return redirect()->route('wali-siswa.pembayaran.digital', $payment);
+    }
+
+    public function changePaymentMethod(
+        Request $request,
+        int $pembayaranId,
+        PaywuzPaymentStatusService $statusService,
+        PaywuzService $paywuz,
+    ): RedirectResponse {
+        $payment = Pembayaran::findOrFail($pembayaranId);
+        $this->guardParentAccess($payment);
+
+        $validated = $request->validate([
+            'payment_method' => ['required', 'string', 'max:50'],
+        ], [
+            'payment_method.required' => 'Silakan pilih kanal pembayaran.',
+        ]);
+
+        if ($payment->payment_gateway !== 'paywuz' || $payment->status_validasi !== 'pending') {
+            return back()->with('error', 'Metode pembayaran ini sudah tidak dapat diubah.');
+        }
+
+        $oldOrderId = (string) $payment->order_id;
+        $amount = (int) Pembayaran::query()
+            ->where('payment_gateway', 'paywuz')
+            ->where('order_id', $oldOrderId)
+            ->sum('jumlah_bayar');
+        $newMethod = (string) $validated['payment_method'];
+
+        try {
+            $paywuz->assertPaymentMethodAvailable($newMethod, $amount);
+        } catch (Throwable $exception) {
+            return back()->withErrors(['payment_method' => $exception->getMessage()]);
+        }
+
+        if (hash_equals((string) $payment->payment_type, $newMethod)) {
+            return $this->continuePayment($payment->id, $paywuz);
+        }
+
+        if (filled($payment->transaction_id) || filled($payment->payment_url)) {
+            if (! $statusService->sync($oldOrderId)) {
+                $payment->refresh();
+            }
+
+            if ($payment->fresh()->status_validasi !== 'pending') {
+                return back()->with('info', 'Status transaksi telah berubah sehingga kanal tidak dapat diganti.');
+            }
+
+            try {
+                $transaction = $paywuz->getTransactionStatus($oldOrderId, $amount, $payment->payment_environment);
+                if ($paywuz->mapStatus((string) ($transaction['status'] ?? 'pending')) !== 'pending') {
+                    $statusService->apply($oldOrderId, $transaction);
+
+                    return back()->with('info', 'Status transaksi telah diperbarui. Kanal tidak perlu diganti.');
+                }
+
+                $cancelled = $paywuz->cancelTransaction($oldOrderId, $amount, $payment->payment_environment);
+                $statusService->apply($oldOrderId, $cancelled);
+            } catch (Throwable $exception) {
+                Log::warning('Penggantian kanal ditunda karena transaksi lama tidak dapat diverifikasi.', [
+                    'pembayaran_id' => $payment->id,
+                    'order_id' => $oldOrderId,
+                    'message' => $exception->getMessage(),
+                ]);
+
+                return back()->with('error', 'Transaksi lama belum dapat diverifikasi. Coba lagi beberapa saat agar tidak terjadi pembayaran ganda.');
+            }
+        }
+
+        $newPayment = DB::transaction(function () use ($oldOrderId, $newMethod, $paywuz): Pembayaran {
+            $oldPayments = Pembayaran::query()
+                ->where('payment_gateway', 'paywuz')
+                ->where('order_id', $oldOrderId)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+
+            if ($oldPayments->isEmpty() || $oldPayments->contains(fn (Pembayaran $item) => $item->status_validasi === 'disetujui')) {
+                throw ValidationException::withMessages([
+                    'payment_method' => 'Status transaksi telah berubah. Muat ulang halaman sebelum melanjutkan.',
+                ]);
+            }
+
+            $oldPayments->each(function (Pembayaran $item): void {
+                if ($item->status_validasi === 'pending') {
+                    $item->update([
+                        'status_validasi' => 'ditolak',
+                        'tanggal_validasi' => now(),
+                        'gateway_status' => $item->gateway_status ?: 'replaced',
+                        'catatan' => trim(($item->catatan ? $item->catatan."\n" : '').'Kanal pembayaran diganti oleh wali siswa.'),
+                    ]);
+                }
+            });
+
+            $newOrderId = $this->generateGatewayOrderId();
+            $baseCode = $this->generatePaymentCode();
+            $newPayments = collect();
+
+            foreach ($oldPayments->values() as $index => $oldPayment) {
+                $newPayments->push(Pembayaran::create([
+                    'tagihan_id' => $oldPayment->tagihan_id,
+                    'siswa_id' => $oldPayment->siswa_id,
+                    'paid_by_parent_id' => Auth::id(),
+                    'kode_pembayaran' => $baseCode.'-'.($index + 1),
+                    'jumlah_bayar' => $oldPayment->jumlah_bayar,
+                    'tanggal_bayar' => now(),
+                    'metode_pembayaran' => 'paywuz',
+                    'payment_gateway' => 'paywuz',
+                    'payment_type' => $newMethod,
+                    'payment_environment' => $paywuz->environment(),
+                    'order_id' => $newOrderId,
+                    'status_validasi' => 'pending',
+                ]));
+            }
+
+            return $newPayments->first();
+        });
+
+        try {
+            $this->openGatewayTransaction($newPayment, $paywuz);
+        } catch (Throwable $exception) {
+            Log::warning('Kanal pengganti belum dapat dibuat.', [
+                'pembayaran_id' => $newPayment->id,
+                'order_id' => $newPayment->order_id,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return redirect()->route('wali-siswa.pembayaran.digital', $newPayment)
+                ->with('error', $this->gatewayUserMessage($exception));
+        }
+
+        return redirect()->route('wali-siswa.pembayaran.digital', $newPayment)
+            ->with('success', 'Kanal pembayaran berhasil diganti.');
     }
 
     private function openGatewayTransaction(Pembayaran $payment, PaywuzService $paywuz): void
@@ -427,15 +582,39 @@ class PembayaranDigitalController extends Controller
             $payment->payment_type = $paymentMethod;
         }
 
-        $transaction = $paywuz->createTransaction(
-            (string) $payment->order_id,
-            $amount,
-            $paymentMethod,
-            $payment->id,
-            $payment->siswa_id,
-            route('wali-siswa.pembayaran.digital', $payment),
-            $payment->payment_environment,
-        );
+        if (filled($payment->payment_url)
+            && (! $payment->payment_expires_at || $payment->payment_expires_at->isFuture())) {
+            return;
+        }
+
+        try {
+            $transaction = $paywuz->createTransaction(
+                (string) $payment->order_id,
+                $amount,
+                $paymentMethod,
+                $payment->id,
+                $payment->siswa_id,
+                route('wali-siswa.pembayaran.digital', $payment),
+                $payment->payment_environment,
+            );
+        } catch (Throwable $creationException) {
+            try {
+                // Jika API sempat membuat transaksi tetapi respons pertama terputus,
+                // pulihkan URL berdasarkan order ID agar retry tidak membuat duplikat.
+                $transaction = $paywuz->getTransactionStatus(
+                    (string) $payment->order_id,
+                    $amount,
+                    $payment->payment_environment,
+                );
+
+                if (blank($transaction['paymentUrl'] ?? null)) {
+                    throw $creationException;
+                }
+            } catch (Throwable) {
+                $this->recordGatewayFailure($payment, $creationException);
+                throw $creationException;
+            }
+        }
 
         Pembayaran::query()
             ->where('payment_gateway', 'paywuz')
@@ -448,7 +627,35 @@ class PembayaranDigitalController extends Controller
                 'gateway_status' => (string) $transaction['status'],
                 'payment_expires_at' => $transaction['expiresAt'] ?? null,
                 'gateway_response' => json_encode($transaction),
+                'gateway_error' => null,
+                'gateway_attempts' => DB::raw('gateway_attempts + 1'),
             ]);
+    }
+
+    private function recordGatewayFailure(Pembayaran $payment, Throwable $exception): void
+    {
+        Pembayaran::query()
+            ->where('payment_gateway', 'paywuz')
+            ->where('order_id', $payment->order_id)
+            ->update([
+                'gateway_error' => $this->gatewayUserMessage($exception),
+                'gateway_attempts' => DB::raw('gateway_attempts + 1'),
+            ]);
+    }
+
+    private function gatewayUserMessage(Throwable $exception): string
+    {
+        $message = strtolower($exception->getMessage());
+
+        if (str_contains($message, 'nominal') || str_contains($message, 'batas')) {
+            return 'Nominal tagihan tidak sesuai dengan batas kanal yang dipilih. Silakan pilih kanal lain.';
+        }
+
+        if (str_contains($message, 'metode') || str_contains($message, 'kanal')) {
+            return 'Kanal pembayaran sedang tidak tersedia. Silakan pilih kanal lain.';
+        }
+
+        return 'Kanal pembayaran belum dapat dibuat. Silakan coba lagi beberapa saat atau pilih kanal lain.';
     }
 
     private function guardParentAccess(Pembayaran $payment): void

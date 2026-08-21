@@ -146,7 +146,7 @@
                                             <span>&middot;</span>
                                             <span>{{ $item->siswa->kelas->nama_kelas ?? '-' }}</span>
                                             <span>&middot;</span>
-                                            <span>{{ ($item->metode_pembayaran ?? 'transfer') === 'transfer' ? 'Direct Transfer' : ucfirst($item->metode_pembayaran) }}</span>
+                                            <span>{{ $item->payment_channel_label }}</span>
                                         </div>
                                     </div>
                                     <div class="action-item-right">

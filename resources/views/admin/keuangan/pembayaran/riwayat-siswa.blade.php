@@ -185,7 +185,7 @@
                                                 @elseif($bayar->metode_pembayaran === 'transfer')
                                                     <span class="badge bg-warning"><i class="fas fa-university"></i> Direct Transfer</span>
                                                 @else
-                                                    <span class="badge bg-success"><i class="fas fa-credit-card"></i> Digital</span>
+                                                    <x-payment-method-badge :payment="$bayar" />
                                                 @endif
                                             </td>
                                             <td data-label="STATUS" class="align-middle text-end text-md-center">
@@ -277,7 +277,7 @@
                                                 <strong class="text-dark">Rp
                                                     {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</strong>
                                                 <span class="text-muted ms-2">
-                                                        via {{ $bayar->metode_pembayaran === 'transfer' ? 'Direct Transfer' : ucfirst($bayar->metode_pembayaran) }}
+                                                        via {{ $bayar->payment_channel_label }}
                                                 </span>
                                             </div>
                                             <small class="text-muted">{{ $bayar->tanggal_bayar->format('d M Y') }}</small>

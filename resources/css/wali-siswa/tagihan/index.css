@@ -91,6 +91,73 @@
   opacity: 0;
 }
 
+.payment-channel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.payment-channel-card {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 82px;
+    padding: .85rem;
+    border: 1px solid #d8deea;
+    border-radius: .75rem;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+
+.payment-channel-card:hover {
+    border-color: #4361ee;
+    box-shadow: 0 5px 18px rgba(67, 97, 238, .1);
+}
+
+.payment-channel-icon {
+    width: 1.4rem;
+    color: #4361ee;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.payment-channel-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.payment-channel-copy small {
+    color: #64748b;
+    font-size: .7rem;
+}
+
+.payment-channel-check {
+    color: #cbd5e1;
+}
+
+.payment-channel-input:checked + .payment-channel-card {
+    border-color: #4361ee;
+    background: #eef2ff;
+    box-shadow: 0 0 0 2px rgba(67, 97, 238, .12);
+}
+
+.payment-channel-input:checked + .payment-channel-card .payment-channel-check {
+    color: #4361ee;
+}
+
+.payment-channel-option.is-unavailable {
+    display: none;
+}
+
+@media (max-width: 575.98px) {
+    .payment-channel-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .wali-siswa-tagihan-index-page .payment-input:disabled {
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;

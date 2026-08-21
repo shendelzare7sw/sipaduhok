@@ -73,6 +73,11 @@ class PaywuzPaymentStatusService
                     'payment_expires_at' => filled($transaction['expiresAt'] ?? null) ? $transaction['expiresAt'] : $payment->payment_expires_at,
                 ];
 
+                if (filled($transaction['paymentUrl'] ?? null)) {
+                    $updates['payment_url'] = (string) $transaction['paymentUrl'];
+                    $updates['gateway_error'] = null;
+                }
+
                 if ($oldStatus === 'pending' && $newStatus !== 'pending') {
                     $updates['status_validasi'] = $newStatus;
                     $updates['tanggal_validasi'] = $newStatus === 'disetujui' ? now() : null;

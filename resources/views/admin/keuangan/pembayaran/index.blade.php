@@ -106,7 +106,7 @@
                             <option value="">Semua Metode</option>
                             <option value="tunai"    {{ ($filters['metode'] ?? '') == 'tunai'    ? 'selected' : '' }}>Tunai</option>
                             <option value="transfer" {{ ($filters['metode'] ?? '') == 'transfer' ? 'selected' : '' }}>Direct Transfer</option>
-                            <option value="paywuz" {{ ($filters['metode'] ?? '') == 'paywuz' ? 'selected' : '' }}>Pembayaran Digital</option>
+                            <option value="paywuz" {{ ($filters['metode'] ?? '') == 'paywuz' ? 'selected' : '' }}>Kanal Pembayaran (QRIS/VA/Retail)</option>
                         </select>
                     </div>
                     <div class="mb-2">
@@ -202,7 +202,7 @@
                                 @elseif($pembayaran->metode_pembayaran === 'transfer')
                                     <span class="badge bg-success badge-pill">DIRECT TRANSFER</span>
                                 @else
-                                    <span class="badge bg-info badge-pill">DIGITAL</span>
+                                    <x-payment-method-badge :payment="$pembayaran" class="badge-pill" />
                                 @endif
                             </td>
                             <td data-label="Tanggal" class="small fw-semibold payment-main-text">

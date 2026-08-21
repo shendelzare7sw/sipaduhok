@@ -60,7 +60,7 @@
                         <span class="meta-label">Metode:</span>
                         <span class="meta-value">
                             @if($pembayaran->metode_pembayaran == 'paywuz')
-                                Pembayaran Digital
+                                {{ $pembayaran->payment_channel_label }}
                             @elseif($pembayaran->metode_pembayaran == 'transfer')
                                 Direct Transfer
                             @else

@@ -96,9 +96,7 @@ class PaywuzService
 
     public function defaultPaymentMethod(int $amount): string
     {
-        $availableMethods = collect($this->paymentMethods())
-            ->filter(fn (array $method): bool => $amount >= $method['min_amount'] && $amount <= $method['max_amount'])
-            ->values();
+        $availableMethods = collect($this->availablePaymentMethods($amount));
 
         if ($availableMethods->isEmpty()) {
             throw new RuntimeException('Tidak ada kanal pembayaran digital yang cocok untuk nominal tagihan ini.');
@@ -115,6 +113,15 @@ class PaywuzService
         }
 
         return (string) $availableMethods->first()['code'];
+    }
+
+    /** @return list<array<string, int|string>> */
+    public function availablePaymentMethods(int $amount): array
+    {
+        return collect($this->paymentMethods())
+            ->filter(fn (array $method): bool => $amount >= $method['min_amount'] && $amount <= $method['max_amount'])
+            ->values()
+            ->all();
     }
 
     /** @return array<string, mixed> */
@@ -150,6 +157,10 @@ class PaywuzService
             ],
         ]));
 
+        if (is_array($data)) {
+            $data = $this->withRecoveredPaymentUrl($data);
+        }
+
         $this->assertTransactionResponse($data, $orderId, $amount);
 
         $paymentUrl = filled($data['paymentUrl'] ?? null) ? (string) $data['paymentUrl'] : null;
@@ -165,6 +176,10 @@ class PaywuzService
     {
         $data = $this->data($this->client($environment)->get('/transactions/'.rawurlencode($orderId)));
         $this->assertTransactionResponse($data, $orderId, $amount, requirePaymentUrl: false);
+
+        if (is_array($data) && $this->mapStatus((string) ($data['status'] ?? 'pending')) === 'pending') {
+            $data = $this->withRecoveredPaymentUrl($data);
+        }
 
         return $data;
     }
@@ -246,5 +261,20 @@ class PaywuzService
                 || str_ends_with($host, '.paywuz.id')
                 || $host === 'paywuz.com'
                 || str_ends_with($host, '.paywuz.com'));
+    }
+
+    /** @param array<string, mixed> $transaction */
+    private function withRecoveredPaymentUrl(array $transaction): array
+    {
+        if (blank($transaction['paymentUrl'] ?? null) && filled($transaction['id'] ?? null)) {
+            $baseUrl = rtrim((string) config('services.paywuz.checkout_url', 'https://paywuz.id/pay'), '/');
+            $transaction['paymentUrl'] = $baseUrl.'/'.rawurlencode((string) $transaction['id']);
+        }
+
+        if (! $this->isTrustedPaymentUrl((string) ($transaction['paymentUrl'] ?? ''))) {
+            throw new RuntimeException('URL pembayaran digital tidak valid.');
+        }
+
+        return $transaction;
     }
 }

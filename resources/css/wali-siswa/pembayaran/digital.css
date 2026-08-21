@@ -18,6 +18,20 @@
     overflow-wrap: anywhere;
 }
 
+.digital-payment-hero h3 {
+    color: #fff !important;
+}
+
+.digital-pay-button {
+    color: #fff !important;
+    font-weight: 700;
+}
+
+.digital-pay-button:hover,
+.digital-pay-button:focus {
+    color: #fff !important;
+}
+
 .digital-payment-eyebrow {
     display: block;
     margin-bottom: .5rem;
@@ -74,6 +88,46 @@
     font-weight: 700;
     text-align: right;
     overflow-wrap: anywhere;
+}
+
+.digital-channel-list {
+    display: grid;
+    gap: .65rem;
+}
+
+.digital-channel-choice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .85rem 1rem;
+    border: 1px solid var(--digital-border);
+    border-radius: .7rem;
+    cursor: pointer;
+    transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+}
+
+.digital-channel-choice span {
+    display: flex;
+    flex-direction: column;
+}
+
+.digital-channel-choice small {
+    color: #64748b;
+}
+
+.digital-channel-choice > i {
+    color: #cbd5e1;
+}
+
+.btn-check:checked + .digital-channel-choice {
+    border-color: var(--digital-primary);
+    background: #eef2ff;
+    box-shadow: 0 0 0 2px rgba(67, 97, 238, .12);
+}
+
+.btn-check:checked + .digital-channel-choice > i {
+    color: var(--digital-primary);
 }
 
 @media (max-width: 767.98px) {

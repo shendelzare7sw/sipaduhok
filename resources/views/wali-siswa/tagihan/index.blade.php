@@ -421,7 +421,7 @@
                             <div class="mb-4">
                                 <label class="form-label fw-bold mb-2">Pilihan Metode Pembayaran</label>
                                 <div class="row g-2">
-                                    {{-- Pembayaran digital otomatis --}}
+                                    {{-- Pembayaran digital melalui kanal yang dipilih wali siswa --}}
                                     @if($infoPembayaran->isPaywuzEnabled() && count($paymentMethods) > 0)
                                         <div class="col-md-4">
                                             <input type="radio" class="btn-check" name="metode_pembayaran" id="methodPaywuz"
@@ -430,7 +430,7 @@
                                                 class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3"
                                                 for="methodPaywuz">
                                                 <i class="fas fa-credit-card fa-2x mb-2"></i>
-                                                <span class="small fw-bold">Pembayaran Digital</span>
+                                                <span class="small fw-bold">Kanal Pembayaran</span>
                                             </label>
                                         </div>
                                     @endif
@@ -485,6 +485,47 @@
                                         <i class="fas fa-shield-alt me-2 mt-1"></i>
                                         <div class="small">Setelah konfirmasi, Anda akan diarahkan ke halaman pembayaran aman. Status tagihan akan diperbarui <strong>otomatis</strong>.</div>
                                     </div>
+                                </div>
+
+                                <label class="form-label fw-bold mb-2">Pilih kanal pembayaran <span class="text-danger">*</span></label>
+                                <div class="payment-channel-grid" id="paymentChannelOptions">
+                                    @foreach($paymentMethods as $method)
+                                        @php
+                                            $methodId = 'paymentChannel'.preg_replace('/[^A-Za-z0-9]/', '', $method['code']);
+                                            $methodIcon = match ($method['type']) {
+                                                'qris' => 'fas fa-qrcode',
+                                                'retail' => 'fas fa-store',
+                                                default => 'fas fa-university',
+                                            };
+                                            $feeParts = [];
+                                            if ($method['fee_percent_bps'] > 0) {
+                                                $feeParts[] = number_format($method['fee_percent_bps'] / 100, 2, ',', '.').'%';
+                                            }
+                                            if ($method['fee_flat'] > 0) {
+                                                $feeParts[] = 'Rp '.number_format($method['fee_flat'], 0, ',', '.');
+                                            }
+                                        @endphp
+                                        <div class="payment-channel-option"
+                                            data-payment-channel-option
+                                            data-min="{{ $method['min_amount'] }}"
+                                            data-max="{{ $method['max_amount'] }}">
+                                            <input type="radio" class="btn-check payment-channel-input"
+                                                name="payment_method" id="{{ $methodId }}"
+                                                value="{{ $method['code'] }}" autocomplete="off" disabled>
+                                            <label class="payment-channel-card" for="{{ $methodId }}">
+                                                <i class="{{ $methodIcon }} payment-channel-icon"></i>
+                                                <span class="payment-channel-copy">
+                                                    <strong>{{ $method['name'] }}</strong>
+                                                    <small>{{ $feeParts ? 'Biaya '.implode(' + ', $feeParts) : 'Biaya mengikuti bank yang dipilih' }}</small>
+                                                    <small>Rp {{ number_format($method['min_amount'], 0, ',', '.') }}–Rp {{ number_format($method['max_amount'], 0, ',', '.') }}</small>
+                                                </span>
+                                                <i class="fas fa-check-circle payment-channel-check"></i>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="small text-danger mt-2 d-none" id="paymentChannelUnavailable">
+                                    Tidak ada kanal yang mendukung total pembayaran ini.
                                 </div>
                             </div>
 
@@ -647,7 +688,7 @@
                                             @elseif($bayar->metode_pembayaran == 'transfer')
                                                 <span class="badge bg-label-info"><i class="fas fa-university me-1"></i> Direct Transfer</span>
                                             @elseif($bayar->metode_pembayaran == 'paywuz')
-                                                <span class="badge bg-label-primary"><i class="fas fa-credit-card me-1"></i> Digital</span>
+                                                <x-payment-method-badge :payment="$bayar" />
                                             @endif
                                         </td>
                                         <td data-label="STATUS" class="text-end text-md-center">

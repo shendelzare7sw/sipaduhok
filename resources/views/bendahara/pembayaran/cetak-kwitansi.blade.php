@@ -245,7 +245,7 @@
                     </tr>
                     <tr>
                         <td>Metode</td>
-                        <td>: {{ $pembayaran->metode_pembayaran === 'transfer' ? 'Direct Transfer' : ucfirst($pembayaran->metode_pembayaran) }}</td>
+                        <td>: {{ $pembayaran->payment_channel_label }}</td>
                     </tr>
                     <tr>
                         <td>Status</td>

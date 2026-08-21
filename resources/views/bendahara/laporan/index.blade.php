@@ -17,7 +17,7 @@
         $metodeLabels = [
             'tunai' => 'Tunai',
             'transfer' => 'Direct Transfer',
-            'paywuz' => 'Pembayaran Digital',
+            'paywuz' => 'Kanal Pembayaran',
         ];
     @endphp
 
@@ -52,7 +52,7 @@
                             <option value="">Semua Metode</option>
                             <option value="tunai" {{ request('metode') == 'tunai' ? 'selected' : '' }}>Tunai</option>
                             <option value="transfer" {{ request('metode') == 'transfer' ? 'selected' : '' }}>Direct Transfer</option>
-                            <option value="paywuz" {{ request('metode') == 'paywuz' ? 'selected' : '' }}>Pembayaran Digital</option>
+                            <option value="paywuz" {{ request('metode') == 'paywuz' ? 'selected' : '' }}>Kanal Pembayaran (QRIS/VA/Retail)</option>
                         </select>
                     </div>
                 </div>
@@ -200,7 +200,7 @@
                 <div class="stat-widget">
                     <div class="stat-details">
                         <div class="stat-value">Rp {{ number_format($totalNonTunai, 0, ',', '.') }}</div>
-                        <div class="stat-label">Direct Transfer & Digital</div>
+                        <div class="stat-label">Direct Transfer & Kanal Pembayaran</div>
                     </div>
                     <div class="stat-icon-wrapper stat-icon-gateway">
                         <i class="fas fa-university"></i>
@@ -289,7 +289,7 @@
                                     @elseif($bayar->metode_pembayaran === 'transfer')
                                         <span class="badge bg-warning text-white fw-bold method-badge">DIRECT TRANSFER</span>
                                     @else
-                                        <span class="badge bg-success fw-bold method-badge">DIGITAL</span>
+                                        <x-payment-method-badge :payment="$bayar" class="fw-bold method-badge" />
                                     @endif
                                 </td>
                                 <td data-label="Validator" class="small fw-semibold">

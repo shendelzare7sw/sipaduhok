@@ -60,7 +60,7 @@
                                 @elseif($pembayaran->metode_pembayaran === 'transfer')
                                     <span class="badge bg-success badge-custom shadow-sm">DIRECT TRANSFER</span>
                                 @else
-                                    <span class="badge bg-info badge-custom shadow-sm">DIGITAL</span>
+                                    <x-payment-method-badge :payment="$pembayaran" class="badge-custom shadow-sm" />
                                 @endif
                             </td>
                         </tr>
