@@ -89,6 +89,14 @@ class PembayaranDigitalController extends Controller
 
         $paymentMethod = (string) $validated['payment_method'];
 
+        try {
+            $paywuz->assertPaymentMethodAvailable($paymentMethod, $amount);
+        } catch (Throwable $exception) {
+            return back()->withErrors([
+                'payment_method' => $exception->getMessage(),
+            ])->withInput();
+        }
+
         $pending = Pembayaran::query()
             ->where('tagihan_id', $tagihan->id)
             ->where('siswa_id', $siswa->id)
@@ -98,21 +106,18 @@ class PembayaranDigitalController extends Controller
             ->first();
 
         if ($pending) {
-            app(PaywuzPaymentStatusService::class)->sync((string) $pending->order_id);
+            $statusService = app(PaywuzPaymentStatusService::class);
+            $statusService->sync((string) $pending->order_id);
             $pending->refresh();
 
             if ($pending->status_validasi === 'pending') {
+                if (! $this->matchesRequestedPaymentMethod($pending, $paymentMethod)) {
+                    return $this->replacePendingPaymentMethod($pending, $paymentMethod, $statusService, $paywuz);
+                }
+
                 return redirect()->route('wali-siswa.pembayaran.digital', $pending)
                     ->with('info', 'Anda masih memiliki pembayaran yang menunggu penyelesaian.');
             }
-        }
-
-        try {
-            $paywuz->assertPaymentMethodAvailable($paymentMethod, $amount);
-        } catch (Throwable $exception) {
-            return back()->withErrors([
-                'payment_method' => $exception->getMessage(),
-            ])->withInput();
         }
 
         $payment = DB::transaction(function () use ($tagihan, $siswa, $user, $amount, $validated, $paymentMethod, $paywuz): Pembayaran {
@@ -218,6 +223,14 @@ class PembayaranDigitalController extends Controller
                 return back()->with('error', 'Pembayaran digital belum dikonfigurasi.')->withInput();
             }
 
+            try {
+                $paywuz->assertPaymentMethodAvailable((string) $validated['payment_method'], $total);
+            } catch (Throwable $exception) {
+                return back()->withErrors([
+                    'payment_method' => $exception->getMessage(),
+                ])->withInput();
+            }
+
             $pending = Pembayaran::query()
                 ->whereIn('tagihan_id', $items->map(fn (array $item) => $item['tagihan']->id))
                 ->where('siswa_id', $siswa->id)
@@ -225,16 +238,32 @@ class PembayaranDigitalController extends Controller
                 ->where('status_validasi', 'pending')
                 ->first();
             if ($pending) {
-                return redirect()->route('wali-siswa.pembayaran.digital', $pending)
-                    ->with('info', 'Selesaikan pembayaran yang masih menunggu sebelum membuat transaksi baru.');
+                $statusService = app(PaywuzPaymentStatusService::class);
+                $statusService->sync((string) $pending->order_id);
+                $pending->refresh();
+
+                if ($pending->status_validasi !== 'pending') {
+                    $pending = null;
+                }
             }
 
-            try {
-                $paywuz->assertPaymentMethodAvailable((string) $validated['payment_method'], $total);
-            } catch (Throwable $exception) {
-                return back()->withErrors([
-                    'payment_method' => $exception->getMessage(),
-                ])->withInput();
+            if ($pending) {
+                $requestedTagihanIds = $items->map(fn (array $item) => (int) $item['tagihan']->id)->all();
+
+                if ($this->pendingMatchesTagihanIds($pending, $requestedTagihanIds)
+                    && ! $this->matchesRequestedPaymentMethod($pending, (string) $validated['payment_method'])) {
+                    return $this->replacePendingPaymentMethod(
+                        $pending,
+                        (string) $validated['payment_method'],
+                        $statusService,
+                        $paywuz,
+                    );
+                }
+
+                return redirect()->route('wali-siswa.pembayaran.digital', $pending)
+                    ->with('info', $this->matchesRequestedPaymentMethod($pending, (string) $validated['payment_method'])
+                        ? 'Selesaikan pembayaran yang masih menunggu sebelum membuat transaksi baru.'
+                        : 'Transaksi pending memuat pilihan tagihan yang berbeda. Selesaikan atau batalkan transaksi tersebut terlebih dahulu.');
             }
         }
 
@@ -300,7 +329,21 @@ class PembayaranDigitalController extends Controller
         });
 
         if ($creation['pending_id']) {
-            return redirect()->route('wali-siswa.pembayaran.digital', $creation['pending_id'])
+            $pending = Pembayaran::query()->findOrFail($creation['pending_id']);
+            $requestedTagihanIds = $items->map(fn (array $item) => (int) $item['tagihan']->id)->all();
+
+            if ($validated['metode_pembayaran'] === 'paywuz'
+                && $this->pendingMatchesTagihanIds($pending, $requestedTagihanIds)
+                && ! $this->matchesRequestedPaymentMethod($pending, (string) $validated['payment_method'])) {
+                return $this->replacePendingPaymentMethod(
+                    $pending,
+                    (string) $validated['payment_method'],
+                    app(PaywuzPaymentStatusService::class),
+                    $paywuz,
+                );
+            }
+
+            return redirect()->route('wali-siswa.pembayaran.digital', $pending)
                 ->with('info', 'Selesaikan pembayaran yang masih menunggu sebelum membuat transaksi baru.');
         }
 
@@ -445,6 +488,21 @@ class PembayaranDigitalController extends Controller
             'payment_method.required' => 'Silakan pilih kanal pembayaran.',
         ]);
 
+        return $this->replacePendingPaymentMethod(
+            $payment,
+            (string) $validated['payment_method'],
+            $statusService,
+            $paywuz,
+        );
+    }
+
+    private function replacePendingPaymentMethod(
+        Pembayaran $payment,
+        string $newMethod,
+        PaywuzPaymentStatusService $statusService,
+        PaywuzService $paywuz,
+    ): RedirectResponse {
+
         if ($payment->payment_gateway !== 'paywuz' || $payment->status_validasi !== 'pending') {
             return back()->with('error', 'Metode pembayaran ini sudah tidak dapat diubah.');
         }
@@ -454,7 +512,6 @@ class PembayaranDigitalController extends Controller
             ->where('payment_gateway', 'paywuz')
             ->where('order_id', $oldOrderId)
             ->sum('jumlah_bayar');
-        $newMethod = (string) $validated['payment_method'];
 
         try {
             $paywuz->assertPaymentMethodAvailable($newMethod, $amount);
@@ -462,7 +519,7 @@ class PembayaranDigitalController extends Controller
             return back()->withErrors(['payment_method' => $exception->getMessage()]);
         }
 
-        if (hash_equals((string) $payment->payment_type, $newMethod)) {
+        if ($this->matchesRequestedPaymentMethod($payment, $newMethod)) {
             return $this->continuePayment($payment->id, $paywuz);
         }
 
@@ -560,6 +617,34 @@ class PembayaranDigitalController extends Controller
 
         return redirect()->route('wali-siswa.pembayaran.digital', $newPayment)
             ->with('success', 'Kanal pembayaran berhasil diganti.');
+    }
+
+    private function matchesRequestedPaymentMethod(Pembayaran $payment, string $requestedMethod): bool
+    {
+        $requestedMethod = strtoupper(trim($requestedMethod));
+
+        if ($requestedMethod === 'VA') {
+            return $payment->payment_channel_group === 'va';
+        }
+
+        return hash_equals(strtoupper(trim((string) $payment->payment_type)), $requestedMethod);
+    }
+
+    /** @param list<int> $requestedTagihanIds */
+    private function pendingMatchesTagihanIds(Pembayaran $payment, array $requestedTagihanIds): bool
+    {
+        $pendingTagihanIds = Pembayaran::query()
+            ->where('payment_gateway', 'paywuz')
+            ->where('order_id', $payment->order_id)
+            ->pluck('tagihan_id')
+            ->map(fn ($id): int => (int) $id)
+            ->sort()
+            ->values()
+            ->all();
+
+        sort($requestedTagihanIds);
+
+        return $pendingTagihanIds === array_values($requestedTagihanIds);
     }
 
     private function openGatewayTransaction(Pembayaran $payment, PaywuzService $paywuz): void
