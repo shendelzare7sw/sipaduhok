@@ -1,0 +1,12 @@
+Test Case ID,Old Provider/Behavior,New Paywuz Behavior,Keep/Revise/Replace,Expected Result,Automatable?,Evidence
+TC-P-044,Create Midtrans Snap payment,Create Paywuz order and trusted payment URL with selected provider channel,Revise,Owned valid bill creates one pending order and usable URL without duplicate,Yes,PaywuzServiceContractTest; PaywuzSelectedChannelFlowTest
+TC-P-045,Midtrans webhook/API sync,Paywuz status API plus official flat webhook,Revise,Verified provider status synchronizes payment tagihan audit notification exactly once,Yes,Status service PASS; official webhook probe FAIL
+TC-P-046,Configure bank cash and Midtrans,Configure direct transfer cash Paywuz keys mode toggle and fee bearer,Revise,Admin/Bendahara save masked valid config and disabled is enforced,Yes,Config controllers; PaywuzDisabledServerSideTest
+TC-N-018,Invalid manual/digital nominal,Server validates ownership remaining amount and provider channel limits,Revise,Invalid amount/channel cannot create provider transaction,Yes,PaywuzServiceContractTest; controller guards
+TC-N-046,Invalid Midtrans signature,Invalid Paywuz HMAC/header/body,Revise,HTTP 403 for invalid signature with no state change,Yes,SITClosureDomainIntegrationTest
+TC-N-057,Midtrans disabled bypass,Paywuz disabled bypass,Revise,Direct request cannot create transaction,Yes,PaywuzDisabledServerSideTest
+TC-N-058,Midtrans bulk callback,One Paywuz order spanning multiple owned bills,Revise,Amount/group mapping updates every row consistently,Yes,Digital controller; status service
+TC-N-059,Forged Snap finish redirect,Forged redirect/manual status claim,Replace,Browser input never marks paid; only verified GET/webhook status does,Yes,Routes/controller/status service
+TC-N-060,Cancel duplicate Midtrans pending,Cancel duplicate Paywuz remote order before local rejection,Revise,Paid tagihan has no payable duplicate and uncertain cancel stays visible pending,Yes,PaywuzSelectedChannelFlowTest; SIT closure
+TC-N-061,Repeated Midtrans callback,Repeated Paywuz delivery/status,Revise,No double financial update audit or notification,Yes,SITClosureDomainIntegrationTest
+NEW-PAYWUZ-CONTRACT,Not applicable,Official flat webhook payload contract,Add to next controlled revision,Valid signed flat payload is accepted and applied; currently FAIL,Yes,Paywuz SDK README; local contract probe
