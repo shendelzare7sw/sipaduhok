@@ -244,16 +244,15 @@ class SITClosureDomainIntegrationTest extends TestCase
 
         $deliveryId = 'SIT-DELIVERY-'.uniqid();
         $payload = [
-            'event' => 'transaction.settlement',
-            'data' => [
-                'id' => 'SIT-TRX-'.uniqid(),
-                'orderId' => $orderId,
-                'amount' => 1000000,
-                'totalPayment' => 1000000,
-                'paymentMethod' => 'QRIS',
-                'status' => 'settlement',
-            ],
+            'id' => 'SIT-TRX-'.uniqid(),
+            'orderId' => $orderId,
+            'amount' => 1000000,
+            'fee' => 0,
+            'totalPayment' => 1000000,
+            'paymentMethod' => 'QRIS',
+            'status' => 'settlement',
             'timestamp' => now()->toIso8601String(),
+            'metadata' => ['source' => 'contract-fixture'],
         ];
         $rawPayload = json_encode($payload, JSON_UNESCAPED_SLASHES);
         $headers = [
@@ -297,15 +296,13 @@ class SITClosureDomainIntegrationTest extends TestCase
         ]);
 
         $payload = [
-            'event' => 'transaction.settlement',
-            'data' => [
-                'id' => 'SIT-TRX-INVALID',
-                'orderId' => 'SIT-ORDER-NOT-FOUND',
-                'amount' => 100000,
-                'totalPayment' => 100000,
-                'paymentMethod' => 'QRIS',
-                'status' => 'settlement',
-            ],
+            'id' => 'SIT-TRX-INVALID',
+            'orderId' => 'SIT-ORDER-NOT-FOUND',
+            'amount' => 100000,
+            'fee' => 0,
+            'totalPayment' => 100000,
+            'paymentMethod' => 'QRIS',
+            'status' => 'settlement',
             'timestamp' => now()->toIso8601String(),
         ];
         $rawPayload = json_encode($payload, JSON_UNESCAPED_SLASHES);
@@ -316,6 +313,49 @@ class SITClosureDomainIntegrationTest extends TestCase
             'HTTP_X_PAYWUZ_EVENT' => 'transaction.settlement',
             'HTTP_X_PAYWUZ_DELIVERY' => 'SIT-INVALID-'.uniqid(),
         ], $rawPayload)->assertForbidden();
+    }
+
+    public function test_webhook_paywuz_mewajibkan_event_header_dan_menolak_replay_kedaluwarsa(): void
+    {
+        $serverKey = 'pk_sand_'.bin2hex(random_bytes(16));
+        InfoPembayaran::getInstance()->update([
+            'paywuz_sandbox_api_key' => Crypt::encryptString($serverKey),
+            'paywuz_enabled' => true,
+            'paywuz_is_production' => false,
+        ]);
+
+        $payload = [
+            'id' => 'SIT-TRX-CONTRACT',
+            'orderId' => 'SIT-ORDER-NOT-FOUND',
+            'amount' => 100000,
+            'fee' => 290,
+            'totalPayment' => 100290,
+            'paymentMethod' => 'QRIS',
+            'status' => 'settlement',
+            'timestamp' => now()->subHours(2)->toIso8601String(),
+            'metadata' => ['source' => 'official-sdk-contract'],
+        ];
+        $rawPayload = json_encode($payload, JSON_UNESCAPED_SLASHES);
+        $baseHeaders = [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_X_PAYWUZ_SIGNATURE' => 'sha256='.hash_hmac('sha256', $rawPayload, $serverKey),
+            'HTTP_X_PAYWUZ_DELIVERY' => 'SIT-CONTRACT-'.uniqid(),
+        ];
+
+        $this->call('POST', '/payments/paywuz/webhook', [], [], [], $baseHeaders, $rawPayload)
+            ->assertStatus(400)
+            ->assertJson(['message' => 'Missing or invalid Paywuz headers.']);
+
+        $this->call('POST', '/payments/paywuz/webhook', [], [], [], [
+            ...$baseHeaders,
+            'HTTP_X_PAYWUZ_EVENT' => 'transaction.settlement',
+        ], $rawPayload)
+            ->assertStatus(400)
+            ->assertJson(['message' => 'Webhook timestamp is outside the accepted window.']);
+
+        $this->assertDatabaseMissing('payment_webhook_deliveries', [
+            'delivery_id' => $baseHeaders['HTTP_X_PAYWUZ_DELIVERY'],
+        ]);
     }
 
     public function test_pembayaran_paywuz_tidak_bisa_dilunasi_manual_oleh_bendahara(): void

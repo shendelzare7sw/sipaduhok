@@ -8,6 +8,7 @@ return [
         'sandbox_api_key' => env('PAYWUZ_SANDBOX_API_KEY'),
         'production_api_key' => env('PAYWUZ_PRODUCTION_API_KEY'),
         'expiry_minutes' => (int) env('PAYWUZ_EXPIRY_MINUTES', 720),
+        'webhook_tolerance_seconds' => (int) env('PAYWUZ_WEBHOOK_TOLERANCE_SECONDS', 900),
     ],
 
     /*

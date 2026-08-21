@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pembayaran;
 use App\Services\PaywuzPaymentStatusService;
 use App\Services\PaywuzService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,39 +23,45 @@ class PaywuzWebhookController extends Controller
             return response()->json(['message' => 'Invalid JSON payload.'], 400);
         }
 
+        $signature = (string) $request->header('X-Paywuz-Signature');
+        $deliveryId = (string) $request->header('X-Paywuz-Delivery');
+        $headerEvent = trim((string) $request->header('X-Paywuz-Event'));
+        $allowedEvents = [
+            'transaction.settlement',
+            'transaction.paid',
+            'transaction.failed',
+            'transaction.cancelled',
+        ];
+
+        if (! preg_match('/^sha256=[a-f0-9]{64}$/i', $signature)
+            || blank($deliveryId)
+            || strlen($deliveryId) > 100
+            || ! in_array($headerEvent, $allowedEvents, true)) {
+            return response()->json(['message' => 'Missing or invalid Paywuz headers.'], 400);
+        }
+
+        // SDK resmi mengirim body transaksi datar dan event pada X-Paywuz-Event.
         $validator = Validator::make($payload, [
-            'event' => ['required', 'string', 'in:transaction.settlement,transaction.paid,transaction.failed,transaction.cancelled'],
-            'data' => ['required', 'array'],
-            'data.id' => ['required', 'string', 'max:100'],
-            'data.orderId' => ['required', 'string', 'max:64'],
-            'data.amount' => ['required', 'integer', 'min:1'],
-            'data.status' => ['required', 'string', 'in:pending,settlement,success,failed,cancelled,expired'],
-            'data.paymentMethod' => ['nullable', 'string', 'max:50'],
-            'data.totalPayment' => ['nullable', 'integer', 'min:1'],
+            'id' => ['required', 'string', 'max:100'],
+            'orderId' => ['required', 'string', 'max:64'],
+            'amount' => ['required', 'integer', 'min:1'],
+            'fee' => ['required', 'integer', 'min:0'],
+            'totalPayment' => ['required', 'integer', 'min:1'],
+            'paymentMethod' => ['required', 'string', 'max:50'],
+            'status' => ['required', 'string', 'in:pending,settlement,success,failed,cancelled,expired'],
             'timestamp' => ['required', 'string', 'max:50'],
+            'metadata' => ['nullable', 'array'],
         ]);
 
         if ($validator->fails()) {
             return response()->json(['message' => 'Invalid webhook payload.'], 400);
         }
 
-        $signature = (string) $request->header('X-Paywuz-Signature');
-        $deliveryId = (string) $request->header('X-Paywuz-Delivery');
-        $headerEvent = (string) $request->header('X-Paywuz-Event');
-
-        if (! preg_match('/^sha256=[a-f0-9]{64}$/i', $signature) || blank($deliveryId) || strlen($deliveryId) > 100) {
-            return response()->json(['message' => 'Missing or invalid Paywuz headers.'], 400);
-        }
-
-        if ($headerEvent !== '' && ! hash_equals($payload['event'], $headerEvent)) {
-            return response()->json(['message' => 'Webhook event header does not match payload.'], 400);
-        }
-
-        $eventMatchesStatus = match ($payload['event']) {
-            'transaction.settlement' => data_get($payload, 'data.status') === 'settlement',
-            'transaction.paid' => data_get($payload, 'data.status') === 'success',
-            'transaction.failed' => in_array(data_get($payload, 'data.status'), ['failed', 'expired'], true),
-            'transaction.cancelled' => data_get($payload, 'data.status') === 'cancelled',
+        $eventMatchesStatus = match ($headerEvent) {
+            'transaction.settlement' => $payload['status'] === 'settlement',
+            'transaction.paid' => $payload['status'] === 'success',
+            'transaction.failed' => in_array($payload['status'], ['failed', 'expired'], true),
+            'transaction.cancelled' => $payload['status'] === 'cancelled',
             default => false,
         };
 
@@ -62,9 +69,20 @@ class PaywuzWebhookController extends Controller
             return response()->json(['message' => 'Webhook event does not match transaction status.'], 400);
         }
 
+        try {
+            $eventTime = CarbonImmutable::parse((string) $payload['timestamp']);
+        } catch (Throwable) {
+            return response()->json(['message' => 'Invalid webhook timestamp.'], 400);
+        }
+
+        $toleranceSeconds = max(60, min((int) config('services.paywuz.webhook_tolerance_seconds', 900), 3600));
+        if ($eventTime->diffInSeconds(CarbonImmutable::now()) > $toleranceSeconds) {
+            return response()->json(['message' => 'Webhook timestamp is outside the accepted window.'], 400);
+        }
+
         $payments = Pembayaran::query()
             ->where('payment_gateway', 'paywuz')
-            ->where('order_id', data_get($payload, 'data.orderId'))
+            ->where('order_id', $payload['orderId'])
             ->get();
 
         $keys = $payments->isNotEmpty()
@@ -79,16 +97,12 @@ class PaywuzWebhookController extends Controller
             return response()->json(['message' => 'Invalid webhook signature.'], 403);
         }
 
-        if ($payments->isEmpty()) {
-            return response()->json(['message' => 'Webhook accepted; payment not found.'], 202);
-        }
-
-        if ((int) $payments->sum('jumlah_bayar') !== (int) data_get($payload, 'data.amount')) {
+        if ($payments->isNotEmpty() && (int) $payments->sum('jumlah_bayar') !== (int) $payload['amount']) {
             return response()->json(['message' => 'Webhook amount does not match payment.'], 422);
         }
 
-        if ($payments->pluck('transaction_id')->filter()->contains(
-            fn (string $reference) => ! hash_equals($reference, (string) data_get($payload, 'data.id'))
+        if ($payments->isNotEmpty() && $payments->pluck('transaction_id')->filter()->contains(
+            fn (string $reference) => ! hash_equals($reference, (string) $payload['id'])
         )) {
             return response()->json(['message' => 'Webhook reference does not match payment.'], 422);
         }
@@ -96,8 +110,8 @@ class PaywuzWebhookController extends Controller
         $inserted = DB::table('payment_webhook_deliveries')->insertOrIgnore([
             'provider' => 'paywuz',
             'delivery_id' => $deliveryId,
-            'event' => $payload['event'],
-            'pembayaran_id' => $payments->first()->id,
+            'event' => $headerEvent,
+            'pembayaran_id' => $payments->first()?->id,
             'payload_hash' => hash('sha256', $rawBody),
             'created_at' => now(),
             'updated_at' => now(),
@@ -107,8 +121,17 @@ class PaywuzWebhookController extends Controller
             return response()->json(['message' => 'Webhook already processed.']);
         }
 
+        if ($payments->isEmpty()) {
+            DB::table('payment_webhook_deliveries')->where('delivery_id', $deliveryId)->update([
+                'processed_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return response()->json(['message' => 'Webhook accepted; payment not found.'], 202);
+        }
+
         try {
-            $statusService->apply((string) data_get($payload, 'data.orderId'), $payload['data']);
+            $statusService->apply((string) $payload['orderId'], $payload);
             DB::table('payment_webhook_deliveries')->where('delivery_id', $deliveryId)->update([
                 'processed_at' => now(),
                 'updated_at' => now(),

@@ -45,4 +45,4 @@ Payload create yang dikirim:
 
 SDK resmi menyatakan event berada pada header `X-Paywuz-Event`, delivery ID pada `X-Paywuz-Delivery`, signature pada `X-Paywuz-Signature`, dan body berupa objek datar berisi `id`, `orderId`, `amount`, `fee`, `totalPayment`, `paymentMethod`, `status`, `timestamp`, serta `metadata` opsional.
 
-Controller saat ini mengharuskan body wrapper `{"event": ..., "data": {...}, "timestamp": ...}`. Ini adalah ketidaksesuaian kontrak yang terverifikasi, bukan asumsi. Probe lokal dengan payload datar bertanda tangan sesuai dokumentasi menghasilkan HTTP 400 `Invalid webhook payload`; tidak ada transaksi production dibuat.
+Controller menerima body datar tersebut dan menjadikan `X-Paywuz-Event` sebagai event wajib. Signature diverifikasi terhadap raw body sebelum mutasi finansial; event harus sesuai dengan status transaksi, timestamp dibatasi oleh freshness window, dan delivery ID dideduplikasi. Fixture kontrak resmi kini menghasilkan HTTP 200 dan mutasi finansial idempoten pada SIT.
