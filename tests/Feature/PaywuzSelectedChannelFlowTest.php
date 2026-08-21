@@ -19,6 +19,21 @@ use Tests\TestCase;
 
 class PaywuzSelectedChannelFlowTest extends TestCase
 {
+    public function test_halaman_pembayaran_hanya_memakai_satu_notifikasi_status(): void
+    {
+        $controller = file_get_contents(app_path('Http/Controllers/OrangTua/PembayaranDigitalController.php'));
+        $view = file_get_contents(resource_path('views/wali-siswa/pembayaran/digital.blade.php'));
+
+        $this->assertStringNotContainsString('Status pembayaran telah diperbarui.', $controller);
+        $this->assertSame(
+            1,
+            substr_count($view, 'Pembayaran telah dikonfirmasi otomatis dan tagihan siswa sudah diperbarui.'),
+        );
+        $this->assertStringContainsString("\$gatewayStatus === 'failed'", $view);
+        $this->assertStringContainsString("\$gatewayStatus === 'expired'", $view);
+        $this->assertStringContainsString("\$gatewayStatus === 'cancelled'", $view);
+    }
+
     public function test_pilihan_va_dari_form_mengganti_transaksi_qris_pending(): void
     {
         config([

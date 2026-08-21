@@ -18,6 +18,31 @@
     $gatewayTotal = (int) ($pembayaran->gateway_total ?: $totalBayar);
     $fee = max(0, $gatewayTotal - $totalBayar);
     $expired = $pembayaran->payment_expires_at && $pembayaran->payment_expires_at->isPast();
+    $gatewayStatus = strtolower((string) $pembayaran->gateway_status);
+    $paymentNotice = session('payment_notice');
+    $paymentNoticeType = session('payment_notice_type');
+
+    if (!$paymentNotice) {
+        [$paymentNotice, $paymentNoticeType] = match (true) {
+            $isPaid => ['Pembayaran telah dikonfirmasi otomatis dan tagihan siswa sudah diperbarui.', 'success'],
+            $isPending && $expired => ['Batas waktu pembayaran telah berakhir. Silakan pilih kanal pembayaran baru.', 'warning'],
+            $isPending && filled($pembayaran->payment_url) => ['Pembayaran masih menunggu penyelesaian.', 'info'],
+            $isPending => [$pembayaran->gateway_error ?: 'Kanal pembayaran belum terbentuk. Silakan coba kembali atau pilih kanal lain.', 'warning'],
+            $gatewayStatus === 'failed' => ['Pembayaran gagal diproses. Silakan kembali ke tagihan dan pilih kanal pembayaran lain.', 'danger'],
+            $gatewayStatus === 'expired' => ['Transaksi pembayaran telah kedaluwarsa.', 'warning'],
+            $gatewayStatus === 'cancelled' => ['Transaksi pembayaran telah dibatalkan.', 'danger'],
+            default => ['Pembayaran sudah tidak aktif dan tidak dapat dilanjutkan.', 'danger'],
+        };
+    } else {
+        $paymentNoticeType ??= 'info';
+    }
+
+    $paymentNoticeIcon = match ($paymentNoticeType) {
+        'success' => 'fas fa-check-circle',
+        'danger' => 'fas fa-times-circle',
+        'warning' => 'fas fa-exclamation-triangle',
+        default => 'fas fa-info-circle',
+    };
 @endphp
 
 <div class="container-xxl flex-grow-1 container-p-y digital-payment-page">
@@ -33,11 +58,11 @@
                 <div class="digital-payment-hero">
                     <div>
                         <span class="digital-payment-eyebrow">TAGIHAN SEKOLAH</span>
-                        <h3 class="mb-2 text-white">{{ $isPaid ? 'Pembayaran Berhasil' : ($isPending ? 'Selesaikan Pembayaran' : 'Pembayaran Tidak Aktif') }}</h3>
+                        <h3 class="mb-2 text-white">{{ $isPaid ? 'Pembayaran Berhasil' : ($isPending && !$expired ? 'Selesaikan Pembayaran' : ($expired ? 'Pembayaran Kedaluwarsa' : 'Pembayaran Tidak Aktif')) }}</h3>
                         <p class="mb-0">Nomor transaksi {{ $pembayaran->order_id }}</p>
                     </div>
                     <span class="badge rounded-pill px-3 py-2 {{ $isPaid ? 'bg-success' : ($isPending ? 'bg-warning text-dark' : 'bg-danger') }}">
-                        {{ $isPaid ? 'Lunas' : ($isPending ? 'Menunggu Pembayaran' : 'Dibatalkan / Kedaluwarsa') }}
+                        {{ $isPaid ? 'Lunas' : ($isPending && !$expired ? 'Menunggu Pembayaran' : ($expired ? 'Kedaluwarsa' : 'Dibatalkan / Gagal')) }}
                     </span>
                 </div>
 
@@ -72,25 +97,22 @@
                         </div>
                     </div>
 
+                    <div class="alert alert-{{ $paymentNoticeType }} mt-4 mb-0" role="status">
+                        <i class="{{ $paymentNoticeIcon }} me-2"></i>{{ $paymentNotice }}
+                    </div>
+
                     @if($isPending && $pembayaran->payment_url && !$expired)
                         <a href="{{ $pembayaran->payment_url }}" class="btn btn-primary btn-lg w-100 mt-4 digital-pay-button" rel="noopener">
                             <i class="fas fa-lock me-2"></i>Selesaikan Pembayaran
                         </a>
                         <p class="small text-muted text-center mt-3 mb-0">Anda dapat menutup halaman ini dan melanjutkan pembayaran kembali dari riwayat tagihan.</p>
                     @elseif($isPending)
-                        <div class="alert alert-warning mt-4 mb-0">
-                            <i class="fas fa-clock me-2"></i>{{ $pembayaran->gateway_error ?: 'Kanal pembayaran belum terbentuk. Silakan coba kembali atau pilih kanal lain.' }}
-                        </div>
                         <form action="{{ route('wali-siswa.pembayaran.continue', $pembayaran) }}" method="POST" class="mt-3" data-payment-submit>
                             @csrf
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="fas fa-rotate me-2"></i>Coba Buat Kanal Lagi
                             </button>
                         </form>
-                    @elseif($isPaid)
-                        <div class="alert alert-success mt-4 mb-0">
-                            <i class="fas fa-check-circle me-2"></i>Pembayaran telah dikonfirmasi otomatis dan tagihan siswa sudah diperbarui.
-                        </div>
                     @endif
                 </div>
             </div>

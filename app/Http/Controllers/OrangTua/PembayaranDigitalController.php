@@ -116,7 +116,7 @@ class PembayaranDigitalController extends Controller
                 }
 
                 return redirect()->route('wali-siswa.pembayaran.digital', $pending)
-                    ->with('info', 'Anda masih memiliki pembayaran yang menunggu penyelesaian.');
+                    ->with('payment_notice', 'Anda masih memiliki pembayaran yang menunggu penyelesaian.');
             }
         }
 
@@ -153,7 +153,7 @@ class PembayaranDigitalController extends Controller
 
         if (! $payment->wasRecentlyCreated) {
             return redirect()->route('wali-siswa.pembayaran.digital', $payment)
-                ->with('info', 'Pembayaran yang sama sedang menunggu penyelesaian.');
+                ->with('payment_notice', 'Pembayaran yang sama sedang menunggu penyelesaian.');
         }
 
         try {
@@ -261,7 +261,7 @@ class PembayaranDigitalController extends Controller
                 }
 
                 return redirect()->route('wali-siswa.pembayaran.digital', $pending)
-                    ->with('info', $this->matchesRequestedPaymentMethod($pending, (string) $validated['payment_method'])
+                    ->with('payment_notice', $this->matchesRequestedPaymentMethod($pending, (string) $validated['payment_method'])
                         ? 'Selesaikan pembayaran yang masih menunggu sebelum membuat transaksi baru.'
                         : 'Transaksi pending memuat pilihan tagihan yang berbeda. Selesaikan atau batalkan transaksi tersebut terlebih dahulu.');
             }
@@ -344,7 +344,7 @@ class PembayaranDigitalController extends Controller
             }
 
             return redirect()->route('wali-siswa.pembayaran.digital', $pending)
-                ->with('info', 'Selesaikan pembayaran yang masih menunggu sebelum membuat transaksi baru.');
+                ->with('payment_notice', 'Selesaikan pembayaran yang masih menunggu sebelum membuat transaksi baru.');
         }
 
         $paymentIds = $creation['payment_ids'];
@@ -442,13 +442,15 @@ class PembayaranDigitalController extends Controller
             try {
                 $this->openGatewayTransaction($payment, $paywuz);
             } catch (Throwable $exception) {
-                return back()->with('error', $this->gatewayUserMessage($exception));
+                return back()
+                    ->with('payment_notice', $this->gatewayUserMessage($exception))
+                    ->with('payment_notice_type', 'danger');
             }
         }
 
         $statusService->sync((string) $payment->order_id);
 
-        return back()->with('success', 'Status pembayaran telah diperbarui.');
+        return back();
     }
 
     public function continuePayment(int $pembayaranId, PaywuzService $paywuz): RedirectResponse
@@ -466,7 +468,8 @@ class PembayaranDigitalController extends Controller
                 $this->openGatewayTransaction($payment, $paywuz);
             } catch (Throwable $exception) {
                 return redirect()->route('wali-siswa.pembayaran.digital', $payment)
-                    ->with('error', $this->gatewayUserMessage($exception));
+                    ->with('payment_notice', $this->gatewayUserMessage($exception))
+                    ->with('payment_notice_type', 'danger');
             }
         }
 
@@ -612,11 +615,12 @@ class PembayaranDigitalController extends Controller
             ]);
 
             return redirect()->route('wali-siswa.pembayaran.digital', $newPayment)
-                ->with('error', $this->gatewayUserMessage($exception));
+                ->with('payment_notice', $this->gatewayUserMessage($exception))
+                ->with('payment_notice_type', 'danger');
         }
 
         return redirect()->route('wali-siswa.pembayaran.digital', $newPayment)
-            ->with('success', 'Kanal pembayaran berhasil diganti.');
+            ->with('payment_notice', 'Kanal pembayaran berhasil diganti.');
     }
 
     private function matchesRequestedPaymentMethod(Pembayaran $payment, string $requestedMethod): bool
