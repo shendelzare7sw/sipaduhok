@@ -10,6 +10,7 @@ use App\Models\TahunAjaran;
 use App\Services\NotificationService;
 use App\Services\PaywuzPaymentStatusService;
 use App\Services\PaywuzService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -714,7 +715,7 @@ class PembayaranDigitalController extends Controller
                 'payment_url' => (string) $transaction['paymentUrl'],
                 'gateway_total' => (int) ($transaction['totalPayment'] ?? $amount),
                 'gateway_status' => (string) $transaction['status'],
-                'payment_expires_at' => $transaction['expiresAt'] ?? null,
+                'payment_expires_at' => $this->parseGatewayDate($transaction['expiresAt'] ?? null),
                 'gateway_response' => json_encode($transaction),
                 'gateway_error' => null,
                 'gateway_attempts' => DB::raw('gateway_attempts + 1'),
@@ -730,6 +731,11 @@ class PembayaranDigitalController extends Controller
                 'gateway_error' => $this->gatewayUserMessage($exception),
                 'gateway_attempts' => DB::raw('gateway_attempts + 1'),
             ]);
+    }
+
+    private function parseGatewayDate(mixed $value): ?CarbonImmutable
+    {
+        return filled($value) ? CarbonImmutable::parse((string) $value) : null;
     }
 
     private function gatewayUserMessage(Throwable $exception): string

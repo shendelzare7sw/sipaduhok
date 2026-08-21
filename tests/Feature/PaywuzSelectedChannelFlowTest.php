@@ -244,7 +244,7 @@ class PaywuzSelectedChannelFlowTest extends TestCase
             'paymentMethod' => $paymentMethod,
             'status' => $status,
             'paymentUrl' => $paymentUrl,
-            'expiresAt' => now()->addHour()->toIso8601String(),
+            'expiresAt' => now('UTC')->addHour()->format('Y-m-d\TH:i:s.v\Z'),
         ];
     }
 }
