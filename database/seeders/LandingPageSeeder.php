@@ -36,7 +36,7 @@ class LandingPageSeeder extends Seeder
                     'description' => 'House Of Knowledge menyediakan media pembelajaran dan akademik berbasis website "SipaduHOK" sebagai media pembelajaran online yang lebih fleksibel',
                     'button_text' => 'Jelajahi Sekarang',
                     'button_link' => '#program',
-                    'image' => 'img/hero-img.jpg',
+                    'image' => 'img/hero-homeschooling.webp',
                     'background_image' => 'img/hero-bg.jpg',
                     'experience_years' => '14+',
                     'active_students' => '200+'

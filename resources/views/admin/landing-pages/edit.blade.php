@@ -514,10 +514,15 @@
                                 <div class="row g-3">
                                     @foreach($section->content as $key => $value)
                                         @if(is_array($value)) @continue @endif
-                                        @if($sectionKey === 'hero' && $key === 'image') @continue @endif
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">
-                                                {{ ucwords(str_replace('_', ' ', $key)) }}
+                                                @if($sectionKey === 'hero' && $key === 'image')
+                                                    Gambar Utama Hero
+                                                @elseif($sectionKey === 'hero' && $key === 'background_image')
+                                                    Gambar Latar Hero
+                                                @else
+                                                    {{ ucwords(str_replace('_', ' ', $key)) }}
+                                                @endif
                                             </label>
                                             @if($key === 'image' || str_contains($key, 'image') || $key === 'icon')
                                                 <div class="input-group">

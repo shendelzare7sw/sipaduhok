@@ -32,6 +32,10 @@
             'button_text' => 'Masuk ke Portal',
             'button_link' => route('login'),
         ]);
+        $heroImage = $heroContent['image'] ?? null;
+        if (!$heroImage || $heroImage === 'img/hero-img.jpg') {
+            $heroImage = 'img/hero-homeschooling.webp';
+        }
 
         $program = $page->getSection('program');
         $programContent = $program->content ?? [];
@@ -104,7 +108,7 @@
                 <!-- Right Content - Decorative Image -->
                 <div class="hidden lg:block">
                     <div class="decorative-frame-tilt relative">
-                        <img loading="lazy" decoding="async" src="{{ asset($heroContent['image'] ?? 'img/hero-img.jpg') }}" alt="Sipadu Homescholing" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
+                        <img loading="lazy" decoding="async" src="{{ asset($heroImage) }}" alt="Belajar homeschooling melalui Sipadu Homescholing" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
 
                         <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl px-5 py-4 shadow-xl transform -rotate-3">
                             <p class="font-bold text-gray-800">LMS & Pembayaran</p>
