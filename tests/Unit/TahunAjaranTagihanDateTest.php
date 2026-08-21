@@ -15,11 +15,11 @@ class TahunAjaranTagihanDateTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_default_jatuh_tempo_mengikuti_tanggal_sekarang_dalam_tahun_ajaran(): void
+    public function test_default_jatuh_tempo_mengikuti_akhir_tahun_ajaran_aktif(): void
     {
         Carbon::setTestNow('2026-08-16');
 
-        $this->assertSame('2026-09-16', $this->tahunAjaran()->getDefaultTagihanDueDate()->toDateString());
+        $this->assertSame('2027-06-20', $this->tahunAjaran()->getDefaultTagihanDueDate()->toDateString());
     }
 
     public function test_default_jatuh_tempo_tidak_melewati_akhir_tahun_ajaran(): void
@@ -33,10 +33,7 @@ class TahunAjaranTagihanDateTest extends TestCase
     {
         Carbon::setTestNow('2026-08-16');
 
-        $this->assertSame(
-            '2026-09-16',
-            $this->tahunAjaran()->normalizeTagihanDueDate('2025-09-16')->toDateString()
-        );
+        $this->assertSame('2026-09-16', $this->tahunAjaran()->normalizeTagihanDueDate('2025-09-16')->toDateString());
     }
 
     public function test_bulan_spp_dibangun_dari_rentang_tahun_ajaran(): void

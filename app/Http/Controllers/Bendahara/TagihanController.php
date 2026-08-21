@@ -83,6 +83,16 @@ class TagihanController extends Controller
         } else {
             $query = Siswa::whereIn('status', ['aktif', 'lulus']);
 
+            // Pada tahun ajaran aktif, daftar utama harus konsisten dengan
+            // sasaran Buat Tagihan Massal: hanya siswa aktif yang berada di
+            // kelas tahun ajaran tersebut. Alumni tetap dapat diakses melalui
+            // mode khusus Alumni Menunggak dan tidak lagi memenuhi halaman awal
+            // dengan nilai Rp 0 sementara tagihan siswa aktif ada di halaman lain.
+            if ($tahunAjaranAktif && $selectedYear->id === $tahunAjaranAktif->id) {
+                $query->where('status', 'aktif')
+                    ->whereIn('kelas_id', $kelasList->pluck('id'));
+            }
+
             // Filter berdasarkan kelas
             if ($request->filled('kelas_id')) {
                 $query->where('kelas_id', $request->kelas_id);
@@ -163,6 +173,7 @@ class TagihanController extends Controller
         if (! $isAlumniMode && $tahunAjaranAktif && $selectedYear && $selectedYear->id === $tahunAjaranAktif->id) {
             $tunggakanData = Tagihan::where('tahun_ajaran_id', '!=', $tahunAjaranAktif->id)
                 ->whereIn('status', ['belum_bayar', 'cicilan', 'terlambat'])
+                ->where('jumlah', '>', 0)
                 ->select('tahun_ajaran_id', DB::raw('COUNT(DISTINCT siswa_id) as jumlah_siswa'), DB::raw('SUM(jumlah) as total_tunggakan'))
                 ->groupBy('tahun_ajaran_id')
                 ->get();
@@ -664,14 +675,23 @@ class TagihanController extends Controller
                     );
                 }
 
-                $message = "Tagihan berhasil dibuat untuk {$totalCreated} data";
-                if ($totalSkipped > 0) {
-                    $message .= " ({$totalSkipped} data dilewati karena siswa sudah memiliki tagihan jenis tersebut)";
-                }
-                $message .= " dari {$kelasCount} kelas.";
+                $redirect = redirect()->route($this->getRoutePrefix().'.index', [
+                    'tahun_ajaran_id' => $tahunAjaranAktif->id,
+                ]);
 
-                return redirect()->route($this->getRoutePrefix().'.index')
-                    ->with('success', $message);
+                if ($totalCreated === 0 && $totalSkipped > 0) {
+                    return $redirect->with(
+                        'warning',
+                        "Tidak ada tagihan baru yang dibuat. {$totalSkipped} data tagihan sudah tersedia pada tahun ajaran {$tahunAjaranAktif->nama_tahun_ajaran}."
+                    );
+                }
+
+                $message = "Berhasil membuat {$totalCreated} tagihan baru dari {$kelasCount} kelas.";
+                if ($totalSkipped > 0) {
+                    $message .= " {$totalSkipped} data yang sudah tersedia tidak dibuat ulang.";
+                }
+
+                return $redirect->with('success', $message);
             } catch (\Exception $e) {
                 DB::rollBack();
 

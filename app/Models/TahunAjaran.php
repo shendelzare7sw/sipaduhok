@@ -174,16 +174,15 @@ class TahunAjaran extends Model
     }
 
     /**
-     * Default jatuh tempo tagihan: satu bulan dari tanggal acuan dan selalu
-     * berada di dalam rentang tahun ajaran ini.
+     * Default jatuh tempo tagihan mengikuti akhir tahun ajaran.
+     *
+     * Tagihan massal adalah kewajiban untuk satu periode akademik penuh. Karena
+     * itu, pada tahun ajaran lintas kalender (mis. 2026/2027), nilai awal form
+     * harus ikut menunjuk ke 2027 dan tidak berhenti di tahun kalender saat ini.
      */
-    public function getDefaultTagihanDueDate(?CarbonInterface $reference = null): Carbon
+    public function getDefaultTagihanDueDate(): Carbon
     {
-        $candidate = Carbon::parse($reference ?? now())
-            ->startOfDay()
-            ->addMonthNoOverflow();
-
-        return $this->clampTagihanDate($candidate);
+        return $this->tanggal_selesai->copy()->startOfDay();
     }
 
     /**
