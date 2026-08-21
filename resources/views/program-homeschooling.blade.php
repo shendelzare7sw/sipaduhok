@@ -16,7 +16,7 @@
     <x-navbar></x-navbar>
 
     <!-- Hero Section -->
-    <section class="relative h-[400px] flex items-center justify-center" style="background-image: url('{{ asset('img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
+    <section class="relative h-[400px] flex items-center justify-center bg-gradient-to-br from-[#165fac] via-[#217b8c] to-[#287f3b]">
         <div class="hero-overlay absolute inset-0"></div>
         <div class="relative z-10 text-center text-white px-4">
             <nav class="text-sm mb-4">
@@ -66,7 +66,7 @@
                     </div>
                 </div>
                 <div class="relative">
-                    <img loading="lazy" decoding="async" src="{{ asset('img/hero-img.jpg') }}" alt="Homeschooling" class="rounded-2xl shadow-xl w-full h-[400px] object-cover">
+                    <img loading="lazy" decoding="async" src="{{ asset('img/hero-homeschooling.webp') }}" alt="Belajar homeschooling melalui Sipadu Homescholing" class="rounded-2xl shadow-xl w-full h-[400px] object-cover">
                 </div>
             </div>
         </div>
