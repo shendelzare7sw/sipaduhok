@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <x-seo-meta title="Kontak - HOK Homeschooling" description="Hubungi HOK Homeschooling melalui WhatsApp, telepon, email, atau media sosial."></x-seo-meta>
+    <x-seo-meta title="Kontak - Sipadu Homescholing" description="Hubungi Sipadu Homescholing melalui WhatsApp, telepon, email, atau media sosial."></x-seo-meta>
 
     <!-- CDN Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -225,7 +225,7 @@
                 {{ $socialHeader['title'] ?? 'Ikuti Kami di Sosial Media' }}
             </h2>
             <p class="text-gray-600 mb-12">
-                Dapatkan informasi terbaru tentang HOK Homeschooling
+                Dapatkan informasi terbaru tentang Sipadu Homescholing
             </p>
 
             <div class="flex flex-wrap justify-center gap-6">

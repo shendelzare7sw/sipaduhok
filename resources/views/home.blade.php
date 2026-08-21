@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <x-seo-meta title="HOK Homeschooling - LMS & Pembayaran" description="Portal HOK Homeschooling untuk pembelajaran daring serta pembayaran tagihan orang tua." keywords="HOK Homeschooling, LMS homeschooling, pembayaran tagihan homeschooling"></x-seo-meta>
+    <x-seo-meta title="Sipadu Homescholing - LMS & Pembayaran" description="Portal Sipadu Homescholing untuk pembelajaran daring serta pembayaran tagihan orang tua." keywords="Sipadu Homescholing, LMS homeschooling, pembayaran tagihan homeschooling"></x-seo-meta>
 
     <!-- CDN Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +37,7 @@
         $programContent = $program->content ?? [];
         $programHeader = [
             'badge' => 'Layanan Utama',
-            'title' => 'Portal HOK Homeschooling',
+            'title' => 'Portal Sipadu Homescholing',
             'description' => 'Layanan digital difokuskan pada pembelajaran homeschooling dan pembayaran tagihan orang tua.',
         ];
         $programItems = [
@@ -104,7 +104,7 @@
                 <!-- Right Content - Decorative Image -->
                 <div class="hidden lg:block">
                     <div class="decorative-frame-tilt relative">
-                        <img loading="lazy" decoding="async" src="{{ asset($heroContent['image'] ?? 'img/hero-img.jpg') }}" alt="HOK Homeschooling" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
+                        <img loading="lazy" decoding="async" src="{{ asset($heroContent['image'] ?? 'img/hero-img.jpg') }}" alt="Sipadu Homescholing" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
 
                         <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl px-5 py-4 shadow-xl transform -rotate-3">
                             <p class="font-bold text-gray-800">LMS & Pembayaran</p>
@@ -238,7 +238,7 @@
                 $aboutContent = $aboutSection->content ?? [];
                 $aboutContent = array_merge($aboutContent, [
                     'badge' => 'Tentang Layanan',
-                    'title' => 'HOK Homeschooling Perorangan',
+                    'title' => 'Sipadu Homescholing',
                     'description_1' => 'Layanan pendampingan homeschooling dengan proses belajar yang fleksibel dan lebih personal sesuai kebutuhan anak.',
                     'description_2' => 'Portal ini digunakan untuk kegiatan LMS serta akses pembayaran tagihan orang tua melalui akun masing-masing.',
                     'button_text' => 'Lihat Program',
@@ -254,7 +254,7 @@
                 <!-- Left - Image -->
                 <div class="relative">
                     <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                        <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image'] ?? 'img/about-img.jpg') }}" alt="HOK Homeschooling Perorangan" class="w-full h-[450px] object-cover">
+                        <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image'] ?? 'img/about-img.jpg') }}" alt="Sipadu Homescholing" class="w-full h-[450px] object-cover">
                     </div>
 
                     <!-- Experience Badge -->
@@ -521,7 +521,7 @@
     <section class="py-20" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-                Akses Layanan HOK Homeschooling
+                Akses Layanan Sipadu Homescholing
             </h2>
             <p class="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
                 Masuk untuk mengikuti pembelajaran atau melihat tagihan yang telah diterbitkan melalui akun Anda.

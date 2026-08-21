@@ -10,7 +10,7 @@
     <div class="flex flex-col items-center mt-10 space-y-2">
         <!-- Beranda -->
         <a href="{{ url('/') }}" class="text-white px-4 py-2 text-lg font-medium rounded-full w-full text-center {{ request()->is('/') ? 'active-mobile' : '' }}">Beranda</a>       
-        <!-- Tampilan publik difokuskan pada layanan homeschooling perorangan. -->
+        <!-- Tampilan publik difokuskan pada layanan homeschooling. -->
         <a href="{{ url('/program-homeschooling') }}"
             class="text-white px-4 py-2 text-lg font-medium rounded-full w-full text-center {{ request()->is('program-homeschooling') ? 'active-mobile' : '' }}">
             Homeschooling

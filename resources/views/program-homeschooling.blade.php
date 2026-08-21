@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <x-seo-meta title="Homeschooling Perorangan - HOK" description="Layanan HOK Homeschooling Perorangan dengan pendampingan belajar fleksibel, LMS, dan akses tagihan orang tua." keywords="homeschooling perorangan, LMS homeschooling, pendampingan belajar"></x-seo-meta>
+    <x-seo-meta title="Program - Sipadu Homescholing" description="Layanan Sipadu Homescholing dengan pendampingan belajar fleksibel, LMS, dan akses tagihan orang tua." keywords="Sipadu Homescholing, LMS homeschooling, pendampingan belajar"></x-seo-meta>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 
@@ -24,9 +24,9 @@
                 <span class="mx-2">/</span>
                 <span>Program</span>
                 <span class="mx-2">/</span>
-                <span class="font-semibold">Homeschooling Perorangan</span>
+                <span class="font-semibold">Program Homeschooling</span>
             </nav>
-            <h1 class="text-4xl md:text-5xl font-bold">Homeschooling Perorangan</h1>
+            <h1 class="text-4xl md:text-5xl font-bold">Sipadu Homescholing</h1>
             <p class="mt-4 text-lg text-white/90">Pendampingan belajar fleksibel sesuai kebutuhan anak</p>
         </div>
     </section>
@@ -36,10 +36,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <span class="inline-block bg-[#165fac]/20 text-[#165fac] px-4 py-2 rounded-full text-sm font-semibold mb-4">Layanan Perorangan</span>
+                    <span class="inline-block bg-[#165fac]/20 text-[#165fac] px-4 py-2 rounded-full text-sm font-semibold mb-4">Layanan Homeschooling</span>
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Belajar Lebih Personal dan Terarah</h2>
                     <p class="text-gray-600 mb-6 leading-relaxed">
-                        HOK Homeschooling menyediakan pendampingan belajar yang fleksibel dan personal. Ritme, jadwal, serta aktivitas belajar dapat disesuaikan dengan kebutuhan setiap anak.
+                        Sipadu Homescholing menyediakan pendampingan belajar yang fleksibel dan personal. Ritme, jadwal, serta aktivitas belajar dapat disesuaikan dengan kebutuhan setiap anak.
                     </p>
                     <p class="text-gray-600 mb-6 leading-relaxed">
                         Kegiatan pembelajaran didukung melalui LMS, sedangkan orang tua dapat mengakses tagihan yang tersedia setelah login.

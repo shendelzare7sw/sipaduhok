@@ -1,7 +1,7 @@
 @props([
-    'title' => 'HOK Homeschooling - LMS & Pembayaran',
-    'description' => 'Portal HOK Homeschooling untuk pembelajaran daring dan pembayaran tagihan orang tua.',
-    'keywords' => 'HOK Homeschooling, LMS homeschooling, pembayaran tagihan homeschooling',
+    'title' => 'Sipadu Homescholing - LMS & Pembayaran',
+    'description' => 'Portal Sipadu Homescholing untuk pembelajaran daring dan pembayaran tagihan orang tua.',
+    'keywords' => 'Sipadu Homescholing, LMS homeschooling, pembayaran tagihan homeschooling',
     'image' => asset('img/hero-bg.jpg')
 ])
 
@@ -10,7 +10,7 @@
 <meta name="title" content="{{ $title }}">
 <meta name="description" content="{{ $description }}">
 <meta name="keywords" content="{{ $keywords }}">
-<meta name="author" content="HOK Homeschooling">
+<meta name="author" content="Sipadu Homescholing">
 
 <!-- Favicons -->
 <link rel="icon" type="image/png" href="{{ asset('img/logo/logo.png') }}">
@@ -26,7 +26,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="{{ $title }}">
 <meta property="og:locale" content="id_ID">
-<meta property="og:site_name" content="HOK Homeschooling">
+<meta property="og:site_name" content="Sipadu Homescholing">
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
@@ -48,7 +48,7 @@
     {
       "@type": "Organization",
       "@id": "{{ config('app.url') }}#organization",
-      "name": "HOK Homeschooling",
+      "name": "Sipadu Homescholing",
       "alternateName": "SipaduHOK",
       "url": "{{ config('app.url') }}",
       "logo": {
@@ -69,7 +69,7 @@
       "@type": "WebSite",
       "@id": "{{ config('app.url') }}#website",
       "url": "{{ config('app.url') }}",
-      "name": "HOK Homeschooling",
+      "name": "Sipadu Homescholing",
       "description": "{{ $description }}"
     }
   ]

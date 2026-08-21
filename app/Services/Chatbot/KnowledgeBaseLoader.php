@@ -483,7 +483,7 @@ class KnowledgeBaseLoader
                 '/program-inklusi' => 'Program Pendidikan Inklusi (anak berkebutuhan khusus)',
                 '/program-terapi' => 'Program Terapi / Konseling',
                 '/fasilitas' => 'Fasilitas sekolah (ruang kelas, lab, dll)',
-                '/pendaftaran' => 'Pendaftaran HOK Homeschooling — alur, persyaratan, dan kisaran biaya',
+                '/pendaftaran' => 'Pendaftaran Sipadu Homescholing — alur, persyaratan, dan kisaran biaya',
                 '/galeri' => 'Galeri foto kegiatan sekolah',
                 '/kontak' => 'Kontak sekolah (alamat, telepon, email, peta)',
                 '/berita' => 'Berita & Artikel sekolah',

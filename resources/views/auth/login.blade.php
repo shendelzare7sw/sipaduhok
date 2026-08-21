@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk LMS - HOK Homeschooling</title>
+    <title>Masuk LMS - Sipadu Homescholing</title>
     <!-- Favicons -->
     <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/logo.png') }}">
@@ -46,7 +46,7 @@
                         
                         <div class="relative z-10 text-center">
                             <h1 class="text-4xl font-bold mb-4">Selamat Datang!</h1>
-                            <p class="text-xl text-white/90">HOK Homeschooling</p>
+                            <p class="text-xl text-white/90">Sipadu Homescholing</p>
                             <p class="mt-4 text-white/70">LMS dan pembayaran dalam satu portal</p>
                         </div>
                     </div>
@@ -69,7 +69,7 @@
                                     <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z"/>
                                 </svg>
                             </div>
-                            <span class="text-sm font-semibold text-gray-700 leading-tight">HOK Homeschooling</span>
+                            <span class="text-sm font-semibold text-gray-700 leading-tight">Sipadu Homescholing</span>
                         </div>
 
                         <!-- Form Header -->
@@ -210,7 +210,7 @@
                         <span class="font-bold underline decoration-white/50 group-hover:decoration-white underline-offset-4">Hubungi Administrator</span>
                     @endif
                 </p>
-                <p class="opacity-70">&copy; 2026 HOK Homeschooling. All rights reserved.</p>
+                <p class="opacity-70">&copy; 2026 Sipadu Homescholing. All rights reserved.</p>
             </div>
         </div>
     </div>

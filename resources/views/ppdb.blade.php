@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <x-seo-meta title="Pendaftaran - HOK Homeschooling" description="Informasi alur dan persyaratan pendaftaran HOK Homeschooling Perorangan."></x-seo-meta>
+    <x-seo-meta title="Pendaftaran - Sipadu Homescholing" description="Informasi alur dan persyaratan pendaftaran Sipadu Homescholing."></x-seo-meta>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
@@ -98,7 +98,7 @@
                     <div class="text-center p-5 bg-gradient-to-br from-secondary/10 to-secondary/5 rounded-2xl">
                         <div class="text-3xl text-secondary mb-2"><i class="fas fa-user-graduate"></i></div>
                         <p class="text-sm text-gray-600 mb-1">Bentuk Layanan</p>
-                        <p class="text-lg font-bold text-gray-800">Pendampingan Perorangan</p>
+                        <p class="text-lg font-bold text-gray-800">Pendampingan Personal</p>
                     </div>
                 </div>
             </div>
@@ -175,14 +175,14 @@
                     </article>
                 </div>
 
-                <p class="text-center text-sm text-gray-500 mt-8">Konfirmasi rincian dan pilihan pendampingan melalui kontak HOK Homeschooling.</p>
+                <p class="text-center text-sm text-gray-500 mt-8">Konfirmasi rincian dan pilihan pendampingan melalui kontak Sipadu Homescholing.</p>
             </div>
         </section>
 
         <section class="py-16" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
             <div class="max-w-4xl mx-auto px-4 text-center">
                 <h2 class="text-3xl font-bold text-white mb-4">Siap Memulai Konsultasi?</h2>
-                <p class="text-white/90 mb-8">Hubungi kontak HOK Homeschooling untuk membicarakan kebutuhan belajar anak Anda.</p>
+                <p class="text-white/90 mb-8">Hubungi kontak Sipadu Homescholing untuk membicarakan kebutuhan belajar anak Anda.</p>
                 <a href="https://wa.me/6285811258534?text=Halo%20HOK%20Homeschooling,%20saya%20ingin%20konsultasi%20pendaftaran"
                     target="_blank" rel="noopener noreferrer"
                     class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-full hover:bg-gray-100 transition">
