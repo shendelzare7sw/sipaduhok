@@ -24,6 +24,32 @@ const updateModeDisplay = () => {
   card.classList.toggle('is-sandbox', !production);
 };
 
+const copyToClipboard = async (value) => {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return;
+    } catch (error) {
+      console.warn('Clipboard API ditolak, mencoba fallback browser.', error);
+    }
+  }
+
+  const input = document.createElement('textarea');
+  input.value = value;
+  input.setAttribute('readonly', '');
+  input.style.position = 'fixed';
+  input.style.opacity = '0';
+  document.body.appendChild(input);
+  input.select();
+
+  const copied = document.execCommand('copy');
+  input.remove();
+
+  if (!copied) {
+    throw new Error('Browser menolak akses clipboard.');
+  }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-toggle-edit]').forEach((button) => {
     button.addEventListener('click', () => setPanelState(button.dataset.type));
@@ -33,10 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.querySelectorAll('[data-copy-value]').forEach((button) => {
     button.addEventListener('click', async () => {
-      await navigator.clipboard.writeText(button.dataset.copyValue || '');
       const icon = button.querySelector('i');
-      icon?.classList.replace('fa-copy', 'fa-check');
-      setTimeout(() => icon?.classList.replace('fa-check', 'fa-copy'), 1500);
+
+      try {
+        await copyToClipboard(button.dataset.copyValue || '');
+        icon?.classList.replace('fa-copy', 'fa-check');
+        button.title = 'Berhasil disalin';
+        setTimeout(() => {
+          icon?.classList.replace('fa-check', 'fa-copy');
+          button.title = 'Salin URL webhook';
+        }, 1500);
+      } catch (error) {
+        console.error('Gagal menyalin URL webhook:', error);
+        button.title = 'Gagal menyalin. Salin URL dari kolom di samping.';
+      }
     });
   });
   document.getElementById('paywuzEnvironment')?.addEventListener('change', updateModeDisplay);

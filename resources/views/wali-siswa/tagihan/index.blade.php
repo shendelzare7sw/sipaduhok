@@ -436,7 +436,7 @@
                                     @endif
 
                                     {{-- Direct Transfer Option --}}
-                                    @if($infoPembayaran->hasRekeningBank())
+                                    @if($infoPembayaran->isDirectTransferEnabled())
                                         <div class="col-md-4">
                                             <input type="radio" class="btn-check" name="metode_pembayaran" id="methodTransfer"
                                                 value="transfer" autocomplete="off" required>
@@ -465,7 +465,7 @@
                                     {{-- Tunai Option Removed from Selection --}}
                                 </div>
 
-                                    @if((!$infoPembayaran->isPaywuzEnabled() || count($paymentMethods) === 0) && !$infoPembayaran->hasRekeningBank())
+                                    @if((!$infoPembayaran->isPaywuzEnabled() || count($paymentMethods) === 0) && !$infoPembayaran->isDirectTransferEnabled())
                                         <div class="alert alert-warning d-flex align-items-center mt-3 mb-0" role="alert">
                                             <i class="fas fa-exclamation-triangle me-2"></i>
                                             <div class="small">
@@ -501,12 +501,13 @@
                             @if($infoPembayaran->isPaywuzEnabled() && count($paymentMethods) === 0)
                                 <div class="alert alert-warning">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
-                                    Kanal pembayaran digital sedang tidak dapat dimuat. Silakan gunakan Direct Transfer atau coba kembali nanti.
+                                    Kanal pembayaran digital sedang tidak dapat dimuat.
+                                    {{ $infoPembayaran->isDirectTransferEnabled() ? 'Silakan gunakan Direct Transfer atau coba kembali nanti.' : 'Silakan coba kembali nanti atau hubungi sekolah.' }}
                                 </div>
                             @endif
 
                             {{-- 2. Direct Transfer Info --}}
-                            @if($infoPembayaran->hasRekeningBank())
+                            @if($infoPembayaran->isDirectTransferEnabled())
                                 <div id="infoTransfer" class="method-info d-none">
                                     <div class="card bg-label-info border border-info mb-3">
                                         <div class="card-body">
@@ -592,7 +593,7 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
                             <button type="submit" class="btn btn-primary" id="btnSubmitBulk"
-                                @if((!$infoPembayaran->isPaywuzEnabled() || count($paymentMethods) === 0) && !$infoPembayaran->hasRekeningBank())
+                                @if((!$infoPembayaran->isPaywuzEnabled() || count($paymentMethods) === 0) && !$infoPembayaran->isDirectTransferEnabled())
                                     disabled
                                 @endif
                             >

@@ -1,5 +1,6 @@
 @php
     $hasRekening = $infoPembayaran->hasRekeningBank();
+    $directTransferEnabled = $infoPembayaran->isDirectTransferEnabled();
     $gatewayConfigured = $infoPembayaran->hasPaywuz();
     $gatewayEnabled = $infoPembayaran->isPaywuzEnabled();
     $isProduction = old('paywuz_environment', $infoPembayaran->paywuz_is_production ? 'production' : 'sandbox') === 'production';
@@ -12,7 +13,7 @@
     <div class="stat-row">
         <div class="stat-widget">
             <div class="stat-icon stat-icon-blue"><i class="fas fa-university"></i></div>
-            <div><div class="stat-value">{{ $hasRekening ? 'Aktif' : 'Belum' }}</div><div class="stat-label">Direct Transfer</div><div class="stat-desc">{{ $hasRekening ? $infoPembayaran->nama_bank : 'Rekening belum diatur' }}</div></div>
+            <div><div class="stat-value">{{ $directTransferEnabled ? 'Aktif' : ($hasRekening ? 'Off' : 'Belum') }}</div><div class="stat-label">Direct Transfer</div><div class="stat-desc">{{ !$hasRekening ? 'Rekening belum diatur' : ($directTransferEnabled ? $infoPembayaran->nama_bank : 'Disembunyikan dari wali siswa') }}</div></div>
         </div>
         <div class="stat-widget">
             <div class="stat-icon stat-icon-green"><i class="fas fa-credit-card"></i></div>
@@ -24,14 +25,14 @@
         </div>
         <div class="stat-widget">
             <div class="stat-icon stat-icon-purple"><i class="fas fa-shield-alt"></i></div>
-            <div><div class="stat-value">{{ $gatewayEnabled && $hasRekening ? 'Siap' : 'Cek' }}</div><div class="stat-label">Kesiapan Kanal</div><div class="stat-desc">{{ $gatewayEnabled && $hasRekening ? 'Semua kanal utama tersedia' : 'Ada kanal yang perlu dilengkapi' }}</div></div>
+            <div><div class="stat-value">{{ $gatewayEnabled || $directTransferEnabled ? 'Siap' : 'Cek' }}</div><div class="stat-label">Kesiapan Kanal</div><div class="stat-desc">{{ $gatewayEnabled || $directTransferEnabled ? 'Minimal satu kanal online tersedia' : 'Tidak ada kanal online aktif' }}</div></div>
         </div>
     </div>
 
     <div class="pay-grid">
         <div class="pay-card">
             <div class="pay-card-header">
-                <div><h5 class="pay-card-title"><i class="fas fa-university pay-card-title-icon-primary"></i> Rekening Bank Tujuan</h5><div class="pay-card-subtitle">Ditampilkan untuk instruksi Direct Transfer.</div></div>
+                <div><h5 class="pay-card-title"><i class="fas fa-university pay-card-title-icon-primary"></i> Rekening Bank Tujuan</h5><div class="pay-card-subtitle">Data tetap tersimpan meskipun Direct Transfer dinonaktifkan.</div></div>
                 <button type="button" class="btn btn-outline-primary btn-sm btn-pay-action" data-toggle-edit data-type="rekening"><i class="fas fa-edit"></i> Atur Rekening</button>
             </div>
             <div class="pay-card-body">
@@ -101,7 +102,7 @@
         <div class="pay-card">
             <div class="pay-card-header"><div><h5 class="pay-card-title"><i class="fas fa-satellite-dish pay-card-title-icon-info"></i> Status Kanal</h5><div class="pay-card-subtitle">Kanal yang tersedia untuk wali siswa.</div></div></div>
             <div class="pay-card-body"><div class="pay-status-grid">
-                <div class="pay-status-item {{ $hasRekening ? 'is-active' : 'is-inactive' }}"><div class="pay-status-main"><div class="pay-status-icon {{ $hasRekening ? 'pay-status-icon-active' : 'pay-status-icon-inactive' }}"><i class="fas fa-university"></i></div><div><div class="pay-status-title">Direct Transfer</div><div class="pay-status-desc">{{ $hasRekening ? 'Kanal aktif' : 'Belum terhubung' }}</div></div></div></div>
+                <div class="pay-status-item {{ $directTransferEnabled ? 'is-active' : 'is-inactive' }}"><div class="pay-status-main"><div class="pay-status-icon {{ $directTransferEnabled ? 'pay-status-icon-active' : 'pay-status-icon-inactive' }}"><i class="fas fa-university"></i></div><div><div class="pay-status-title">Direct Transfer</div><div class="pay-status-desc">{{ !$hasRekening ? 'Lengkapi rekening terlebih dahulu' : ($directTransferEnabled ? 'Tampil untuk wali siswa' : 'Disembunyikan dari wali siswa') }}</div></div></div>@if($hasRekening)<form action="{{ $updateRoute }}" method="POST" class="ms-auto">@csrf<input type="hidden" name="type" value="direct_transfer_toggle"><div class="form-check form-switch mb-0"><input type="checkbox" class="form-check-input" name="direct_transfer_enabled" value="1" @checked($infoPembayaran->direct_transfer_enabled) data-submit-on-change aria-label="Aktifkan atau nonaktifkan Direct Transfer"></div></form>@endif</div>
                 <div class="pay-status-item {{ $gatewayEnabled ? 'is-active' : 'is-inactive' }}"><div class="pay-status-main"><div class="pay-status-icon {{ $gatewayEnabled ? 'pay-status-icon-active' : 'pay-status-icon-inactive' }}"><i class="fas fa-credit-card"></i></div><div><div class="pay-status-title">Pembayaran Digital</div><div class="pay-status-desc">{{ !$gatewayConfigured ? 'Belum terhubung' : ($gatewayEnabled ? 'Kanal aktif' : 'Dinonaktifkan') }}</div></div></div>@if($gatewayConfigured)<form action="{{ $updateRoute }}" method="POST" class="ms-auto">@csrf<input type="hidden" name="type" value="paywuz_toggle"><div class="form-check form-switch mb-0"><input type="checkbox" class="form-check-input" name="paywuz_enabled" value="1" @checked($infoPembayaran->paywuz_enabled) data-submit-on-change></div></form>@endif</div>
                 <div class="pay-status-item is-active"><div class="pay-status-main"><div class="pay-status-icon pay-status-icon-active"><i class="fas fa-money-bill-wave"></i></div><div><div class="pay-status-title">Pembayaran Kasir</div><div class="pay-status-desc">Kanal selalu aktif</div></div></div></div>
             </div></div>

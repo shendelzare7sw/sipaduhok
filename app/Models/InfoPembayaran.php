@@ -16,6 +16,7 @@ class InfoPembayaran extends Model
         'nama_bank',
         'rekening_bank',
         'atas_nama',
+        'direct_transfer_enabled',
         'paywuz_sandbox_api_key',
         'paywuz_production_api_key',
         'paywuz_is_production',
@@ -28,6 +29,7 @@ class InfoPembayaran extends Model
     ];
 
     protected $casts = [
+        'direct_transfer_enabled' => 'boolean',
         'paywuz_is_production' => 'boolean',
         'paywuz_enabled' => 'boolean',
         'paywuz_fee_by_merchant' => 'boolean',
@@ -64,6 +66,14 @@ class InfoPembayaran extends Model
         return ! empty($this->rekening_bank) &&
                ! empty($this->nama_bank) &&
                ! empty($this->atas_nama);
+    }
+
+    /**
+     * Direct Transfer hanya tersedia jika diaktifkan dan data rekening lengkap.
+     */
+    public function isDirectTransferEnabled(): bool
+    {
+        return (bool) $this->direct_transfer_enabled && $this->hasRekeningBank();
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Cabang;
+use App\Models\InfoPembayaran;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\Tagihan;
@@ -46,14 +47,21 @@ class OrangTuaBayarTagihanIdorTest extends TestCase
 
             // Orang tua yang login + anaknya sendiri
             $parent = $this->makeUser('orang_tua', "ortu.$suffix@test.local");
-            $anakSendiri = $this->makeSiswa($cabang->id, $kelas->id, 'S' . $suffix);
+            $anakSendiri = $this->makeSiswa($cabang->id, $kelas->id, 'S'.$suffix);
             $this->linkParent($parent->id, $anakSendiri->id);
 
             // Anak orang lain (TIDAK terhubung ke $parent)
-            $anakOrangLain = $this->makeSiswa($cabang->id, $kelas->id, 'L' . $suffix);
+            $anakOrangLain = $this->makeSiswa($cabang->id, $kelas->id, 'L'.$suffix);
 
             $tagihanSendiri = $this->makeTagihan($anakSendiri->id, $ta->id);
             $tagihanOrangLain = $this->makeTagihan($anakOrangLain->id, $ta->id);
+            $infoPembayaran = InfoPembayaran::getInstance();
+            $infoPembayaran->update([
+                'nama_bank' => 'Bank Test',
+                'rekening_bank' => '1234567890',
+                'atas_nama' => 'Sekolah Test',
+                'direct_transfer_enabled' => true,
+            ]);
 
             $this->actingAs($parent)->withoutMiddleware();
 
@@ -78,6 +86,21 @@ class OrangTuaBayarTagihanIdorTest extends TestCase
                 'siswa_id' => $anakSendiri->id,
                 'status_validasi' => 'pending',
             ]);
+
+            // Kanal yang disembunyikan dari UI juga wajib ditolak di server,
+            // meskipun request transfer dikirim secara manual dari browser.
+            $tagihanSaatTransferOff = $this->makeTagihan($anakSendiri->id, $ta->id);
+            $infoPembayaran->update(['direct_transfer_enabled' => false]);
+
+            $this->post(route('wali-siswa.tagihan.bayar', $anakSendiri->id), [
+                'tagihan_id' => $tagihanSaatTransferOff->id,
+                'jumlah_bayar' => 50000,
+                'metode_pembayaran' => 'transfer',
+                'bukti_bayar' => UploadedFile::fake()->image('bukti-disabled.jpg'),
+            ])->assertSessionHas('error', 'Direct Transfer sedang dinonaktifkan. Silakan pilih pembayaran digital.');
+            $this->assertDatabaseMissing('pembayaran', [
+                'tagihan_id' => $tagihanSaatTransferOff->id,
+            ]);
         } finally {
             DB::connection('mysql')->rollBack();
         }
@@ -85,25 +108,27 @@ class OrangTuaBayarTagihanIdorTest extends TestCase
 
     private function makeKelas(int $cabangId, int $taId, string $suffix): Kelas
     {
-        $k = new Kelas();
+        $k = new Kelas;
         $k->cabang_id = $cabangId;
         $k->tahun_ajaran_id = $taId;
-        $k->nama_kelas = 'Kelas ' . $suffix;
+        $k->nama_kelas = 'Kelas '.$suffix;
         $k->jenjang = 'SMP';
-        $k->kode_kelas = 'K' . $suffix;
+        $k->kode_kelas = 'K'.$suffix;
         $k->kuota_siswa = 30;
         $k->save();
+
         return $k;
     }
 
     private function makeUser(string $role, string $email): User
     {
-        $u = new User();
-        $u->name = 'User ' . $email;
+        $u = new User;
+        $u->name = 'User '.$email;
         $u->email = $email;
         $u->role = $role;
         $u->password = bcrypt('password');
         $u->save();
+
         return $u;
     }
 
@@ -111,12 +136,12 @@ class OrangTuaBayarTagihanIdorTest extends TestCase
     {
         $u = $this->makeUser('siswa', "siswa.$suffix@test.local");
 
-        $s = new Siswa();
+        $s = new Siswa;
         $s->user_id = $u->id;
         $s->cabang_id = $cabangId;
         $s->kelas_id = $kelasId;
-        $s->nisn = 'N' . $suffix;
-        $s->nama_lengkap = 'Siswa ' . $suffix;
+        $s->nisn = 'N'.$suffix;
+        $s->nama_lengkap = 'Siswa '.$suffix;
         $s->jenis_kelamin = 'L';
         $s->tempat_lahir = '-';
         $s->tanggal_lahir = '2010-01-01';
@@ -124,6 +149,7 @@ class OrangTuaBayarTagihanIdorTest extends TestCase
         $s->tanggal_masuk = now();
         $s->status = 'aktif';
         $s->save();
+
         return $s;
     }
 
@@ -143,7 +169,7 @@ class OrangTuaBayarTagihanIdorTest extends TestCase
 
     private function makeTagihan(int $siswaId, int $taId): Tagihan
     {
-        $t = new Tagihan();
+        $t = new Tagihan;
         $t->siswa_id = $siswaId;
         $t->tahun_ajaran_id = $taId;
         $t->jenis_tagihan = 'spp';
@@ -152,6 +178,7 @@ class OrangTuaBayarTagihanIdorTest extends TestCase
         $t->tanggal_jatuh_tempo = now()->addDays(7);
         $t->status = 'belum_bayar';
         $t->save();
+
         return $t;
     }
 }

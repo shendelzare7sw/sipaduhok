@@ -111,6 +111,23 @@ class InfoPembayaranController extends Controller
             $status = $request->has('paywuz_enabled') ? 'diaktifkan' : 'dinonaktifkan';
             $message = "Metode pembayaran digital berhasil {$status}.";
 
+        } elseif ($type === 'direct_transfer_toggle') {
+            $info = InfoPembayaran::getInstance();
+            $enabled = $request->boolean('direct_transfer_enabled');
+
+            if ($enabled && ! $info->hasRekeningBank()) {
+                return redirect()->back()->with('error', 'Lengkapi rekening bank sebelum mengaktifkan Direct Transfer.');
+            }
+
+            $data = [
+                'direct_transfer_enabled' => $enabled,
+                'updated_by' => auth()->id(),
+            ];
+
+            $message = $enabled
+                ? 'Direct Transfer berhasil diaktifkan dan akan tampil untuk wali siswa.'
+                : 'Direct Transfer berhasil dinonaktifkan dan disembunyikan dari wali siswa.';
+
         } else {
             return redirect()->back()->with('error', 'Tipe update tidak valid.');
         }

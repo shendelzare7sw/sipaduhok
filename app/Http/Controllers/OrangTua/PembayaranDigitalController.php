@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\OrangTua;
 
 use App\Http\Controllers\Controller;
+use App\Models\InfoPembayaran;
 use App\Models\Pembayaran;
 use App\Models\Tagihan;
 use App\Models\TahunAjaran;
@@ -45,6 +46,10 @@ class PembayaranDigitalController extends Controller
 
         $tagihan = Tagihan::query()->findOrFail($validated['tagihan_id']);
         $this->guardTagihan($tagihan, $siswa->id);
+
+        if ($validated['metode_pembayaran'] === 'transfer' && ! InfoPembayaran::getInstance()->isDirectTransferEnabled()) {
+            return back()->with('error', 'Direct Transfer sedang dinonaktifkan. Silakan pilih pembayaran digital.')->withInput();
+        }
 
         $amount = (int) $validated['jumlah_bayar'];
         $this->guardAmount($tagihan, $amount);
@@ -173,6 +178,10 @@ class PembayaranDigitalController extends Controller
             'payment_method' => ['required_if:metode_pembayaran,paywuz', 'nullable', 'string', 'max:50'],
             'bukti_bayar' => ['required_if:metode_pembayaran,transfer', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:10240'],
         ]);
+
+        if ($validated['metode_pembayaran'] === 'transfer' && ! InfoPembayaran::getInstance()->isDirectTransferEnabled()) {
+            return back()->with('error', 'Direct Transfer sedang dinonaktifkan. Silakan pilih pembayaran digital.')->withInput();
+        }
 
         $tagihan = Tagihan::query()
             ->whereIn('id', collect($validated['items'])->pluck('tagihan_id'))
