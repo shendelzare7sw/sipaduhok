@@ -1,449 +1,77 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Data Siswa')
 @section('page-title', 'Data Siswa')
-@section('page-subtitle', 'Kelola data seluruh siswa aktif dan alumni')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/users/siswa.css'])
-@endsection
+@section('page-subtitle', 'Kelola siswa aktif, alumni, dan penempatan kelas')
 
 @section('content')
-<div class="user-list-shell">
-        {{-- KONFIRMASI KEDUA HAPUS PERMANEN --}}
-        {{-- Tahap 1 (peringatan berisi rincian data terkait) sudah dirender sebagai
-             flash 'error' oleh layouts.sneat. Blok ini tahap 2: penegasan terakhir
-             sebelum data benar-benar dimusnahkan. --}}
-        @if(session('hapus_siswa_konfirmasi'))
-            @php $konf = session('hapus_siswa_konfirmasi'); @endphp
-            <div class="alert alert-danger border-danger border-3 shadow-sm">
-                <h5 class="fw-bold mb-2">
-                    <i class="fas fa-triangle-exclamation me-2"></i>Konfirmasi Terakhir - Hapus Permanen
-                </h5>
-                <p class="mb-2">
-                    Anda akan menghapus <strong>{{ $konf['nama'] }}</strong>
-                    @if(!empty($konf['nis'])) (NIS: {{ $konf['nis'] }}) @endif
-                    beserta seluruh data berikut, <strong>permanen dan tidak bisa dikembalikan</strong>:
-                </p>
-                <ul class="mb-3">
-                    @foreach($konf['blockers'] as $b)
-                        <li>{{ $b }}</li>
-                    @endforeach
-                </ul>
-                <p class="mb-3 small">
-                    Data keuangan (tagihan &amp; pembayaran) dan akademik (nilai, presensi, rapor, ujian)
-                    milik siswa ini akan ikut terhapus dari seluruh menu. Pastikan ini memang yang Anda inginkan.
-                </p>
-                <div class="d-flex flex-wrap gap-2">
-                    <form action="{{ route('admin.users.delete-siswa', $konf['id']) }}" method="POST" class="d-inline">
-                        @csrf
-                        @method('DELETE')
-                        <input type="hidden" name="konfirmasi_permanen" value="1">
-                        <button type="submit" class="btn btn-danger fw-bold">
-                            <i class="fas fa-trash me-1"></i> Ya, Saya Yakin - Hapus Permanen
-                        </button>
-                    </form>
-                    <a href="{{ route('admin.users.siswa') }}" class="btn btn-secondary">
-                        <i class="fas fa-times me-1"></i> Batal, Jangan Hapus
-                    </a>
-                </div>
-            </div>
-        @endif
+@php
+    $hasFilters = request()->hasAny(['search', 'jenjang', 'kelas_id', 'kelas_nama', 'cabang_id', 'status']);
+    $statusTone = ['aktif' => 'bg-emerald-50 text-emerald-700', 'lulus' => 'bg-blue-50 text-blue-700', 'pindah' => 'bg-amber-50 text-amber-700', 'keluar' => 'bg-red-50 text-red-700'];
+@endphp
 
-        {{-- Success Message --}}
+<div class="min-w-0 space-y-5">
+    @if(session('hapus_siswa_konfirmasi'))
+        @php $konf = session('hapus_siswa_konfirmasi'); @endphp
+        <section class="rounded-2xl border-2 border-red-300 bg-red-50 p-4 text-red-900 sm:p-5"><h2 class="text-sm font-extrabold"><i class="fas fa-triangle-exclamation mr-1.5" aria-hidden="true"></i>Konfirmasi terakhir: hapus permanen</h2><p class="mt-2 text-xs leading-5">Anda akan menghapus <strong>{{ $konf['nama'] }}</strong> beserta seluruh data keuangan, akademik, dan akun login:</p><ul class="mt-2 list-disc space-y-1 pl-5 text-xs">@foreach($konf['blockers'] as $blocker)<li>{{ $blocker }}</li>@endforeach</ul><div class="mt-4 flex flex-wrap gap-2"><form action="{{ route('admin.users.delete-siswa', $konf['id']) }}" method="POST" data-confirm data-confirm-title="Hapus permanen?" data-confirm-message="Seluruh data siswa tidak dapat dikembalikan." data-confirm-text="Ya, hapus permanen">@csrf @method('DELETE')<input type="hidden" name="konfirmasi_permanen" value="1"><button type="submit" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-xs font-bold text-white hover:bg-red-700"><i class="fas fa-trash" aria-hidden="true"></i>Hapus Permanen</button></form><a href="{{ route('admin.users.siswa') }}" class="inline-flex h-10 items-center justify-center rounded-xl bg-white px-4 text-xs font-bold text-slate-700 no-underline ring-1 ring-slate-200">Batal</a></div></section>
+    @endif
 
-        {{-- Import Warnings --}}
-        @if(session('import_warnings'))
-            <div class="alert alert-warning import-warning">
-                <div class="import-warning-header">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Beberapa data dilewati saat import:
-                </div>
-                <ul class="import-warning-list">
-                    @foreach(session('import_warnings') as $warning)
-                        <li>{{ $warning }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    @if(session('import_warnings'))<section class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900"><p class="font-extrabold"><i class="fas fa-exclamation-triangle mr-1.5" aria-hidden="true"></i>Beberapa data import dilewati</p><ul class="mt-2 list-disc space-y-1 pl-5">@foreach(session('import_warnings') as $warning)<li>{{ $warning }}</li>@endforeach</ul></section>@endif
 
-        <div class="card">
-            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
-                {{-- Left Group: Title & Filter --}}
-                <div class="d-flex flex-wrap align-items-center gap-3 w-100-mobile">
-                    {{-- Title Group --}}
-                    <div class="d-flex gap-2 align-items-center justify-content-between w-100-mobile">
-                        <div class="d-flex gap-2 align-items-center">
-                            <a href="{{ route('admin.users.index') }}" class="btn-secondary">
-                                <i class="fas fa-arrow-left"></i>
-                            </a>
-                            <div>
-                                <h5 class="mb-0 fw-bold text-dark">Daftar Siswa</h5>
-                                <small class="text-muted">Total: {{ $siswa->total() }} siswa</small>
-                            </div>
-                        </div>
-                    </div>
+    <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 p-4 sm:p-5">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div class="flex min-w-0 items-center gap-3"><a href="{{ route('admin.users.index') }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 no-underline hover:bg-slate-200"><i class="fas fa-arrow-left" aria-hidden="true"></i></a><div class="min-w-0"><h2 class="text-base font-extrabold text-slate-900">Daftar Siswa</h2><p class="mt-1 text-xs text-slate-500">{{ $siswa->total() }} siswa ditemukan</p></div></div><div class="grid grid-cols-4 gap-2 sm:flex"><a href="{{ route('admin.users.siswa.print') }}?{{ http_build_query(request()->all()) }}" target="_blank" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-slate-100 px-3 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200" title="Cetak"><i class="fas fa-print" aria-hidden="true"></i><span class="hidden sm:inline">Cetak</span></a><a href="{{ route('admin.users.siswa-template') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-cyan-50 px-3 text-xs font-bold text-cyan-700 no-underline hover:bg-cyan-100" title="Template"><i class="fas fa-download" aria-hidden="true"></i><span class="hidden sm:inline">Template</span></a><a href="{{ route('admin.users.import-siswa') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 text-xs font-bold text-emerald-700 no-underline hover:bg-emerald-100" title="Import"><i class="fas fa-file-import" aria-hidden="true"></i><span class="hidden sm:inline">Import</span></a><a href="{{ route('admin.users.create-siswa') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-brand-600 px-3 text-xs font-bold text-white no-underline hover:bg-brand-700"><i class="fas fa-plus" aria-hidden="true"></i><span class="hidden sm:inline">Tambah</span></a></div></div>
 
-                    {{-- Filter Form (Moved to header line) --}}
-                    <form action="{{ route('admin.users.siswa') }}" method="GET" id="filterForm" class="d-flex gap-2 align-items-center w-100-mobile">
-                        {{-- Filter Dropdown --}}
-                        <div class="dropdown filter-dropdown w-100-mobile">
-                            <button class="btn btn-secondary dropdown-toggle w-100-mobile d-flex justify-content-between align-items-center" type="button" id="filterDropdown" 
-                                data-bs-toggle="dropdown" aria-expanded="false" 
-                                data-bs-auto-close="outside" data-bs-display="static">
-                                <span><i class="fas fa-filter me-1"></i> Filter</span>
-                            </button>
-                            <div class="dropdown-menu p-3 shadow-lg border-0 filter-dropdown-menu" aria-labelledby="filterDropdown">
-                                <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
+<form action="{{ route('admin.users.siswa') }}" method="GET" class="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_repeat(4,minmax(130px,0.4fr))_auto]"><label class="relative"><span class="sr-only">Cari siswa</span><i class="fas fa-search pointer-events-none absolute left-3 top-3.5 text-xs text-slate-400" aria-hidden="true"></i><input type="search" name="search" value="{{ request('search') }}" placeholder="Nama, NIS, atau NISN..." class="h-10 w-full rounded-xl border border-slate-200 !pl-10 pr-3 text-xs outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"></label><select name="cabang_id" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-700"><option value="">Semua Cabang</option>@foreach($cabangList as $cabang)<option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>@endforeach</select><select name="jenjang" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-700"><option value="">Semua Jenjang</option>@foreach($jenjangs as $jenjang)<option value="{{ $jenjang }}" {{ request('jenjang') === $jenjang ? 'selected' : '' }}>{{ $jenjang }}</option>@endforeach</select><select name="kelas_id" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-700"><option value="">Semua Kelas</option>@foreach($kelasList as $kelas)<option value="{{ $kelas->id }}" @selected((string) request('kelas_id') === (string) $kelas->id)>{{ $kelas->nama_kelas }} · {{ $kelas->jenjang }} · {{ $kelas->cabang->nama_cabang ?? 'Cabang tidak tersedia' }}</option>@endforeach</select><select name="status" class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-700"><option value="">Semua Status</option>@foreach(['aktif', 'lulus', 'pindah', 'keluar'] as $status)<option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>@endforeach</select><div class="flex gap-2"><button type="submit" class="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-800 px-4 text-xs font-bold text-white"><i class="fas fa-filter" aria-hidden="true"></i>Filter</button>@if($hasFilters)<a href="{{ route('admin.users.siswa') }}" class="inline-flex h-10 items-center justify-center rounded-xl bg-red-50 px-3 text-red-700 no-underline"><i class="fas fa-times" aria-hidden="true"></i></a>@endif</div></form>
+        </header>
 
-                                {{-- Filter Cabang (First Priority) --}}
-                                <div class="mb-2">
-                                    <label class="form-label small fw-bold">Cabang</label>
-                                    <select name="cabang_id" id="cabangSelect" class="form-select form-select-sm">
-                                        <option value="">Semua Cabang</option>
-                                        @foreach($cabangList as $cabang)
-                                            <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
-                                                {{ $cabang->nama_cabang }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-4 py-2.5"><label class="flex cursor-pointer items-center gap-2 text-[11px] font-bold text-slate-600"><input type="checkbox" data-bulk-select-all="siswa-bulk-form" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">Pilih semua halaman ini</label><form id="siswa-bulk-form" action="{{ route('admin.users.bulk-delete-siswa') }}" method="POST" data-confirm data-confirm-title="Hapus siswa terpilih?" data-confirm-message="Data terkait juga dapat ikut terhapus." data-confirm-text="Ya, hapus data">@csrf<button type="submit" data-bulk-submit="siswa-bulk-form" disabled class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 text-[10px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"><i class="fas fa-trash" aria-hidden="true"></i>Hapus (<span data-bulk-count>0</span>)</button></form></div>
 
-                                {{-- Filter Jenjang (Dependent on Cabang) --}}
-                                <div class="mb-2" id="jenjangFilterContainer">
-                                    <label class="form-label small fw-bold">Jenjang</label>
-                                    <select name="jenjang" id="jenjangSelect" class="form-select form-select-sm">
-                                        <option value="">Semua Jenjang</option>
-                                        @foreach($jenjangs as $j)
-                                            <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+        <div class="divide-y divide-slate-100 lg:hidden">@forelse($siswa as $s)<article class="p-4"><div class="flex min-w-0 items-start gap-3"><input type="checkbox" name="ids[]" value="{{ $s->id }}" form="siswa-bulk-form" data-bulk-item class="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500"><div class="min-w-0 flex-1"><div class="flex items-start justify-between gap-2"><div class="min-w-0"><h3 class="truncate text-sm font-extrabold text-slate-900">{{ $s->user->name ?? $s->nama_lengkap }}</h3><p class="mt-1 truncate text-[11px] text-slate-500">NIS {{ $s->nis }} · NISN {{ $s->nisn }}</p></div><span class="shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[9px] font-bold {{ $statusTone[$s->status] ?? 'bg-slate-100 text-slate-600' }}">{{ ucfirst($s->status) }}</span></div><div class="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-[11px]"><div class="min-w-0"><p class="text-slate-400">Kelas</p><p class="mt-0.5 truncate whitespace-nowrap font-semibold text-slate-700">{{ $s->kelas->nama_kelas ?? ($s->status === 'lulus' ? 'Lulus' : 'Belum masuk kelas') }} <span class="ml-1 font-medium text-slate-400">{{ $s->kelas->jenjang ?? '' }}</span></p></div><div class="min-w-0"><p class="text-slate-400">Cabang</p><p class="mt-0.5 truncate font-semibold text-slate-700">{{ $s->cabang->nama_cabang ?? '-' }}</p></div></div><div class="mt-3 grid grid-cols-3 gap-2"><a href="{{ route('admin.users.show-siswa', $s->id) }}" class="inline-flex h-9 items-center justify-center gap-1 rounded-lg bg-blue-50 text-xs font-bold text-blue-700 no-underline"><i class="fas fa-eye" aria-hidden="true"></i>Detail</a><a href="{{ route('admin.users.edit-siswa', $s->id) }}" class="inline-flex h-9 items-center justify-center gap-1 rounded-lg bg-amber-50 text-xs font-bold text-amber-700 no-underline"><i class="fas fa-edit" aria-hidden="true"></i>Edit</a><form action="{{ route('admin.users.delete-siswa', $s->id) }}" method="POST" data-confirm data-confirm-title="Hapus siswa?" data-confirm-message="{{ $s->nama_lengkap }} dan akun loginnya akan dihapus." data-confirm-text="Ya, hapus">@csrf @method('DELETE')<button type="submit" class="h-9 w-full rounded-lg bg-red-50 text-xs font-bold text-red-700"><i class="fas fa-trash mr-1" aria-hidden="true"></i>Hapus</button></form></div></div></div></article>@empty<div class="p-12 text-center text-xs text-slate-500"><i class="fas fa-user-graduate mb-3 block text-3xl text-slate-300" aria-hidden="true"></i>{{ $hasFilters ? 'Tidak ada siswa yang sesuai filter.' : 'Belum ada data siswa.' }}</div>@endforelse</div>
 
-                                {{-- Filter Kelas (Dependent on Jenjang) --}}
-                                <div class="mb-2" id="kelasFilterContainer">
-                                    <label class="form-label small fw-bold">Kelas</label>
-                                    <select name="kelas_nama" id="kelasSelect" class="form-select form-select-sm">
-                                        <option value="">Semua Kelas</option>
-                                        @foreach($kelasList as $kelas)
-                                            <option value="{{ $kelas->nama_kelas }}"
-                                                    data-cabang="{{ $kelas->cabang_id }}"
-                                                    data-jenjang="{{ $kelas->jenjang }}"
-                                                    {{ request('kelas_nama') == $kelas->nama_kelas ? 'selected' : '' }}>
-                                                {{ $kelas->nama_kelas }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                {{-- Filter Status --}}
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold">Status Siswa</label>
-                                    <select name="status" class="form-select form-select-sm">
-                                        <option value="">Semua Status</option>
-                                        <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                                        <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }}>Lulus</option>
-                                        <option value="pindah" {{ request('status') == 'pindah' ? 'selected' : '' }}>Pindah</option>
-                                        <option value="keluar" {{ request('status') == 'keluar' ? 'selected' : '' }}>Keluar</option>
-                                    </select>
-                                </div>
-
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary btn-sm">Terapkan Filter</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Search Input (Next to Filter) --}}
-                        <div class="search-input-wrapper w-100-mobile">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" name="search" id="searchInput" class="search-input"
-                                placeholder="Cari..." value="{{ request('search') }}"
-                                autocomplete="off">
-                            <button type="button" class="clear-search {{ request('search') ? 'show' : '' }}"
-                                id="clearSearch" title="Hapus pencarian">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                {{-- Right Group: Actions --}}
-                <div class="d-flex gap-2 action-group-mobile">
-                    <form action="{{ route('admin.users.bulk-delete-siswa') }}" method="POST" id="bulkDeleteForm" class="bulk-delete-form">
-                        @csrf
-                        <input type="hidden" name="ids" id="bulkDeleteIds">
-                        <button type="button" class="btn btn-danger" data-show-bulk-delete-modal>
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
-                    
-                    <!-- Dropdown Menu Aksi -->
-                    <div class="btn-group">
-                        <button type="button" class="btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-cog"></i> <span class="d-none d-md-inline">Menu Aksi</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a href="{{ route('admin.users.siswa.print') }}?{{ http_build_query(request()->all()) }}" class="dropdown-item" target="_blank">
-                                    <i class="fas fa-print me-2"></i> Cetak Data (PDF)
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.users.import-siswa') }}" class="dropdown-item">
-                                    <i class="fas fa-file-import me-2"></i> Import Excel
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.users.siswa-template') }}" class="dropdown-item">
-                                    <i class="fas fa-download me-2"></i> Download Template
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <a href="{{ route('admin.users.create-siswa') }}" class="btn-primary btn-nowrap">
-                        <i class="fas fa-plus"></i>
-                        <span class="d-none d-md-inline">Tambah Siswa</span>
-                        <span class="d-md-none">Tambah</span>
-                    </a>
-                </div>
-            </div>
-
-
-
-            <div class="d-md-none mobile-select-all-bar">
-                <input type="checkbox" id="selectAllMobile" class="form-check-input">
-                <label for="selectAllMobile" class="select-all-label">Pilih Semua</label>
-            </div>
-
-            <div class="table-scroll">
-                <table class="table table-card-mobile">
-                    <thead>
+        @if($siswa->isNotEmpty())
+            <div class="hidden overflow-x-auto lg:block">
+                <table class="w-full min-w-[1080px] table-fixed text-left text-sm">
+                    <colgroup>
+                        <col class="w-12">
+                        <col class="w-12">
+                        <col class="w-[22%]">
+                        <col class="w-[16%]">
+                        <col class="w-28">
+                        <col>
+                        <col class="w-24">
+                        <col class="w-32">
+                    </colgroup>
+                    <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500">
                         <tr>
-                            <th class="text-center th-checkbox">
-                                <input type="checkbox" id="selectAll" class="form-check-input">
-                            </th>
-                            <th class="th-number">No</th>
-                            <th>Nama Siswa</th>
-                            <th>NIS / NISN</th>
-                            <th class="th-jenjang">Jenjang</th>
-                            <th>Kelas</th>
-                            <th>Cabang</th>
-                            <th class="th-status">Status</th>
-                            <th class="th-actions">Aksi</th>
+                            <th class="px-3 py-3"><span class="sr-only">Pilih</span></th>
+                            <th class="px-2 py-3 text-center">No</th>
+                            <th class="px-3 py-3">Nama Siswa</th>
+                            <th class="px-3 py-3">NIS / NISN</th>
+                            <th class="px-3 py-3 whitespace-nowrap">Kelas</th>
+                            <th class="px-3 py-3">Cabang</th>
+                            <th class="px-3 py-3">Status</th>
+                            <th class="px-3 py-3 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse($siswa as $index => $s)
-                            <tr>
-                                <td class="text-center mobile-card-checkbox">
-                                    <input type="checkbox" name="ids[]" class="form-check-input select-item" value="{{ $s->id }}">
-                                </td>
-                                <td class="mobile-hide row-number">
-                                    {{ $siswa->firstItem() + $index }}</td>
-                                <td class="mobile-card-head">
-                                    <div class="student-name-cell">{{ $s->user->name ?? $s->nama_lengkap }}</div>
-                                    <small class="cell-muted">
-                                        <i class="fas fa-{{ $s->jenis_kelamin == 'L' ? 'mars' : 'venus' }} icon-xs"></i>
-                                        {{ $s->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}
-                                    </small>
-                                </td>
-                                <td data-label="NIS / NISN">
-                                    <div class="student-id">
-                                        {{ $s->nis }}</div>
-                                    <small class="student-id-sub">{{ $s->nisn }}</small>
-                                </td>
-                                <td data-label="Jenjang">
-                                    @if($s->kelas)
-                                        @php
-                                            $jenjangBadge = [
-                                                'KB' => 'badge-kb',
-                                                'TKA' => 'badge-tka',
-                                                'TKB' => 'badge-tkb',
-                                                'SD' => 'badge-sd',
-                                                'SMP' => 'badge-smp',
-                                                'SMA' => 'badge-sma',
-                                            ][$s->kelas->jenjang] ?? 'badge-class';
-                                        @endphp
-                                        <span class="badge {{ $jenjangBadge }} badge-compact">
-                                            {{ $s->kelas->jenjang }}
-                                        </span>
-                                    @else
-                                        <span class="placeholder-dash">-</span>
-                                    @endif
-                                </td>
-                                <td data-label="Kelas">
-                                    @if($s->kelas)
-                                        <span class="badge-class">
-                                            <i class="fas fa-door-open icon-xs"></i>
-                                            {{ $s->kelas->nama_kelas }}
-                                        </span>
-                                    @elseif($s->status === 'lulus')
-                                        <span class="class-status graduated">
-                                            <i class="fas fa-graduation-cap"></i>
-                                            Lulus
-                                        </span>
-                                    @else
-                                        <span class="class-status unassigned">
-                                            <i class="fas fa-exclamation-circle"></i>
-                                            Belum masuk kelas
-                                        </span>
-                                    @endif
-                                </td>
-                                <td data-label="Cabang" class="cabang-cell">{{ $s->cabang->nama_cabang ?? '-' }}</td>
-                                <td data-label="Status">
-                                    <span class="badge-status {{ $s->status }}">
-                                        @if($s->status === 'aktif')
-                                            <i class="fas fa-check-circle icon-xs"></i>
-                                        @elseif($s->status === 'lulus')
-                                            <i class="fas fa-graduation-cap icon-xs"></i>
-                                        @elseif($s->status === 'pindah')
-                                            <i class="fas fa-exchange-alt icon-xs"></i>
-                                        @else
-                                            <i class="fas fa-times-circle icon-xs"></i>
-                                        @endif
-                                        {{ ucfirst($s->status) }}
-                                    </span>
-                                </td>
-                                <td class="mobile-card-actions">
-                                    <div class="action-buttons">
-                                        {{-- View Button --}}
-                                        <a href="{{ route('admin.users.show-siswa', $s->id) }}" class="action-btn view"
-                                            title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        {{-- Edit Button --}}
-                                        <a href="{{ route('admin.users.edit-siswa', $s->id) }}" class="action-btn edit"
-                                            title="Edit Data">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        {{-- Delete Button --}}
-                                        <button type="button" class="action-btn delete" title="Hapus Data"
-                                            data-bs-toggle="modal" data-bs-target="#deleteSiswaModal{{ $s->id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach($siswa as $index => $s)
+                            <tr class="hover:bg-slate-50/80">
+                                <td class="px-3 py-3"><input type="checkbox" name="ids[]" value="{{ $s->id }}" form="siswa-bulk-form" data-bulk-item class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"></td>
+                                <td class="px-2 py-3 text-center text-xs tabular-nums text-slate-400">{{ $siswa->firstItem() + $index }}</td>
+                                <td class="px-3 py-3"><p class="truncate font-bold text-slate-800" title="{{ $s->user->name ?? $s->nama_lengkap }}">{{ $s->user->name ?? $s->nama_lengkap }}</p><p class="mt-0.5 text-[11px] text-slate-500">{{ $s->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</p></td>
+                                <td class="px-3 py-3 text-xs text-slate-600"><p class="truncate">{{ $s->nis }}</p><p class="truncate text-slate-400">{{ $s->nisn }}</p></td>
+                                <td class="px-3 py-3 text-xs text-slate-600"><p class="whitespace-nowrap font-semibold">{{ $s->kelas->nama_kelas ?? ($s->status === 'lulus' ? 'Lulus' : 'Belum masuk') }} <span class="ml-1 font-medium text-slate-400">{{ $s->kelas->jenjang ?? '' }}</span></p></td>
+                                <td class="px-3 py-3 text-xs text-slate-600"><p class="truncate" title="{{ $s->cabang->nama_cabang ?? '-' }}">{{ $s->cabang->nama_cabang ?? '-' }}</p></td>
+                                <td class="px-3 py-3"><span class="whitespace-nowrap rounded-full px-2.5 py-1 text-[9px] font-bold {{ $statusTone[$s->status] ?? 'bg-slate-100 text-slate-600' }}">{{ ucfirst($s->status) }}</span></td>
+                                <td class="px-3 py-3"><div class="flex justify-end gap-1.5"><x-cleanflow.table-action href="{{ route('admin.users.show-siswa', $s->id) }}" tone="view" icon="fas fa-eye" label="Detail siswa" /><x-cleanflow.table-action href="{{ route('admin.users.edit-siswa', $s->id) }}" tone="edit" icon="fas fa-edit" label="Edit siswa" /><form action="{{ route('admin.users.delete-siswa', $s->id) }}" method="POST" data-confirm data-confirm-title="Hapus siswa?" data-confirm-message="{{ $s->nama_lengkap }} dan akun loginnya akan dihapus." data-confirm-text="Ya, hapus">@csrf @method('DELETE')<x-cleanflow.table-action type="submit" tone="delete" icon="fas fa-trash" label="Hapus siswa" /></form></div></td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="empty-table-cell">
-                                    <i class="fas fa-user-graduate fa-3x empty-table-icon"></i>
-                                    <div class="empty-table-title">
-                                        @if(request('search') || request('jenjang') || request('kelas_nama') || request('cabang_id') || request('status'))
-                                            Tidak ada data siswa yang sesuai dengan filter yang dipilih
-                                        @else
-                                            Belum ada data siswa
-                                        @endif
-                                    </div>
-                                    <small>
-                                        @if(request('search') || request('jenjang') || request('kelas_nama') || request('cabang_id') || request('status'))
-                                            Coba filter lain atau <a href="{{ route('admin.users.siswa') }}" class="reset-filter-link">hapus semua filter</a>
-                                        @else
-                                            Silakan tambah data siswa baru
-                                        @endif
-                                    </small>
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
-
-            @if($siswa->hasPages())
-                <div class="pagination-wrap">
-                    {{ $siswa->appends(request()->except('page'))->links() }}
-                </div>
-            @endif
-        </div>
-    </div>
-
-    {{-- Delete Modals for Siswa --}}
-    @foreach($siswa as $s)
-        <div class="modal fade" id="deleteSiswaModal{{ $s->id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title fw-bold">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Konfirmasi Hapus
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Apakah Anda yakin ingin menghapus data siswa:</p>
-                        <div class="student-info-box">
-                            <div class="student-name">
-                                <i class="fas fa-user-graduate text-primary"></i>
-                                {{ $s->nama_lengkap }}
-                            </div>
-                            <div class="student-details">
-                                <div class="detail-item">
-                                    <i class="fas fa-id-card detail-icon"></i>
-                                    <span>NIS: {{ $s->nis }}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-hashtag detail-icon"></i>
-                                    <span>NISN: {{ $s->nisn }}</span>
-                                </div>
-                                @if($s->kelas)
-                                    <div class="detail-item">
-                                        <i class="fas fa-door-open detail-icon"></i>
-                                        <span>{{ $s->kelas->nama_kelas }}</span>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                        <p class="modal-danger-note">
-                            <i class="fas fa-info-circle"></i>
-                            <small class="text-muted">Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait
-                                termasuk akun login siswa.</small>
-                        </p>
-                    </div>
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-modal-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times"></i>
-                            Batal
-                        </button>
-                        <form action="{{ route('admin.users.delete-siswa', $s->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash"></i>
-                                Ya, Hapus
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endforeach
-<!-- Modal Konfirmasi Bulk Delete -->
-    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Apakah Anda yakin ingin menghapus <span id="selectedCount" class="selected-count"></span> data terpilih? Tindakan ini tidak dapat dibatalkan.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" data-submit-bulk-delete>Ya, Hapus</button>
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/users/list.js'])
+        @endif
+        @if($siswa->hasPages())<footer class="border-t border-slate-200 px-4 py-3">{{ $siswa->appends(request()->except('page'))->links() }}</footer>@endif
+    </section>
+</div>
 @endsection

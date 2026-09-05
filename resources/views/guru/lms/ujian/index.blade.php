@@ -8,10 +8,6 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
-@push('styles')
-    @vite(['resources/css/guru/lms/ujian/index.css'])
-@endpush
-
 @section('content')
 <div class="guru-lms-ujian-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -26,13 +22,13 @@
             <table class="table table-hover">
                 <thead class="table-light">
                     <tr>
-                        <th class="text-center col-no">No</th>
+                        <th class="w-[50px] text-center">No</th>
                         <th>Judul Ujian</th>
                         <th class="text-center">Tipe</th>
                         <th class="text-center">Tanggal Mulai</th>
                         <th class="text-center">Tanggal Selesai</th>
                         <th class="text-center">Durasi</th>
-                        <th class="text-center col-actions">Aksi</th>
+                        <th class="w-[150px] text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -133,7 +129,7 @@
                     Apakah Anda yakin ingin menghapus {{ $tipeUjian === 'latihan' ? 'latihan' : 'ujian' }} ini?
                 </div>
                 <div class="modal-footer">
-                    <form id="deleteForm" method="POST" class="delete-form w-100 m-0">
+                    <form id="deleteForm" method="POST" class="w-100 m-0">
                         @csrf
                         @method('DELETE')
                         <div class="form-check mb-3 text-start">

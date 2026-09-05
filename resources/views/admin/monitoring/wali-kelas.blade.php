@@ -1,258 +1,32 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Monitoring Wali Kelas')
-@section('page-title', 'Monitoring Data Wali Kelas')
-@section('page-subtitle', 'Lihat progress penyelesaian rapor per wali kelas')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/monitoring/wali-kelas.css', 'resources/js/admin/monitoring/wali-kelas.js'])
-@endsection
+@section('page-title', 'Monitoring Wali Kelas')
+@section('page-subtitle', 'Pantau penyelesaian rapor pada setiap kelas')
 
 @section('content')
 @php
-    $routeBase = 'admin.monitoring';
-    $scopeLabel = request('cabang_id') ? 'Cabang terfilter' : 'Semua cabang';
-    $showCabangFilter = isset($cabangs);
-    $visibleRows = $waliKelas->getCollection();
-    $totalSiswaPage = $visibleRows->sum('total_siswa');
-    $raporSelesaiPage = $visibleRows->sum('rapor_selesai');
-    $avgProgressPage = $visibleRows->count() > 0 ? round($visibleRows->avg('progress_rapor'), 1) : 0;
+    $routeName=request()->routeIs('ketua.*')?'ketua.monitoring.wali-kelas':'admin.monitoring.wali-kelas';
+    $rows=$waliKelas->getCollection();
+    $totalSiswa=$rows->sum('total_siswa');
+    $raporSelesai=$rows->sum('rapor_selesai');
+    $avgProgress=$rows->isNotEmpty()?round($rows->avg('progress_rapor'),1):0;
 @endphp
+<div class="min-w-0 w-full space-y-4">
+    <header><p class="text-xs font-bold uppercase tracking-wide text-brand-600">Pantau wali kelas</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Progress penerbitan rapor</h2><p class="mt-1 text-sm text-slate-500">Lihat kelas yang perlu ditindaklanjuti pada periode dan cabang tertentu.</p></header>
+    <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">@foreach([['value'=>$waliKelas->total(),'label'=>'Wali kelas','icon'=>'fas fa-user-tie','tone'=>'bg-blue-50 text-blue-700'],['value'=>$rows->sum('kelas_count'),'label'=>'Kelas halaman ini','icon'=>'fas fa-school','tone'=>'bg-violet-50 text-violet-700'],['value'=>$totalSiswa,'label'=>'Siswa terpantau','icon'=>'fas fa-users','tone'=>'bg-emerald-50 text-emerald-700'],['value'=>$raporSelesai,'label'=>'Rapor selesai ('.number_format($avgProgress,1).'%)','icon'=>'fas fa-file-circle-check','tone'=>'bg-amber-50 text-amber-700']] as $stat)<article class="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $stat['tone'] }}"><i class="{{ $stat['icon'] }}"></i></span><div class="min-w-0"><strong class="block text-xl font-extrabold text-slate-950">{{ $stat['value'] }}</strong><span class="block truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $stat['label'] }}</span></div></article>@endforeach</section>
 
-<div class="container-xxl flex-grow-1 container-p-y monitoring-page">
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon primary"><i class="fas fa-user-tie"></i></div>
-                <span>Wali Kelas</span>
-                <strong>{{ $waliKelas->total() }}</strong>
-            </div>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 p-4 sm:p-5"><div class="flex flex-wrap items-start justify-between gap-3"><div><h3 class="font-extrabold text-slate-950"><i class="fas fa-chart-line mr-2 text-brand-600"></i>Progress per wali kelas</h3><p class="mt-1 text-xs text-slate-500">Rapor selesai dihitung dari rapor berstatus diterbitkan.</p></div>@if(request()->anyFilled(['search','cabang_id','tahun_ajaran_id']))<a href="{{ route($routeName) }}" class="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-700 no-underline">Reset filter</a>@endif</div><form action="{{ route($routeName) }}" method="GET" class="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(240px,1fr)_220px_170px_auto]"><label class="relative sm:col-span-2 xl:col-span-1"><i class="fas fa-search absolute left-3.5 top-3.5 text-xs text-slate-400"></i><input name="search" value="{{ request('search') }}" placeholder="Cari wali kelas..." class="h-11 w-full rounded-xl border border-slate-300 !pl-10 pr-3 text-sm"></label><select name="cabang_id" @change="$el.form.submit()" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Semua cabang</option>@foreach($cabangs as $cabang)<option value="{{ $cabang->id }}" @selected((string)request('cabang_id')===(string)$cabang->id)>{{ $cabang->nama_cabang }}</option>@endforeach</select><select name="tahun_ajaran_id" @change="$el.form.submit()" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm">@foreach($tahunAjarans as $tahun)<option value="{{ $tahun->id }}" @selected((int)$taFilterId===$tahun->id)>{{ $tahun->nama_tahun_ajaran }}{{ $tahun->is_active?' (Aktif)':'' }}</option>@endforeach</select><button class="h-11 rounded-xl bg-slate-800 px-4 text-xs font-bold text-white">Cari</button></form></header>
+        <div class="divide-y divide-slate-100 lg:hidden">
+            @forelse($waliKelas as $wali)
+                @php $progress=$wali->progress_rapor??0; $kelasNames=$wali->kelas_names?:($wali->kelas_info?->nama_kelas??'-'); $cabangNames=$wali->cabang_names?:($wali->kelas_info?->cabang?->nama_cabang??'-'); $tahunNames=$wali->tahun_ajaran_names?:($wali->kelas_info?->tahunAjaran?->nama_tahun_ajaran??'-'); @endphp
+                <article class="p-4"><div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-xs font-extrabold text-blue-700">{{ strtoupper(substr($wali->nama_lengkap,0,1)) }}</span><div class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-950">{{ $wali->nama_lengkap }}</strong><span class="block truncate text-xs text-slate-500">{{ $wali->nip ?: 'NIP belum diisi' }} &middot; {{ $tahunNames }}</span></div><span class="rounded-full px-2 py-1 text-[10px] font-bold {{ $progress>=75?'bg-emerald-50 text-emerald-700':($progress>=50?'bg-amber-50 text-amber-700':'bg-red-50 text-red-700') }}">{{ number_format($progress,1) }}%</span></div><div class="mt-3 rounded-xl bg-slate-50 p-3"><span class="block truncate text-xs font-bold text-slate-800">{{ $kelasNames }}</span><small class="block truncate text-slate-400">{{ $cabangNames }}</small><div class="mt-2 flex justify-between text-[10px] text-slate-500"><span>{{ $wali->rapor_selesai??0 }} dari {{ $wali->total_siswa??0 }} rapor terbit</span><span>{{ $progress>=100?'Selesai':($progress>=75?'Hampir selesai':($progress>=50?'Proses':'Perlu tindak lanjut')) }}</span></div><progress max="100" value="{{ min($progress,100) }}" class="mt-1 h-2 w-full accent-brand-600"></progress></div></article>
+            @empty<p class="p-10 text-center text-sm text-slate-500">Belum ada penugasan wali kelas pada periode ini.</p>@endforelse
         </div>
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon info"><i class="fas fa-school"></i></div>
-                <span>Kelas Halaman Ini</span>
-                <strong>{{ $visibleRows->sum('kelas_count') }}</strong>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon success"><i class="fas fa-users"></i></div>
-                <span>Siswa Terpantau</span>
-                <strong>{{ $totalSiswaPage }}</strong>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon warning"><i class="fas fa-file-alt"></i></div>
-                <span>Rapor Selesai</span>
-                <strong>{{ $raporSelesaiPage }}</strong>
-                <span class="meta-text">Rata-rata {{ number_format($avgProgressPage, 1) }}%</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="content-card">
-        <div class="content-card-header">
-            <div>
-                <h5 class="mb-1">Progress Rapor per Wali Kelas</h5>
-                <p class="text-muted mb-0">Progress dihitung dari rapor berstatus diterbitkan dibanding total siswa.</p>
-            </div>
-            <form action="{{ route($routeBase . '.wali-kelas') }}" method="GET" class="filter-toolbar">
-                <input type="text" name="search" class="form-control" placeholder="Cari wali kelas..." value="{{ request('search') }}">
-
-                @if($showCabangFilter)
-                    <select name="cabang_id" class="form-select" data-monitoring-auto-submit>
-                        <option value="">Semua Cabang</option>
-                        @foreach($cabangs as $cabang)
-                            <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
-                        @endforeach
-                    </select>
-                @endif
-
-                <button type="submit" class="btn btn-primary"><i class="fas fa-filter me-1"></i> Filter</button>
-                @if(request()->anyFilled($showCabangFilter ? ['search', 'cabang_id'] : ['search']))
-                    <a href="{{ route($routeBase . '.wali-kelas') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-1"></i> Reset
-                    </a>
-                @endif
-            </form>
-        </div>
-
-        <div class="content-card-body">
-            @if($waliKelas->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-clean align-middle">
-                        <thead>
-                            <tr>
-                                <th>Wali Kelas</th>
-                                <th>Kelas dan Cabang</th>
-                                <th>Tahun Ajaran</th>
-                                <th class="text-center">Siswa</th>
-                                <th class="text-center">Rapor</th>
-                                <th class="monitoring-progress-column">Progress</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($waliKelas as $wali)
-                                @php
-                                    $progress = $wali->progress_rapor ?? 0;
-                                    $progressClass = $progress >= 75 ? 'high' : ($progress >= 50 ? 'medium' : 'low');
-                                    $kelasNames = $wali->kelas_names ?: ($wali->kelas_info->nama_kelas ?? '-');
-                                    $cabangNames = $wali->cabang_names ?: ($wali->kelas_info->cabang->nama_cabang ?? '-');
-                                    $tahunNames = $wali->tahun_ajaran_names ?: ($wali->kelas_info->tahunAjaran->nama_tahun_ajaran ?? '-');
-                                @endphp
-                                <tr>
-                                    <td data-label="Wali Kelas" class="mobile-primary-cell">
-                                        <span class="entity-title">{{ $wali->nama_lengkap }}</span>
-                                        <span class="entity-subtitle">{{ $wali->nip ?? 'NIP belum diisi' }}</span>
-                                        <details class="mobile-row-details">
-                                            <summary>
-                                                <span>
-                                                    <span class="mobile-summary-main">Detail monitoring</span>
-                                                    <span class="mobile-summary-meta">{{ \Illuminate\Support\Str::limit($kelasNames, 58) }}</span>
-                                                </span>
-                                                <span class="mobile-summary-link">Selengkapnya</span>
-                                            </summary>
-                                            <div class="mobile-row-details-body">
-                                                <div class="mobile-detail-section">
-                                                    <div class="mobile-detail-title">Kelas</div>
-                                                    <span class="soft-badge primary assignment-badge">{{ $kelasNames }}</span>
-                                                    <span class="entity-subtitle">{{ $cabangNames }}</span>
-                                                </div>
-                                                <div class="mobile-detail-section">
-                                                    <div class="mobile-detail-title">Tahun Ajaran</div>
-                                                    <span class="entity-title">{{ $tahunNames }}</span>
-                                                </div>
-                                                <div class="mobile-detail-section">
-                                                    <div class="mobile-detail-title">Rekap Rapor</div>
-                                                    <div class="metric-grid">
-                                                        <div class="metric-chip">
-                                                            <span>Siswa</span>
-                                                            <strong>{{ $wali->total_siswa ?? 0 }}</strong>
-                                                        </div>
-                                                        <div class="metric-chip">
-                                                            <span>Rapor Selesai</span>
-                                                            <strong class="text-success">{{ $wali->rapor_selesai ?? 0 }}</strong>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="mobile-detail-section">
-                                                    <div class="mobile-detail-title">Progress</div>
-                                                    <div class="progress-wrap">
-                                                        <div class="progress-track">
-                                                            <div class="progress-fill {{ $progressClass }}" data-monitoring-progress="{{ min($progress, 100) }}"></div>
-                                                        </div>
-                                                        <div class="progress-caption">
-                                                            <span>{{ number_format($progress, 1) }}%</span>
-                                                            <span>
-                                                                @if($progress >= 100)
-                                                                    Selesai
-                                                                @elseif($progress >= 75)
-                                                                    Hampir selesai
-                                                                @elseif($progress >= 50)
-                                                                    Proses
-                                                                @else
-                                                                    Perlu tindak lanjut
-                                                                @endif
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </details>
-                                    </td>
-                                    <td data-label="Kelas" class="complex-cell desktop-detail-cell">
-                                        <details class="mobile-details">
-                                            <summary>
-                                                <span>
-                                                    <span class="mobile-summary-main">{{ \Illuminate\Support\Str::limit($kelasNames, 58) }}</span>
-                                                    <span class="mobile-summary-meta">{{ $cabangNames }}</span>
-                                                </span>
-                                                <span class="mobile-summary-link">Selengkapnya</span>
-                                            </summary>
-                                            <div class="mobile-details-body">
-                                                <span class="soft-badge primary assignment-badge">{{ $kelasNames }}</span>
-                                                <span class="entity-subtitle">{{ $cabangNames }}</span>
-                                            </div>
-                                        </details>
-                                    </td>
-                                    <td data-label="Tahun Ajaran" class="desktop-detail-cell">{{ $tahunNames }}</td>
-                                    <td data-label="Siswa" class="text-center desktop-detail-cell">
-                                        <strong>{{ $wali->total_siswa ?? 0 }}</strong>
-                                    </td>
-                                    <td data-label="Rapor" class="text-center desktop-detail-cell">
-                                        <strong class="text-success">{{ $wali->rapor_selesai ?? 0 }}</strong>
-                                    </td>
-                                    <td data-label="Progress" class="complex-cell desktop-detail-cell">
-                                        <details class="mobile-details">
-                                            <summary>
-                                                <span>
-                                                    <span class="mobile-summary-main">{{ number_format($progress, 1) }}%</span>
-                                                    <span class="mobile-summary-meta">
-                                                        @if($progress >= 100)
-                                                            Selesai
-                                                        @elseif($progress >= 75)
-                                                            Hampir selesai
-                                                        @elseif($progress >= 50)
-                                                            Proses
-                                                        @else
-                                                            Perlu tindak lanjut
-                                                        @endif
-                                                    </span>
-                                                </span>
-                                                <span class="mobile-summary-link">Selengkapnya</span>
-                                            </summary>
-                                            <div class="mobile-details-body">
-                                                <div class="progress-wrap">
-                                                    <div class="progress-track">
-                                                        <div class="progress-fill {{ $progressClass }}" data-monitoring-progress="{{ min($progress, 100) }}"></div>
-                                                    </div>
-                                                    <div class="progress-caption">
-                                                        <span>{{ number_format($progress, 1) }}%</span>
-                                                        <span>
-                                                            @if($progress >= 100)
-                                                                Selesai
-                                                            @elseif($progress >= 75)
-                                                                Hampir selesai
-                                                            @elseif($progress >= 50)
-                                                                Proses
-                                                            @else
-                                                                Perlu tindak lanjut
-                                                            @endif
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </details>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-4">{{ $waliKelas->withQueryString()->links() }}</div>
-            @else
-                <div class="empty-state">
-                    <i class="fas fa-user-tie"></i>
-                    <h6>Tidak ada data wali kelas</h6>
-                    <p>Data muncul setelah wali kelas ditugaskan pada kelas aktif.</p>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <div class="info-panel">
-        <div class="info-icon info"><i class="fas fa-info-circle"></i></div>
-        <div>
-            <h6>Catatan Monitoring</h6>
-            <p>Halaman ini membaca penugasan wali kelas lama dan penugasan baru dari menu wali kelas, sehingga kelas yang dikelola lewat sistem terbaru tetap ikut terpantau.</p>
-        </div>
-    </div>
+        <div class="hidden overflow-x-auto lg:block"><table class="w-full table-fixed text-left text-sm"><colgroup><col class="w-[23%]"><col><col class="w-[16%]"><col class="w-20"><col class="w-24"><col class="w-[18%]"></colgroup><thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500"><tr><th class="px-5 py-3">Wali kelas</th><th class="px-3 py-3">Kelas dan cabang</th><th class="px-3 py-3">Tahun ajaran</th><th class="px-3 py-3 text-center">Siswa</th><th class="px-3 py-3 text-center">Rapor terbit</th><th class="px-5 py-3">Progress</th></tr></thead><tbody class="divide-y divide-slate-100">@forelse($waliKelas as $wali)@php $progress=$wali->progress_rapor??0; $kelasNames=$wali->kelas_names?:($wali->kelas_info?->nama_kelas??'-'); $cabangNames=$wali->cabang_names?:($wali->kelas_info?->cabang?->nama_cabang??'-'); $tahunNames=$wali->tahun_ajaran_names?:($wali->kelas_info?->tahunAjaran?->nama_tahun_ajaran??'-'); @endphp<tr><td class="px-5 py-3"><strong class="block truncate text-slate-950">{{ $wali->nama_lengkap }}</strong><span class="block truncate text-xs text-slate-500">{{ $wali->nip ?: 'NIP belum diisi' }}</span></td><td class="px-3 py-3"><span class="block truncate text-xs font-bold text-slate-700" title="{{ $kelasNames }}">{{ $kelasNames }}</span><small class="block truncate text-slate-400" title="{{ $cabangNames }}">{{ $cabangNames }}</small></td><td class="px-3 py-3"><span class="block truncate whitespace-nowrap text-xs text-slate-600">{{ $tahunNames }}</span></td><td class="px-3 py-3 text-center font-bold text-slate-800">{{ $wali->total_siswa??0 }}</td><td class="px-3 py-3 text-center font-bold text-emerald-700">{{ $wali->rapor_selesai??0 }}</td><td class="px-5 py-3"><div class="flex justify-between text-[10px] text-slate-500"><span>{{ number_format($progress,1) }}%</span><span>{{ $progress>=100?'Selesai':($progress>=75?'Hampir':($progress>=50?'Proses':'Tindak lanjut')) }}</span></div><progress max="100" value="{{ min($progress,100) }}" class="mt-1 h-2 w-full accent-brand-600"></progress></td></tr>@empty<tr><td colspan="6" class="p-10 text-center text-sm text-slate-500">Belum ada penugasan wali kelas pada periode ini.</td></tr>@endforelse</tbody></table></div>
+        @if($waliKelas->hasPages())<footer class="border-t border-slate-200 p-4">{{ $waliKelas->withQueryString()->links() }}</footer>@endif
+    </section>
+    <div class="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs text-blue-700"><i class="fas fa-circle-info mt-0.5"></i><p>Data mencakup penugasan wali kelas lama dan penugasan multipel dari menu Wali Kelas, tetapi selalu dibatasi ke periode yang dipilih.</p></div>
 </div>
 @endsection

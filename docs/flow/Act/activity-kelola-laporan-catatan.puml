@@ -1,0 +1,66 @@
+@startuml activity-kelola-laporan-catatan
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin)|
+start
+:Mengakses Menu\nLaporan & Catatan;
+
+|Sistem|
+:Menampilkan Sub-Menu\n(Kelola Laporan & Riwayat Catatan);
+
+|Pengguna (Admin)|
+:Memilih Sub-Menu\n(Decision);
+
+if (Pilihan?) then (Laporan Terpadu)
+    |Sistem|
+    :Menampilkan Dasbor Laporan;
+
+    |Pengguna (Admin)|
+    :Memilih Jenis Laporan\n(Akademik, Pengguna, Kelas, dll);
+    :Menentukan Filter Data\n(Tahun Ajaran, Cabang, Status);
+    :Klik "Tampilkan" atau "Export";
+
+    |Sistem|
+    :Memproses Data dari Database;
+    :Menampilkan Pratinjau (Preview) Laporan\natau Menghasilkan File Unduhan (PDF/Excel);
+
+else (Pengelolaan Catatan)
+    |Sistem|
+    :Menampilkan Riwayat Catatan\nyang Pernah Dikirim Admin;
+
+    |Pengguna (Admin)|
+    :Memilih Aksi Catatan\n(Decision);
+
+    if (Aksi?) then (Kirim Catatan Baru)
+        :Klik "Buat Catatan Baru";
+
+        |Sistem|
+        :Menampilkan Form Pembuatan Catatan;
+
+        |Pengguna (Admin)|
+        :Mengisi Judul dan Isi Catatan;
+        :Memilih Tingkat Prioritas\n(Biasa / Penting / Mendesak);
+        :Menentukan Target Penerima\n(Semua Pengguna / Role Tertentu / Individu Spesifik);
+        :Klik "Kirim Catatan";
+
+        |Sistem|
+        :Menyimpan Catatan ke Database;
+        :Mem-broadcast Notifikasi\nke Sistem Penerima yang Dituju;
+        :Menampilkan Pesan Sukses;
+
+    else (Hapus Riwayat Catatan)
+        |Pengguna (Admin)|
+        :Klik "Hapus" pada Catatan Lama;
+
+        |Sistem|
+        :Menghapus Data Catatan dari Sistem;
+        :Menampilkan Pesan Sukses;
+    endif
+endif
+
+|Pengguna (Admin)|
+:Selesai Melakukan Kelola\nLaporan & Catatan;
+stop
+@enduml

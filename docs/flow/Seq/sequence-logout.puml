@@ -1,0 +1,21 @@
+@startuml
+title Sequence Diagram - Logout
+autonumber
+
+actor "Semua Pengguna" as Pengguna
+boundary "UI_Dashboard" as UI
+control "Control_Auth" as Control
+
+Pengguna -> UI : 1. Klik Tombol "Logout" / "Keluar"
+activate UI
+UI -> Control : 2. RequestLogout()
+activate Control
+
+Control -> Control : 3. Menghapus / Destroy Session Auth
+Control --> UI : 4. RedirectKeHalamanLogin()
+deactivate Control
+
+UI --> Pengguna : 5. Halaman Login Terbuka (Sesi Berakhir)
+deactivate UI
+
+@enduml

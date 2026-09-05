@@ -1,6 +1,4 @@
-﻿@import 'bootstrap/dist/css/bootstrap.min.css';
-@import '@fortawesome/fontawesome-free/css/all.min.css';
-
+﻿
 :root {
     --primary: #165fac;
     --primary-dark: #0d3f7a;
@@ -430,4 +428,3 @@ body {
 .lms-logout-cancel {
     border: 1px solid #e5e7eb;
 }
-

@@ -1,0 +1,81 @@
+@startuml activity-kelola-ujian
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Guru Pengajar)|
+start
+:Mengakses Dashboard LMS Kelas;
+
+|Sistem|
+:Menampilkan Daftar Ujian\npada Tab "Ujian / Evaluasi";
+
+|Pengguna (Guru Pengajar)|
+:Memilih Aksi Utama\n(Decision);
+
+if (Aksi?) then (Buat Ujian Baru)
+    :Klik Tombol "Buat Ujian";
+
+    |Sistem|
+    :Menampilkan Form Pengaturan Ujian;
+
+    |Pengguna (Guru Pengajar)|
+    :Mengatur Judul, Jadwal Pelaksanaan,\nDurasi, dan Aturan Ujian;
+    :Klik "Simpan Pengaturan";
+
+    |Sistem|
+    :Menyimpan Pengaturan Ujian;
+
+    |Pengguna (Guru Pengajar)|
+    :Menambahkan Soal (Input Manual,\nImport Excel, atau AI Generate);
+
+    |Sistem|
+    :Menyimpan Bank Soal Ujian;
+    :Mempersiapkan Sesi Ujian\nuntuk Seluruh Siswa Terdaftar;
+
+elseif (Aksi?) then (Pengawasan Ujian / Live Proctoring)
+    :Memilih Ujian yang Sedang Berlangsung;
+    :Klik "Pengawasan (Live Monitoring)";
+
+    |Sistem|
+    :Memuat Data Pengawasan Real-Time;
+
+    repeat
+        |Sistem|
+        :Menampilkan Status Pengerjaan Siswa\n(Mengerjakan / Selesai / Terputus);
+        :Menampilkan Sisa Waktu per Siswa;
+        :Menampilkan Log Aktivitas\n(Koneksi Hilang, Berganti Tab, dll);
+
+        |Pengguna (Guru Pengajar)|
+        :Memantau Jalannya Ujian\ndan Kejujuran Siswa;
+
+        if (Ada Tindakan Khusus?) then (Ya)
+            :Mengubah Status Ujian Siswa\n(Pause / Hentikan Paksa);
+            |Sistem|
+            :Mengeksekusi Tindakan ke\nLayar Siswa yang Bersangkutan;
+        else (Tidak)
+        endif
+
+    repeat while (Ujian Masih Berlangsung?)
+
+elseif (Aksi?) then (Koreksi & Publikasi Nilai)
+    :Memilih Ujian yang Telah Berakhir;
+    :Klik "Lihat Hasil & Koreksi";
+
+    |Sistem|
+    :Menghitung Nilai Otomatis\n(Untuk Soal Pilihan Ganda);
+    :Menampilkan Rekapitulasi;
+
+    |Pengguna (Guru Pengajar)|
+    :Mengoreksi Jawaban Esai\n(Dibantu AI Suggestion jika perlu);
+    :Menyimpan Nilai Akhir;
+    :Klik "Publikasikan Nilai"\n(Toggle Result Visibility);
+
+    |Sistem|
+    :Membuka Akses agar Nilai\nDapat Dilihat oleh Siswa;
+endif
+
+|Pengguna (Guru Pengajar)|
+:Selesai Melakukan Kelola Ujian;
+stop
+@enduml

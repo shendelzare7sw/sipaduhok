@@ -1,0 +1,219 @@
+@startuml erd-gabungan
+' ERD Gabungan SIPADUHOK - overview seluruh entitas (58 tabel)
+' Notasi: crow's-foot (IE). ||=satu, {=banyak, o=opsional/nullable.
+!theme plain
+hide circle
+hide empty members
+skinparam linetype ortho
+skinparam nodesep 12
+skinparam ranksep 40
+left to right direction
+
+package "A. Pengguna, Peran & Organisasi" {
+  entity "roles" as roles
+  entity "users" as users
+  entity "cabang" as cabang
+  entity "tenaga_pendidik" as tenaga_pendidik
+  entity "siswa" as siswa
+  entity "student_parents" as student_parents
+  entity "tahun_ajaran" as tahun_ajaran
+}
+
+package "B. Akademik: Kelas, Mapel & Jadwal" {
+  entity "mata_pelajaran" as mata_pelajaran
+  entity "kelas" as kelas
+  entity "guru_pengajar_kelas" as guru_pengajar_kelas
+  entity "wali_kelas_assignments" as wali_kelas_assignments
+  entity "jadwal_pelajaran" as jadwal_pelajaran
+  entity "jadwal_pelajaran_history" as jadwal_pelajaran_history
+  entity "jadwal_kelas" as jadwal_kelas
+  entity "pengaturan_istirahat" as pengaturan_istirahat
+  entity "presensi" as presensi
+}
+
+package "C. Penilaian, Rapor & Kenaikan Kelas" {
+  entity "nilai" as nilai
+  entity "pengaturan_kkm" as pengaturan_kkm
+  entity "rapor" as rapor
+  entity "rapor_nilai" as rapor_nilai
+  entity "rapor_kegiatan_ekstra" as rapor_kegiatan_ekstra
+  entity "template_capaian_kompetensi" as template_capaian_kompetensi
+  entity "pengajuan_rapor_ketua" as pengajuan_rapor_ketua
+  entity "request_download_rapor" as request_download_rapor
+  entity "status_naik_kelas_siswa" as status_naik_kelas_siswa
+  entity "promotion_schedules" as promotion_schedules
+  entity "pengaturan_naik_kelas" as pengaturan_naik_kelas
+  entity "izin_naik_kelas_khusus" as izin_naik_kelas_khusus
+}
+
+package "D. LMS: Pertemuan, Materi, Tugas, Ujian & Forum" {
+  entity "pertemuans" as pertemuans
+  entity "materi" as materi
+  entity "tugas" as tugas
+  entity "tugas_siswa" as tugas_siswa
+  entity "ujian" as ujian
+  entity "soal_ujian" as soal_ujian
+  entity "ujian_siswa" as ujian_siswa
+  entity "jawaban_siswa" as jawaban_siswa
+  entity "ujian_siswa_soal_statuses" as ujian_siswa_soal_statuses
+  entity "ujian_pengawasan_logs" as ujian_pengawasan_logs
+  entity "forum_diskusi" as forum_diskusi
+  entity "forum_replies" as forum_replies
+  entity "lms_meetings" as lms_meetings
+}
+
+package "E. Keuangan" {
+  entity "tagihan" as tagihan
+  entity "pembayaran" as pembayaran
+  entity "info_pembayaran" as info_pembayaran
+  entity "pengaturan_batas_pembayaran" as pengaturan_batas_pembayaran
+  entity "financial_audit_logs" as financial_audit_logs
+}
+
+package "F. Konten, Notifikasi & Sistem" {
+  entity "berita" as berita
+  entity "flyer" as flyer
+  entity "pengumuman" as pengumuman
+  entity "kalender_akademik" as kalender_akademik
+  entity "landing_pages" as landing_pages
+  entity "landing_page_sections" as landing_page_sections
+  entity "notifications" as notifications
+  entity "catatan" as catatan
+  entity "catatan_dibaca" as catatan_dibaca
+  entity "catatan_monitoring" as catatan_monitoring
+  entity "recovery_tickets" as recovery_tickets
+  entity "app_settings" as app_settings
+}
+
+users ||--|{ berita : dibuat_oleh
+users ||--|{ catatan : pengirim_id
+users ||--o{ catatan : penerima_id
+catatan ||--|{ catatan_dibaca : catatan_id
+users ||--|{ catatan_dibaca : user_id
+users ||--|{ catatan_monitoring : pengirim_id
+tenaga_pendidik ||--|{ catatan_monitoring : guru_id
+kelas ||--|{ catatan_monitoring : kelas_id
+mata_pelajaran ||--|{ catatan_monitoring : mata_pelajaran_id
+users ||--o{ financial_audit_logs : user_id
+users ||--|{ flyer : dibuat_oleh
+mata_pelajaran ||--|{ forum_diskusi : mata_pelajaran_id
+pertemuans ||--o{ forum_diskusi : pertemuan_id
+kelas ||--|{ forum_diskusi : kelas_id
+users ||--|{ forum_diskusi : user_id
+forum_diskusi ||--|{ forum_replies : forum_diskusi_id
+users ||--|{ forum_replies : user_id
+forum_replies ||--o{ forum_replies : parent_id
+tenaga_pendidik ||--|{ guru_pengajar_kelas : tenaga_pendidik_id
+kelas ||--|{ guru_pengajar_kelas : kelas_id
+mata_pelajaran ||--|{ guru_pengajar_kelas : mata_pelajaran_id
+users ||--o{ info_pembayaran : updated_by
+siswa ||--|{ izin_naik_kelas_khusus : siswa_id
+tahun_ajaran ||--|{ izin_naik_kelas_khusus : tahun_ajaran_id
+users ||--o{ izin_naik_kelas_khusus : diajukan_oleh
+users ||--o{ izin_naik_kelas_khusus : disetujui_oleh
+jadwal_pelajaran ||--|{ jadwal_kelas : jadwal_pelajaran_id
+kelas ||--|{ jadwal_kelas : kelas_id
+tahun_ajaran ||--|{ jadwal_pelajaran : tahun_ajaran_id
+kelas ||--|{ jadwal_pelajaran : kelas_id
+mata_pelajaran ||--|{ jadwal_pelajaran : mata_pelajaran_id
+tenaga_pendidik ||--o{ jadwal_pelajaran : guru_id
+users ||--o{ jadwal_pelajaran : updated_by
+jadwal_pelajaran ||--|{ jadwal_pelajaran_history : jadwal_pelajaran_id
+users ||--o{ jadwal_pelajaran_history : changed_by
+ujian_siswa ||--|{ jawaban_siswa : ujian_siswa_id
+soal_ujian ||--|{ jawaban_siswa : soal_ujian_id
+tahun_ajaran ||--|{ kalender_akademik : tahun_ajaran_id
+cabang ||--|{ kelas : cabang_id
+tahun_ajaran ||--|{ kelas : tahun_ajaran_id
+tenaga_pendidik ||--o{ kelas : wali_kelas_id
+landing_pages ||--|{ landing_page_sections : landing_page_id
+kelas ||--|{ lms_meetings : kelas_id
+mata_pelajaran ||--|{ lms_meetings : mata_pelajaran_id
+tenaga_pendidik ||--|{ lms_meetings : guru_id
+kelas ||--|{ materi : kelas_id
+mata_pelajaran ||--|{ materi : mata_pelajaran_id
+pertemuans ||--o{ materi : pertemuan_id
+tenaga_pendidik ||--|{ materi : guru_id
+siswa ||--|{ nilai : siswa_id
+mata_pelajaran ||--|{ nilai : mata_pelajaran_id
+kelas ||--|{ nilai : kelas_id
+tahun_ajaran ||--|{ nilai : tahun_ajaran_id
+tenaga_pendidik ||--|{ nilai : guru_id
+tenaga_pendidik ||--o{ nilai : edited_by_wali_id
+users ||--|{ notifications : user_id
+tagihan ||--|{ pembayaran : tagihan_id
+siswa ||--|{ pembayaran : siswa_id
+users ||--o{ pembayaran : paid_by_parent_id
+users ||--o{ pembayaran : divalidasi_oleh
+siswa ||--|{ pengajuan_rapor_ketua : siswa_id
+users ||--|{ pengajuan_rapor_ketua : diajukan_oleh
+users ||--o{ pengajuan_rapor_ketua : diputuskan_oleh
+tahun_ajaran ||--|{ pengaturan_batas_pembayaran : tahun_ajaran_id
+users ||--|{ pengaturan_batas_pembayaran : created_by
+tahun_ajaran ||--|{ pengaturan_kkm : tahun_ajaran_id
+mata_pelajaran ||--|{ pengaturan_kkm : mata_pelajaran_id
+tahun_ajaran ||--|{ pengaturan_naik_kelas : tahun_ajaran_id
+kalender_akademik ||--o{ pengumuman : kalender_akademik_id
+users ||--|{ pengumuman : dibuat_oleh
+kelas ||--|{ pertemuans : kelas_id
+mata_pelajaran ||--|{ pertemuans : mata_pelajaran_id
+tenaga_pendidik ||--|{ pertemuans : guru_id
+siswa ||--|{ presensi : siswa_id
+kelas ||--|{ presensi : kelas_id
+mata_pelajaran ||--o{ presensi : mata_pelajaran_id
+users ||--|{ presensi : diinput_oleh
+tahun_ajaran ||--|{ promotion_schedules : tahun_ajaran_id
+users ||--o{ promotion_schedules : created_by
+siswa ||--|{ rapor : siswa_id
+kelas ||--|{ rapor : kelas_id
+tahun_ajaran ||--|{ rapor : tahun_ajaran_id
+rapor ||--|{ rapor_kegiatan_ekstra : rapor_id
+rapor ||--|{ rapor_nilai : rapor_id
+mata_pelajaran ||--|{ rapor_nilai : mata_pelajaran_id
+nilai ||--|{ rapor_nilai : nilai_id
+users ||--|{ recovery_tickets : user_id
+rapor ||--|{ request_download_rapor : rapor_id
+users ||--|{ request_download_rapor : user_id
+siswa ||--|{ request_download_rapor : siswa_id
+users ||--o{ request_download_rapor : diputuskan_oleh
+users ||--|{ siswa : user_id
+cabang ||--|{ siswa : cabang_id
+kelas ||--o{ siswa : kelas_id
+users ||--o{ siswa : validasi_rapor_ketua_oleh
+users ||--o{ siswa : validasi_ujian_oleh
+users ||--o{ siswa : validasi_rapor_oleh
+ujian ||--|{ soal_ujian : ujian_id
+siswa ||--|{ status_naik_kelas_siswa : siswa_id
+tahun_ajaran ||--|{ status_naik_kelas_siswa : tahun_ajaran_id
+kelas ||--o{ status_naik_kelas_siswa : original_kelas_id
+users ||--o{ status_naik_kelas_siswa : rolled_back_by
+siswa ||--|{ student_parents : siswa_id
+users ||--|{ student_parents : parent_id
+siswa ||--|{ tagihan : siswa_id
+tahun_ajaran ||--|{ tagihan : tahun_ajaran_id
+tagihan ||--o{ tagihan : tagihan_asal_id
+tagihan ||--o{ tagihan : dialihkan_ke_id
+mata_pelajaran ||--|{ template_capaian_kompetensi : mata_pelajaran_id
+users ||--o{ template_capaian_kompetensi : created_by
+users ||--|{ tenaga_pendidik : user_id
+kelas ||--|{ tugas : kelas_id
+mata_pelajaran ||--|{ tugas : mata_pelajaran_id
+pertemuans ||--o{ tugas : pertemuan_id
+tenaga_pendidik ||--|{ tugas : guru_id
+tugas ||--|{ tugas_siswa : tugas_id
+siswa ||--|{ tugas_siswa : siswa_id
+kelas ||--|{ ujian : kelas_id
+mata_pelajaran ||--|{ ujian : mata_pelajaran_id
+pertemuans ||--o{ ujian : pertemuan_id
+tenaga_pendidik ||--|{ ujian : guru_id
+ujian_siswa ||--|{ ujian_pengawasan_logs : ujian_siswa_id
+ujian ||--|{ ujian_siswa : ujian_id
+siswa ||--|{ ujian_siswa : siswa_id
+soal_ujian ||--o{ ujian_siswa : current_soal_ujian_id
+ujian_siswa ||--|{ ujian_siswa_soal_statuses : ujian_siswa_id
+soal_ujian ||--|{ ujian_siswa_soal_statuses : soal_ujian_id
+roles ||--o{ users : role_id
+cabang ||--o{ users : cabang_id
+tenaga_pendidik ||--|{ wali_kelas_assignments : tenaga_pendidik_id
+kelas ||--|{ wali_kelas_assignments : kelas_id
+@enduml

@@ -1,0 +1,86 @@
+@startuml
+title Sequence Diagram - UC18: Proses Eksekusi Kenaikan Kelas
+autonumber
+
+actor "Admin / Waka" as Admin
+boundary "UI_EksekusiKenaikan" as UI
+control "Control_EksekusiKenaikan" as Control
+entity "T_TahunAjaran" as E_TA
+entity "T_Siswa" as E_Siswa
+entity "T_RiwayatKenaikan" as E_Riwayat
+
+== Skenario: Pra-Kondisi dan Menampilkan Daftar Simulasi ==
+
+Admin -> UI : 1. Mengakses Menu Eksekusi Kenaikan Kelas
+activate UI
+UI -> Control : 2. RequestStatusKesiapan()
+activate Control
+
+Control -> E_TA : 3. CekTahunAjaranBerikutnya()
+activate E_TA
+E_TA --> Control : 4. StatusTA()
+deactivate E_TA
+
+Control -> Control : 5. CekKetersediaanKelasBaru()
+
+alt Sistem Belum Siap (Tahun Ajaran / Kelas Baru Tidak Ada)
+    Control --> UI : 6. ErrorStatus("Tahun Ajaran / Kelas Baru Belum Dibuat!")
+    UI --> Admin : 7. Menampilkan Peringatan & Tombol Eksekusi Dikunci
+else Sistem Sudah Siap
+    Control -> Control : 8. SimulasiKelayakanSiswa()
+    note right of Control : Evaluasi Akademik Tuntas & Keuangan/Dispensasi Lunas
+
+    Control -> E_Siswa : 9. AmbilDataSiswaBesertaStatus()
+    activate E_Siswa
+    E_Siswa --> Control : 10. DataSiswa(StatusEligible)
+    deactivate E_Siswa
+
+    Control --> UI : 11. TampilkanDaftarSimulasi(Data)
+    UI --> Admin : 12. Daftar Siswa & Status Kelayakan Terbuka
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Eksekusi Kenaikan (Pilih Manual) ==
+
+Admin -> UI : 13. Menandai Checkbox Siswa Tertentu
+Admin -> UI : 14. Klik "Naikkan Kelas Siswa Terpilih"
+activate UI
+UI -> Control : 15. ProsesKenaikan(Array_ID)
+activate Control
+
+Control -> E_Riwayat : 16. Mencatat Riwayat Kenaikan Siswa
+activate E_Riwayat
+deactivate E_Riwayat
+note right of E_Riwayat : Assumed Success diterapkan
+
+Control -> E_Siswa : 17. UpdateKelasSiswa(Array_ID, TahunAjaranBaru)
+activate E_Siswa
+deactivate E_Siswa
+
+Control --> UI : 18. NotifikasiSukses()
+deactivate Control
+UI --> Admin : 19. Menampilkan Pesan Sukses & Refresh Daftar
+deactivate UI
+
+== Skenario: Eksekusi Kenaikan (Massal / Bulk) ==
+
+Admin -> UI : 20. Klik "Eksekusi Massal Siswa yang Memenuhi Syarat"
+activate UI
+UI -> Control : 21. ProsesKenaikanMassal(SyaratEligible)
+activate Control
+
+Control -> E_Riwayat : 22. Mencatat Riwayat Kenaikan Massal
+activate E_Riwayat
+deactivate E_Riwayat
+
+Control -> E_Siswa : 23. UpdateSemuaKelasSiswa(Eligible, TahunAjaranBaru)
+activate E_Siswa
+deactivate E_Siswa
+
+Control --> UI : 24. NotifikasiSukses()
+deactivate Control
+UI --> Admin : 25. Menampilkan Pesan Sukses & Refresh Daftar
+deactivate UI
+
+@enduml

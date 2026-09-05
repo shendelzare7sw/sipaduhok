@@ -1,266 +1,46 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', isset($flyer) ? 'Edit Flyer' : 'Tambah Flyer')
-
 @section('page-title', isset($flyer) ? 'Edit Flyer' : 'Tambah Flyer')
-@section('page-subtitle', 'Pop-up iklan untuk siswa')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/akademik/flyer/form.css'])
-@endsection
+@section('page-subtitle', 'Tentukan isi, target pengguna, dan periode pop-up')
 
 @section('content')
-<div class="admin-flyer-form-page">
-<div class="row">
-    <div class="col-lg-8">
-        <div class="content-card">
-            <form action="{{ isset($flyer) ? route('admin.akademik.flyer.update', $flyer->id) : route('admin.akademik.flyer.store') }}" 
-                  method="POST" 
-                  enctype="multipart/form-data">
-                @csrf
-                @if(isset($flyer))
-                    @method('PUT')
-                @endif
-                <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.akademik.flyer.index')) }}">
+@php
+    $routeBase = request()->routeIs('sekretaris.*') ? 'sekretaris' : 'admin.akademik';
+    $isEdit = isset($flyer);
+    $inputClass = 'mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20';
+    $textareaClass = 'mt-1.5 min-h-28 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20';
+    $currentImage = $isEdit && $flyer->gambar_flyer ? $flyer->gambar_url : null;
+@endphp
 
-                <!-- Judul -->
-                <div class="form-group">
-                    <label for="judul" class="form-label">
-                        Judul Flyer <span class="text-danger">*</span>
-                    </label>
-                    <input type="text" 
-                           class="form-control @error('judul') is-invalid @enderror" 
-                           id="judul" 
-                           name="judul" 
-                           value="{{ old('judul', $flyer->judul ?? '') }}" 
-                           placeholder="Contoh: Hear For You - Konseling Gratis"
-                           required>
-                    @error('judul')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+<div class="min-w-0 w-full">
+    <div class="mb-4 flex items-center gap-3"><a href="{{ url()->previous(route($routeBase . '.flyer.index')) }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 no-underline hover:bg-slate-200" aria-label="Kembali"><i class="fas fa-arrow-left" aria-hidden="true"></i></a><div class="min-w-0"><h2 class="text-base font-extrabold text-slate-900">{{ $isEdit ? 'Perbarui flyer' : 'Flyer baru' }}</h2><p class="mt-0.5 text-xs text-slate-500">Kolom bertanda bintang wajib diisi.</p></div></div>
 
-                <!-- Deskripsi -->
-                <div class="form-group">
-                    <label for="deskripsi" class="form-label">
-                        Deskripsi <small class="text-muted">(Opsional)</small>
-                    </label>
-                    <textarea class="form-control @error('deskripsi') is-invalid @enderror" 
-                              id="deskripsi" 
-                              name="deskripsi" 
-                              rows="3"
-                              placeholder="Deskripsi singkat tentang flyer ini">{{ old('deskripsi', $flyer->deskripsi ?? '') }}</textarea>
-                    @error('deskripsi')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+    @if($errors->any())<section class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-800"><p class="font-extrabold"><i class="fas fa-exclamation-circle mr-1.5" aria-hidden="true"></i>Periksa kembali data berikut:</p><ul class="mt-2 list-disc space-y-1 pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></section>@endif
 
-                <!-- Gambar Flyer -->
-                <div class="form-group">
-                    <label for="gambar_flyer" class="form-label">
-                        Gambar Flyer <span class="text-danger">*</span>
-                        <small class="text-muted">(JPG, PNG, max 2MB)</small>
-                    </label>
+    <form action="{{ $isEdit ? route($routeBase . '.flyer.update', $flyer->id) : route($routeBase . '.flyer.store') }}" method="POST" enctype="multipart/form-data" class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]" x-data="{ preview: @js($currentImage) }">
+        @csrf
+        @if($isEdit) @method('PUT') @endif
+        <input type="hidden" name="_return_url" value="{{ url()->previous(route($routeBase . '.flyer.index')) }}">
 
-                    <div class="mb-3 image-preview-container {{ isset($flyer) && $flyer->gambar_flyer ? 'is-visible' : '' }}" id="imagePreviewContainer">
-                        <img id="imagePreview"
-                             src="{{ isset($flyer) && $flyer->gambar_flyer ? $flyer->gambar_url : '' }}"
-                             alt="Preview"
-                             class="img-thumbnail image-preview-image">
-                        <p class="small text-muted mt-2">
-                            <span id="previewLabel">{{ isset($flyer) ? 'Upload gambar baru untuk mengganti' : 'Preview gambar yang akan diupload' }}</span>
-                        </p>
-                    </div>
+        <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="border-b border-slate-200 p-4 sm:p-5"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-images text-brand-600" aria-hidden="true"></i>Konten flyer</h3><p class="mt-1 text-xs text-slate-500">Flyer akan muncul sebagai pop-up sesuai target dan tanggal yang dipilih.</p></header>
+            <div class="grid gap-5 p-4 sm:p-5">
+                <label class="block text-xs font-bold text-slate-700">Judul flyer <span class="text-red-500">*</span><input type="text" name="judul" value="{{ old('judul', $flyer->judul ?? '') }}" maxlength="255" required placeholder="Contoh: Program Konseling Gratis" class="{{ $inputClass }} @error('judul') !border-red-400 @enderror">@error('judul')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
+                <label class="block text-xs font-bold text-slate-700">Deskripsi <span class="font-normal text-slate-400">(opsional)</span><textarea name="deskripsi" placeholder="Jelaskan isi atau tujuan flyer secara singkat..." class="{{ $textareaClass }} @error('deskripsi') !border-red-400 @enderror">{{ old('deskripsi', $flyer->deskripsi ?? '') }}</textarea>@error('deskripsi')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
 
-                    <input type="file"
-                           class="form-control @error('gambar_flyer') is-invalid @enderror"
-                           id="gambar_flyer"
-                           name="gambar_flyer"
-                           accept="image/*"
-                           {{ isset($flyer) ? '' : 'required' }}>
-                    @error('gambar_flyer')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                <div><p class="text-xs font-bold text-slate-700">Gambar flyer <span class="text-red-500">*</span></p><label class="mt-1.5 block cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition hover:border-brand-400 hover:bg-brand-50/30"><input type="file" name="gambar_flyer" accept="image/jpeg,image/png,image/gif" class="sr-only" {{ $isEdit ? '' : 'required' }} @change="const file = $event.target.files[0]; if (file) preview = URL.createObjectURL(file)"><div x-show="!preview" class="flex min-h-52 flex-col items-center justify-center p-6 text-center"><span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><i class="fas fa-cloud-arrow-up text-lg" aria-hidden="true"></i></span><p class="mt-3 text-sm font-extrabold text-slate-800">Pilih gambar flyer</p><p class="mt-1 text-[11px] text-slate-500">JPG, PNG, atau GIF · maksimal 2 MB</p></div><img x-show="preview" :src="preview" alt="Pratinjau flyer" class="max-h-[520px] w-full object-contain"></label>@if($isEdit)<p class="mt-1.5 text-[11px] text-slate-500">Biarkan kosong untuk mempertahankan gambar saat ini.</p>@endif @error('gambar_flyer')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</div>
 
-                <!-- Link URL -->
-                <div class="form-group">
-                    <label for="link_url" class="form-label">
-                        Link URL <small class="text-muted">(Opsional)</small>
-                    </label>
-                    <input type="url" 
-                           class="form-control @error('link_url') is-invalid @enderror" 
-                           id="link_url" 
-                           name="link_url" 
-                           value="{{ old('link_url', $flyer->link_url ?? '') }}" 
-                           placeholder="https://example.com">
-                    <small class="text-muted">Link untuk "Selengkapnya" di pop-up</small>
-                    @error('link_url')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                <label class="block text-xs font-bold text-slate-700">Tautan tujuan <span class="font-normal text-slate-400">(opsional)</span><span class="relative mt-1.5 block"><i class="fas fa-link pointer-events-none absolute left-3 top-3.5 text-xs text-slate-400" aria-hidden="true"></i><input type="url" name="link_url" value="{{ old('link_url', $flyer->link_url ?? '') }}" placeholder="https://..." class="h-11 w-full rounded-xl border border-slate-200 bg-white !pl-10 pr-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 @error('link_url') !border-red-400 @enderror"></span><span class="mt-1.5 block text-[11px] font-normal text-slate-500">Digunakan oleh tombol “Selengkapnya” pada pop-up.</span>@error('link_url')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
 
-                <!-- Periode Tampil -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="tanggal_mulai" class="form-label">
-                                Tanggal Mulai <span class="text-danger">*</span>
-                            </label>
-                            <input type="date" 
-                                   class="form-control @error('tanggal_mulai') is-invalid @enderror" 
-                                   id="tanggal_mulai" 
-                                   name="tanggal_mulai" 
-                                   value="{{ old('tanggal_mulai', isset($flyer) ? $flyer->tanggal_mulai->format('Y-m-d') : now()->format('Y-m-d')) }}" 
-                                   required>
-                            @error('tanggal_mulai')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="tanggal_selesai" class="form-label">
-                                Tanggal Selesai <span class="text-danger">*</span>
-                            </label>
-                            <input type="date" 
-                                   class="form-control @error('tanggal_selesai') is-invalid @enderror" 
-                                   id="tanggal_selesai" 
-                                   name="tanggal_selesai" 
-                                   value="{{ old('tanggal_selesai', isset($flyer) ? $flyer->tanggal_selesai->format('Y-m-d') : now()->addDays(30)->format('Y-m-d')) }}" 
-                                   required>
-                            @error('tanggal_selesai')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
+                <div class="grid gap-4 sm:grid-cols-2"><label class="block text-xs font-bold text-slate-700">Tanggal mulai <span class="text-red-500">*</span><input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai', $isEdit ? $flyer->tanggal_mulai?->format('Y-m-d') : now()->format('Y-m-d')) }}" required class="{{ $inputClass }} @error('tanggal_mulai') !border-red-400 @enderror">@error('tanggal_mulai')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label><label class="block text-xs font-bold text-slate-700">Tanggal selesai <span class="text-red-500">*</span><input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai', $isEdit ? $flyer->tanggal_selesai?->format('Y-m-d') : now()->addDays(30)->format('Y-m-d')) }}" required class="{{ $inputClass }} @error('tanggal_selesai') !border-red-400 @enderror">@error('tanggal_selesai')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label></div>
 
-                <!-- Target & Urutan -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="target_audience" class="form-label">
-                                Target Audience <span class="text-danger">*</span>
-                            </label>
-                            <select class="form-control @error('target_audience') is-invalid @enderror" 
-                                    id="target_audience" 
-                                    name="target_audience" 
-                                    required>
-                                <option value="siswa" {{ old('target_audience', $flyer->target_audience ?? 'siswa') == 'siswa' ? 'selected' : '' }}>Siswa</option>
-                                <option value="guru" {{ old('target_audience', $flyer->target_audience ?? '') == 'guru' ? 'selected' : '' }}>Guru</option>
-                                <option value="wali_kelas" {{ old('target_audience', $flyer->target_audience ?? '') == 'wali_kelas' ? 'selected' : '' }}>Wali Kelas</option>
-                                <option value="orang_tua" {{ old('target_audience', $flyer->target_audience ?? '') == 'orang_tua' ? 'selected' : '' }}>Wali Siswa</option>
-                                <option value="semua" {{ old('target_audience', $flyer->target_audience ?? '') == 'semua' ? 'selected' : '' }}>Semua</option>
-                            </select>
-                            @error('target_audience')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="urutan_tampil" class="form-label">
-                                Urutan Tampil <span class="text-danger">*</span>
-                            </label>
-                            <input type="number" 
-                                   class="form-control @error('urutan_tampil') is-invalid @enderror" 
-                                   id="urutan_tampil" 
-                                   name="urutan_tampil" 
-                                   value="{{ old('urutan_tampil', $flyer->urutan_tampil ?? 1) }}" 
-                                   min="1"
-                                   required>
-                            <small class="text-muted">1 = tampil pertama, 2 = kedua, dst.</small>
-                            @error('urutan_tampil')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Status -->
-                <div class="form-group">
-                    <label for="status" class="form-label">
-                        Status <span class="text-danger">*</span>
-                    </label>
-                    <select class="form-control @error('status') is-invalid @enderror" 
-                            id="status" 
-                            name="status" 
-                            required>
-                        <option value="aktif" {{ old('status', $flyer->status ?? 'aktif') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                        <option value="draft" {{ old('status', $flyer->status ?? '') == 'draft' ? 'selected' : '' }}>Draft</option>
-                        <option value="nonaktif" {{ old('status', $flyer->status ?? '') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                    </select>
-                    @error('status')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Buttons -->
-                <div class="d-flex justify-content-between flyer-form-actions">
-                    <a href="{{ url()->previous(route('admin.akademik.flyer.index')) }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Kembali
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>{{ isset($flyer) ? 'Update' : 'Simpan' }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Info Panel -->
-    <div class="col-lg-4">
-        <div class="content-card">
-            <h3 class="flyer-info-title">
-                <i class="fas fa-info-circle me-2 flyer-info-icon"></i>Panduan
-            </h3>
-            
-            <div class="flyer-info-content">
-                <p><strong>Organisasi di PKBM HOK:</strong></p>
-                <ul>
-                    <li>Hear For You</li>
-                    <li>HOK EduLab Cafe</li>
-                    <li>Taman Bacaan Masyarakat</li>
-                </ul>
-                
-                <hr>
-                
-                <p><strong>Cara Kerja:</strong></p>
-                <ul>
-                    <li>Flyer tampil sebagai <strong>pop-up</strong> saat siswa login</li>
-                    <li>Tampil bergantian sesuai urutan</li>
-                    <li>Hanya flyer aktif & dalam periode yang tampil</li>
-                </ul>
-                
-                <hr>
-                
-                <p class="flyer-tip">
-                    <i class="fas fa-lightbulb flyer-tip-icon"></i>
-                    <strong> Tips:</strong> Buat gambar dengan rasio 16:9 atau 4:3 untuk hasil terbaik.
-                </p>
+                <div class="grid gap-4 sm:grid-cols-3"><label class="block text-xs font-bold text-slate-700">Target pengguna <span class="text-red-500">*</span><select name="target_audience" required class="{{ $inputClass }} @error('target_audience') !border-red-400 @enderror">@foreach(['siswa' => 'Siswa', 'guru' => 'Guru', 'wali_kelas' => 'Wali Kelas', 'orang_tua' => 'Wali Siswa', 'semua' => 'Semua Pengguna'] as $value => $label)<option value="{{ $value }}" {{ old('target_audience', $flyer->target_audience ?? 'siswa') === $value ? 'selected' : '' }}>{{ $label }}</option>@endforeach</select>@error('target_audience')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label><label class="block text-xs font-bold text-slate-700">Urutan tampil <span class="text-red-500">*</span><input type="number" name="urutan_tampil" min="1" value="{{ old('urutan_tampil', $flyer->urutan_tampil ?? 1) }}" required class="{{ $inputClass }} @error('urutan_tampil') !border-red-400 @enderror">@error('urutan_tampil')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label><label class="block text-xs font-bold text-slate-700">Status <span class="text-red-500">*</span><select name="status" required class="{{ $inputClass }} @error('status') !border-red-400 @enderror">@foreach(['aktif' => 'Aktif', 'draft' => 'Draft', 'nonaktif' => 'Nonaktif'] as $value => $label)<option value="{{ $value }}" {{ old('status', $flyer->status ?? 'aktif') === $value ? 'selected' : '' }}>{{ $label }}</option>@endforeach</select>@error('status')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label></div>
             </div>
-        </div>
+            <footer class="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50/70 p-4 sm:flex-row sm:justify-end"><a href="{{ url()->previous(route($routeBase . '.flyer.index')) }}" class="inline-flex h-11 items-center justify-center rounded-xl bg-white px-5 text-xs font-bold text-slate-700 no-underline ring-1 ring-inset ring-slate-200 hover:bg-slate-100">Batal</a><button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-xs font-bold text-white hover:bg-brand-700"><i class="fas fa-save" aria-hidden="true"></i>{{ $isEdit ? 'Simpan perubahan' : 'Simpan flyer' }}</button></footer>
+        </section>
 
-        <div class="content-card side-preview-card {{ isset($flyer) && $flyer->gambar_flyer ? 'is-visible' : '' }}" id="sidePreviewCard">
-            <h3 class="side-preview-title">
-                <i class="fas fa-eye me-2 side-preview-icon"></i>Preview
-            </h3>
-            <img id="sidePreviewImage"
-                 src="{{ isset($flyer) && $flyer->gambar_flyer ? $flyer->gambar_url : '' }}"
-                 alt="Preview"
-                 class="side-preview-image">
-        </div>
-    </div>
+        <aside class="space-y-4 xl:sticky xl:top-24 xl:self-start"><section x-show="preview" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="border-b border-slate-200 p-4"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-eye text-brand-600" aria-hidden="true"></i>Pratinjau</h3></header><img :src="preview" alt="Pratinjau flyer" class="max-h-[420px] w-full object-contain"></section><section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-lightbulb text-amber-500" aria-hidden="true"></i>Panduan tayang</h3><ul class="mt-4 space-y-3 text-xs leading-5 text-slate-600"><li class="flex gap-2"><i class="fas fa-check mt-1 text-emerald-600" aria-hidden="true"></i><span>Gunakan gambar dengan teks yang tetap terbaca pada layar ponsel.</span></li><li class="flex gap-2"><i class="fas fa-check mt-1 text-emerald-600" aria-hidden="true"></i><span>Flyer ditampilkan berdasarkan urutan, target, status, dan periode aktif.</span></li><li class="flex gap-2"><i class="fas fa-check mt-1 text-emerald-600" aria-hidden="true"></i><span>Pilih Draft untuk memeriksa konten tanpa menayangkannya.</span></li></ul><div class="mt-4 rounded-xl bg-brand-50 p-3 text-xs leading-5 text-brand-800"><i class="fas fa-mobile-screen-button mr-1" aria-hidden="true"></i>Rasio 16:9 atau 4:3 memberi hasil paling fleksibel.</div></section></aside>
+    </form>
 </div>
-</div>
-
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/akademik/flyer/form.js'])
 @endsection

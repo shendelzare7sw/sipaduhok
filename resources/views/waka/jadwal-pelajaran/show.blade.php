@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Jadwal Pelajaran - ' . $kelas->nama_kelas)
 @section('page-title', 'Jadwal Pelajaran')
 @section('page-subtitle', $kelas->nama_kelas . ' - ' . $kelas->cabang->nama_cabang)
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
 @vite(['resources/css/waka/jadwal-pelajaran/show.css'])

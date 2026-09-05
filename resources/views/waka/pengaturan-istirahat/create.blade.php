@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', $selectedJenjang ? "Tambah Waktu Istirahat - $selectedJenjang" : 'Tambah Waktu Istirahat')
 @section('page-title', $selectedJenjang ? "Tambah Waktu Istirahat - $selectedJenjang" : 'Tambah Waktu Istirahat')
 @section('page-subtitle', $selectedJenjang ? "Tambah waktu istirahat untuk jenjang $selectedJenjang" : 'Tambah Pengaturan Waktu Istirahat Baru')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('content')
     <div class="row justify-content-center">

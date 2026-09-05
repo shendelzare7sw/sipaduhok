@@ -1,4 +1,4 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Data Kelas')
 
@@ -7,9 +7,6 @@
 Kelola data kelas di cabang Anda {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahun_ajaran : '' }}
 @endsection
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/kelas/index.css'])

@@ -71,9 +71,10 @@ class Flyer extends Model
      */
     public function getGambarUrlAttribute()
     {
-        if ($this->gambar_flyer) {
+        if ($this->gambar_flyer && \Storage::disk('public')->exists($this->gambar_flyer)) {
             return asset('storage/' . $this->gambar_flyer);
         }
+
         return asset('img/hero-img.jpg');
     }
 

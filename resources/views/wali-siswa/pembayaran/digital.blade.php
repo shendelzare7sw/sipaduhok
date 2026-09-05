@@ -1,11 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Pembayaran Tagihan')
 @section('page-title', 'Pembayaran Tagihan')
 
-@section('sidebar-menu')
-    @include('wali-siswa.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-siswa/pembayaran/digital.css'])

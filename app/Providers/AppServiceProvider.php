@@ -7,7 +7,6 @@ use App\Models\UjianSiswa;
 use App\Observers\TugasSiswaObserver;
 use App\Observers\UjianSiswaObserver;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\URL;
 use Carbon\Carbon;
 
@@ -31,15 +30,12 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Force Laravel pagination to use Bootstrap 5
-        Paginator::useBootstrapFive();
-
         // Use Indonesian wording for relative dates such as "1 jam yang lalu".
         Carbon::setLocale('id');
 
         // View Composer for Guru Sidebar
         \Illuminate\Support\Facades\View::composer(
-            'guru.partials.sneat-sidebar-menu',
+            'guru.partials.sidebar',
             \App\Http\View\Composers\GuruSidebarComposer::class
         );
 

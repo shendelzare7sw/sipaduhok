@@ -1,0 +1,89 @@
+@startuml
+title Sequence Diagram - UC19: Kelola Presensi Siswa
+autonumber
+
+actor "Wali Kelas" as Wali
+boundary "UI_KelolaPresensi" as UI
+control "Control_Presensi" as Control
+entity "T_Presensi" as E_Presensi
+
+== Skenario: Menampilkan Menu Presensi ==
+
+Wali -> UI : 1. Mengakses Menu Presensi
+activate UI
+UI --> Wali : 2. Menampilkan Pilihan Sub-Menu (Presensi Harian / Validasi Izin)
+deactivate UI
+
+== Skenario: Input Presensi Harian ==
+
+Wali -> UI : 3. Memilih Sub-Menu "Presensi Harian"
+activate UI
+UI -> Control : 4. RequestDataSiswa(Tanggal, Kelas)
+activate Control
+Control -> E_Presensi : 5. AmbilDaftarSiswa()
+activate E_Presensi
+E_Presensi --> Control : 6. DataSiswaDitemukan(Data)
+deactivate E_Presensi
+Control --> UI : 7. TampilkanHalamanPresensi(Data)
+deactivate Control
+
+Wali -> UI : 8. Memilih Status Kehadiran (Hadir/Sakit/Izin/Alpha) & Keterangan
+Wali -> UI : 9. Klik "Simpan Presensi"
+UI -> Control : 10. SimpanDataPresensi(Data)
+activate Control
+
+Control -> E_Presensi : 11. InsertDataPresensi(Data)
+activate E_Presensi
+deactivate E_Presensi
+note right of E_Presensi: Konvensi Assumed Success diterapkan
+
+alt Status = Sakit / Izin
+    Control -> E_Presensi : 12. Otomatis Update StatusValidasi="Disetujui"
+    activate E_Presensi
+    deactivate E_Presensi
+end
+
+Control --> UI : 13. NotifikasiSukses()
+deactivate Control
+UI --> Wali : 14. Menampilkan Pesan Sukses & Refresh Data
+deactivate UI
+
+== Skenario: Validasi Izin (Pengajuan Orang Tua) ==
+
+Wali -> UI : 15. Memilih Sub-Menu "Validasi Izin"
+activate UI
+UI -> Control : 16. RequestDataIzinPending()
+activate Control
+Control -> E_Presensi : 17. AmbilDataIzin(Status="Pending")
+activate E_Presensi
+E_Presensi --> Control : 18. DataIzinDitemukan(Data)
+deactivate E_Presensi
+Control --> UI : 19. TampilkanDaftarIzin(Data)
+deactivate Control
+
+Wali -> UI : 20. Melihat Bukti Surat/Foto dan Menentukan Keputusan
+UI -> Control : 21. ProsesValidasiIzin(ID, Keputusan, AlasanTolak)
+activate Control
+
+alt Keputusan = Setuju
+    Control -> E_Presensi : 22. UpdateStatusValidasi(ID, "Disetujui")
+    activate E_Presensi
+    deactivate E_Presensi
+else Keputusan = Tolak
+    Control -> E_Presensi : 23. UpdateStatusValidasi(ID, "Ditolak", AlasanTolak)
+    activate E_Presensi
+    deactivate E_Presensi
+
+    Control -> E_Presensi : 24. Ubah Status Kehadiran -> "Alpha"
+    activate E_Presensi
+    deactivate E_Presensi
+end
+
+Control -> Control : 25. Kirim Notifikasi Hasil Validasi ke Orang Tua
+
+Control --> UI : 26. NotifikasiSukses()
+deactivate Control
+UI --> Wali : 27. Menampilkan Pesan Sukses & Refresh Data
+deactivate UI
+
+@enduml

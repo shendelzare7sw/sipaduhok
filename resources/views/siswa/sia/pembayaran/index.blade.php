@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Pembayaran')
 @section('page-title', 'Pembayaran & Tagihan')
 @section('page-subtitle', 'Kelola pembayaran sekolah')
 
-@section('sidebar-menu')
-    @include('siswa.partials.sneat-sidebar-sia')
-@endsection
 
 @push('styles')
     @vite(['resources/css/siswa/sia/pembayaran/index.css'])

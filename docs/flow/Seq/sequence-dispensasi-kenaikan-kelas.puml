@@ -1,0 +1,95 @@
+@startuml
+title Sequence Diagram - UC16: Memproses Dispensasi Kenaikan Kelas
+autonumber
+
+actor "Admin / Bendahara" as Admin
+actor "Ketua PKBM" as Ketua
+boundary "UI_DispensasiKenaikan" as UI
+control "Control_Dispensasi" as Control
+entity "T_DispensasiKenaikan" as E_Dispensasi
+entity "T_KelayakanKenaikan" as E_Kelayakan
+
+== Skenario: Mengajukan Dispensasi (Oleh Admin/Bendahara) ==
+
+Admin -> UI : 1. Mengakses Menu Kandidat Dispensasi (Kenaikan Kelas)
+activate UI
+UI -> Control : 2. RequestDataKandidat()
+activate Control
+Control -> E_Kelayakan : 3. AmbilDataSiswa(Tuntas Akademik, Nunggak Keuangan)
+activate E_Kelayakan
+E_Kelayakan --> Control : 4. DataDitemukan(Data)
+deactivate E_Kelayakan
+Control --> UI : 5. TampilkanDaftarSiswa(Data)
+deactivate Control
+
+Admin -> UI : 6. Memilih Siswa & Klik "Ajukan"
+UI --> Admin : 7. Menampilkan Pop-up "Ajukan Izin Khusus"
+
+Admin -> UI : 8. Mengisi Alasan Pengajuan
+Admin -> UI : 9. Klik "Kirim ke Ketua PKBM"
+UI -> Control : 10. SubmitPengajuan(Data)
+activate Control
+
+Control -> E_Dispensasi : 11. InsertData(Status="Menunggu")
+activate E_Dispensasi
+deactivate E_Dispensasi
+note right of E_Dispensasi : Assumed Success
+
+Control -> Control : 12. Kirim Notifikasi ke Ketua PKBM
+
+Control --> UI : 13. NotifikasiSukses()
+deactivate Control
+UI --> Admin : 14. Pesan Sukses & Status Berubah (Menunggu)
+deactivate UI
+
+
+== Skenario: Evaluasi Dispensasi (Oleh Ketua PKBM) ==
+
+Ketua -> UI : 15. Mengakses Dashboard Persetujuan (dari Notifikasi)
+activate UI
+UI -> Control : 16. RequestDataPengajuanMenunggu()
+activate Control
+Control -> E_Dispensasi : 17. AmbilDataPengajuan()
+activate E_Dispensasi
+E_Dispensasi --> Control : 18. DataDitemukan(Data)
+deactivate E_Dispensasi
+Control --> UI : 19. TampilkanDetailIzinKhusus(Data)
+deactivate Control
+
+Ketua -> UI : 20. Melihat Detail & Memilih Keputusan (Setujui / Tolak)
+UI -> Control : 21. ProsesKeputusan(ID, Keputusan, AlasanTolak)
+activate Control
+
+alt Keputusan = Setujui
+    Control -> E_Dispensasi : 22. UpdateStatus(ID, "Disetujui")
+    activate E_Dispensasi
+    deactivate E_Dispensasi
+
+    Control -> E_Kelayakan : 23. Mengaktifkan Kelayakan (Eligibility) Naik Kelas
+    activate E_Kelayakan
+    deactivate E_Kelayakan
+
+    Control -> Control : 24. Kirim Notifikasi Persetujuan ke Admin
+
+    Control --> UI : 25. NotifikasiSukses()
+    UI --> Ketua : 26. Pesan Sukses & Refresh Daftar
+
+else Keputusan = Tolak
+    Ketua -> UI : 27. (Opsional) Mengisi Alasan Penolakan
+    Control -> E_Dispensasi : 28. UpdateStatus(ID, "Ditolak", AlasanTolak)
+    activate E_Dispensasi
+    deactivate E_Dispensasi
+
+    Control -> E_Kelayakan : 29. Tetap Memblokir Kelayakan Naik Kelas
+    activate E_Kelayakan
+    deactivate E_Kelayakan
+
+    Control -> Control : 30. Kirim Notifikasi Penolakan ke Admin
+
+    Control --> UI : 31. NotifikasiSukses()
+    UI --> Ketua : 32. Pesan Sukses & Refresh Daftar
+end
+deactivate Control
+deactivate UI
+
+@enduml

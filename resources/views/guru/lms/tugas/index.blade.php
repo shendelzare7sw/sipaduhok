@@ -8,10 +8,6 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
-@push('styles')
-    @vite(['resources/css/guru/lms/tugas/index.css'])
-@endpush
-
 @section('content')
 <div class="guru-lms-tugas-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -88,7 +84,7 @@
         </div>
     @else
         <div class="card-custom text-center py-5">
-            <i class="fas fa-inbox text-muted empty-icon"></i>
+            <i class="fas fa-inbox text-muted text-[64px] opacity-20"></i>
             <p class="text-muted mt-3">Belum ada tugas. Klik "Buat Tugas Baru" untuk memulai.</p>
         </div>
     @endif
@@ -105,7 +101,7 @@
                     Apakah Anda yakin ingin menghapus tugas ini?
                 </div>
                 <div class="modal-footer">
-                    <form id="deleteForm" method="POST" class="delete-form w-100 m-0">
+                    <form id="deleteForm" method="POST" class="w-100 m-0">
                         @csrf
                         @method('DELETE')
                         <div class="form-check mb-3 text-start">

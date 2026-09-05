@@ -1,111 +1,18 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Kelas - {{ $tahunAjaran->nama_tahun_ajaran ?? 'Semua Tahun' }}</title>
-    <link rel="stylesheet" href="{{ asset('css/admin/kelas/print.css') }}">
-    <script src="{{ asset('js/admin/kelas/print.js') }}" defer></script>
-    @include('partials.print-head')
-</head>
-<body>
-    <a href="{{ route('admin.kelas.index') }}" class="back-button no-print">
-        &larr; Kembali
-    </a>
-    <button type="button" id="printButton" class="print-button no-print">
-        Cetak
-    </button>
+@extends('layouts.print')
 
-    <div class="container">
-        @include('partials.print-header', ['cabang' => $cabang ?? null])
+@section('title', 'Daftar Kelas')
+@section('back-url', route('admin.kelas.index'))
+@section('report-title', 'Daftar Kelas')
 
-        <div class="title">
-            <h3>DAFTAR KELAS</h3>
-            <p>Tahun Ajaran: {{ $tahunAjaran->nama_tahun_ajaran ?? 'Semua Tahun Ajaran' }}</p>
-        </div>
+@section('report-meta')
+    <p class="mt-1 text-xs text-slate-600 print:text-[8pt]">Tahun ajaran: {{ $tahunAjaran->nama_tahun_ajaran ?? 'Semua tahun ajaran' }} &middot; Total {{ $kelas->count() }} kelas</p>
+@endsection
 
-        @if($kelas->count() > 0)
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="col-no">No</th>
-                            <th>Kode Kelas</th>
-                            <th>Nama Kelas</th>
-                            <th>Jenjang</th>
-                            <th>Cabang</th>
-                            <th>Wali Kelas</th>
-                            <th class="col-small">Siswa</th>
-                            <th class="col-small">Kuota</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($kelas as $index => $k)
-                        <tr>
-                            <td class="center">{{ $index + 1 }}</td>
-                            <td>{{ $k->kode_kelas }}</td>
-                            <td><strong>{{ $k->nama_kelas }}</strong></td>
-                            <td class="center">{{ $k->jenjang }}</td>
-                            <td>{{ $k->cabang->nama_cabang ?? '-' }}</td>
-                            <td>{{ $k->waliKelas->nama_lengkap ?? '-' }}</td>
-                            <td class="center">{{ $k->siswa_count }}</td>
-                            <td class="center">{{ $k->kuota_siswa }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="summary">
-                <h4>Ringkasan:</h4>
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <div class="label">Total Kelas</div>
-                        <div class="value">{{ $kelas->count() }}</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="label">Total Siswa</div>
-                        <div class="value">{{ $kelas->sum('siswa_count') }}</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="label">Total Kuota</div>
-                        <div class="value">{{ $kelas->sum('kuota_siswa') }}</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="label">Kelas PAUD</div>
-                        <div class="value">{{ $kelas->where('jenjang', 'PAUD')->count() }}</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="label">Kelas SD</div>
-                        <div class="value">{{ $kelas->where('jenjang', 'SD')->count() }}</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="label">Kelas SMP</div>
-                        <div class="value">{{ $kelas->where('jenjang', 'SMP')->count() }}</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="label">Kelas SMA</div>
-                        <div class="value">{{ $kelas->where('jenjang', 'SMA')->count() }}</div>
-                    </div>
-                </div>
-            </div>
-        @else
-            <p class="empty-message">
-                Tidak ada data kelas untuk ditampilkan.
-            </p>
-        @endif
-
-        <div class="footer">
-            <div class="footer-left">
-                <p class="print-date">Dicetak pada: {{ now()->format('d F Y, H:i') }}</p>
-            </div>
-            <div class="footer-right">
-                <p>Tangerang Selatan, {{ now()->format('d F Y') }}</p>
-                <p>Kepala PKBM House of Knowledge</p>
-                <div class="signature-line"></div>
-                <p><strong>(_________________________)</strong></p>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+@section('report-content')
+    @if($kelas->isNotEmpty())
+        <div class="mb-4 grid grid-cols-3 gap-2 print:grid-cols-3">@foreach([['Total kelas', $kelas->count()], ['Total siswa', $kelas->sum('siswa_count')], ['Total kuota', $kelas->sum('kuota_siswa')]] as $item)<div class="rounded-lg border border-slate-300 px-2 py-1.5 text-center"><p class="text-[9px] font-bold uppercase text-slate-500 print:text-[7pt]">{{ $item[0] }}</p><p class="text-sm font-extrabold print:text-[9pt]">{{ $item[1] }}</p></div>@endforeach</div>
+        <table class="w-full table-fixed border-collapse text-[9px] print:text-[7pt]"><colgroup><col class="w-[5%]"><col class="w-[19%]"><col class="w-[14%]"><col class="w-[8%]"><col class="w-[19%]"><col><col class="w-[7%]"><col class="w-[7%]"></colgroup><thead class="bg-slate-100"><tr>@foreach(['No', 'Kode kelas', 'Nama kelas', 'Jenjang', 'Cabang', 'Wali kelas', 'Siswa', 'Kuota'] as $heading)<th class="border border-slate-900 px-1.5 py-2 text-center font-extrabold">{{ $heading }}</th>@endforeach</tr></thead><tbody>@foreach($kelas as $index => $item)<tr class="break-inside-avoid"><td class="border border-slate-900 px-1.5 py-1.5 text-center">{{ $index + 1 }}</td><td class="border border-slate-900 px-1.5 py-1.5 font-mono">{{ $item->kode_kelas }}</td><td class="border border-slate-900 px-1.5 py-1.5 font-semibold">{{ $item->nama_kelas }}</td><td class="border border-slate-900 px-1.5 py-1.5 text-center">{{ $item->jenjang }}</td><td class="border border-slate-900 px-1.5 py-1.5">{{ $item->cabang->nama_cabang ?? '-' }}</td><td class="border border-slate-900 px-1.5 py-1.5">{{ $item->waliKelas->nama_lengkap ?? '-' }}</td><td class="border border-slate-900 px-1.5 py-1.5 text-center">{{ $item->siswa_count }}</td><td class="border border-slate-900 px-1.5 py-1.5 text-center">{{ $item->kuota_siswa }}</td></tr>@endforeach</tbody></table>
+    @else
+        <div class="border border-slate-300 p-8 text-center text-sm text-slate-500">Tidak ada kelas yang sesuai filter.</div>
+    @endif
+@endsection

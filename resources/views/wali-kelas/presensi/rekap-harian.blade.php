@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Rekap Harian Presensi')
 @section('page-title', 'Rekap Harian Presensi')
 @section('page-subtitle', 'Daftar laporan presensi harian kelas ' . ($kelas->nama_kelas ?? ''))
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/presensi/rekap-harian.css', 'resources/js/wali-kelas/presensi/rekap-harian.js'])

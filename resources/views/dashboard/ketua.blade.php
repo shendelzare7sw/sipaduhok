@@ -1,221 +1,34 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Dashboard Ketua PKBM')
-
 @section('page-title', 'Dashboard Ketua PKBM')
-@section('page-subtitle', 'Monitor dan supervisi kegiatan PKBM House Of Knowledge')
-
-@section('sidebar-menu')
-    @include('ketua.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/dashboard/ketua.css'])
-@endsection
+@section('page-subtitle', 'Pantau keputusan, aktivitas, dan kondisi operasional PKBM')
 
 @section('content')
-<div class="ketua-dashboard-page">
+<div class="min-w-0 w-full space-y-5">
+    <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p class="text-xs font-bold uppercase tracking-wide text-brand-600">Ringkasan eksekutif</p><h2 class="mt-1 text-xl font-extrabold text-slate-950 sm:text-2xl">Kondisi PKBM hari ini</h2><p class="mt-1 text-sm text-slate-500">Data operasional untuk pengawasan dan pengambilan keputusan.</p></div><time class="inline-flex min-h-10 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-700 shadow-sm sm:self-auto"><i class="fas fa-calendar-day text-brand-600" aria-hidden="true"></i>{{ now()->locale('id')->translatedFormat('d F Y') }}</time></header>
 
-    <!-- Top Header & Date -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="mb-0 fw-bold text-dark dashboard-section-title">
-            <i class="fas fa-chart-pie me-2 text-primary"></i> Ringkasan Statistik
-        </h5>
-        <div>
-            <span class="badge bg-white text-primary px-3 py-2 fs-6 rounded-pill shadow-sm border dashboard-date-badge">
-                <i class="fas fa-calendar-alt me-2"></i> {{ now()->translatedFormat('d F Y') }}
-            </span>
-        </div>
-    </div>
+    <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        @foreach([
+            ['Siswa aktif', $totalSiswa, 'Terdaftar dan sedang belajar', 'fa-user-graduate', 'bg-brand-50 text-brand-700'],
+            ['Tenaga pendidik', $totalGuru, 'Seluruh guru dan staf akademik', 'fa-chalkboard-teacher', 'bg-emerald-50 text-emerald-700'],
+            ['Kelas aktif', $totalKelas, 'Pada tahun ajaran berjalan', 'fa-school', 'bg-cyan-50 text-cyan-700'],
+            ['Dispensasi pending', $pendingDispensasi, 'Perlu keputusan Ketua', 'fa-hourglass-half', $pendingDispensasi > 0 ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600'],
+        ] as [$label, $value, $description, $icon, $tone])
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><strong class="block text-xl font-extrabold text-slate-950 sm:text-2xl">{{ number_format($value) }}</strong><span class="mt-1 block truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $label }}</span></div><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div><p class="mt-3 truncate border-t border-slate-100 pt-3 text-[11px] text-slate-500" title="{{ $description }}">{{ $description }}</p></article>
+        @endforeach
+    </section>
 
-    <!-- Quick Stats -->
-    <div class="row g-4 mb-4">
-        <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-card border-0 shadow-sm">
-                <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-label-primary">
-                        <i class="fas fa-user-graduate"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $totalSiswa }}</div>
-                        <div class="stat-label">Siswa Terdaftar</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-card border-0 shadow-sm">
-                <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-label-success">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $totalGuru }}</div>
-                        <div class="stat-label">Guru Pengajar</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-card border-0 shadow-sm">
-                <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-label-info">
-                        <i class="fas fa-school"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $totalKelas }}</div>
-                        <div class="stat-label">Total Kelas Aktif</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-card border-0 shadow-sm">
-                <div class="stat-widget">
-                    <div class="stat-icon-wrapper {{ $pendingDispensasi > 0 ? 'bg-label-warning' : 'bg-label-secondary' }}">
-                        <i class="fas fa-exclamation-circle"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $pendingDispensasi }}</div>
-                        <div class="stat-label">Pending Dispensasi</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-800"><div class="flex items-start gap-3"><i class="fas fa-shield-halved mt-0.5 text-brand-700" aria-hidden="true"></i><p><strong class="text-blue-950">Mode pengawasan:</strong> gunakan halaman monitoring untuk analisis. Perubahan data operasional tetap dilakukan oleh petugas pada modul masing-masing.</p></div></section>
 
-    <div class="row g-4 mb-4">
-        
-        <!-- Left Column: Tasks / Information -->
-        <div class="col-lg-8 d-flex flex-column gap-4">
+    <div class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
+        <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 sm:p-5"><div><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-clock-rotate-left text-brand-600" aria-hidden="true"></i>Aktivitas login terbaru</h2><p class="mt-1 text-xs text-slate-500">Lima pengguna terakhir yang mengakses sistem.</p></div><a href="{{ route('ketua.monitoring.pengguna') }}" class="inline-flex min-h-9 shrink-0 items-center rounded-xl bg-brand-50 px-3 text-xs font-bold text-brand-700 no-underline hover:bg-brand-100">Lihat semua</a></header><div class="divide-y divide-slate-100">@forelse($recent_logins as $login)<article class="flex min-w-0 items-center gap-3 px-4 py-3 sm:px-5"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-extrabold text-slate-700">{{ strtoupper(substr($login->name,0,1)) }}</span><div class="min-w-0 flex-1"><h3 class="truncate text-sm font-bold text-slate-900">{{ $login->name }}</h3><p class="mt-0.5 truncate text-[11px] text-slate-500">{{ $login->role_label }}</p></div><time class="shrink-0 text-[10px] text-slate-400">{{ \Carbon\Carbon::parse($login->last_login_at)->locale('id')->diffForHumans() }}</time></article>@empty<div class="p-12 text-center text-sm text-slate-500"><i class="fas fa-inbox mb-3 block text-4xl text-slate-300" aria-hidden="true"></i>Belum ada aktivitas terekam.</div>@endforelse</div></section>
 
-            <!-- Information Alert -->
-            <div class="alert alert-primary d-flex align-items-center rounded-3 shadow-none border-0 supervision-alert" role="alert">
-                <i class="fas fa-info-circle fs-4 me-3 text-primary"></i>
-                <div class="supervision-alert-text">
-                    <strong>Mode Pengawasan (Hanya Baca):</strong> Anda memiliki akses pengawasan eksklusif. Data yang ditampilkan adalah untuk keperluan analitik dan supervisi. Segala jenis mutasi data harus dilakukan melalui staf admin.
-                </div>
-            </div>
-
-            <!-- Recent Activity / Logs -->
-            <div class="dashboard-card flex-grow-1">
-                <div class="card-header-clean d-flex justify-content-between align-items-center">
-                    <h5 class="card-title-clean">
-                        <i class="fas fa-history card-title-icon"></i> Aktivitas Login Civitas
-                    </h5>
-                    <a href="{{ route('ketua.monitoring.pengguna') }}" class="btn btn-sm btn-outline-primary shadow-sm dashboard-link-button">Lihat Pengguna</a>
-                </div>
-                <div class="activity-feed">
-                    @forelse($recent_logins as $login)
-                    <div class="activity-item">
-                        <div class="activity-avatar">
-                            {{ strtoupper(substr($login->name, 0, 1)) }}
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">{{ $login->name }}</div>
-                            <div class="activity-meta">
-                                <span class="badge bg-label-primary me-1">{{ $login->roleRelation->role_name ?? 'User' }}</span>
-                                <i class="far fa-clock ms-1 me-1"></i> {{ \Carbon\Carbon::parse($login->last_login_at)->locale('id')->diffForHumans() }}
-                            </div>
-                        </div>
-                    </div>
-                    @empty
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-inbox mb-2 fs-2"></i>
-                        <p class="mb-0">Belum ada aktivitas terekam.</p>
-                    </div>
-                    @endforelse
-                </div>
-            </div>
-            
-        </div>
-        
-        <!-- Right Column: Quick Links -->
-        <div class="col-lg-4">
-            <div class="dashboard-card h-100 d-flex flex-column">
-                <div class="card-header-clean border-bottom-0 pb-2">
-                    <h5 class="card-title-clean">
-                        <i class="fas fa-th-large card-title-icon"></i> Akses Modul Utama
-                    </h5>
-                </div>
-                
-                <!-- Custom Tabs Fixed -->
-                <div class="px-2 pb-2 border-bottom module-tabs-wrapper">
-                    <ul class="nav nav-pills nav-justified custom-nav-pills flex-column flex-sm-row module-tabs" role="tablist">
-                        <li class="nav-item">
-                            <button type="button" class="nav-link active py-2 px-1 module-tab-button" role="tab" data-bs-toggle="tab" data-bs-target="#tab-approval" aria-selected="true">Approval</button>
-                        </li>
-                        <li class="nav-item">
-                            <button type="button" class="nav-link py-2 px-1 module-tab-button" role="tab" data-bs-toggle="tab" data-bs-target="#tab-monitor" aria-selected="false">Monitoring</button>
-                        </li>
-                        <li class="nav-item">
-                            <button type="button" class="nav-link py-2 px-1 module-tab-button" role="tab" data-bs-toggle="tab" data-bs-target="#tab-laporan" aria-selected="false">Laporan</button>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="tab-content p-0 flex-grow-1 module-tab-content">
-                    
-                    <!-- Approval & Dispensasi Tab -->
-                    <div class="tab-pane fade show active h-100" id="tab-approval" role="tabpanel">
-                        <div class="quick-links-grid align-content-start pb-4">
-                            <a href="{{ route('ketua.kenaikan-kelas.approval.index') }}" class="quick-link-item position-relative">
-                                <i class="fas fa-check-double text-success"></i>
-                                <span class="quick-link-text">Dispensasi Kenaikan</span>
-                            </a>
-                            <a href="{{ route('ketua.validasi-rapor.index') }}" class="quick-link-item position-relative">
-                                <i class="fas fa-certificate text-primary"></i>
-                                <span class="quick-link-text">Validasi Rapor</span>
-                            </a>
-                            <a href="{{ route('ketua.dispensasi.index') }}" class="quick-link-item position-relative">
-                                <i class="fas fa-hand-holding-heart text-warning"></i>
-                                <span class="quick-link-text">Dispensasi Keuangan</span>
-                                @if($pendingDispensasi > 0)
-                                    <span class="badge bg-danger rounded-pill badge-alert-dot"></span>
-                                @endif
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Monitoring Tab -->
-                    <div class="tab-pane fade h-100" id="tab-monitor" role="tabpanel">
-                        <div class="quick-links-grid align-content-start pb-4">
-                            <a href="{{ route('ketua.monitoring.siswa') }}" class="quick-link-item">
-                                <i class="fas fa-user-graduate text-primary"></i>
-                                <span class="quick-link-text">Data Siswa</span>
-                            </a>
-                            <a href="{{ route('ketua.monitoring.wali-kelas') }}" class="quick-link-item">
-                                <i class="fas fa-chalkboard-teacher text-info"></i>
-                                <span class="quick-link-text">Data Wali Kelas</span>
-                            </a>
-                            <a href="{{ route('ketua.monitoring.guru-pengajar') }}" class="quick-link-item">
-                                <i class="fas fa-user-tie text-success"></i>
-                                <span class="quick-link-text">Data Guru</span>
-                            </a>
-                            <a href="{{ route('ketua.monitoring.pengguna') }}" class="quick-link-item">
-                                <i class="fas fa-users text-secondary"></i>
-                                <span class="quick-link-text">Semua Pengguna</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Laporan & Catatan Tab -->
-                    <div class="tab-pane fade h-100" id="tab-laporan" role="tabpanel">
-                        <div class="quick-links-grid align-content-start pb-4">
-                            <a href="{{ route('ketua.laporan.index') }}" class="quick-link-item">
-                                <i class="fas fa-print text-danger"></i>
-                                <span class="quick-link-text">Cetak Laporan</span>
-                            </a>
-                            <a href="{{ route('ketua.catatan.index') }}" class="quick-link-item">
-                                <i class="fas fa-comment-dots text-primary"></i>
-                                <span class="quick-link-text">Kirim Catatan</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
+        <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" x-data="{ tab: 'approval' }"><header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-grid-2 text-brand-600" aria-hidden="true"></i>Akses modul utama</h2><div class="mt-4 grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1" role="tablist">@foreach(['approval'=>'Keputusan','monitoring'=>'Monitoring','laporan'=>'Laporan'] as $key=>$label)<button type="button" @click="tab='{{ $key }}'" :class="tab==='{{ $key }}'?'bg-white text-brand-700 shadow-sm':'text-slate-500 hover:text-slate-800'" class="min-h-9 rounded-lg px-2 text-[10px] font-bold transition" role="tab">{{ $label }}</button>@endforeach</div></header><div class="p-4 sm:p-5">
+            <div x-show="tab==='approval'" x-cloak class="grid gap-2">@foreach([[route('ketua.kenaikan-kelas.approval.index'),'fa-check-double','Dispensasi kenaikan','Putuskan izin naik kelas','text-emerald-700 bg-emerald-50'],[route('ketua.validasi-rapor.index'),'fa-certificate','Validasi rapor','Review rapor dari wali kelas','text-brand-700 bg-brand-50'],[route('ketua.dispensasi.index'),'fa-hand-holding-heart','Dispensasi keuangan','Akses ujian dan rapor','text-amber-700 bg-amber-50']] as [$url,$icon,$title,$desc,$tone])<a href="{{ $url }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 p-3 no-underline hover:border-brand-200 hover:bg-brand-50/30"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span><span class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-900">{{ $title }}</strong><small class="block truncate text-slate-500">{{ $desc }}</small></span><i class="fas fa-arrow-right text-xs text-slate-300 group-hover:text-brand-600" aria-hidden="true"></i></a>@endforeach</div>
+            <div x-show="tab==='monitoring'" x-cloak class="grid gap-2">@foreach([[route('ketua.monitoring.siswa'),'fa-user-graduate','Aktivitas siswa'],[route('ketua.monitoring.wali-kelas'),'fa-user-tie','Wali kelas'],[route('ketua.monitoring.guru-pengajar'),'fa-chalkboard-teacher','Guru pengajar'],[route('ketua.monitoring.lms.index'),'fa-laptop','Konten LMS']] as [$url,$icon,$title])<a href="{{ $url }}" class="group flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 px-3 no-underline hover:border-brand-200 hover:bg-brand-50/30"><i class="fas {{ $icon }} w-5 text-center text-brand-600" aria-hidden="true"></i><strong class="min-w-0 flex-1 truncate text-sm text-slate-800">{{ $title }}</strong><i class="fas fa-arrow-right text-xs text-slate-300 group-hover:text-brand-600" aria-hidden="true"></i></a>@endforeach</div>
+            <div x-show="tab==='laporan'" x-cloak class="grid gap-2">@foreach([[route('ketua.laporan.index'),'fa-print','Cetak laporan','Laporan operasional dan akademik'],[route('ketua.catatan.index'),'fa-message','Catatan','Komunikasi tindak lanjut']] as [$url,$icon,$title,$desc])<a href="{{ $url }}" class="group flex items-center gap-3 rounded-xl border border-slate-200 p-3 no-underline hover:border-brand-200 hover:bg-brand-50/30"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><i class="fas {{ $icon }}" aria-hidden="true"></i></span><span class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-900">{{ $title }}</strong><small class="block truncate text-slate-500">{{ $desc }}</small></span><i class="fas fa-arrow-right text-xs text-slate-300 group-hover:text-brand-600" aria-hidden="true"></i></a>@endforeach</div>
+        </div></section>
     </div>
 </div>
 @endsection

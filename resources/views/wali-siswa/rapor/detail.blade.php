@@ -1,11 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Detail Rapor')
 @section('page-title', 'Detail Rapor')
 
-@section('sidebar-menu')
-    @include('wali-siswa.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-siswa/rapor/detail.css'])

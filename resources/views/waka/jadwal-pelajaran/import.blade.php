@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Import Jadwal Pelajaran')
 @section('page-title', 'Import Jadwal Pelajaran')
 @section('page-subtitle', 'Import jadwal pelajaran dari file Excel')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/jadwal-pelajaran/import.css'])

@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Detail Pembayaran')
 @section('page-title', 'Detail Pembayaran')
 @section('page-subtitle', 'Validasi pembayaran siswa')
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/bendahara/pembayaran/show.css'])

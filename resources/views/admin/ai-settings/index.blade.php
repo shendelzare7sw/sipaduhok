@@ -1,362 +1,94 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Pengaturan AI Assistant')
-
 @section('page-title', 'Pengaturan AI Assistant')
-@section('page-subtitle', 'Konfigurasi integrasi kecerdasan buatan untuk fitur otomatisasi')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/ai-settings/index.css'])
-@endsection
+@section('page-subtitle', 'Satu konfigurasi untuk chatbot, generator soal, dan bantuan penilaian')
 
 @section('content')
-    <div class="admin-ai-settings-page" data-test-url="{{ route('admin.ai-settings.test') }}" data-csrf-token="{{ csrf_token() }}">
-    <div class="row g-4">
-        <!-- Settings Column -->
-        <div class="col-12 col-md-8 col-lg-7">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header border-bottom bg-transparent py-3">
-                    <h5 class="card-title mb-0 d-flex align-items-center">
-                        <i class="fas fa-robot me-2 text-primary"></i>
-                        Konfigurasi AI Provider
-                    </h5>
+@php
+    $providers = [
+        'groq' => ['label' => 'Groq Cloud', 'note' => 'Cepat untuk chatbot dan otomatisasi teks.', 'icon' => 'fa-bolt', 'tone' => 'bg-violet-50 text-violet-700'],
+        'gemini' => ['label' => 'Google Gemini', 'note' => 'Multimodal untuk teks, gambar, dan PDF.', 'icon' => 'fa-gem', 'tone' => 'bg-blue-50 text-blue-700'],
+    ];
+    $roles = [
+        'ketua_pkbm' => ['Ketua PKBM', 'Ringkasan dan keputusan operasional'],
+        'wakil_kepala_sekolah' => ['Wakil Kepala Sekolah', 'Jadwal dan koordinasi akademik'],
+        'sekretaris' => ['Sekretaris', 'Administrasi dan publikasi'],
+        'bendahara' => ['Bendahara', 'Keuangan dan pembayaran'],
+        'wali_kelas' => ['Wali Kelas', 'Presensi dan rapor kelas'],
+        'guru_pengajar' => ['Guru Pengajar', 'LMS, nilai, dan soal'],
+        'siswa' => ['Siswa', 'Panduan penggunaan sistem'],
+        'orang_tua' => ['Orang Tua', 'Informasi siswa dan tagihan'],
+    ];
+    $models = config('ai-models.available');
+@endphp
+
+<div
+    x-data="{
+        provider: @js($provider),
+        showGroqKey: false,
+        showGeminiKey: false,
+        testing: false,
+        async testConnection() {
+            const apiKey = this.provider === 'groq' ? this.$refs.groqKey.value : this.$refs.geminiKey.value;
+            const model = this.provider === 'groq' ? this.$refs.groqModel.value : this.$refs.geminiModel.value;
+            if (!apiKey) { await Swal.fire({ icon: 'warning', title: 'API key belum diisi', text: 'Isi API key provider yang dipilih terlebih dahulu.', confirmButtonColor: '#285dcc' }); return; }
+            this.testing = true;
+            try {
+                const response = await fetch(@js(route('admin.ai-settings.test')), { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': @js(csrf_token()) }, body: JSON.stringify({ provider: this.provider, api_key: apiKey, model }) });
+                const result = await response.json();
+                await Swal.fire({ icon: result.success ? 'success' : 'error', title: result.success ? 'Koneksi berhasil' : 'Koneksi gagal', text: result.message, confirmButtonColor: '#285dcc' });
+            } catch (error) {
+                await Swal.fire({ icon: 'error', title: 'Koneksi gagal', text: 'Server tidak dapat menguji provider saat ini.', confirmButtonColor: '#285dcc' });
+            } finally { this.testing = false; }
+        }
+    }"
+    class="min-w-0 w-full space-y-4"
+>
+    <header><p class="text-xs font-bold uppercase tracking-wide text-brand-600">Integrasi sistem</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Konfigurasi AI terpadu</h2><p class="mt-1 text-sm text-slate-500">Pilih satu provider global, lalu tentukan fitur dan pengguna yang diizinkan.</p></header>
+
+    @if($errors->any())
+        <section class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><strong class="block">Pengaturan belum dapat disimpan.</strong><ul class="mt-2 list-disc space-y-1 pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></section>
+    @endif
+
+    <form action="{{ route('admin.ai-settings.update') }}" method="POST" class="space-y-4">
+        @csrf @method('PUT')
+
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 p-4 sm:p-5"><h3 class="font-extrabold text-slate-950"><i class="fas fa-cloud mr-2 text-brand-600"></i>1. Provider dan model</h3><p class="mt-1 text-xs text-slate-500">Provider ini dipakai oleh seluruh fitur AI dan seluruh role.</p></div>
+            <div class="space-y-5 p-4 sm:p-5">
+                <fieldset><legend class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Provider aktif</legend><div class="grid gap-3 sm:grid-cols-2">@foreach($providers as $key => $info)<label class="flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition" :class="provider === '{{ $key }}' ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-100' : 'border-slate-200 hover:bg-slate-50'"><input type="radio" name="ai_provider" value="{{ $key }}" x-model="provider" class="mt-1 h-4 w-4 border-slate-300 text-brand-600"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $info['tone'] }}"><i class="fas {{ $info['icon'] }}"></i></span><span><strong class="block text-sm text-slate-950">{{ $info['label'] }}</strong><span class="mt-1 block text-xs leading-5 text-slate-500">{{ $info['note'] }}</span></span></label>@endforeach</div></fieldset>
+
+                <div x-show="provider === 'groq'" x-cloak class="grid gap-4 lg:grid-cols-2">
+                    <label class="lg:col-span-2"><span class="mb-1.5 block text-xs font-bold text-slate-700">Groq API key</span><span class="flex"><input x-ref="groqKey" name="groq_api_key" :type="showGroqKey ? 'text' : 'password'" value="{{ $groqApiKey }}" autocomplete="off" placeholder="gsk_..." class="h-11 min-w-0 flex-1 rounded-l-xl border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"><button type="button" @click="showGroqKey = !showGroqKey" class="h-11 w-11 rounded-r-xl border border-l-0 border-slate-300 text-slate-500" :aria-label="showGroqKey ? 'Sembunyikan API key' : 'Tampilkan API key'"><i class="fas" :class="showGroqKey ? 'fa-eye-slash' : 'fa-eye'"></i></button></span><span class="mt-1 block text-xs text-slate-500">Buat key di <a href="https://console.groq.com/keys" target="_blank" rel="noopener" class="font-bold text-brand-700">Groq Console</a>.</span></label>
+                    <label><span class="mb-1.5 block text-xs font-bold text-slate-700">Model chat</span><select x-ref="groqModel" name="ai_model" :disabled="provider !== 'groq'" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm">@foreach($models['groq'] as $id => $info)<option value="{{ $id }}" @selected($model === $id)>{{ $info['label'] }}</option>@endforeach</select></label>
+                    <label><span class="mb-1.5 block text-xs font-bold text-slate-700">Model vision</span><select name="ai_vision_model" :disabled="provider !== 'groq'" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm">@foreach($models['groq'] as $id => $info)@if($info['vision'] ?? false)<option value="{{ $id }}" @selected($visionModel === $id)>{{ $info['label'] }}</option>@endif @endforeach</select></label>
                 </div>
-                <div class="card-body p-4">
-                    <form action="{{ route('admin.ai-settings.update') }}" method="POST">
-                        @csrf
-                        @method('PUT')
 
-                        {{-- Hidden fields to preserve Chatbot Access Control settings --}}
-                        @foreach(['ketua_pkbm','wakil_kepala_sekolah','sekretaris','bendahara','wali_kelas','guru_pengajar','siswa','orang_tua'] as $role)
-                            @if($chatbotEnabledRoles[$role] ?? false)
-                                <input type="hidden" name="chatbot_{{ $role }}" value="on">
-                            @endif
-                        @endforeach
-
-                        <div class="mb-4 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div>
-                                    <h6 class="fw-bold mb-1"><i class="fas fa-shield-alt me-2 text-primary"></i>Pembatasan Konteks Chatbot</h6>
-                                    <small class="text-muted">Jika diaktifkan, Chatbot <strong>HANYA</strong> menjawab pertanyaan seputar menu &amp; fitur SIPADUHOK. Pertanyaan di luar konteks (cuaca, politik, hiburan, dll) akan ditolak sopan. Disarankan tetap aktif untuk fokus penggunaan.</small>
-                                </div>
-                                <div class="form-check form-switch form-switch-lg mb-0 ai-switch-wrap">
-                                    <input class="form-check-input ai-switch-input" type="checkbox" role="switch" name="context_restriction_enabled" id="context_restriction_enabled" {{ $contextRestrictionEnabled ? 'checked' : '' }}>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="fw-bold mb-1"><i class="fas fa-pen-fancy me-2 text-primary"></i>AI Question Generator</h6>
-                                    <small class="text-muted">Izinkan Guru untuk menggunakan fitur AI Generator Soal Otomatis pada halaman Kelola Soal Ujian dan Latihan.</small>
-                                </div>
-                                <div class="form-check form-switch form-switch-lg mb-0 ai-switch-wrap">
-                                    <input class="form-check-input ai-switch-input" type="checkbox" role="switch" name="ai_question_generator_enabled" id="ai_question_generator_enabled" {{ $aiQuestionGeneratorEnabled ? 'checked' : '' }}>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-globe me-2 text-primary"></i>AI Provider (GLOBAL)
-                            </label>
-                            <select class="form-select form-select-lg ai-provider-select" name="ai_provider" id="ai_provider">
-                                <option value="groq" {{ $provider == 'groq' ? 'selected' : '' }}>
-                                    Groq Cloud (Llama / Qwen / Mixtral - FREE)
-                                </option>
-                                <option value="gemini" {{ $provider == 'gemini' ? 'selected' : '' }}>
-                                    Google Gemini (2.5 Flash - FREE)
-                                </option>
-                            </select>
-                            <div class="alert alert-info mt-2 mb-0 ai-provider-note">
-                                <i class="fas fa-info-circle me-1"></i>
-                                <strong>Provider ini berlaku untuk SEMUA user</strong> (Admin, Guru, Siswa).
-                                Groq Cloud dan Google Gemini menawarkan Tier Gratis yang generous.
-                            </div>
-                        </div>
-
-                        <!-- Groq API Key -->
-                        <div class="mb-3 provider-field" id="groq_field">
-                            <label class="form-label fw-bold">Groq Cloud API Key</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                <input type="password" class="form-control" name="groq_api_key" id="groq_api_key"
-                                    value="{{ $groqApiKey }}" placeholder="gsk_...">
-                                <button class="btn btn-outline-secondary" type="button" id="toggleGroqApiKey">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="form-text">
-                                Dapatkan API Key gratis di <a href="https://console.groq.com/keys" target="_blank">Groq Console</a>.
-                            </div>
-                        </div>
-
-                        <!-- Gemini API Key -->
-                        <div class="mb-3 provider-field is-hidden" id="gemini_field">
-                            <label class="form-label fw-bold">Google Gemini API Key</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                <input type="password" class="form-control" name="gemini_api_key" id="gemini_api_key"
-                                    value="{{ $geminiApiKey }}" placeholder="AIza...">
-                                <button class="btn btn-outline-secondary" type="button" id="toggleGeminiApiKey">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="form-text">
-                                Dapatkan API Key gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.
-                            </div>
-                        </div>
-
-                        {{-- Daftar model dibaca dari config/ai-models.php agar tidak
-                             pernah lagi menawarkan model yang sudah dimatikan penyedianya. --}}
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Model Text (Chat)</label>
-                            <select class="form-select" name="ai_model" id="ai_model">
-                                <optgroup label="Groq Cloud (GRATIS)">
-                                    @foreach(config('ai-models.available.groq') as $id => $info)
-                                        <option value="{{ $id }}" {{ $model == $id ? 'selected' : '' }}>{{ $info['label'] }}</option>
-                                    @endforeach
-                                </optgroup>
-                                <optgroup label="Google Gemini (GRATIS)">
-                                    @foreach(config('ai-models.available.gemini') as $id => $info)
-                                        <option value="{{ $id }}" {{ $model == $id ? 'selected' : '' }}>{{ $info['label'] }}</option>
-                                    @endforeach
-                                </optgroup>
-                            </select>
-                            <div class="form-text">Fitur Auto-Fallback aktif: Jika model Groq melebihi batas Rate Limit, sistem akan otomatis beralih meminjam model lain.</div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Model Vision (Multimodal)</label>
-                            <select class="form-select" name="ai_vision_model" id="ai_vision_model">
-                                <optgroup label="Groq Cloud (GRATIS)">
-                                    @foreach(config('ai-models.available.groq') as $id => $info)
-                                        @if($info['vision'] ?? false)
-                                            <option value="{{ $id }}" {{ $visionModel == $id ? 'selected' : '' }}>{{ $info['label'] }}</option>
-                                        @endif
-                                    @endforeach
-                                </optgroup>
-                                <optgroup label="Google Gemini (GRATIS)">
-                                    @foreach(config('ai-models.available.gemini') as $id => $info)
-                                        @if($info['vision'] ?? false)
-                                            <option value="{{ $id }}" {{ $visionModel == $id ? 'selected' : '' }}>{{ $info['label'] }}</option>
-                                        @endif
-                                    @endforeach
-                                </optgroup>
-                            </select>
-                            <div class="form-text">
-                                Dipakai khusus menganalisis <strong>gambar</strong> pada jawaban tugas.
-                                Di Groq, hanya <strong>Qwen 3.6 27B</strong> yang bisa membaca gambar.
-                                Untuk berkas <strong>PDF</strong>, gunakan Gemini — hanya Gemini yang bisa membaca PDF secara langsung.
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mt-4">
-                            <button type="button" class="btn btn-outline-success" id="testConnectionBtn">
-                                <i class="fas fa-plug me-2"></i> Test Koneksi
-                            </button>
-                            <button type="submit" class="btn btn-primary px-4 shadow-sm">
-                                <i class="fas fa-save me-2"></i> Simpan Pengaturan
-                            </button>
-                        </div>
-
-                        <!-- Connection Status Alert (Inline) -->
-                        <div id="connectionAlert" class="alert mt-3 d-none fade show" role="alert">
-                            <div class="d-flex align-items-center">
-                                <i id="connectionIcon" class="fas fa-info-circle me-2 fs-4"></i>
-                                <div>
-                                    <strong id="connectionTitle" class="d-block">Status Koneksi</strong>
-                                    <span id="connectionMessage">Checking...</span>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                <div x-show="provider === 'gemini'" x-cloak class="grid gap-4 lg:grid-cols-2">
+                    <label class="lg:col-span-2"><span class="mb-1.5 block text-xs font-bold text-slate-700">Gemini API key</span><span class="flex"><input x-ref="geminiKey" name="gemini_api_key" :type="showGeminiKey ? 'text' : 'password'" value="{{ $geminiApiKey }}" autocomplete="off" placeholder="AIza..." class="h-11 min-w-0 flex-1 rounded-l-xl border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"><button type="button" @click="showGeminiKey = !showGeminiKey" class="h-11 w-11 rounded-r-xl border border-l-0 border-slate-300 text-slate-500" :aria-label="showGeminiKey ? 'Sembunyikan API key' : 'Tampilkan API key'"><i class="fas" :class="showGeminiKey ? 'fa-eye-slash' : 'fa-eye'"></i></button></span><span class="mt-1 block text-xs text-slate-500">Buat key di <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="font-bold text-brand-700">Google AI Studio</a>.</span></label>
+                    <label><span class="mb-1.5 block text-xs font-bold text-slate-700">Model chat</span><select x-ref="geminiModel" name="ai_model" :disabled="provider !== 'gemini'" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm">@foreach($models['gemini'] as $id => $info)<option value="{{ $id }}" @selected($model === $id)>{{ $info['label'] }}</option>@endforeach</select></label>
+                    <label><span class="mb-1.5 block text-xs font-bold text-slate-700">Model vision</span><select name="ai_vision_model" :disabled="provider !== 'gemini'" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm">@foreach($models['gemini'] as $id => $info)@if($info['vision'] ?? false)<option value="{{ $id }}" @selected($visionModel === $id)>{{ $info['label'] }}</option>@endif @endforeach</select></label>
                 </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-3"><p class="text-xs leading-5 text-slate-500"><i class="fas fa-shield-alt mr-1 text-emerald-600"></i>API key disimpan di pengaturan aplikasi dan tidak dikirim saat tes selain ke endpoint provider.</p><button type="button" @click="testConnection()" :disabled="testing" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-white px-4 text-xs font-bold text-emerald-700 disabled:opacity-50"><i class="fas" :class="testing ? 'fa-spinner fa-spin' : 'fa-plug'"></i><span x-text="testing ? 'Menguji...' : 'Tes koneksi'">Tes koneksi</span></button></div>
             </div>
-        </div>
+        </section>
 
-        <!-- Info Column -->
-        <div class="col-12 col-md-4 col-lg-5">
-            <div class="card bg-label-info border-0 mb-4">
-                <div class="card-body">
-                    <div class="d-flex align-items-start">
-                         <div class="avatar me-2">
-                            <div class="rounded bg-white text-info d-flex align-items-center justify-content-center ai-brain-icon">
-                                <i class="fas fa-brain"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <h5 class="card-title fw-bold text-dark mb-1">AI Grading Assistant</h5>
-                            <p class="card-text text-muted mb-0">Fitur ini membantu guru memberikan penilaian awal dan feedback otomatis untuk soal uraian.</p>
-                        </div>
-                    </div>
-                </div>
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 p-4 sm:p-5"><h3 class="font-extrabold text-slate-950"><i class="fas fa-wand-magic-sparkles mr-2 text-brand-600"></i>2. Fitur AI</h3><p class="mt-1 text-xs text-slate-500">Batasi fungsi AI sesuai kebutuhan operasional sekolah.</p></div>
+            <div class="grid sm:grid-cols-2">
+                <label class="flex cursor-pointer items-start gap-3 border-b border-slate-100 p-4 sm:border-b-0 sm:border-r sm:p-5"><span class="min-w-0 flex-1"><strong class="block text-sm text-slate-950">Pembatasan konteks chatbot</strong><span class="mt-1 block text-xs leading-5 text-slate-500">Chatbot hanya menjawab pertanyaan tentang menu dan fitur SIPADUHOK.</span></span><span class="relative inline-flex h-6 w-11 shrink-0 items-center"><input type="checkbox" name="context_restriction_enabled" class="peer sr-only" @checked($contextRestrictionEnabled)><span class="absolute inset-0 rounded-full bg-slate-300 transition peer-checked:bg-brand-600"></span><span class="absolute left-1 h-4 w-4 rounded-full bg-white shadow transition peer-checked:translate-x-5"></span></span></label>
+                <label class="flex cursor-pointer items-start gap-3 p-4 sm:p-5"><span class="min-w-0 flex-1"><strong class="block text-sm text-slate-950">Generator soal AI</strong><span class="mt-1 block text-xs leading-5 text-slate-500">Guru dapat membuat rancangan soal ujian dan latihan secara otomatis.</span></span><span class="relative inline-flex h-6 w-11 shrink-0 items-center"><input type="checkbox" name="ai_question_generator_enabled" class="peer sr-only" @checked($aiQuestionGeneratorEnabled)><span class="absolute inset-0 rounded-full bg-slate-300 transition peer-checked:bg-brand-600"></span><span class="absolute left-1 h-4 w-4 rounded-full bg-white shadow transition peer-checked:translate-x-5"></span></span></label>
             </div>
+        </section>
 
-            <div class="card border-0 shadow-sm">
-                 <div class="card-body">
-                    <h6 class="fw-bold mb-3"><i class="fas fa-lightbulb text-warning me-2"></i>Cara Kerja</h6>
-                    <ul class="timeline ms-2">
-                        <li class="timeline-item pb-4 border-start border-2 ps-3 timeline-border">
-                            <span class="timeline-indicator-advanced text-primary fw-bold">1</span>
-                            <div class="ms-2">
-                                <div class="fw-bold text-dark">Analisis Konteks</div>
-                                <p class="text-muted small mb-0">AI membaca Pertanyaan, Kunci Jawaban, dan Jawaban Siswa.</p>
-                            </div>
-                        </li>
-                        <li class="timeline-item pb-4 border-start border-2 ps-3 timeline-border">
-                            <span class="timeline-indicator-advanced text-primary fw-bold">2</span>
-                            <div class="ms-2">
-                                <div class="fw-bold text-dark">Evaluasi Cerdas</div>
-                                <p class="text-muted small mb-0">Model bahasa besar (LLM) mengevaluasi relevansi dan ketepatan jawaban.</p>
-                            </div>
-                        </li>
-                        <li class="timeline-item border-start border-2 ps-3 timeline-border-transparent">
-                             <span class="timeline-indicator-advanced text-success fw-bold">3</span>
-                            <div class="ms-2">
-                                <div class="fw-bold text-dark">Rekomendasi</div>
-                                <p class="text-muted small mb-0">Sistem memberikan saran skor (0-100) dan feedback konstruktif untuk guru.</p>
-                            </div>
-                        </li>
-                    </ul>
-                 </div>
-            </div>
-        </div>
-    </div>
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 p-4 sm:p-5"><h3 class="font-extrabold text-slate-950"><i class="fas fa-user-shield mr-2 text-emerald-600"></i>3. Pengguna chatbot</h3><p class="mt-1 text-xs text-slate-500">Admin selalu memiliki akses. Aktifkan role lain sesuai kesiapan penggunaan.</p></div>
+            <div class="grid sm:grid-cols-2 xl:grid-cols-4">@foreach($roles as $key => [$label, $description])<label class="flex cursor-pointer items-start gap-3 border-b border-slate-100 p-4 sm:border-r sm:p-5 xl:[&:nth-child(4n)]:border-r-0"><span class="min-w-0 flex-1"><strong class="block text-sm text-slate-950">{{ $label }}</strong><span class="mt-1 block text-xs leading-5 text-slate-500">{{ $description }}</span></span><span class="relative inline-flex h-6 w-11 shrink-0 items-center"><input type="checkbox" name="chatbot_{{ $key }}" class="peer sr-only" @checked($chatbotEnabledRoles[$key] ?? false)><span class="absolute inset-0 rounded-full bg-slate-300 transition peer-checked:bg-brand-600"></span><span class="absolute left-1 h-4 w-4 rounded-full bg-white shadow transition peer-checked:translate-x-5"></span></span></label>@endforeach</div>
+        </section>
 
-    {{-- Chatbot Access Control Section --}}
-    <div class="row g-4 mt-3">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header border-bottom bg-transparent py-3">
-                    <h5 class="card-title mb-0 d-flex align-items-center">
-                        <i class="fas fa-user-shield me-2 text-success"></i>
-                        Kontrol Akses Chatbot AI
-                    </h5>
-                    <p class="text-muted small mb-0 mt-2">Atur role mana saja yang dapat mengakses fitur AI Chatbot Assistant. Role <strong>Admin</strong> selalu memiliki akses.</p>
-                </div>
-                <div class="card-body p-4">
-                    <form action="{{ route('admin.ai-settings.update') }}" method="POST">
-                        @csrf
-                        @method('PUT')
-
-                        {{-- Hidden fields to preserve other settings --}}
-                        <input type="hidden" name="groq_api_key" value="{{ $groqApiKey }}">
-                        <input type="hidden" name="gemini_api_key" value="{{ $geminiApiKey }}">
-                        <input type="hidden" name="ai_model" value="{{ $model }}">
-                        <input type="hidden" name="ai_vision_model" value="{{ $visionModel }}">
-                        <input type="hidden" name="ai_provider" value="{{ $provider }}">
-                        <input type="hidden" name="context_restriction_enabled" id="context_restriction_enabled_hidden" value="{{ $contextRestrictionEnabled ? '1' : '0' }}">
-                        <input type="hidden" name="ai_question_generator_enabled" id="ai_question_generator_enabled_hidden" value="{{ $aiQuestionGeneratorEnabled ? '1' : '0' }}">
-
-                        <div class="row g-3">
-                            {{-- Staff Roles (Left Column) --}}
-                            <div class="col-12 col-md-6">
-                                <h6 class="text-primary fw-bold mb-3">
-                                    <i class="fas fa-users me-2"></i>Role Staff
-                                </h6>
-
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="chatbot_ketua_pkbm" id="chatbot_ketua_pkbm"
-                                        {{ ($chatbotEnabledRoles['ketua_pkbm'] ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="chatbot_ketua_pkbm">
-                                        <strong>Ketua PKBM</strong>
-                                        <span class="text-muted d-block small">Akses penuh untuk kepala pusat kegiatan</span>
-                                    </label>
-                                </div>
-
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="chatbot_wakil_kepala_sekolah" id="chatbot_wakil_kepala_sekolah"
-                                        {{ ($chatbotEnabledRoles['wakil_kepala_sekolah'] ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="chatbot_wakil_kepala_sekolah">
-                                        <strong>Wakil Kepala Sekolah</strong>
-                                        <span class="text-muted d-block small">Bantuan untuk tugas wakil kepala sekolah</span>
-                                    </label>
-                                </div>
-
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="chatbot_sekretaris" id="chatbot_sekretaris"
-                                        {{ ($chatbotEnabledRoles['sekretaris'] ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="chatbot_sekretaris">
-                                        <strong>Sekretaris</strong>
-                                        <span class="text-muted d-block small">Asisten untuk tugas administrasi</span>
-                                    </label>
-                                </div>
-
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="chatbot_bendahara" id="chatbot_bendahara"
-                                        {{ ($chatbotEnabledRoles['bendahara'] ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="chatbot_bendahara">
-                                        <strong>Bendahara</strong>
-                                        <span class="text-muted d-block small">Bantuan untuk keuangan dan pembayaran</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            {{-- Teaching Staff & Users (Right Column) --}}
-                            <div class="col-12 col-md-6">
-                                <h6 class="text-primary fw-bold mb-3">
-                                    <i class="fas fa-chalkboard-teacher me-2"></i>Role Pengajar & Pengguna
-                                </h6>
-
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="chatbot_wali_kelas" id="chatbot_wali_kelas"
-                                        {{ ($chatbotEnabledRoles['wali_kelas'] ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="chatbot_wali_kelas">
-                                        <strong>Wali Kelas</strong>
-                                        <span class="text-muted d-block small">Bantuan untuk presensi dan rapor</span>
-                                    </label>
-                                </div>
-
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="chatbot_guru_pengajar" id="chatbot_guru_pengajar"
-                                        {{ ($chatbotEnabledRoles['guru_pengajar'] ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="chatbot_guru_pengajar">
-                                        <strong>Guru Pengajar</strong>
-                                        <span class="text-muted d-block small">Asisten untuk LMS, nilai, dan soal ujian</span>
-                                    </label>
-                                </div>
-
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="chatbot_siswa" id="chatbot_siswa"
-                                        {{ ($chatbotEnabledRoles['siswa'] ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="chatbot_siswa">
-                                        <strong>Siswa</strong>
-                                        <span class="text-muted d-block small">Bantuan untuk pertanyaan seputar sistem</span>
-                                    </label>
-                                </div>
-
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="chatbot_orang_tua" id="chatbot_orang_tua"
-                                        {{ ($chatbotEnabledRoles['orang_tua'] ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="chatbot_orang_tua">
-                                        <strong>Wali Siswa</strong>
-                                        <span class="text-muted d-block small">Bantuan untuk cek nilai dan pembayaran</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                            <div class="text-muted small">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Perubahan akan berlaku setelah user login kembali
-                            </div>
-                            <button type="submit" class="btn btn-success px-4 shadow-sm">
-                                <i class="fas fa-save me-2"></i> Simpan Pengaturan Akses
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    </div>
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/ai-settings/index.js'])
+        <div class="sticky bottom-3 z-10 flex justify-end rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur"><button type="submit" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-save"></i>Simpan seluruh pengaturan</button></div>
+    </form>
+</div>
 @endsection

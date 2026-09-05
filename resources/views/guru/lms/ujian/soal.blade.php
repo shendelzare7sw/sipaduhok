@@ -8,10 +8,6 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
-@push('styles')
-    @vite(['resources/css/guru/lms/ujian/soal.css'])
-@endpush
-
 @section('content')
 <div class="guru-lms-ujian-soal-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -65,7 +61,7 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <div class="text-truncate question-preview">
+                                                    <div class="max-w-[400px] text-truncate">
                                                         {{ strip_tags($soal->pertanyaan) }}
                                                     </div>
                                                 </td>
@@ -91,7 +87,7 @@
         </div>
     @else
         <div class="card-custom text-center py-5">
-            <i class="fas fa-clipboard-list text-muted empty-icon"></i>
+            <i class="fas fa-clipboard-list text-muted text-[64px] opacity-20"></i>
             <h5 class="mt-3 text-muted">Belum ada soal ujian</h5>
             <p class="text-muted mb-4">Mulai tambahkan soal untuk ujian ini</p>
             <a href="{{ route('guru.lms.ujian.soal.create', [$kelas->id, $mapel->id, $ujian->id]) }}" class="btn btn-primary">
@@ -113,7 +109,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="deleteForm" method="POST" class="delete-form">
+                    <form id="deleteForm" method="POST" class="inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">Hapus</button>

@@ -1,549 +1,97 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
-@section('title', 'Detail Siswa - ' . $siswa->nama_lengkap)
-
+@section('title', 'Detail Siswa - '.$siswa->nama_lengkap)
 @section('page-title', 'Detail Siswa')
 @section('page-subtitle', $siswa->nama_lengkap)
 
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/manajemen-siswa/show.css'])
-@endsection
-
 @section('content')
-    <div class="ms-show-page">
-        <div class="breadcrumb">
-            <a href="{{ route('admin.dashboard') }}"><i class="fas fa-home"></i></a>
-            <span>/</span>
-            <a href="{{ route('admin.manajemen-siswa.index') }}">Manajemen Siswa</a>
-            <span>/</span>
-            <span class="current">{{ $siswa->nama_lengkap }}</span>
+@php
+    $hasAyahKandung = $siswa->orangTua->contains(fn ($parent) => $parent->pivot->relationship === 'ayah_kandung');
+    $hasIbuKandung = $siswa->orangTua->contains(fn ($parent) => $parent->pivot->relationship === 'ibu_kandung');
+    $existingParentIds = $siswa->orangTua->pluck('id');
+    $linkableParents = $availableParents->whereNotIn('id', $existingParentIds);
+    $relationships = [
+        'ayah_kandung' => 'Ayah Kandung', 'ibu_kandung' => 'Ibu Kandung',
+        'ayah_tiri' => 'Ayah Tiri', 'ibu_tiri' => 'Ibu Tiri',
+        'kakek' => 'Kakek', 'nenek' => 'Nenek', 'paman' => 'Paman',
+        'bibi' => 'Bibi', 'wali' => 'Wali', 'lainnya' => 'Lainnya',
+    ];
+    $details = [
+        ['Nama lengkap', $siswa->nama_lengkap], ['NISN', $siswa->nisn ?: '-'],
+        ['NIS', $siswa->nis ?: '-'], ['Jenis kelamin', $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'],
+        ['Tempat, tanggal lahir', trim(($siswa->tempat_lahir ?: '-').', '.($siswa->tanggal_lahir?->locale('id')->translatedFormat('d F Y') ?? '-'))],
+        ['Tanggal masuk', $siswa->tanggal_masuk?->locale('id')->translatedFormat('d F Y') ?? '-'],
+        ['Cabang', $siswa->cabang->nama_cabang ?? '-'], ['Status', ucfirst($siswa->status)],
+        ['Nama ayah', $siswa->nama_ayah ?: '-'], ['Nama ibu', $siswa->nama_ibu ?: '-'],
+        ['Telepon wali', $siswa->telepon_orangtua ?: '-'], ['Alamat', $siswa->alamat ?: '-'],
+    ];
+@endphp
+
+<div x-data="{ parentPanel: {{ $errors->any() ? 'true' : 'false' }}, mode: '{{ old('create_new_parent') === '1' ? 'new' : (old('parent_id') ? 'existing' : '') }}', search: '', parentStatus: '', showPassword: false }" class="min-w-0 w-full space-y-4">
+    <header class="overflow-hidden rounded-2xl bg-gradient-to-r from-brand-950 to-brand-700 p-4 text-white shadow-sm sm:p-5 [&_h2]:!text-white [&_a:first-child]:!text-brand-700 [&_a:first-child:hover]:!text-brand-900">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="flex min-w-0 items-center gap-3"><span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-xl font-extrabold ring-1 ring-inset ring-white/20">{{ strtoupper(substr($siswa->nama_lengkap,0,1)) }}</span><div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wide text-blue-200">Profil siswa</p><h2 class="truncate text-xl font-extrabold sm:text-2xl">{{ $siswa->nama_lengkap }}</h2><p class="mt-1 truncate text-xs text-blue-100">NISN {{ $siswa->nisn ?: '-' }}{{ $siswa->nis ? ' · NIS '.$siswa->nis : '' }} &middot; {{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</p></div></div>
+<div class="flex flex-wrap gap-2"><a href="{{ route('admin.users.edit-siswa',$siswa->id) }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-3 text-xs font-bold text-brand-700 no-underline hover:bg-blue-50 hover:text-brand-900"><i class="fas fa-pen"></i>Edit data</a><a href="{{ route('admin.manajemen-siswa.print-kartu',$siswa) }}" target="_blank" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white/10 px-3 text-xs font-bold text-white no-underline ring-1 ring-inset ring-white/20 hover:bg-white/20"><i class="fas fa-id-card"></i>Cetak kartu</a><a href="{{ route('admin.manajemen-siswa.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white/10 px-3 text-xs font-bold text-white no-underline ring-1 ring-inset ring-white/20 hover:bg-white/20"><i class="fas fa-arrow-left"></i>Kembali</a></div>
         </div>
+    </header>
 
-        <div class="header-card {{ $siswa->jenis_kelamin == 'P' ? 'female' : '' }}">
-            <div class="header-content">
-                <div class="header-top">
-                    <div class="header-info">
-                        <div class="header-avatar">{{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}</div>
-                        <div class="header-text">
-                            <h1>{{ $siswa->nama_lengkap }}</h1>
-                            <div class="header-meta">
-                                <span class="header-badge">
-                                    <i class="fas fa-id-card"></i> NISN: {{ $siswa->nisn }}
-                                </span>
-                                @if($siswa->nis)
-                                    <span class="header-badge">
-                                        <i class="fas fa-hashtag"></i> NIS: {{ $siswa->nis }}
-                                    </span>
-                                @endif
-                                <span class="header-badge">
-                                    <i class="fas fa-{{ $siswa->jenis_kelamin == 'L' ? 'mars' : 'venus' }}"></i>
-                                    {{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="header-actions">
-                        <a href="{{ route('admin.users.edit-siswa', $siswa->id) }}" class="btn btn-white" title="Edit identitas, foto, status, dll">
-                            <i class="fas fa-edit"></i> Edit Data
-                        </a>
-                        <a href="{{ route('admin.manajemen-siswa.print-kartu', $siswa) }}" class="btn btn-white" target="_blank">
-                            <i class="fas fa-id-card"></i> Cetak Kartu
-                        </a>
-                        <a href="{{ route('admin.manajemen-siswa.index') }}" class="btn btn-white-outline">
-                            <i class="fas fa-arrow-left"></i> Kembali
-                        </a>
-                    </div>
-                </div>
+    @if($errors->any())
+        <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"><strong>Data belum dapat disimpan.</strong><ul class="mt-2 list-disc space-y-1 pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+    @endif
+
+    <div class="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,.85fr)]">
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="border-b border-slate-200 px-4 py-4 sm:px-5"><h3 class="font-extrabold text-slate-950"><i class="fas fa-user mr-2 text-brand-600"></i>Data pribadi</h3><p class="mt-1 text-xs text-slate-500">Identitas utama dan informasi keluarga siswa.</p></header>
+            <dl class="grid sm:grid-cols-2">
+                @foreach($details as [$label,$value])
+                    <div class="min-w-0 border-b border-slate-100 px-4 py-3 last:border-b-0 sm:px-5 sm:[&:nth-last-child(-n+2)]:border-b-0"><dt class="text-[10px] font-bold uppercase tracking-wide text-slate-400">{{ $label }}</dt><dd class="mt-1 break-words text-sm font-semibold text-slate-800">{{ $value }}</dd></div>
+                @endforeach
+            </dl>
+        </section>
+
+        <section class="self-start overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="border-b border-slate-200 px-4 py-4 sm:px-5"><h3 class="font-extrabold text-slate-950"><i class="fas fa-school mr-2 text-brand-600"></i>Kelas dan penempatan</h3><p class="mt-1 text-xs text-slate-500">Periode aktif: {{ $tahunAjaranAktif?->nama_tahun_ajaran ?? 'belum tersedia' }}.</p></header>
+            <div class="space-y-4 p-4 sm:p-5">
+                @if($siswa->kelas)
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><span class="text-[10px] font-bold uppercase tracking-wide text-emerald-600">Kelas saat ini</span><strong class="mt-1 block text-xl text-emerald-950">{{ $siswa->kelas->nama_kelas }} <small class="text-sm text-emerald-700">{{ $siswa->kelas->jenjang }}</small></strong><p class="mt-1 text-xs text-emerald-700">{{ $siswa->kelas->cabang->nama_cabang ?? '-' }} &middot; {{ $siswa->kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</p>@if($siswa->kelas->waliKelas)<p class="mt-1 text-xs text-emerald-700">Wali kelas: {{ $siswa->kelas->waliKelas->nama_lengkap }}</p>@endif</div>
+                @else
+                    <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"><i class="fas fa-circle-exclamation mr-2"></i><strong>Belum ditempatkan di kelas.</strong></div>
+                @endif
+                <form action="{{ route('admin.manajemen-siswa.assign-kelas',$siswa) }}" method="POST" class="space-y-3">@csrf<label class="block"><span class="mb-1.5 block text-xs font-bold text-slate-700">{{ $siswa->kelas ? 'Pindahkan ke kelas' : 'Tempatkan ke kelas' }}</span><select name="kelas_id" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Tanpa kelas</option>@foreach($kelasList->groupBy('jenjang') as $jenjang=>$group)<optgroup label="{{ $jenjang }}">@foreach($group as $kelas)@php $sisaKuota=$kelas->kuota_siswa-$kelas->siswa_count; @endphp<option value="{{ $kelas->id }}" @selected($siswa->kelas_id===$kelas->id) @disabled($sisaKuota<=0 && $siswa->kelas_id!==$kelas->id)>{{ $kelas->nama_kelas }} - {{ $kelas->cabang->nama_cabang ?? '' }} (sisa {{ $sisaKuota }})</option>@endforeach</optgroup>@endforeach</select></label><button type="submit" class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-check"></i>Simpan penempatan</button></form>
             </div>
-        </div>
-
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-user"></i> Data Pribadi</h5>
-                </div>
-                <div class="card-body">
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Nama Lengkap</span>
-                            <span class="info-value">{{ $siswa->nama_lengkap }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">NISN</span>
-                            <span class="info-value text-code-blue">{{ $siswa->nisn }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">NIS</span>
-                            <span class="info-value">{{ $siswa->nis ?? '-' }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Jenis Kelamin</span>
-                            <span class="info-value">{{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Tempat, Tanggal Lahir</span>
-                            <span class="info-value">{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir->format('d F Y') }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Alamat</span>
-                            <span class="info-value">{{ $siswa->alamat }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Nama Ayah</span>
-                            <span class="info-value">{{ $siswa->nama_ayah ?? '-' }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Nama Ibu</span>
-                            <span class="info-value">{{ $siswa->nama_ibu ?? '-' }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Telepon Wali Siswa</span>
-                            <span class="info-value">{{ $siswa->telepon_orangtua ?? '-' }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Tanggal Masuk</span>
-                            <span class="info-value">{{ $siswa->tanggal_masuk->format('d F Y') }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Status</span>
-                            <span class="info-value">
-                                <span class="badge {{ $siswa->status == 'aktif' ? 'badge-success' : 'badge-warning' }}">
-                                    {{ ucfirst($siswa->status) }}
-                                </span>
-                            </span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Cabang</span>
-                            <span class="info-value">{{ $siswa->cabang->nama_cabang ?? '-' }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-graduation-cap"></i> Kelas & Penempatan</h5>
-                </div>
-                <div class="card-body">
-                    <div class="kelas-current {{ !$siswa->kelas ? 'no-kelas' : '' }}">
-                        @if($siswa->kelas)
-                            <h4>Kelas Saat Ini</h4>
-                            <div class="kelas-name">{{ $siswa->kelas->nama_kelas }}</div>
-                            <div class="kelas-meta">
-                                <i class="fas fa-layer-group"></i> {{ $siswa->kelas->jenjang }} &bull;
-                                <i class="fas fa-building"></i> {{ $siswa->kelas->cabang->nama_cabang ?? '-' }} &bull;
-                                <i class="fas fa-calendar"></i> {{ $siswa->kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}
-                                @if($siswa->kelas->waliKelas)
-                                    <br><i class="fas fa-user-tie"></i> Wali Kelas: {{ $siswa->kelas->waliKelas->nama_lengkap }}
-                                @endif
-                            </div>
-                        @else
-                            <h4><i class="fas fa-exclamation-triangle"></i> Belum Ada Kelas</h4>
-                            <div class="kelas-name">Siswa ini belum ditempatkan di kelas manapun</div>
-                        @endif
-                    </div>
-
-                    <form action="{{ route('admin.manajemen-siswa.assign-kelas', $siswa) }}" method="POST">
-                        @csrf
-                        <div class="form-group">
-                            <label for="kelas_id">{{ $siswa->kelas ? 'Pindahkan ke Kelas Lain' : 'Tempatkan ke Kelas' }}</label>
-                            <select name="kelas_id" id="kelas_id">
-                                <option value="">-- Pilih Kelas --</option>
-                                @foreach($kelasList->groupBy('jenjang') as $jenjang => $kelasGroup)
-                                    <optgroup label="{{ $jenjang }}">
-                                        @foreach($kelasGroup as $k)
-                                            @php
-                                                $sisaKuota = $k->kuota_siswa - $k->siswa_count;
-                                            @endphp
-                                            <option value="{{ $k->id }}" {{ $siswa->kelas_id == $k->id ? 'selected' : '' }} {{ $sisaKuota <= 0 && $siswa->kelas_id != $k->id ? 'disabled' : '' }}>
-                                                {{ $k->nama_kelas }} - {{ $k->cabang->nama_cabang ?? '' }} (Sisa: {{ $sisaKuota }})
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-full">
-                            <i class="fas fa-save"></i> Simpan Perubahan
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header card-header-flex">
-                    <h5><i class="fas fa-users"></i> Data Wali Siswa / Wali</h5>
-                    <button type="button" class="btn btn-sm btn-primary add-parent-button" id="btnTambahOrangTua">
-                        <i class="fas fa-plus"></i> Tambah Wali Siswa
-                    </button>
-                </div>
-                <div class="card-body">
-                    @php
-                        $hasAyahKandung = $siswa->orangTua->contains(fn($p) => $p->pivot->relationship === 'ayah_kandung');
-                        $hasIbuKandung = $siswa->orangTua->contains(fn($p) => $p->pivot->relationship === 'ibu_kandung');
-                        $existingParentIds = $siswa->orangTua->pluck('id')->toArray();
-                    @endphp
-
-                    @if($siswa->orangTua && $siswa->orangTua->count() > 0)
-                        <div class="info-grid">
-                            @foreach($siswa->orangTua as $parent)
-                                @php
-                                    $relationshipLabel = ucwords(str_replace('_', ' ', $parent->pivot->relationship));
-                                    $isCoreRelationship = in_array($parent->pivot->relationship, ['ayah_kandung', 'ibu_kandung']);
-                                @endphp
-                                <div class="info-item parent-linked-item">
-                                    <div class="parent-linked-row">
-                                        <div class="parent-linked-content">
-                                            <div class="parent-linked-heading">
-                                                <div class="parent-avatar parent-avatar-{{ $parent->pivot->relationship }}">
-                                                    {{ strtoupper(substr($parent->name, 0, 1)) }}
-                                                </div>
-                                                <div class="parent-linked-text">
-                                                    <div class="parent-name">{{ $parent->name }}</div>
-                                                    <div class="parent-email-row">
-                                                        <i class="fas fa-envelope parent-email-icon"></i>
-                                                        <span>{{ $parent->email }}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="parent-badges">
-                                                <span class="badge {{ $isCoreRelationship ? 'relationship-badge-core' : 'relationship-badge-other' }}">
-                                                    <i class="fas fa-user-friends"></i> {{ $relationshipLabel }}
-                                                </span>
-                                                @if($parent->pivot->is_primary)
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-star"></i> Penanggung Jawab Utama
-                                                    </span>
-                                                @endif
-                                                @if($parent->pivot->is_financial_responsible)
-                                                    <span class="badge badge-financial">
-                                                        <i class="fas fa-wallet"></i> Penanggung Jawab Keuangan
-                                                    </span>
-                                                @endif
-                                                @if($parent->pivot->can_access_academic)
-                                                    <span class="badge badge-academic">
-                                                        <i class="fas fa-book"></i> Akses Akademik
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <form action="{{ route('admin.manajemen-siswa.detach-parent', [$siswa, $parent]) }}" method="POST" id="detachParentForm{{ $parent->id }}" class="detach-parent-form">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button
-                                                type="button"
-                                                class="btn btn-sm btn-detach-parent"
-                                                data-detach-parent
-                                                data-parent-id="{{ $parent->id }}"
-                                                data-parent-name="{{ $parent->name }}"
-                                                data-relationship="{{ $relationshipLabel }}"
-                                            >
-                                                <i class="fas fa-unlink"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="alert alert-parent-empty">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            Belum ada data wali siswa/wali yang terhubung dengan siswa ini.
-                        </div>
-                    @endif
-
-                    <div id="addParentFormContainer" class="add-parent-form">
-                        <div class="add-parent-header">
-                            <h6 class="add-parent-title">
-                                <i class="fas fa-user-plus title-icon-primary"></i> Tambah Wali Siswa / Wali
-                            </h6>
-                            <button type="button" class="btn btn-sm btn-subtle-icon" data-hide-parent-form>
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-
-                        @if($hasAyahKandung && $hasIbuKandung)
-                            <div class="alert alert-info-parent">
-                                <i class="fas fa-info-circle"></i>
-                                Siswa ini sudah memiliki Ayah Kandung dan Ibu Kandung. Anda masih dapat menambahkan wali/wali siswa dengan hubungan lain.
-                            </div>
-                        @elseif($hasAyahKandung)
-                            <div class="alert alert-info-parent">
-                                <i class="fas fa-info-circle"></i>
-                                Siswa ini sudah memiliki Ayah Kandung. Opsi "Ayah Kandung" tidak tersedia.
-                            </div>
-                        @elseif($hasIbuKandung)
-                            <div class="alert alert-info-parent">
-                                <i class="fas fa-info-circle"></i>
-                                Siswa ini sudah memiliki Ibu Kandung. Opsi "Ibu Kandung" tidak tersedia.
-                            </div>
-                        @endif
-
-                        <div class="form-group">
-                            <label class="form-label">Opsi Tambah Wali Siswa</label>
-                            <select id="parentOptionSelect" class="form-control">
-                                <option value="">-- Pilih Opsi --</option>
-                                <option value="existing">Pilih Wali Siswa yang Sudah Ada</option>
-                                <option value="new">Buat Akun Wali Siswa Baru</option>
-                            </select>
-                        </div>
-
-                        <div id="existingParentForm" class="parent-form-panel">
-                            <form action="{{ route('admin.manajemen-siswa.attach-parent', $siswa) }}" method="POST" id="attachParentForm">
-                                @csrf
-
-                                <div class="form-grid-2">
-                                    <div class="form-group form-group-compact">
-                                        <label class="form-label">
-                                            <i class="fas fa-search form-icon-muted"></i> Cari Wali Siswa
-                                        </label>
-                                        <input type="text" id="searchParentInput" class="form-control" placeholder="Ketik nama atau email...">
-                                    </div>
-                                    <div class="form-group form-group-compact">
-                                        <label class="form-label">
-                                            <i class="fas fa-filter form-icon-muted"></i> Filter Status
-                                        </label>
-                                        <select id="filterParentStatus" class="form-control">
-                                            <option value="">Semua Wali Siswa</option>
-                                            <option value="available">Belum Punya Anak Terdaftar (Baru)</option>
-                                            <option value="has_children">Sudah Punya Anak Terdaftar</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Pilih Wali Siswa <span class="required-mark">*</span>
-                                        <small class="label-note">(<span id="parentCount">{{ $availableParents->count() }}</span> tersedia)</small>
-                                    </label>
-                                    <div id="parentListContainer" class="parent-list-container">
-                                        @forelse($availableParents as $p)
-                                            @php
-                                                $isAlreadyLinked = in_array($p->id, $existingParentIds);
-                                                $hasChildren = $p->studentParents->count() > 0;
-                                            @endphp
-                                            <label
-                                                class="parent-option {{ $isAlreadyLinked ? 'is-hidden' : '' }}"
-                                                data-name="{{ strtolower($p->name) }}"
-                                                data-email="{{ strtolower($p->email) }}"
-                                                data-already-linked="{{ $isAlreadyLinked ? 'true' : 'false' }}"
-                                                data-status="{{ $hasChildren ? 'has_children' : 'available' }}"
-                                            >
-                                                <input type="radio" name="parent_id" value="{{ $p->id }}" class="parent-radio" {{ $isAlreadyLinked ? 'disabled' : '' }} required>
-                                                <div class="parent-option-body">
-                                                    <div class="parent-option-name">
-                                                        <i class="fas fa-user"></i>
-                                                        <span class="parent-option-name-text">{{ $p->name }}</span>
-                                                        @if(!$hasChildren)
-                                                            <span class="new-badge">BARU</span>
-                                                        @endif
-                                                    </div>
-                                                    <small class="parent-option-meta">
-                                                        {{ $p->email }}
-                                                        @if($hasChildren)
-                                                            <br><strong>Anak:</strong>
-                                                            {{ $p->studentParents->take(3)->pluck('siswa.nama_lengkap')->join(', ') }}{{ $p->studentParents->count() > 3 ? '...' : '' }}
-                                                        @else
-                                                            <br><em>Belum memiliki anak terdaftar</em>
-                                                        @endif
-                                                    </small>
-                                                </div>
-                                            </label>
-                                        @empty
-                                            <div class="empty-parent-state">
-                                                <i class="fas fa-users-slash empty-state-icon"></i>
-                                                <p>Tidak ada akun wali siswa tersedia.</p>
-                                                <small>Silakan buat akun baru terlebih dahulu.</small>
-                                            </div>
-                                        @endforelse
-                                        <div id="noParentFound" class="empty-parent-state no-parent-found">
-                                            <i class="fas fa-search empty-state-icon"></i>
-                                            <p><strong>Tidak ada wali siswa yang ditemukan</strong></p>
-                                            <small>Coba ubah kata kunci pencarian</small>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Hubungan <span class="required-mark">*</span></label>
-                                    <select name="relationship" id="relationshipSelect" class="form-control" required>
-                                        <option value="">-- Pilih Hubungan --</option>
-                                        <option value="ayah_kandung" {{ $hasAyahKandung ? 'disabled' : '' }}>Ayah Kandung {{ $hasAyahKandung ? '(Sudah Ada)' : '' }}</option>
-                                        <option value="ibu_kandung" {{ $hasIbuKandung ? 'disabled' : '' }}>Ibu Kandung {{ $hasIbuKandung ? '(Sudah Ada)' : '' }}</option>
-                                        <option value="ayah_tiri">Ayah Tiri</option>
-                                        <option value="ibu_tiri">Ibu Tiri</option>
-                                        <option value="kakek">Kakek</option>
-                                        <option value="nenek">Nenek</option>
-                                        <option value="paman">Paman</option>
-                                        <option value="bibi">Bibi</option>
-                                        <option value="wali">Wali</option>
-                                        <option value="lainnya">Lainnya</option>
-                                    </select>
-                                </div>
-
-                                <div class="parent-checkbox-grid">
-                                    <div class="form-group">
-                                        <label>
-                                            <input type="checkbox" name="is_primary" value="1">
-                                            <span class="checkbox-label-text"><i class="fas fa-star icon-warning"></i> Penanggung Jawab Utama</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>
-                                            <input type="checkbox" name="is_financial_responsible" value="1" checked>
-                                            <span class="checkbox-label-text"><i class="fas fa-wallet icon-success"></i> Penanggung Jawab Keuangan</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>
-                                            <input type="checkbox" name="can_access_academic" value="1" checked>
-                                            <span class="checkbox-label-text"><i class="fas fa-book icon-primary"></i> Akses Data Akademik</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="form-actions">
-                                    <button type="submit" class="btn btn-primary form-action-submit">
-                                        <i class="fas fa-link"></i> Hubungkan Wali Siswa
-                                    </button>
-                                    <button type="button" class="btn btn-secondary-action" data-hide-parent-form>
-                                        <i class="fas fa-times"></i> Batal
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div id="newParentForm" class="parent-form-panel">
-                            <form action="{{ route('admin.manajemen-siswa.attach-parent', $siswa) }}" method="POST" id="createParentForm">
-                                @csrf
-                                <input type="hidden" name="create_new_parent" value="1">
-
-                                <div class="form-grid-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Nama Lengkap <span class="required-mark">*</span></label>
-                                        <input type="text" name="new_parent_name" class="form-control" placeholder="Nama lengkap wali siswa" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Username <span class="required-mark">*</span></label>
-                                        <input type="text" name="new_parent_username" class="form-control" placeholder="Username untuk login" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-grid-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Email <span class="required-mark">*</span></label>
-                                        <input type="email" name="new_parent_email" class="form-control" placeholder="contoh@email.com" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Password <span class="required-mark">*</span></label>
-                                        <div class="password-wrapper">
-                                            <input type="password" name="new_parent_password" id="newParentPassword" class="form-control password-input" placeholder="Minimal 8 karakter" required>
-                                            <button type="button" class="password-toggle" data-toggle-password data-target="newParentPassword" data-icon="toggleNewParentPwdIcon">
-                                                <i id="toggleNewParentPwdIcon" class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-grid-2">
-                                    <div class="form-group">
-                                        <label class="form-label">No. Telepon/WA</label>
-                                        <input type="text" name="new_parent_phone" class="form-control" placeholder="Contoh: 08123456789">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Hubungan <span class="required-mark">*</span></label>
-                                        <select name="relationship" id="newRelationshipSelect" class="form-control" required>
-                                            <option value="">-- Pilih Hubungan --</option>
-                                            <option value="ayah_kandung" {{ $hasAyahKandung ? 'disabled' : '' }}>Ayah Kandung {{ $hasAyahKandung ? '(Sudah Ada)' : '' }}</option>
-                                            <option value="ibu_kandung" {{ $hasIbuKandung ? 'disabled' : '' }}>Ibu Kandung {{ $hasIbuKandung ? '(Sudah Ada)' : '' }}</option>
-                                            <option value="ayah_tiri">Ayah Tiri</option>
-                                            <option value="ibu_tiri">Ibu Tiri</option>
-                                            <option value="kakek">Kakek</option>
-                                            <option value="nenek">Nenek</option>
-                                            <option value="paman">Paman</option>
-                                            <option value="bibi">Bibi</option>
-                                            <option value="wali">Wali</option>
-                                            <option value="lainnya">Lainnya</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="parent-checkbox-grid">
-                                    <div class="form-group">
-                                        <label>
-                                            <input type="checkbox" name="is_primary" value="1">
-                                            <span class="checkbox-label-text"><i class="fas fa-star icon-warning"></i> Penanggung Jawab Utama</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>
-                                            <input type="checkbox" name="is_financial_responsible" value="1" checked>
-                                            <span class="checkbox-label-text"><i class="fas fa-wallet icon-success"></i> Penanggung Jawab Keuangan</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>
-                                            <input type="checkbox" name="can_access_academic" value="1" checked>
-                                            <span class="checkbox-label-text"><i class="fas fa-book icon-primary"></i> Akses Data Akademik</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="form-actions">
-                                    <button type="submit" class="btn btn-primary form-action-submit">
-                                        <i class="fas fa-user-plus"></i> Buat & Hubungkan Wali Siswa
-                                    </button>
-                                    <button type="button" class="btn btn-secondary-action" data-hide-parent-form>
-                                        <i class="fas fa-times"></i> Batal
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="detachParentModal" tabindex="-1" aria-labelledby="detachParentModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content detach-modal-content">
-                    <div class="modal-header d-flex justify-content-between align-items-center detach-modal-header">
-                        <h5 class="modal-title detach-modal-title" id="detachParentModalLabel">
-                            <i class="fas fa-unlink"></i>
-                            Konfirmasi Hapus Hubungan
-                        </h5>
-                        <button type="button" class="detach-modal-close" data-bs-dismiss="modal" aria-label="Close">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body detach-modal-body">
-                        <p class="detach-modal-message">Apakah Anda yakin ingin menghapus hubungan dengan wali siswa berikut?</p>
-                        <div class="detach-parent-summary">
-                            <div class="detach-parent-name" id="detachParentName"></div>
-                            <div class="detach-parent-relationship">Hubungan: <span id="detachParentRelationship"></span></div>
-                        </div>
-                        <p class="detach-modal-note">
-                            <i class="fas fa-info-circle"></i> Hubungan akan dihapus. Wali siswa masih bisa dihubungkan kembali nanti.
-                        </p>
-                    </div>
-                    <div class="modal-footer detach-modal-footer">
-                        <button type="button" class="btn btn-modal-cancel" data-bs-dismiss="modal">
-                            <i class="fas fa-times"></i> Batal
-                        </button>
-                        <button type="button" class="btn btn-modal-confirm" id="submitDetachParentButton">
-                            <i class="fas fa-unlink"></i> Ya, Hapus Hubungan
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </section>
     </div>
-@endsection
 
-@section('scripts')
-    @vite(['resources/js/admin/manajemen-siswa/show.js'])
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-5"><div><h3 class="font-extrabold text-slate-950"><i class="fas fa-people-roof mr-2 text-brand-600"></i>Wali siswa</h3><p class="mt-1 text-xs text-slate-500">Kelola hubungan keluarga dan hak akses wali.</p></div><button type="button" @click="parentPanel = !parentPanel; if (!parentPanel) mode = ''" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-brand-600 px-3 text-xs font-bold text-white hover:bg-brand-700"><i class="fas fa-plus"></i>Tambah wali</button></header>
+
+        <div class="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-3 sm:p-5">
+            @forelse($siswa->orangTua as $parent)
+                @php $relationshipLabel=$relationships[$parent->pivot->relationship] ?? ucwords(str_replace('_',' ',$parent->pivot->relationship)); @endphp
+                <article class="flex min-w-0 items-start gap-3 rounded-2xl border border-slate-200 p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-xs font-extrabold text-violet-700">{{ strtoupper(substr($parent->name,0,1)) }}</span><div class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-950" title="{{ $parent->name }}">{{ $parent->name }}</strong><span class="block truncate text-xs text-slate-500">{{ $parent->email }}</span><div class="mt-2 flex flex-wrap gap-1"><span class="rounded-full bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700">{{ $relationshipLabel }}</span>@if($parent->pivot->is_primary)<span class="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">Utama</span>@endif @if($parent->pivot->is_financial_responsible)<span class="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">Keuangan</span>@endif @if($parent->pivot->can_access_academic)<span class="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">Akademik</span>@endif</div></div><form action="{{ route('admin.manajemen-siswa.detach-parent',[$siswa,$parent]) }}" method="POST" data-confirm data-confirm-title="Hapus hubungan wali?" data-confirm-message="Hubungan {{ $parent->name }} sebagai {{ $relationshipLabel }} akan dilepas. Akun wali tidak dihapus." data-confirm-text="Ya, lepas">@csrf @method('DELETE')<x-cleanflow.table-action type="submit" tone="delete" icon="fas fa-unlink" label="Lepas hubungan wali" /></form></article>
+            @empty
+                <div class="rounded-2xl border border-dashed border-slate-300 p-8 text-center md:col-span-2 xl:col-span-3"><i class="fas fa-users-slash text-3xl text-slate-300"></i><h4 class="mt-3 font-bold text-slate-900">Belum ada wali terhubung</h4><p class="mt-1 text-xs text-slate-500">Hubungkan akun yang sudah ada atau buat akun wali baru.</p></div>
+            @endforelse
+        </div>
+
+        <div x-cloak x-show="parentPanel" x-transition class="border-t border-slate-200 bg-slate-50 p-4 sm:p-5">
+            <div class="mx-auto max-w-5xl space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3"><div><h4 class="font-extrabold text-slate-950">Tambahkan wali siswa</h4><p class="mt-1 text-xs text-slate-500">Pilih sumber akun terlebih dahulu.</p></div><button type="button" @click="parentPanel=false; mode=''" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white text-slate-500 ring-1 ring-inset ring-slate-200"><i class="fas fa-times"></i></button></div>
+                @if($hasAyahKandung || $hasIbuKandung)<p class="rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs text-blue-700">Relasi inti yang sudah ada: {{ collect([$hasAyahKandung ? 'Ayah Kandung' : null,$hasIbuKandung ? 'Ibu Kandung' : null])->filter()->join(' dan ') }}. Opsi tersebut dinonaktifkan agar tidak ganda.</p>@endif
+                <div class="grid grid-cols-2 gap-2"><button type="button" @click="mode='existing'" :class="mode==='existing' ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 bg-white text-slate-600'" class="min-h-12 rounded-xl border px-3 text-xs font-bold"><i class="fas fa-link mr-2"></i>Akun yang ada</button><button type="button" @click="mode='new'" :class="mode==='new' ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 bg-white text-slate-600'" class="min-h-12 rounded-xl border px-3 text-xs font-bold"><i class="fas fa-user-plus mr-2"></i>Buat akun baru</button></div>
+
+                <form x-cloak x-show="mode==='existing'" action="{{ route('admin.manajemen-siswa.attach-parent',$siswa) }}" method="POST" class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4">@csrf
+                    <div class="grid gap-3 sm:grid-cols-2"><label><span class="mb-1.5 block text-xs font-bold text-slate-700">Cari wali</span><input type="search" x-model="search" placeholder="Nama atau email..." class="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"></label><label><span class="mb-1.5 block text-xs font-bold text-slate-700">Status akun</span><select x-model="parentStatus" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Semua akun</option><option value="available">Belum punya siswa</option><option value="has_children">Sudah punya siswa</option></select></label></div>
+                    <fieldset><legend class="mb-2 text-xs font-bold text-slate-700">Pilih wali <span class="text-red-500">*</span></legend><div class="max-h-64 space-y-2 overflow-y-auto rounded-xl border border-slate-200 p-2">@forelse($linkableParents as $candidate)@php $hasChildren=$candidate->studentParents->isNotEmpty(); $searchValue=strtolower($candidate->name.' '.$candidate->email); @endphp<label x-show="(search==='' || @js($searchValue).includes(search.toLowerCase())) && (parentStatus==='' || parentStatus==='{{ $hasChildren ? 'has_children' : 'available' }}')" class="flex cursor-pointer items-start gap-3 rounded-xl p-3 hover:bg-slate-50"><input type="radio" name="parent_id" value="{{ $candidate->id }}" required class="mt-1 h-4 w-4 border-slate-300 text-brand-600"><span class="min-w-0"><strong class="block truncate text-sm text-slate-900">{{ $candidate->name }}</strong><small class="block truncate text-slate-500">{{ $candidate->email }}</small><small class="mt-1 block text-slate-400">{{ $hasChildren ? 'Sudah terhubung dengan '.$candidate->studentParents->count().' siswa' : 'Belum memiliki siswa' }}</small></span></label>@empty<p class="p-6 text-center text-sm text-slate-500">Tidak ada akun wali lain yang tersedia.</p>@endforelse</div></fieldset>
+                    <div class="grid gap-3 sm:grid-cols-2"><label><span class="mb-1.5 block text-xs font-bold text-slate-700">Hubungan <span class="text-red-500">*</span></span><select name="relationship" required class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Pilih hubungan</option>@foreach($relationships as $value=>$label)<option value="{{ $value }}" @selected(old('relationship')===$value) @disabled(($value==='ayah_kandung'&&$hasAyahKandung)||($value==='ibu_kandung'&&$hasIbuKandung))>{{ $label }}</option>@endforeach</select></label><div class="space-y-2 pt-1 sm:pt-6"><label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" name="is_primary" value="1" @checked(old('is_primary')) class="h-4 w-4 rounded text-brand-600">Penanggung jawab utama</label><label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" name="is_financial_responsible" value="1" @checked(old('is_financial_responsible',true)) class="h-4 w-4 rounded text-brand-600">Akses keuangan</label><label class="flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" name="can_access_academic" value="1" @checked(old('can_access_academic',true)) class="h-4 w-4 rounded text-brand-600">Akses akademik</label></div></div><button type="submit" class="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white"><i class="fas fa-link"></i>Hubungkan wali</button>
+                </form>
+
+                <form x-cloak x-show="mode==='new'" action="{{ route('admin.manajemen-siswa.attach-parent',$siswa) }}" method="POST" class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4">@csrf<input type="hidden" name="create_new_parent" value="1">
+                    <div class="grid gap-3 sm:grid-cols-2"><label><span class="mb-1.5 block text-xs font-bold text-slate-700">Nama lengkap <span class="text-red-500">*</span></span><input name="new_parent_name" value="{{ old('new_parent_name') }}" required class="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"></label><label><span class="mb-1.5 block text-xs font-bold text-slate-700">Username <span class="text-red-500">*</span></span><input name="new_parent_username" value="{{ old('new_parent_username') }}" required class="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"></label><label><span class="mb-1.5 block text-xs font-bold text-slate-700">Email <span class="text-red-500">*</span></span><input type="email" name="new_parent_email" value="{{ old('new_parent_email') }}" required class="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"></label><label><span class="mb-1.5 block text-xs font-bold text-slate-700">Password <span class="text-red-500">*</span></span><span class="relative block"><input :type="showPassword ? 'text' : 'password'" name="new_parent_password" minlength="8" required class="h-11 w-full rounded-xl border border-slate-300 pl-3 pr-11 text-sm"><button type="button" @click="showPassword=!showPassword" class="absolute inset-y-0 right-0 w-11 text-slate-400"><i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i></button></span></label><label><span class="mb-1.5 block text-xs font-bold text-slate-700">Nomor telepon/WA</span><input name="new_parent_phone" value="{{ old('new_parent_phone') }}" class="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"></label><label><span class="mb-1.5 block text-xs font-bold text-slate-700">Hubungan <span class="text-red-500">*</span></span><select name="relationship" required class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Pilih hubungan</option>@foreach($relationships as $value=>$label)<option value="{{ $value }}" @selected(old('relationship')===$value) @disabled(($value==='ayah_kandung'&&$hasAyahKandung)||($value==='ibu_kandung'&&$hasIbuKandung))>{{ $label }}</option>@endforeach</select></label></div>
+                    <div class="grid gap-2 sm:grid-cols-3"><label class="flex min-h-10 items-center gap-2 rounded-xl bg-slate-50 px-3 text-xs font-semibold text-slate-700"><input type="checkbox" name="is_primary" value="1" @checked(old('is_primary')) class="h-4 w-4 rounded text-brand-600">Wali utama</label><label class="flex min-h-10 items-center gap-2 rounded-xl bg-slate-50 px-3 text-xs font-semibold text-slate-700"><input type="checkbox" name="is_financial_responsible" value="1" @checked(old('is_financial_responsible',true)) class="h-4 w-4 rounded text-brand-600">Akses keuangan</label><label class="flex min-h-10 items-center gap-2 rounded-xl bg-slate-50 px-3 text-xs font-semibold text-slate-700"><input type="checkbox" name="can_access_academic" value="1" @checked(old('can_access_academic',true)) class="h-4 w-4 rounded text-brand-600">Akses akademik</label></div><button type="submit" class="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white"><i class="fas fa-user-plus"></i>Buat dan hubungkan</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
 @endsection

@@ -1,104 +1,19 @@
-@extends('layouts.sneat')
-
+@extends('layouts.app')
 @section('title', 'Import Jadwal Pelajaran')
 @section('page-title', 'Import Jadwal Pelajaran')
-@section('page-subtitle', 'Import jadwal pelajaran dari file Excel')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/jadwal-pelajaran/import.css'])
-@endsection
+@section('page-subtitle', 'Masukkan banyak jadwal sekaligus dari template Excel')
 
 @section('content')
-    <div class="jp-import-page">
-        @if($errors->any())
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                <ul class="mb-0">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <div class="instructions">
-            <h6><i class="fas fa-info-circle me-2"></i> Petunjuk Import Jadwal Pelajaran</h6>
-            <ol>
-                <li>Pilih tahun ajaran target untuk import.</li>
-                <li>Download template Excel dan <strong>hapus baris contoh</strong> berwarna kuning sebelum mengisi data.</li>
-                <li><strong>WAJIB:</strong> nama_cabang, nama_kelas, nama_mapel, hari, jam_mulai, jam_selesai.</li>
-                <li><strong>OPSIONAL:</strong> nama_guru, jika kosong jadwal dibuat dengan status "kosong", dan keterangan.</li>
-                <li><strong>MULTI-KELAS:</strong> pisahkan nama kelas dengan koma, contoh: <code>X IPA 1, X IPA 2</code>.</li>
-                <li><strong>BEDA JENJANG:</strong> sistem otomatis memisah jadwal per jenjang dengan mapel yang sesuai.</li>
-                <li><span class="jp-warning-red">Jika kelas/mapel tidak ditemukan di database, baris akan dilewati.</span></li>
-                <li><span class="jp-warning-orange">Jika guru tidak ditemukan, jadwal tetap dibuat dengan status "kosong".</span></li>
-            </ol>
-        </div>
-
-        <div class="card jp-import-card">
-            <div class="card-header">
-                <h5><i class="fas fa-file-import jp-import-icon"></i>Upload File Excel</h5>
-            </div>
-            <div class="card-body">
-                <div class="jp-template-actions">
-                    <a href="{{ route('admin.jadwal-pelajaran.template') }}" class="btn btn-success">
-                        <i class="fas fa-download"></i> Download Template
-                    </a>
-                </div>
-
-                <form action="{{ route('admin.jadwal-pelajaran.import.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-
-                    <label class="jp-form-label" for="tahunAjaranId">Tahun Ajaran Target:</label>
-                    <select name="tahun_ajaran_id" id="tahunAjaranId" class="jp-import-select" required>
-                        @foreach(\App\Models\TahunAjaran::orderBy('tanggal_mulai', 'desc')->get() as $ta)
-                            <option value="{{ $ta->id }}" {{ $ta->is_active ? 'selected' : '' }}>
-                                {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    <label for="fileInput" class="upload-area" data-upload-area>
-                        <div class="upload-area-icon">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                        </div>
-                        <div class="upload-area-title">Klik untuk memilih file atau drag & drop</div>
-                        <div class="upload-area-help">Format: .xlsx, .xls (Maks 5MB)</div>
-                    </label>
-
-                    <input type="file" name="file" id="fileInput" class="d-none" accept=".xlsx,.xls" required>
-
-                    <div class="file-selected d-none" id="fileSelected">
-                        <div class="file-selected-main">
-                            <i class="fas fa-file-excel file-selected-icon"></i>
-                            <div>
-                                <strong id="fileName">-</strong>
-                                <div class="file-selected-size" id="fileSize">-</div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-secondary jp-clear-file-btn" data-clear-file>
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-
-                    <div class="jp-actions">
-                        <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Kembali
-                        </a>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
-                            <i class="fas fa-upload"></i> Import Data
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="min-w-0 w-full space-y-4" x-data="{ fileName: '', fileSize: '', pick(event) { const file = event.target.files[0]; this.fileName = file?.name || ''; this.fileSize = file ? (file.size / 1024 / 1024).toFixed(2) + ' MB' : ''; } }">
+    <header class="flex min-w-0 items-start gap-3"><a href="{{ route('admin.jadwal-pelajaran.index') }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali"><i class="fas fa-arrow-left"></i></a><div><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Jadwal pelajaran</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Import dari Excel</h2><p class="mt-1 text-sm text-slate-500">Gunakan template agar nama cabang, kelas, mapel, dan format waktu terbaca tepat.</p></div></header>
+    @if($errors->any())<aside class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><p class="font-extrabold">File belum dapat diproses.</p><ul class="mt-2 list-disc space-y-1 pl-5 text-xs">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></aside>@endif
+    <div class="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]">
+        <aside class="rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5"><div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand-600"><i class="fas fa-list-ol"></i></span><div><h3 class="font-extrabold text-slate-950">Sebelum mengunggah</h3><p class="text-xs text-slate-600">Ikuti urutan berikut agar impor tidak gagal.</p></div></div><ol class="mt-4 space-y-3 text-sm leading-6 text-slate-700">@foreach(['Pilih tahun ajaran target.', 'Unduh template lalu hapus baris contoh berwarna kuning.', 'Isi nama_cabang, nama_kelas, nama_mapel, hari, jam_mulai, dan jam_selesai.', 'Nama guru dan keterangan boleh dikosongkan.', 'Untuk multi-kelas, pisahkan nama kelas dengan koma.'] as $step)<li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-600 text-[11px] font-extrabold text-white">{{ $loop->iteration }}</span><span>{{ $step }}</span></li>@endforeach</ol><div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">Kelas atau mapel yang tidak ditemukan akan dilewati. Guru yang tidak ditemukan membuat jadwal berstatus <strong>kosong</strong>.</div></aside>
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-5"><div><h3 class="font-extrabold text-slate-950">Unggah file jadwal</h3><p class="mt-0.5 text-xs text-slate-500">Format .xlsx atau .xls, maksimum 5 MB.</p></div><a href="{{ route('admin.jadwal-pelajaran.template') }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-50 px-4 text-xs font-bold text-emerald-700 no-underline hover:bg-emerald-100"><i class="fas fa-download"></i>Unduh template</a></header><form action="{{ route('admin.jadwal-pelajaran.import.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4 p-4 sm:p-5">@csrf
+            <label class="block"><span class="block text-sm font-bold text-slate-700">Tahun ajaran target <span class="text-red-500">*</span></span><select name="tahun_ajaran_id" class="mt-1.5 block h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" required>@foreach(\App\Models\TahunAjaran::orderBy('tanggal_mulai', 'desc')->get() as $ta)<option value="{{ $ta->id }}" @selected($ta->is_active)>{{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' (Aktif)' : '' }}</option>@endforeach</select></label>
+            <label class="flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-5 text-center transition hover:border-brand-400 hover:bg-brand-50"><input type="file" name="file" class="sr-only" accept=".xlsx,.xls" required @change="pick($event)"><span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-xl text-brand-700"><i class="fas fa-cloud-arrow-up"></i></span><strong class="mt-3 text-sm text-slate-900" x-text="fileName || 'Pilih file Excel'"></strong><span class="mt-1 text-xs text-slate-500" x-text="fileSize || 'Ketuk area ini untuk membuka file'"></span></label>
+            <div class="flex flex-wrap justify-end gap-2"><a href="{{ route('admin.jadwal-pelajaran.index') }}" class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" :disabled="!fileName" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"><i class="fas fa-upload"></i>Mulai import</button></div>
+        </form></section>
     </div>
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/jadwal-pelajaran/import.js'])
+</div>
 @endsection

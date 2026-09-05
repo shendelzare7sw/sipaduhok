@@ -1,57 +1,13 @@
-@once
-    @push('styles')
-        @vite(['resources/css/monitoring-lms/modal-catatan.css'])
-    @endpush
-
-    @push('scripts')
-        @vite(['resources/js/monitoring-lms/modal-catatan.js'])
-    @endpush
-@endonce
-
-<div class="modal fade" id="modalKirimCatatan" tabindex="-1" aria-labelledby="modalKirimCatatanLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content modal-catatan-content">
-            <form id="formKirimCatatan" method="POST" action="{{ route($baseRoute . '.catatan') }}">
-                @csrf
-                <input type="hidden" name="konten_type" id="catatanKontenType" value="">
-                <input type="hidden" name="konten_id" id="catatanKontenId" value="">
-
-                <div class="modal-header modal-catatan-header align-items-start">
-                    <div>
-                        <h5 class="modal-title fw-bold mb-1 modal-catatan-title" id="modalKirimCatatanLabel">
-                            <i class="fas fa-comment-dots me-2 modal-catatan-title-icon"></i>Kirim Catatan untuk Guru
-                        </h5>
-                        <p class="text-muted mb-0 modal-catatan-subtitle" id="catatanKontenLabel">Konten</p>
-                    </div>
-                    <button type="button" class="btn-close modal-catatan-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body modal-catatan-body">
-                    <div class="alert alert-info modal-catatan-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Catatan akan dikirim sebagai notifikasi langsung kepada guru yang membuat konten ini.
-                    </div>
-
-                    <label for="isi_catatan" class="form-label fw-semibold modal-catatan-label">Isi Catatan / Revisi</label>
-                    <textarea name="isi_catatan" id="isi_catatan" rows="6"
-                        class="form-control modal-catatan-textarea"
-                        placeholder="Tuliskan masukan, koreksi, atau instruksi revisi untuk guru..."
-                        required minlength="5" maxlength="5000"></textarea>
-                    <div class="d-flex justify-content-between mt-2">
-                        <small class="text-muted">Min. 5 karakter</small>
-                        <small class="text-muted"><span id="charCount">0</span>/5000</small>
-                    </div>
-                </div>
-
-                <div class="modal-footer modal-catatan-footer">
-                    <button type="button" class="btn btn-light modal-catatan-button" data-bs-dismiss="modal">
-                        Batal
-                    </button>
-                    <button type="submit" class="btn btn-primary modal-catatan-button" id="btnKirimCatatan">
-                        <i class="fas fa-paper-plane me-2"></i>Kirim Catatan
-                    </button>
-                </div>
-            </form>
+<dialog x-ref="noteDialog" class="m-auto w-[calc(100%-2rem)] max-w-xl overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/60" @click.self="$el.close()" @close="submittingNote = false">
+    <form method="POST" action="{{ route($baseRoute.'.catatan') }}" @submit="submittingNote = true">
+        @csrf
+        <input type="hidden" name="konten_type" :value="note.type">
+        <input type="hidden" name="konten_id" :value="note.id">
+        <header class="flex items-start justify-between gap-4 border-b border-slate-200 p-4 sm:p-5"><div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-wide text-brand-600">Catatan monitoring</p><h2 class="mt-1 flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-comment-dots text-brand-600" aria-hidden="true"></i>Kirim catatan untuk guru</h2><p class="mt-1 truncate text-xs text-slate-500" x-text="note.title ? `${note.label}: ${note.title}` : 'Pilih konten yang ingin diberi catatan'"></p></div><button type="button" @click="$refs.noteDialog.close()" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200" aria-label="Tutup dialog"><i class="fas fa-xmark" aria-hidden="true"></i></button></header>
+        <div class="space-y-4 p-4 sm:p-5">
+            <div class="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs leading-5 text-blue-800"><i class="fas fa-circle-info mt-0.5 shrink-0 text-blue-600" aria-hidden="true"></i><p>Catatan dikirim sebagai notifikasi kepada guru pembuat konten. Tuliskan masalah dan perbaikan yang diharapkan secara jelas.</p></div>
+            <label class="block"><span class="text-xs font-bold text-slate-700">Isi catatan atau revisi <span class="text-red-600">*</span></span><textarea name="isi_catatan" x-model="noteText" rows="6" minlength="5" maxlength="5000" required class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm leading-6 text-slate-900 outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Contoh: materi perlu dilengkapi tujuan pembelajaran dan sumber referensi."></textarea><span class="mt-1.5 flex justify-between text-[10px] text-slate-400"><span>Minimal 5 karakter</span><span><span x-text="noteText.length"></span>/5000</span></span></label>
         </div>
-    </div>
-</div>
+        <footer class="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 p-4"><button type="button" @click="$refs.noteDialog.close()" class="h-10 rounded-xl px-4 text-xs font-bold text-slate-600 hover:bg-slate-200">Batal</button><button type="submit" :disabled="submittingNote || noteText.trim().length < 5" class="inline-flex h-10 items-center gap-2 rounded-xl bg-brand-600 px-4 text-xs font-bold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"><i class="fas" :class="submittingNote ? 'fa-spinner fa-spin' : 'fa-paper-plane'" aria-hidden="true"></i><span x-text="submittingNote ? 'Mengirim...' : 'Kirim catatan'"></span></button></footer>
+    </form>
+</dialog>

@@ -1,287 +1,49 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Detail Tahun Ajaran')
-
 @section('page-title', 'Detail Tahun Ajaran')
-@section('page-subtitle', 'Informasi lengkap tahun ajaran')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/tahun-ajaran/show.css'])
-@endsection
+@section('page-subtitle', $tahunAjaran->nama_tahun_ajaran)
 
 @section('content')
-<div class="tahun-ajaran-show-page">
-    <div class="d-flex justify-content-between align-items-center mb-3 show-header-action">
-        <h5 class="mb-0 show-title">
-            Detail: {{ $tahunAjaran->nama_tahun_ajaran }}
-        </h5>
-        <a href="{{ route('admin.tahun-ajaran.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left btn-icon"></i> Kembali
-        </a>
+@php
+    $start = \Carbon\Carbon::parse($tahunAjaran->tanggal_mulai);
+    $end = \Carbon\Carbon::parse($tahunAjaran->tanggal_selesai);
+    $periods = $tahunAjaran->getSemesterPeriods();
+    $currentSemester = \App\Models\TahunAjaran::getCurrentSemester();
+    $raporPeriods = [
+        ['label' => 'PTS Ganjil', 'period' => $tahunAjaran->getRaporPeriod('ganjil', 'tengah_semester'), 'tone' => 'border-violet-200 bg-violet-50 text-violet-900', 'automatic' => !$tahunAjaran->tanggal_akhir_pts_ganjil],
+        ['label' => 'PAS Ganjil', 'period' => $tahunAjaran->getRaporPeriod('ganjil', 'akhir_semester'), 'tone' => 'border-amber-200 bg-amber-50 text-amber-900', 'automatic' => false],
+        ['label' => 'PTS Genap', 'period' => $tahunAjaran->getRaporPeriod('genap', 'tengah_semester'), 'tone' => 'border-violet-200 bg-violet-50 text-violet-900', 'automatic' => !$tahunAjaran->tanggal_akhir_pts_genap],
+        ['label' => 'PAS Genap', 'period' => $tahunAjaran->getRaporPeriod('genap', 'akhir_semester'), 'tone' => 'border-blue-200 bg-blue-50 text-blue-900', 'automatic' => false],
+    ];
+@endphp
+
+<div class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+    <div class="min-w-0 space-y-5">
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 sm:p-5"><div class="min-w-0"><h2 class="truncate text-lg font-extrabold text-slate-900">{{ $tahunAjaran->nama_tahun_ajaran }}</h2><p class="mt-1 text-xs text-slate-500">Ringkasan periode akademik</p></div><span class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold {{ $tahunAjaran->is_active ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' }}"><i class="fas {{ $tahunAjaran->is_active ? 'fa-check-circle' : 'fa-pause-circle' }}" aria-hidden="true"></i>{{ $tahunAjaran->is_active ? 'Aktif' : 'Tidak Aktif' }}</span></header>
+            <dl class="grid grid-cols-2 divide-x divide-y divide-slate-100 sm:grid-cols-4"><div class="p-4"><dt class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Mulai</dt><dd class="mt-1 text-sm font-bold text-slate-800">{{ $start->format('d M Y') }}</dd></div><div class="p-4"><dt class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Selesai</dt><dd class="mt-1 text-sm font-bold text-slate-800">{{ $end->format('d M Y') }}</dd></div><div class="p-4"><dt class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Durasi</dt><dd class="mt-1 text-sm font-bold text-slate-800">{{ $start->diffInMonths($end) }} bulan</dd></div><div class="p-4"><dt class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Diperbarui</dt><dd class="mt-1 text-sm font-bold text-slate-800">{{ $tahunAjaran->updated_at->format('d M Y') }}</dd></div></dl>
+        </section>
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <div class="flex items-center justify-between gap-3"><div><h2 class="text-base font-extrabold text-slate-900"><i class="fas fa-calendar-alt mr-2 text-emerald-600" aria-hidden="true"></i>Periode Semester</h2><p class="mt-1 text-xs text-slate-500">Batas semester yang dipakai oleh jadwal dan laporan.</p></div><a href="{{ route('admin.tahun-ajaran.edit', $tahunAjaran->id) }}" class="text-xs font-bold text-brand-700 no-underline hover:underline">Atur</a></div>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                @foreach(['ganjil' => ['Semester Ganjil', 'fa-sun', 'border-amber-200 bg-amber-50 text-amber-900'], 'genap' => ['Semester Genap', 'fa-snowflake', 'border-blue-200 bg-blue-50 text-blue-900']] as $semester => $meta)
+                    <article class="rounded-xl border p-4 {{ $meta[2] }}"><div class="flex items-center justify-between gap-2"><h3 class="text-sm font-extrabold"><i class="fas {{ $meta[1] }} mr-1.5" aria-hidden="true"></i>{{ $meta[0] }}</h3>@if($tahunAjaran->is_active && $currentSemester === $semester)<span class="rounded-full bg-emerald-600 px-2 py-0.5 text-[9px] font-bold uppercase text-white">Berjalan</span>@endif</div><p class="mt-3 text-xs font-semibold">{{ $periods[$semester]['start']->format('d M Y') }} - {{ $periods[$semester]['end']->format('d M Y') }}</p></article>
+                @endforeach
+            </div>
+            @if(!$tahunAjaran->tanggal_mulai_genap)<p class="mt-3 rounded-xl bg-slate-50 p-3 text-[11px] leading-5 text-slate-600"><i class="fas fa-info-circle mr-1 text-slate-400" aria-hidden="true"></i>Pembagian semester masih menggunakan perhitungan otomatis.</p>@endif
+        </section>
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><h2 class="text-base font-extrabold text-slate-900"><i class="fas fa-flag-checkered mr-2 text-violet-600" aria-hidden="true"></i>Periode Rapor</h2><p class="mt-1 text-xs text-slate-500">Rentang PTS dan PAS untuk perhitungan kehadiran rapor.</p><div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">@foreach($raporPeriods as $item)<article class="min-w-0 rounded-xl border p-3 {{ $item['tone'] }}"><h3 class="text-xs font-extrabold">{{ $item['label'] }}</h3><p class="mt-2 text-[11px] font-semibold leading-5">{{ $item['period']['start']->format('d M Y') }}<br>{{ $item['period']['end']->format('d M Y') }}</p>@if($item['automatic'])<span class="mt-2 inline-flex rounded-full bg-white/70 px-2 py-0.5 text-[9px] font-bold">Otomatis</span>@endif</article>@endforeach</div></section>
+
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="flex items-center justify-between border-b border-slate-200 p-4 sm:p-5"><div><h2 class="text-base font-extrabold text-slate-900"><i class="fas fa-chalkboard mr-2 text-brand-600" aria-hidden="true"></i>Kelas Terkait</h2><p class="mt-1 text-xs text-slate-500">Kelas yang memakai tahun ajaran ini.</p></div><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">{{ $tahunAjaran->kelas->count() }} kelas</span></header>@if($tahunAjaran->kelas->isNotEmpty())<div class="overflow-x-auto"><table class="w-full min-w-[560px] text-left text-sm"><thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-5 py-3">Nama Kelas</th><th class="px-5 py-3">Jenjang</th><th class="px-5 py-3">Cabang</th></tr></thead><tbody class="divide-y divide-slate-100">@foreach($tahunAjaran->kelas as $kelas)<tr><td class="px-5 py-3 font-bold text-slate-800">{{ $kelas->nama_kelas }}</td><td class="px-5 py-3 text-xs text-slate-600">{{ $kelas->jenjang ?? '-' }}</td><td class="px-5 py-3 text-xs text-slate-600">{{ $kelas->cabang->nama_cabang ?? '-' }}</td></tr>@endforeach</tbody></table></div>@else<div class="p-10 text-center text-xs text-slate-500"><i class="fas fa-folder-open mb-3 block text-3xl text-slate-300" aria-hidden="true"></i>Belum ada kelas yang terkait.</div>@endif</section>
     </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-info-circle text-muted btn-icon"></i> Informasi Umum</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table-detail">
-                        <tr>
-                            <th>Tahun Ajaran</th>
-                            <td class="detail-strong"><strong>{{ $tahunAjaran->nama_tahun_ajaran }}</strong></td>
-                        </tr>
-                        <tr>
-                            <th>Status</th>
-                            <td>
-                                @if($tahunAjaran->is_active)
-                                    <span class="badge bg-success">Aktif</span>
-                                @else
-                                    <span class="badge bg-secondary">Tidak Aktif</span>
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Tanggal Mulai</th>
-                            <td>{{ \Carbon\Carbon::parse($tahunAjaran->tanggal_mulai)->format('d F Y') }}</td>
-                        </tr>
-                        <tr>
-                            <th>Tanggal Selesai</th>
-                            <td>{{ \Carbon\Carbon::parse($tahunAjaran->tanggal_selesai)->format('d F Y') }}</td>
-                        </tr>
-                        <tr>
-                            <th>Durasi</th>
-                            <td>
-                                {{ \Carbon\Carbon::parse($tahunAjaran->tanggal_mulai)->diffInDays(\Carbon\Carbon::parse($tahunAjaran->tanggal_selesai)) }} hari
-                                <span class="text-muted duration-note">
-                                    ({{ \Carbon\Carbon::parse($tahunAjaran->tanggal_mulai)->diffInMonths(\Carbon\Carbon::parse($tahunAjaran->tanggal_selesai)) }} bulan)
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Terakhir Diupdate</th>
-                            <td>{{ $tahunAjaran->updated_at->format('d M Y, H:i') }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header semester-header">
-                    <h5 class="mb-0"><i class="fas fa-calendar-alt text-success btn-icon"></i> Periode Semester</h5>
-                </div>
-                <div class="card-body">
-                    @php
-                        $periods = $tahunAjaran->getSemesterPeriods();
-                        $currentSemester = \App\Models\TahunAjaran::getCurrentSemester();
-                    @endphp
-
-                    <div class="semester-grid">
-                        <div class="semester-card is-ganjil">
-                            <div class="semester-card-title is-ganjil">
-                                <i class="fas fa-sun"></i>
-                                <strong>Semester Ganjil</strong>
-                                @if($tahunAjaran->is_active && $currentSemester == 'ganjil')
-                                    <span class="badge bg-success">Aktif</span>
-                                @endif
-                            </div>
-                            <div class="semester-card-body is-ganjil">
-                                <i class="fas fa-calendar me-1"></i>
-                                {{ $periods['ganjil']['start']->format('d M Y') }} - {{ $periods['ganjil']['end']->format('d M Y') }}
-                            </div>
-                        </div>
-
-                        <div class="semester-card is-genap">
-                            <div class="semester-card-title is-genap">
-                                <i class="fas fa-snowflake"></i>
-                                <strong>Semester Genap</strong>
-                                @if($tahunAjaran->is_active && $currentSemester == 'genap')
-                                    <span class="badge bg-success">Aktif</span>
-                                @endif
-                            </div>
-                            <div class="semester-card-body is-genap">
-                                <i class="fas fa-calendar me-1"></i>
-                                {{ $periods['genap']['start']->format('d M Y') }} - {{ $periods['genap']['end']->format('d M Y') }}
-                            </div>
-                        </div>
-                    </div>
-
-                    @if(!$tahunAjaran->tanggal_mulai_genap)
-                        <div class="semester-auto-note">
-                            <i class="fas fa-info-circle me-1"></i> Periode semester menggunakan perhitungan otomatis (Juli-Des = Ganjil, Jan-Jun = Genap).
-                            <a href="{{ route('admin.tahun-ajaran.edit', $tahunAjaran->id) }}">Atur periode kustom</a>
-                        </div>
-                    @endif
-
-                    <hr class="report-divider">
-                    <div class="report-heading">
-                        <i class="fas fa-flag-checkered"></i>
-                        <strong>Periode Rapor (PTS vs PAS)</strong>
-                    </div>
-                    @php
-                        $ptsGanjil = $tahunAjaran->getRaporPeriod('ganjil', 'tengah_semester');
-                        $pasGanjil = $tahunAjaran->getRaporPeriod('ganjil', 'akhir_semester');
-                        $ptsGenap  = $tahunAjaran->getRaporPeriod('genap', 'tengah_semester');
-                        $pasGenap  = $tahunAjaran->getRaporPeriod('genap', 'akhir_semester');
-                    @endphp
-                    <div class="report-grid">
-                        <div class="report-card is-pts">
-                            <div class="report-title"><i class="fas fa-clipboard-list me-1"></i> PTS Ganjil</div>
-                            <div>{{ $ptsGanjil['start']->format('d M Y') }} - {{ $ptsGanjil['end']->format('d M Y') }}</div>
-                            @if(!$tahunAjaran->tanggal_akhir_pts_ganjil)
-                                <small class="report-muted">(default: 3 bulan)</small>
-                            @endif
-                        </div>
-                        <div class="report-card is-pas-ganjil">
-                            <div class="report-title"><i class="fas fa-chart-bar me-1"></i> PAS Ganjil</div>
-                            <div>{{ $pasGanjil['start']->format('d M Y') }} - {{ $pasGanjil['end']->format('d M Y') }}</div>
-                        </div>
-                        <div class="report-card is-pts">
-                            <div class="report-title"><i class="fas fa-clipboard-list me-1"></i> PTS Genap</div>
-                            <div>{{ $ptsGenap['start']->format('d M Y') }} - {{ $ptsGenap['end']->format('d M Y') }}</div>
-                            @if(!$tahunAjaran->tanggal_akhir_pts_genap)
-                                <small class="report-muted">(default: 3 bulan)</small>
-                            @endif
-                        </div>
-                        <div class="report-card is-pas-genap">
-                            <div class="report-title"><i class="fas fa-chart-bar me-1"></i> PAS Genap</div>
-                            <div>{{ $pasGenap['start']->format('d M Y') }} - {{ $pasGenap['end']->format('d M Y') }}</div>
-                        </div>
-                    </div>
-                    <small class="report-footer-note">
-                        <i class="fas fa-info-circle"></i> Periode ini dipakai untuk auto-fill kehadiran rapor (sakit/izin/alpha) dari menu Presensi.
-                        @if(!$tahunAjaran->tanggal_akhir_pts_ganjil || !$tahunAjaran->tanggal_akhir_pts_genap)
-                            <a href="{{ route('admin.tahun-ajaran.edit', $tahunAjaran->id) }}">Atur tanggal akhir PTS</a>
-                        @endif
-                    </small>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-chalkboard text-muted btn-icon"></i> Data Kelas Terkait</h5>
-                    <span class="badge bg-secondary kelas-count-badge">{{ $tahunAjaran->kelas->count() }} Kelas</span>
-                </div>
-                <div class="card-body p-0">
-                    @if($tahunAjaran->kelas->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0 related-table">
-                                <thead>
-                                    <tr>
-                                        <th>Nama Kelas</th>
-                                        <th>Tingkat</th>
-                                        <th>Cabang</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($tahunAjaran->kelas as $kelas)
-                                    <tr>
-                                        <td><strong>{{ $kelas->nama_kelas }}</strong></td>
-                                        <td>{{ $kelas->jenjang ?? '-' }}</td>
-                                        <td>{{ $kelas->cabang->nama_cabang ?? '-' }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="empty-related">
-                            <i class="fas fa-folder-open fa-3x mb-3"></i>
-                            <p class="mb-0">Belum ada kelas yang terkait.</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Aksi</h5>
-                </div>
-                <div class="card-body action-grid">
-                    <a href="{{ route('admin.tahun-ajaran.edit', $tahunAjaran->id) }}" class="btn btn-warning">
-                        <i class="fas fa-edit btn-icon"></i> Edit Data
-                    </a>
-
-                    @if(!$tahunAjaran->is_active)
-                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#activateModal">
-                            <i class="fas fa-check btn-icon"></i> Aktifkan
-                        </button>
-                    @endif
-                </div>
-            </div>
-
-            <div class="card danger-card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Peringatan</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        Menghapus tahun ajaran bersifat permanen. Data yang dihapus tidak dapat dikembalikan.
-                    </p>
-                    <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                        <i class="fas fa-trash btn-icon"></i> Hapus Tahun Ajaran
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-@if(!$tahunAjaran->is_active)
-<div class="modal fade" id="activateModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Konfirmasi Aktifkan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Aktifkan tahun ajaran <strong>{{ $tahunAjaran->nama_tahun_ajaran }}</strong>?
-                <div class="modal-note is-warning">
-                    <i class="fas fa-exclamation-triangle"></i> Tahun aktif saat ini akan otomatis dinonaktifkan.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <form action="{{ route('admin.tahun-ajaran.activate', $tahunAjaran->id) }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-success">Ya, Aktifkan</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
-
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Konfirmasi Hapus</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Apakah Anda yakin ingin menghapus tahun ajaran <strong>{{ $tahunAjaran->nama_tahun_ajaran }}</strong>?
-                <div class="modal-note is-danger">
-                    <i class="fas fa-exclamation-circle"></i> Tindakan ini tidak dapat dibatalkan.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <form action="{{ route('admin.tahun-ajaran.destroy', $tahunAjaran->id) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Ya, Hapus</button>
-                </form>
-            </div>
-        </div>
-    </div>
+    <aside class="space-y-4">
+        <a href="{{ route('admin.tahun-ajaran.index') }}" class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-slate-100 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali ke Daftar</a>
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><h2 class="text-sm font-extrabold text-slate-900">Tindakan</h2><div class="mt-3 grid gap-2"><a href="{{ route('admin.tahun-ajaran.edit', $tahunAjaran->id) }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-amber-50 text-xs font-bold text-amber-700 no-underline hover:bg-amber-100"><i class="fas fa-edit" aria-hidden="true"></i>Edit Data</a>@if(!$tahunAjaran->is_active)<form action="{{ route('admin.tahun-ajaran.activate', $tahunAjaran->id) }}" method="POST" data-confirm data-confirm-title="Aktifkan tahun ajaran?" data-confirm-message="Periode aktif saat ini akan dinonaktifkan." data-confirm-text="Ya, aktifkan">@csrf<button type="submit" class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-emerald-50 text-xs font-bold text-emerald-700 hover:bg-emerald-100"><i class="fas fa-check" aria-hidden="true"></i>Aktifkan</button></form>@endif</div></section>
+        <section class="rounded-2xl border border-red-200 bg-red-50 p-4"><h2 class="text-sm font-extrabold text-red-900"><i class="fas fa-exclamation-triangle mr-1.5" aria-hidden="true"></i>Zona Berbahaya</h2><p class="mt-2 text-xs leading-5 text-red-800">Penghapusan permanen dan tidak dapat dibatalkan.</p><form action="{{ route('admin.tahun-ajaran.destroy', $tahunAjaran->id) }}" method="POST" class="mt-3" data-confirm data-confirm-title="Hapus tahun ajaran?" data-confirm-message="{{ $tahunAjaran->nama_tahun_ajaran }} akan dihapus permanen." data-confirm-text="Ya, hapus">@csrf @method('DELETE')<button type="submit" class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-red-600 text-xs font-bold text-white hover:bg-red-700"><i class="fas fa-trash" aria-hidden="true"></i>Hapus Tahun Ajaran</button></form></section>
+    </aside>
 </div>
 @endsection

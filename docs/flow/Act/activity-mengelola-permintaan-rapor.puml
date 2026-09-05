@@ -1,0 +1,41 @@
+@startuml activity-mengelola-permintaan-rapor
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Wali Kelas)|
+start
+:Mengakses Menu\n"Permintaan Unduh Rapor";
+
+|Sistem|
+:Menarik Data Permintaan (Request)\ndari Wali Siswa untuk Kelas yang Diampu;
+:Mengurutkan Berdasarkan Status\n(Prioritas Utama: "Menunggu");
+:Menampilkan Tabel Daftar\nPermintaan Unduh Rapor;
+
+|Pengguna (Wali Kelas)|
+:Memeriksa Detail Permintaan\n(Nama Siswa, Pemohon, Tanggal Request);
+:Memasukkan Catatan / Pesan Balasan\nuntuk Wali Siswa (Opsional);
+:Memilih Keputusan Evaluasi\n(Decision);
+
+if (Keputusan?) then (Setujui / Approve)
+    :Klik Tombol "Setujui";
+
+    |Sistem|
+    :Memperbarui Status di Database\nmenjadi "Disetujui";
+    :Men-generate Token Akses Unduh\n(Berlaku secara dinamis selama 24 Jam);
+    :Mengirim Notifikasi Persetujuan\nBeserta Link Unduh ke Wali Siswa;
+
+else (Tolak / Reject)
+    |Pengguna (Wali Kelas)|
+    :Klik Tombol "Tolak";
+
+    |Sistem|
+    :Memperbarui Status di Database\nmenjadi "Ditolak";
+    :Mengirim Notifikasi Penolakan\nBeserta Catatan ke Wali Siswa;
+endif
+
+|Pengguna (Wali Kelas)|
+:Menerima Pesan Sukses\n(Notifikasi Aksi Berhasil);
+:Selesai Mengelola Permintaan;
+stop
+@enduml

@@ -1,309 +1,38 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Detail Cabang - ' . $cabang->nama_cabang)
-
 @section('page-title', 'Detail Cabang')
 @section('page-subtitle', $cabang->nama_cabang)
 
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite('resources/css/admin/cabang/show.css')
-@endsection
-
 @section('content')
+@php
+    $statItems = [
+        ['value' => number_format($stats['totalSiswa']), 'label' => 'Total Siswa', 'meta' => 'Seluruh status', 'icon' => 'fa-user-graduate', 'tone' => 'bg-blue-50 text-blue-600'],
+        ['value' => number_format($stats['siswaAktif']), 'label' => 'Siswa Aktif', 'meta' => 'Sedang belajar', 'icon' => 'fa-user-check', 'tone' => 'bg-emerald-50 text-emerald-600'],
+        ['value' => number_format($stats['totalKelas']), 'label' => 'Jumlah Kelas', 'meta' => 'Pada cabang ini', 'icon' => 'fa-chalkboard', 'tone' => 'bg-amber-50 text-amber-600'],
+        ['value' => number_format($stats['totalTenagaPendidik']), 'label' => 'Tenaga Pendidik', 'meta' => 'Akun terhubung', 'icon' => 'fa-chalkboard-teacher', 'tone' => 'bg-violet-50 text-violet-600'],
+    ];
+@endphp
 
-<div class="page-shell">
-    {{-- Breadcrumb --}}
-    <div class="breadcrumb">
-        <a href="{{ route('admin.dashboard') }}"><i class="fas fa-home"></i></a>
-        <span>/</span>
-        <a href="{{ route('admin.cabang.index') }}">Manajemen Cabang</a>
-        <span>/</span>
-        <span class="current">{{ $cabang->nama_cabang }}</span>
+<div class="min-w-0 space-y-5">
+    <section class="overflow-hidden rounded-2xl bg-gradient-to-r from-brand-800 to-sky-500 text-white shadow-sm"><div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"><div class="flex min-w-0 items-center gap-4"><span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-xl ring-1 ring-white/20"><i class="fas fa-building" aria-hidden="true"></i></span><div class="min-w-0"><h2 class="truncate text-lg font-extrabold !text-white">{{ $cabang->nama_cabang }}</h2><div class="mt-2 flex flex-wrap items-center gap-2 text-[11px]"><span class="rounded-full bg-white/15 px-2.5 py-1 font-bold text-white">{{ $cabang->kode_cabang }}</span><span class="rounded-full px-2.5 py-1 font-bold {{ $cabang->is_active ? 'bg-emerald-400/20 text-emerald-50' : 'bg-slate-950/20 text-blue-50' }}">{{ $cabang->is_active ? 'Aktif' : 'Nonaktif' }}</span></div></div></div><div class="grid grid-cols-2 gap-2"><a href="{{ route('admin.cabang.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-3 text-xs font-bold text-white no-underline ring-1 ring-white/20 hover:bg-white/20"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali</a><a href="{{ route('admin.cabang.edit', $cabang) }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-3 text-xs font-bold text-brand-800 no-underline hover:bg-blue-50"><i class="fas fa-edit" aria-hidden="true"></i>Edit</a></div></div></section>
+
+    <x-cleanflow.stat-grid :items="$statItems" />
+
+    <div class="grid min-w-0 gap-5 xl:grid-cols-2">
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><h2 class="text-base font-extrabold text-slate-900"><i class="fas fa-info-circle mr-2 text-brand-600" aria-hidden="true"></i>Informasi Cabang</h2><dl class="mt-4 divide-y divide-slate-100">@foreach([['Kode Cabang', $cabang->kode_cabang], ['Nama Cabang', $cabang->nama_cabang], ['Alamat Lengkap', $cabang->alamat], ['Nomor Telepon', $cabang->telepon ?: '-'], ['Dibuat Pada', $cabang->created_at->format('d M Y, H:i')]] as [$label, $value])<div class="grid gap-1 py-3 sm:grid-cols-[140px_1fr]"><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-400">{{ $label }}</dt><dd class="break-words text-sm font-semibold text-slate-700">{{ $value }}</dd></div>@endforeach</dl></section>
+
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="flex items-center justify-between border-b border-slate-200 p-4 sm:p-5"><div><h2 class="text-base font-extrabold text-slate-900"><i class="fas fa-users mr-2 text-violet-600" aria-hidden="true"></i>Tenaga Pendidik</h2><p class="mt-1 text-xs text-slate-500">Akun yang terhubung ke cabang ini.</p></div><span class="rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-bold text-violet-700">{{ $users->count() }} orang</span></header><div class="divide-y divide-slate-100">@forelse($users->take(5) as $user)<article class="flex items-center gap-3 px-4 py-3 sm:px-5"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-xs font-extrabold text-violet-700">{{ strtoupper(substr($user->name, 0, 1)) }}</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-bold text-slate-800">{{ $user->name }}</p><p class="truncate text-[11px] text-slate-500">{{ $user->email }}</p></div><span class="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-[9px] font-bold text-slate-600">{{ ucwords(str_replace('_', ' ', $user->role)) }}</span></article>@empty<div class="p-10 text-center text-xs text-slate-500"><i class="fas fa-users mb-3 block text-3xl text-slate-300" aria-hidden="true"></i>Belum ada tenaga pendidik.</div>@endforelse</div>@if($users->count() > 5)<a href="{{ route('admin.users.tenaga-pendidik') }}?cabang_id={{ $cabang->id }}" class="flex min-h-10 items-center justify-center border-t border-slate-200 text-xs font-bold text-brand-700 no-underline hover:bg-brand-50">Lihat semua {{ $users->count() }} tenaga pendidik</a>@endif</section>
     </div>
 
-    {{-- Header Card --}}
-    <div class="header-card">
-        <div class="header-content">
-            <div class="header-top">
-                <div class="header-info">
-                    <div class="header-icon">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="header-text">
-                        <h1>{{ $cabang->nama_cabang }}</h1>
-                        <div class="header-meta">
-                            <span class="header-code">
-                                <i class="fas fa-tag"></i> {{ $cabang->kode_cabang }}
-                            </span>
-                            <span class="status-badge {{ $cabang->is_active ? 'active' : 'inactive' }}">
-                                <i class="fas {{ $cabang->is_active ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
-                                {{ $cabang->is_active ? 'Aktif' : 'Non-Aktif' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <a href="{{ route('admin.cabang.edit', $cabang) }}" class="btn btn-white">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                    <a href="{{ route('admin.cabang.index') }}" class="btn btn-white-outline">
-                        <i class="fas fa-arrow-left"></i> Kembali
-                    </a>
-                </div>
-            </div>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="flex items-center justify-between border-b border-slate-200 p-4 sm:p-5"><div><h2 class="text-base font-extrabold text-slate-900"><i class="fas fa-chalkboard mr-2 text-amber-600" aria-hidden="true"></i>Daftar Kelas</h2><p class="mt-1 text-xs text-slate-500">Kelas aktif dan penanggung jawabnya.</p></div><span class="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">{{ $kelas->count() }} kelas</span></header>
+        <div class="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">@forelse($kelas as $k)<article class="min-w-0 rounded-xl border border-slate-200 p-3"><div class="flex items-start justify-between gap-2"><div class="min-w-0"><h3 class="truncate text-sm font-extrabold text-slate-900">{{ $k->nama_kelas }}</h3><p class="mt-1 text-[11px] text-slate-500">{{ $k->kode_kelas }} · {{ $k->tahunAjaran->nama_tahun_ajaran ?? '-' }}</p></div><span class="rounded-full bg-blue-50 px-2 py-1 text-[9px] font-bold text-blue-700">{{ $k->jenjang }}</span></div><dl class="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-slate-50 p-2 text-[11px]"><div><dt class="text-slate-400">Wali kelas</dt><dd class="mt-0.5 truncate font-semibold text-slate-700">{{ $k->waliKelas->nama_lengkap ?? '-' }}</dd></div><div><dt class="text-slate-400">Kuota</dt><dd class="mt-0.5 font-semibold text-slate-700">{{ $k->kuota_siswa }} siswa</dd></div></dl></article>@empty<div class="col-span-full p-8 text-center text-xs text-slate-500"><i class="fas fa-chalkboard mb-3 block text-3xl text-slate-300" aria-hidden="true"></i>Belum ada kelas di cabang ini.</div>@endforelse</div>
+    </section>
 
-            <div class="header-stats">
-                <div class="header-stat">
-                    <div class="header-stat-value">{{ $stats['totalSiswa'] }}</div>
-                    <div class="header-stat-label">Total Siswa</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-value">{{ $stats['siswaAktif'] }}</div>
-                    <div class="header-stat-label">Siswa Aktif</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-value">{{ $stats['totalKelas'] }}</div>
-                    <div class="header-stat-label">Jumlah Kelas</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-value">{{ $stats['totalTenagaPendidik'] }}</div>
-                    <div class="header-stat-label">Tenaga Pendidik</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Info Cards --}}
-    <div class="grid-2">
-        {{-- Detail Cabang --}}
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-info-circle"></i> Informasi Cabang</h5>
-            </div>
-            <div class="card-body">
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">Kode Cabang</span>
-                        <span class="info-value highlight">{{ $cabang->kode_cabang }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Nama Cabang</span>
-                        <span class="info-value">{{ $cabang->nama_cabang }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Alamat Lengkap</span>
-                        <span class="info-value">{{ $cabang->alamat }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Nomor Telepon</span>
-                        <span class="info-value">{{ $cabang->telepon ?: '-' }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Status</span>
-                        <span class="info-value">
-                            @if($cabang->is_active)
-                                <span class="badge badge-success"><i class="fas fa-check"></i> Aktif</span>
-                            @else
-                                <span class="badge badge-warning"><i class="fas fa-pause"></i> Non-Aktif</span>
-                            @endif
-                        </span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Dibuat Pada</span>
-                        <span class="info-value">{{ $cabang->created_at->format('d F Y, H:i') }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Tenaga Pendidik --}}
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-users"></i> Tenaga Pendidik</h5>
-                <span class="badge badge-info">{{ $users->count() }} orang</span>
-            </div>
-            <div class="card-body">
-                @if($users->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-card-mobile">
-                            <thead>
-                                <tr>
-                                    <th>Nama</th>
-                                    <th>Role</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($users->take(5) as $user)
-                                <tr>
-                                    <td class="mobile-card-head">
-                                        <div class="user-info">
-                                            <div class="user-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
-                                            <div>
-                                                <div class="user-name">{{ $user->name }}</div>
-                                                <div class="user-email">{{ $user->email }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td data-label="Role">
-                                        <span class="badge badge-purple">{{ ucwords(str_replace('_', ' ', $user->role)) }}</span>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    @if($users->count() > 5)
-                        <div class="teacher-more-actions">
-                            <a href="{{ route('admin.users.tenaga-pendidik') }}?cabang_id={{ $cabang->id }}" class="btn btn-outline btn-sm">
-                                Lihat Semua ({{ $users->count() }})
-                            </a>
-                        </div>
-                    @endif
-                @else
-                    <div class="empty-state">
-                        <i class="fas fa-users"></i>
-                        <p>Belum ada tenaga pendidik di cabang ini</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    {{-- Kelas & Siswa Tabs --}}
-    <div class="card">
-        <div class="card-body">
-            <div class="tabs">
-                <button class="tab-btn active" data-tab-target="kelas">
-                    <i class="fas fa-chalkboard"></i> Daftar Kelas ({{ $kelas->count() }})
-                </button>
-                <button class="tab-btn" data-tab-target="siswa">
-                    <i class="fas fa-user-graduate"></i> Daftar Siswa ({{ $siswa->total() }})
-                </button>
-            </div>
-
-            {{-- Tab Kelas --}}
-            <div class="tab-content active" id="tab-kelas">
-                @if($kelas->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-card-mobile">
-                            <thead>
-                                <tr>
-                                    <th>Kode Kelas</th>
-                                    <th>Nama Kelas</th>
-                                    <th>Jenjang</th>
-                                    <th>Tahun Ajaran</th>
-                                    <th>Wali Kelas</th>
-                                    <th>Kuota</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($kelas as $k)
-                                <tr>
-                                    {{-- Desktop: Kode --}}
-                                    <td class="desktop-only-cell"><code class="code-chip">{{ $k->kode_kelas }}</code></td>
-                                    {{-- Desktop: Nama --}}
-                                    <td class="desktop-only-cell"><strong>{{ $k->nama_kelas }}</strong></td>
-                                    {{-- Mobile: Card Head --}}
-                                    <td class="mobile-only-cell mobile-card-head">
-                                        <strong>{{ $k->nama_kelas }}</strong>
-                                        <span class="mobile-class-meta">
-                                            <code class="mobile-code-chip">{{ $k->kode_kelas }}</code>
-                                            <span class="badge badge-info badge-compact">{{ $k->jenjang }}</span>
-                                        </span>
-                                    </td>
-                                    <td class="desktop-only-cell"><span class="badge badge-info">{{ $k->jenjang }}</span></td>
-                                    <td data-label="Tahun Ajaran">{{ $k->tahunAjaran->nama_tahun_ajaran ?? '-' }}</td>
-                                    <td data-label="Wali Kelas">{{ $k->waliKelas->nama_lengkap ?? '-' }}</td>
-                                    <td data-label="Kuota">{{ $k->kuota_siswa }} siswa</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="empty-state">
-                        <i class="fas fa-chalkboard"></i>
-                        <p>Belum ada kelas di cabang ini</p>
-                    </div>
-                @endif
-            </div>
-
-            {{-- Tab Siswa --}}
-            <div class="tab-content" id="tab-siswa">
-                @if($siswa->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-card-mobile">
-                            <thead>
-                                <tr>
-                                    <th>NIS</th>
-                                    <th>Nama Siswa</th>
-                                    <th>Kelas</th>
-                                    <th>Jenis Kelamin</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($siswa as $s)
-                                <tr>
-                                    {{-- Desktop: NIS --}}
-                                    <td class="desktop-only-cell"><code class="code-chip">{{ $s->nis }}</code></td>
-                                    {{-- Desktop: Nama --}}
-                                    <td class="desktop-only-cell">
-                                        <div class="user-info">
-                                            <div class="user-avatar user-avatar-green">
-                                                {{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}
-                                            </div>
-                                            <div>
-                                                <div class="user-name">{{ $s->nama_lengkap }}</div>
-                                                <div class="user-email">NISN: {{ $s->nisn }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    {{-- Mobile: Card Head --}}
-                                    <td class="mobile-only-cell mobile-card-head">
-                                        <div class="user-info">
-                                            <div class="user-avatar user-avatar-green">
-                                                {{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}
-                                            </div>
-                                            <div>
-                                                <div class="user-name">{{ $s->nama_lengkap }}</div>
-                                                <div class="user-email">NIS: {{ $s->nis }} | NISN: {{ $s->nisn }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td data-label="Kelas">{{ $s->kelas->nama_kelas ?? '-' }}</td>
-                                    <td data-label="Jenis Kelamin">{{ $s->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
-                                    <td data-label="Status">
-                                        <span class="badge badge-success">{{ ucfirst($s->status) }}</span>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    @if($siswa->hasPages())
-                        <div class="pagination-wrapper">
-                            {{ $siswa->links() }}
-                        </div>
-                    @endif
-                @else
-                    <div class="empty-state">
-                        <i class="fas fa-user-graduate"></i>
-                        <p>Belum ada siswa aktif di cabang ini</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="flex items-center justify-between border-b border-slate-200 p-4 sm:p-5"><div><h2 class="text-base font-extrabold text-slate-900"><i class="fas fa-user-graduate mr-2 text-emerald-600" aria-hidden="true"></i>Daftar Siswa</h2><p class="mt-1 text-xs text-slate-500">Siswa aktif pada cabang ini.</p></div><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">{{ $siswa->total() }} siswa</span></header>
+        <div class="divide-y divide-slate-100 md:hidden">@forelse($siswa as $s)<article class="flex min-w-0 items-center gap-3 p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-xs font-extrabold text-emerald-700">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</span><div class="min-w-0 flex-1"><h3 class="truncate text-sm font-bold text-slate-800">{{ $s->nama_lengkap }}</h3><p class="mt-1 truncate text-[11px] text-slate-500">NIS {{ $s->nis }} · {{ $s->kelas->nama_kelas ?? 'Belum ada kelas' }}</p></div><span class="rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-bold text-emerald-700">{{ ucfirst($s->status) }}</span></article>@empty<div class="p-10 text-center text-xs text-slate-500">Belum ada siswa aktif.</div>@endforelse</div>
+        @if($siswa->isNotEmpty())<div class="hidden overflow-x-auto md:block"><table class="w-full min-w-[760px] text-left text-sm"><thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-5 py-3">NIS</th><th class="px-5 py-3">Nama Siswa</th><th class="px-5 py-3">Kelas</th><th class="px-5 py-3">Jenis Kelamin</th><th class="px-5 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-100">@foreach($siswa as $s)<tr><td class="px-5 py-3 font-mono text-xs text-slate-500">{{ $s->nis }}</td><td class="px-5 py-3"><p class="font-bold text-slate-800">{{ $s->nama_lengkap }}</p><p class="text-[11px] text-slate-500">NISN {{ $s->nisn }}</p></td><td class="px-5 py-3 text-xs text-slate-600">{{ $s->kelas->nama_kelas ?? '-' }}</td><td class="px-5 py-3 text-xs text-slate-600">{{ $s->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td><td class="px-5 py-3"><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">{{ ucfirst($s->status) }}</span></td></tr>@endforeach</tbody></table></div>@endif
+        @if($siswa->hasPages())<footer class="border-t border-slate-200 px-4 py-3">{{ $siswa->links() }}</footer>@endif
+    </section>
 </div>
-
-@endsection
-
-@section('scripts')
-    @vite('resources/js/admin/cabang/show.js')
 @endsection

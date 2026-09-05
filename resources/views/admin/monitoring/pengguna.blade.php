@@ -1,226 +1,33 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Monitoring Data Pengguna')
 @section('page-title', 'Monitoring Data Pengguna')
-@section('page-subtitle', 'Lihat status akun tenaga pendidik dan siswa')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/monitoring/pengguna.css', 'resources/js/admin/monitoring/pengguna.js'])
-@endsection
+@section('page-subtitle', 'Pantau kelengkapan dan status akun warga sekolah')
 
 @section('content')
-@php
-    $routeBase = 'admin.monitoring';
-    $scopeLabel = 'Semua cabang';
-    $userActiveRate = ($stats['totalUsers'] ?? 0) > 0
-        ? round((($stats['userAktif'] ?? 0) / $stats['totalUsers']) * 100)
-        : 0;
-@endphp
+@php $routeName=request()->routeIs('ketua.*')?'ketua.monitoring.pengguna':'admin.monitoring.pengguna'; $activeRate=($stats['totalUsers']??0)>0?round(($stats['userAktif']/$stats['totalUsers'])*100):0; @endphp
+<div class="min-w-0 w-full space-y-4">
+    <header><p class="text-xs font-bold uppercase tracking-wide text-brand-600">Pantau pengguna</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Status warga dan akun sekolah</h2><p class="mt-1 text-sm text-slate-500">Periksa siapa yang sudah memiliki akun aktif dan siapa yang perlu ditindaklanjuti.</p></header>
+    <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        @foreach([['value'=>$stats['totalTenagaPendidik']??0,'label'=>'Tenaga pendidik','icon'=>'fas fa-chalkboard-teacher','tone'=>'bg-blue-50 text-blue-700'],['value'=>$stats['totalSiswa']??0,'label'=>'Siswa','icon'=>'fas fa-user-graduate','tone'=>'bg-emerald-50 text-emerald-700'],['value'=>$stats['totalUsers']??0,'label'=>'Total akun','icon'=>'fas fa-users','tone'=>'bg-violet-50 text-violet-700'],['value'=>$stats['userAktif']??0,'label'=>'Akun aktif ('.$activeRate.'%)','icon'=>'fas fa-user-check','tone'=>'bg-amber-50 text-amber-700']] as $stat)<article class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $stat['tone'] }}"><i class="{{ $stat['icon'] }}"></i></span><div class="min-w-0"><strong class="block text-xl font-extrabold text-slate-950">{{ $stat['value'] }}</strong><span class="block truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $stat['label'] }}</span></div></article>@endforeach
+    </section>
 
-<div class="container-xxl flex-grow-1 container-p-y monitoring-page">
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon primary"><i class="fas fa-chalkboard-teacher"></i></div>
-                <span>Tenaga Pendidik</span>
-                <strong>{{ $stats['totalTenagaPendidik'] ?? 0 }}</strong>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon success"><i class="fas fa-user-graduate"></i></div>
-                <span>Siswa</span>
-                <strong>{{ $stats['totalSiswa'] ?? 0 }}</strong>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon info"><i class="fas fa-users"></i></div>
-                <span>Total Akun</span>
-                <strong>{{ $stats['totalUsers'] ?? 0 }}</strong>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon warning"><i class="fas fa-user-check"></i></div>
-                <span>Akun Aktif</span>
-                <strong>{{ $stats['userAktif'] ?? 0 }}</strong>
-                <span class="meta-text">{{ $userActiveRate }}% dari total akun</span>
-            </div>
-        </div>
-    </div>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 p-4 sm:p-5"><div class="flex flex-wrap items-start justify-between gap-3"><div><h3 class="font-extrabold text-slate-950"><i class="fas fa-chalkboard-teacher mr-2 text-brand-600"></i>Tenaga pendidik</h3><p class="mt-1 text-xs text-slate-500">Cari berdasarkan nama, peran, atau status akun.</p></div>@if(request()->anyFilled(['search_tp','role_tp','status_tp']))<a href="{{ route($routeName,request()->except(['search_tp','role_tp','status_tp','tp_page'])) }}" class="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-700 no-underline">Reset</a>@endif</div>
+            <form action="{{ route($routeName) }}" method="GET" class="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(240px,1fr)_210px_150px_auto]">@foreach(request()->except(['search_tp','role_tp','status_tp','tp_page']) as $key=>$value)@if(!is_array($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif @endforeach<label class="relative"><i class="fas fa-search absolute left-3.5 top-3.5 text-xs text-slate-400"></i><input name="search_tp" value="{{ request('search_tp') }}" placeholder="Cari tenaga pendidik..." class="h-11 w-full rounded-xl border border-slate-300 !pl-10 pr-3 text-sm"></label><select name="role_tp" @change="$el.form.submit()" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Semua peran</option>@foreach(['ketua_pkbm'=>'Ketua PKBM','sekretaris'=>'Sekretaris','bendahara'=>'Bendahara','wakil_kepala_sekolah'=>'Wakil Kepala Sekolah','wali_kelas'=>'Wali Kelas','guru_pengajar'=>'Guru Pengajar'] as $value=>$label)<option value="{{ $value }}" @selected(request('role_tp')===$value)>{{ $label }}</option>@endforeach</select><select name="status_tp" @change="$el.form.submit()" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Semua status akun</option><option value="aktif" @selected(request('status_tp')==='aktif')>Aktif</option><option value="nonaktif" @selected(request('status_tp')==='nonaktif')>Nonaktif</option></select><button class="h-11 rounded-xl bg-slate-800 px-4 text-xs font-bold text-white">Cari</button></form>
+        </header>
+        <div class="divide-y divide-slate-100 lg:hidden">@forelse($tenagaPendidik as $tp)<article class="flex items-center gap-3 p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-xs font-extrabold text-blue-700">{{ strtoupper(substr($tp->nama_lengkap,0,1)) }}</span><div class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-950">{{ $tp->nama_lengkap }}</strong><span class="block truncate text-xs text-slate-500">{{ $tp->nip ?: 'Tanpa NIP' }} &middot; {{ ucwords(str_replace('_',' ',$tp->user->role??'-')) }}</span><span class="block truncate text-xs text-slate-400">{{ $tp->email ?: $tp->user?->email ?: '-' }}</span></div><span class="rounded-full px-2 py-1 text-[10px] font-bold {{ $tp->user?->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">{{ $tp->user?->is_active ? 'Aktif' : 'Nonaktif' }}</span></article>@empty<p class="p-10 text-center text-sm text-slate-500">Belum ada tenaga pendidik.</p>@endforelse</div>
+        <div class="hidden overflow-x-auto lg:block"><table class="w-full table-fixed text-left text-sm"><colgroup><col class="w-36"><col class="w-[27%]"><col class="w-[19%]"><col><col class="w-28"></colgroup><thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500"><tr><th class="px-5 py-3">NIP</th><th class="px-3 py-3">Nama</th><th class="px-3 py-3">Peran</th><th class="px-3 py-3">Email</th><th class="px-5 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-100">@forelse($tenagaPendidik as $tp)<tr><td class="whitespace-nowrap px-5 py-3 text-xs text-slate-500">{{ $tp->nip ?: '-' }}</td><td class="px-3 py-3"><strong class="block truncate text-slate-950">{{ $tp->nama_lengkap }}</strong></td><td class="px-3 py-3"><span class="block truncate text-xs text-slate-600">{{ ucwords(str_replace('_',' ',$tp->user->role??'-')) }}</span></td><td class="px-3 py-3"><span class="block truncate text-xs text-slate-600" title="{{ $tp->email ?: $tp->user?->email ?: '-' }}">{{ $tp->email ?: $tp->user?->email ?: '-' }}</span></td><td class="px-5 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-bold {{ $tp->user?->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">{{ $tp->user?->is_active ? 'Aktif' : 'Nonaktif' }}</span></td></tr>@empty<tr><td colspan="5" class="p-10 text-center text-sm text-slate-500">Belum ada tenaga pendidik.</td></tr>@endforelse</tbody></table></div>
+        @if($tenagaPendidik->hasPages())<footer class="border-t border-slate-200 p-4">{{ $tenagaPendidik->appends(request()->all())->links() }}</footer>@endif
+    </section>
 
-    <div class="content-card">
-        <div class="content-card-header">
-            <div>
-                <h5 class="mb-1">Tenaga Pendidik</h5>
-                <p class="text-muted mb-0">Filter berdasarkan nama, role, dan status akun.</p>
-            </div>
-            <form action="{{ route($routeBase . '.pengguna') }}" method="GET" class="filter-toolbar">
-                @foreach(request()->except(['search_tp', 'role_tp', 'status_tp', 'tp_page']) as $key => $value)
-                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                @endforeach
-
-                <input type="text" name="search_tp" value="{{ request('search_tp') }}" class="form-control" placeholder="Cari nama...">
-                <select name="role_tp" class="form-select" data-monitoring-auto-submit>
-                    <option value="">Semua Role</option>
-                    <option value="ketua_pkbm" {{ request('role_tp') == 'ketua_pkbm' ? 'selected' : '' }}>Ketua PKBM</option>
-                    <option value="sekretaris" {{ request('role_tp') == 'sekretaris' ? 'selected' : '' }}>Sekretaris</option>
-                    <option value="bendahara" {{ request('role_tp') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
-                    <option value="wakil_kepala_sekolah" {{ request('role_tp') == 'wakil_kepala_sekolah' ? 'selected' : '' }}>Wakil Kepala Sekolah</option>
-                    <option value="wali_kelas" {{ request('role_tp') == 'wali_kelas' ? 'selected' : '' }}>Wali Kelas</option>
-                    <option value="guru_pengajar" {{ request('role_tp') == 'guru_pengajar' ? 'selected' : '' }}>Guru Pengajar</option>
-                </select>
-                <select name="status_tp" class="form-select" data-monitoring-auto-submit>
-                    <option value="">Semua Status</option>
-                    <option value="aktif" {{ request('status_tp') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                    <option value="nonaktif" {{ request('status_tp') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                </select>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i> Cari</button>
-                @if(request()->anyFilled(['search_tp', 'role_tp', 'status_tp']))
-                    <a href="{{ route($routeBase . '.pengguna', request()->except(['search_tp', 'role_tp', 'status_tp', 'tp_page'])) }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-1"></i> Reset
-                    </a>
-                @endif
-            </form>
-        </div>
-        <div class="content-card-body">
-            <div class="table-responsive">
-                <table class="table table-clean align-middle">
-                    <thead>
-                        <tr>
-                            <th>NIP</th>
-                            <th>Nama</th>
-                            <th>Role</th>
-                            <th>Email</th>
-                            <th>Status Akun</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($tenagaPendidik as $tp)
-                            <tr>
-                                <td data-label="NIP"><span class="mobile-cell-value">{{ $tp->nip ?? '-' }}</span></td>
-                                <td data-label="Nama">
-                                    <span class="entity-title mobile-cell-value">{{ $tp->nama_lengkap }}</span>
-                                </td>
-                                <td data-label="Role">
-                                    <span class="soft-badge primary">{{ ucwords(str_replace('_', ' ', $tp->user->role ?? '-')) }}</span>
-                                </td>
-                                <td data-label="Email"><span class="mobile-cell-value">{{ $tp->email ?? $tp->user->email ?? '-' }}</span></td>
-                                <td data-label="Status Akun">
-                                    @if(optional($tp->user)->is_active)
-                                        <span class="soft-badge success"><i class="fas fa-check me-1"></i> Aktif</span>
-                                    @else
-                                        <span class="soft-badge danger"><i class="fas fa-times me-1"></i> Nonaktif</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5">
-                                    <div class="empty-state">
-                                        <i class="fas fa-user-times"></i>
-                                        <h6>Belum ada data tenaga pendidik</h6>
-                                        <p>Data akan tampil setelah akun tenaga pendidik tersedia.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if($tenagaPendidik->hasPages())
-                <div class="mt-4">{{ $tenagaPendidik->appends(request()->all())->links() }}</div>
-            @endif
-        </div>
-    </div>
-
-    <div class="content-card">
-        <div class="content-card-header">
-            <div>
-                <h5 class="mb-1">Siswa</h5>
-                <p class="text-muted mb-0">Pantau status siswa dan akses akun LMS/SIA.</p>
-            </div>
-            <form action="{{ route($routeBase . '.pengguna') }}" method="GET" class="filter-toolbar">
-                @foreach(request()->except(['search_siswa', 'status_siswa', 'siswa_page']) as $key => $value)
-                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                @endforeach
-
-                <input type="text" name="search_siswa" value="{{ request('search_siswa') }}" class="form-control" placeholder="Cari siswa...">
-                <select name="status_siswa" class="form-select" data-monitoring-auto-submit>
-                    <option value="">Semua Status</option>
-                    <option value="aktif" {{ request('status_siswa') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                    <option value="nonaktif" {{ request('status_siswa') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                </select>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i> Cari</button>
-                @if(request()->anyFilled(['search_siswa', 'status_siswa']))
-                    <a href="{{ route($routeBase . '.pengguna', request()->except(['search_siswa', 'status_siswa', 'siswa_page'])) }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-1"></i> Reset
-                    </a>
-                @endif
-            </form>
-        </div>
-        <div class="content-card-body">
-            <div class="table-responsive">
-                <table class="table table-clean align-middle">
-                    <thead>
-                        <tr>
-                            <th>NISN</th>
-                            <th>Nama</th>
-                            <th>Kelas</th>
-                            <th>Status Siswa</th>
-                            <th>Status Akun</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($siswa as $s)
-                            <tr>
-                                <td data-label="NISN"><span class="mobile-cell-value">{{ $s->nisn ?? '-' }}</span></td>
-                                <td data-label="Nama">
-                                    <span class="entity-title mobile-cell-value">{{ $s->nama_lengkap }}</span>
-                                </td>
-                                <td data-label="Kelas">
-                                    @if($s->kelas)
-                                        <span class="soft-badge primary">{{ $s->kelas->nama_kelas }}</span>
-                                    @else
-                                        <span class="soft-badge warning">Belum ada kelas</span>
-                                    @endif
-                                </td>
-                                <td data-label="Status Siswa">
-                                    <span class="soft-badge {{ $s->status === 'aktif' ? 'success' : 'warning' }}">{{ ucfirst($s->status ?? '-') }}</span>
-                                </td>
-                                <td data-label="Status Akun">
-                                    @if(optional($s->user)->is_active)
-                                        <span class="soft-badge success"><i class="fas fa-check me-1"></i> Aktif</span>
-                                    @else
-                                        <span class="soft-badge danger"><i class="fas fa-times me-1"></i> Nonaktif</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5">
-                                    <div class="empty-state">
-                                        <i class="fas fa-user-graduate"></i>
-                                        <h6>Belum ada data siswa</h6>
-                                        <p>Data siswa akan tampil setelah tersedia di sistem.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if($siswa->hasPages())
-                <div class="mt-4">{{ $siswa->appends(request()->all())->links() }}</div>
-            @endif
-        </div>
-    </div>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 p-4 sm:p-5"><div class="flex flex-wrap items-start justify-between gap-3"><div><h3 class="font-extrabold text-slate-950"><i class="fas fa-user-graduate mr-2 text-brand-600"></i>Siswa</h3><p class="mt-1 text-xs text-slate-500">Pantau status siswa dan akun aksesnya.</p></div>@if(request()->anyFilled(['search_siswa','status_siswa']))<a href="{{ route($routeName,request()->except(['search_siswa','status_siswa','siswa_page'])) }}" class="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-700 no-underline">Reset</a>@endif</div>
+            <form action="{{ route($routeName) }}" method="GET" class="mt-4 grid gap-2 sm:grid-cols-[minmax(220px,1fr)_180px_auto]">@foreach(request()->except(['search_siswa','status_siswa','siswa_page']) as $key=>$value)@if(!is_array($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif @endforeach<label class="relative"><i class="fas fa-search absolute left-3.5 top-3.5 text-xs text-slate-400"></i><input name="search_siswa" value="{{ request('search_siswa') }}" placeholder="Cari siswa..." class="h-11 w-full rounded-xl border border-slate-300 !pl-10 pr-3 text-sm"></label><select name="status_siswa" @change="$el.form.submit()" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Semua status siswa</option>@foreach(['aktif'=>'Aktif','lulus'=>'Lulus','pindah'=>'Pindah','keluar'=>'Keluar'] as $value=>$label)<option value="{{ $value }}" @selected(request('status_siswa')===$value)>{{ $label }}</option>@endforeach</select><button class="h-11 rounded-xl bg-slate-800 px-4 text-xs font-bold text-white">Cari</button></form>
+        </header>
+        <div class="divide-y divide-slate-100 lg:hidden">@forelse($siswa as $student)<article class="flex items-center gap-3 p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-xs font-extrabold text-emerald-700">{{ strtoupper(substr($student->nama_lengkap,0,1)) }}</span><div class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-950">{{ $student->nama_lengkap }}</strong><span class="block truncate text-xs text-slate-500">NISN {{ $student->nisn ?: '-' }} &middot; {{ $student->kelas?->nama_kelas ?? 'Belum ada kelas' }}</span></div><div class="text-right"><span class="block rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">{{ ucfirst($student->status) }}</span><small class="mt-1 block {{ $student->user?->is_active ? 'text-emerald-600' : 'text-red-600' }}">Akun {{ $student->user?->is_active ? 'aktif' : 'nonaktif' }}</small></div></article>@empty<p class="p-10 text-center text-sm text-slate-500">Belum ada siswa.</p>@endforelse</div>
+        <div class="hidden overflow-x-auto lg:block"><table class="w-full table-fixed text-left text-sm"><colgroup><col class="w-36"><col class="w-[30%]"><col><col class="w-28"><col class="w-28"></colgroup><thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500"><tr><th class="px-5 py-3">NISN</th><th class="px-3 py-3">Nama</th><th class="px-3 py-3">Kelas</th><th class="px-3 py-3">Siswa</th><th class="px-5 py-3">Akun</th></tr></thead><tbody class="divide-y divide-slate-100">@forelse($siswa as $student)<tr><td class="whitespace-nowrap px-5 py-3 text-xs text-slate-500">{{ $student->nisn ?: '-' }}</td><td class="px-3 py-3"><strong class="block truncate text-slate-950">{{ $student->nama_lengkap }}</strong></td><td class="px-3 py-3"><span class="block truncate whitespace-nowrap text-xs text-slate-600">{{ $student->kelas?->nama_kelas ?? 'Belum ada kelas' }}</span></td><td class="px-3 py-3"><span class="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">{{ ucfirst($student->status) }}</span></td><td class="px-5 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-bold {{ $student->user?->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }}">{{ $student->user?->is_active ? 'Aktif' : 'Nonaktif' }}</span></td></tr>@empty<tr><td colspan="5" class="p-10 text-center text-sm text-slate-500">Belum ada siswa.</td></tr>@endforelse</tbody></table></div>
+        @if($siswa->hasPages())<footer class="border-t border-slate-200 p-4">{{ $siswa->appends(request()->all())->links() }}</footer>@endif
+    </section>
 </div>
 @endsection

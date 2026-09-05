@@ -76,7 +76,7 @@ class KetuaController extends Controller
             'userAktif' => User::where('is_active', true)->count(),
         ];
 
-        return view('ketua.monitoring.pengguna', compact('tenagaPendidik', 'siswa', 'stats'));
+        return view('admin.monitoring.pengguna', compact('tenagaPendidik', 'siswa', 'stats'));
     }
 
     public function monitoringWaliKelas(Request $request)
@@ -152,8 +152,9 @@ class KetuaController extends Controller
         });
 
         $cabangs = Cabang::all();
+        $tahunAjarans = TahunAjaran::orderByDesc('tanggal_mulai')->get();
 
-        return view('ketua.monitoring.wali-kelas', compact('waliKelas', 'cabangs'));
+        return view('admin.monitoring.wali-kelas', compact('waliKelas', 'cabangs', 'tahunAjarans', 'taFilterId'));
     }
 
     public function monitoringGuruPengajar(Request $request)
@@ -238,8 +239,9 @@ class KetuaController extends Controller
         });
 
         $cabangs = Cabang::all();
+        $tahunAjarans = TahunAjaran::orderByDesc('tanggal_mulai')->get();
 
-        return view('ketua.monitoring.guru-pengajar', compact('guruPengajar', 'cabangs'));
+        return view('admin.monitoring.guru-pengajar', compact('guruPengajar', 'cabangs', 'tahunAjarans', 'taFilterId'));
     }
 
     public function monitoringSiswa(Request $request)
@@ -320,7 +322,7 @@ class KetuaController extends Controller
         }
         $kelasList = $kelasList->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
-        return view('ketua.monitoring.siswa', compact('siswa', 'cabangs', 'kelasList'));
+        return view('admin.monitoring.siswa', compact('siswa', 'cabangs', 'kelasList'));
     }
 
     // ============================================
@@ -346,13 +348,13 @@ class KetuaController extends Controller
             'totalCabang' => Cabang::where('is_active', true)->count(),
         ];
 
-        return view('ketua.laporan.index', compact(
+        return view('admin.laporan.index', array_merge(compact(
             'tahunAjarans',
             'tahunAjaranAktif',
             'cabangs',
             'kelasList',
             'stats'
-        ));
+        ), ['routePrefix' => 'ketua.laporan', 'supportsAcademic' => true]));
     }
 
     public function siswa(Request $request)
@@ -439,9 +441,9 @@ class KetuaController extends Controller
         $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
         $isHistorical = ! $isTaAktif;
 
-        return view('ketua.laporan.print-siswa', compact(
+        return view('admin.laporan.print-siswa', array_merge(compact(
             'siswaList', 'kelas', 'cabang', 'sortBy', 'tahunAjaran', 'isHistorical'
-        ));
+        ), ['backRoute' => 'ketua.laporan.index']));
     }
 
     public function tenagaPendidik(Request $request)
@@ -461,7 +463,10 @@ class KetuaController extends Controller
         $guruList = $query->get();
         $roleFilter = $request->role;
 
-        return view('ketua.laporan.print-guru', compact('guruList', 'roleFilter', 'sortBy'));
+        return view('admin.laporan.print-guru', array_merge(
+            compact('guruList', 'roleFilter', 'sortBy'),
+            ['backRoute' => 'ketua.laporan.index']
+        ));
     }
 
     public function kelas(Request $request)
@@ -484,7 +489,10 @@ class KetuaController extends Controller
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
         $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
 
-        return view('ketua.laporan.print-kelas', compact('kelasList', 'tahunAjaran', 'cabang'));
+        return view('admin.laporan.print-kelas', array_merge(
+            compact('kelasList', 'tahunAjaran', 'cabang'),
+            ['backRoute' => 'ketua.laporan.index']
+        ));
     }
 
     public function waliKelas(Request $request)
@@ -505,7 +513,10 @@ class KetuaController extends Controller
         $kelasList = $query->orderBy('jenjang')->orderBy('nama_kelas')->get();
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
 
-        return view('ketua.laporan.print-wali-kelas', compact('kelasList', 'tahunAjaran'));
+        return view('admin.laporan.print-wali-kelas', array_merge(
+            compact('kelasList', 'tahunAjaran'),
+            ['backRoute' => 'ketua.laporan.index']
+        ));
     }
 
     public function guruPengajar(Request $request)
@@ -522,7 +533,10 @@ class KetuaController extends Controller
         $guruList = $query->orderBy('nama_lengkap')->get();
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
 
-        return view('ketua.laporan.print-guru-pengajar', compact('guruList', 'tahunAjaran'));
+        return view('admin.laporan.print-guru-pengajar', array_merge(
+            compact('guruList', 'tahunAjaran'),
+            ['backRoute' => 'ketua.laporan.index']
+        ));
     }
 
     /**
@@ -559,7 +573,10 @@ class KetuaController extends Controller
 
         $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
 
-        return view('ketua.laporan.print-rekap-akademik', compact('tahunAjaran', 'byStatus', 'stats', 'cabang'));
+        return view('admin.laporan.print-rekap-akademik', array_merge(
+            compact('tahunAjaran', 'byStatus', 'stats', 'cabang'),
+            ['backRoute' => 'ketua.laporan.index']
+        ));
     }
 
     public function rekap(Request $request)
@@ -601,7 +618,10 @@ class KetuaController extends Controller
             'siswa_p' => Siswa::where('status', 'aktif')->where('jenis_kelamin', 'P')->count(),
         ];
 
-        return view('ketua.laporan.print-rekap', compact('cabangs', 'jenjangStats', 'summary', 'tahunAjaran'));
+        return view('admin.laporan.print-rekap', array_merge(
+            compact('cabangs', 'jenjangStats', 'summary', 'tahunAjaran'),
+            ['backRoute' => 'ketua.laporan.index']
+        ));
     }
 
     // ============================================
@@ -612,7 +632,7 @@ class KetuaController extends Controller
     {
         $catatan = Catatan::with('pengirim')->where('pengirim_id', auth()->id())->latest()->paginate(15);
 
-        return view('ketua.catatan.index', compact('catatan'));
+        return view('admin.catatan.index', compact('catatan'));
     }
 
     public function catatanCreate()
@@ -679,7 +699,7 @@ class KetuaController extends Controller
 
         $cabangList = \App\Models\Cabang::orderBy('nama_cabang')->get(['id', 'nama_cabang']);
 
-        return view('ketua.catatan.create', compact('roles', 'usersForIndividu', 'cabangList'));
+        return view('admin.catatan.create', compact('roles', 'usersForIndividu', 'cabangList'));
     }
 
     public function catatanStore(Request $request)
@@ -734,7 +754,7 @@ class KetuaController extends Controller
     {
         $catatan = Catatan::with(['pengirim', 'pembaca'])->findOrFail($id);
 
-        return view('ketua.catatan.show', compact('catatan'));
+        return view('admin.catatan.show', compact('catatan'));
     }
 
     public function catatanDestroy($id)
@@ -756,7 +776,7 @@ class KetuaController extends Controller
     protected function lmsViewContext(): array
     {
         return [
-            'rolePartial' => 'ketua.partials.sneat-sidebar-menu',
+            'rolePartial' => 'ketua.partials.sidebar',
             'baseRoute' => 'ketua.monitoring.lms',
             'cabangScope' => null,
         ];

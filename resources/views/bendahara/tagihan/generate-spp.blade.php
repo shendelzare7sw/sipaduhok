@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Generate SPP Bulanan')
 @section('page-title', 'Generate SPP Bulanan')
 @section('page-subtitle', 'Buat 12 tagihan SPP otomatis')
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 @section('styles')
     @vite(['resources/css/bendahara/tagihan/generate-spp.css'])
 @endsection

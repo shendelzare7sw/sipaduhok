@@ -1,32 +1,40 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
-@section('title', 'Manajemen User')
-
-@section('page-title', 'Manajemen User')
-@section('page-subtitle', 'Overview data Tenaga Pendidik, Siswa, dan Wali Siswa')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/users/index.css'])
-@endsection
+@section('title', 'Manajemen Pengguna')
+@section('page-title', 'Data Pengguna')
+@section('page-subtitle', 'Masukkan akun sekolah, lalu lanjutkan penempatan siswa ke kelas')
 
 @section('content')
-    <div data-admin-users-index
-        data-delete-tenaga-pendidik-url-template="{{ route('admin.users.delete-tenaga-pendidik', ['id' => '__ID__']) }}"
-        data-delete-siswa-url-template="{{ route('admin.users.delete-siswa', ['id' => '__ID__']) }}">
-        @include('admin.users.partials.index-stats')
+@php
+    $statItems = [
+        ['value' => number_format($stats['totalTenagaPendidik']), 'label' => 'Tenaga Pendidik', 'meta' => 'Guru dan staf sekolah', 'icon' => 'fa-chalkboard-teacher', 'tone' => 'bg-emerald-50 text-emerald-600'],
+        ['value' => number_format($stats['totalSiswa']), 'label' => 'Siswa', 'meta' => 'Siswa terdaftar', 'icon' => 'fa-user-graduate', 'tone' => 'bg-blue-50 text-blue-600'],
+        ['value' => number_format($stats['totalUserAktif']), 'label' => 'Akun Aktif', 'meta' => 'Dapat masuk aplikasi', 'icon' => 'fa-user-check', 'tone' => 'bg-violet-50 text-violet-600'],
+        ['value' => number_format($stats['totalUserNonAktif']), 'label' => 'Nonaktif', 'meta' => 'Perlu ditinjau', 'icon' => 'fa-user-times', 'tone' => 'bg-red-50 text-red-600'],
+    ];
+@endphp
 
-        @include('admin.users.partials.recent-tenaga-pendidik')
-        @include('admin.users.partials.recent-siswa')
-        @include('admin.users.partials.recent-wali-siswa')
+<div class="min-w-0 space-y-5">
+    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5"><div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white"><i class="fas fa-route" aria-hidden="true"></i></span><div class="min-w-0"><h2 class="text-sm font-extrabold text-blue-950">Mulai dari mana?</h2><p class="mt-1 text-xs leading-5 text-blue-800">Untuk banyak siswa, gunakan <strong>Import Excel</strong>. Setelah siswa masuk, lanjutkan ke menu Kelas & Penugasan untuk menempatkan mereka sekaligus.</p></div></div></section>
+
+    <x-cleanflow.stat-grid :items="$statItems" />
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><h2 class="text-base font-extrabold text-slate-900"><i class="fas fa-bolt mr-2 text-amber-500" aria-hidden="true"></i>Pilih Data yang Akan Dikelola</h2><p class="mt-1 text-xs text-slate-500">Tiap jenis pengguna mempunyai identitas dan akses berbeda.</p><div class="mt-4 grid gap-3 md:grid-cols-3">
+        @foreach([
+            ['title' => 'Siswa', 'description' => 'Tambah satu per satu atau masukkan banyak siswa dari Excel.', 'icon' => 'fa-user-graduate', 'tone' => 'bg-blue-50 text-blue-700', 'list' => route('admin.users.siswa'), 'create' => route('admin.users.create-siswa'), 'import' => route('admin.users.import-siswa')],
+            ['title' => 'Tenaga Pendidik', 'description' => 'Kelola guru, wali kelas, pengurus, dan staf sekolah.', 'icon' => 'fa-chalkboard-teacher', 'tone' => 'bg-emerald-50 text-emerald-700', 'list' => route('admin.users.tenaga-pendidik'), 'create' => route('admin.users.create-tenaga-pendidik'), 'import' => route('admin.users.import-tenaga-pendidik')],
+            ['title' => 'Wali Siswa', 'description' => 'Kelola akun orang tua dan hubungkan dengan siswa.', 'icon' => 'fa-user-friends', 'tone' => 'bg-amber-50 text-amber-700', 'list' => route('admin.users.wali-siswa'), 'create' => route('admin.users.wali-siswa.create'), 'import' => route('admin.users.import-wali-siswa')],
+        ] as $menu)
+            <article class="min-w-0 rounded-2xl border border-slate-200 p-4"><div class="flex items-start gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl {{ $menu['tone'] }}"><i class="fas {{ $menu['icon'] }}" aria-hidden="true"></i></span><div class="min-w-0"><h3 class="text-sm font-extrabold text-slate-900">{{ $menu['title'] }}</h3><p class="mt-1 text-xs leading-5 text-slate-500">{{ $menu['description'] }}</p></div></div><div class="mt-4 grid grid-cols-3 gap-2"><a href="{{ $menu['list'] }}" class="inline-flex min-h-9 items-center justify-center rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 no-underline hover:bg-slate-200">Lihat</a><a href="{{ $menu['create'] }}" class="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-50 text-[11px] font-bold text-brand-700 no-underline hover:bg-brand-100">Tambah</a><a href="{{ $menu['import'] }}" class="inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-50 text-[11px] font-bold text-emerald-700 no-underline hover:bg-emerald-100">Import</a></div></article>
+        @endforeach
+    </div></section>
+
+    <div class="grid min-w-0 gap-5 xl:grid-cols-3">
+        <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="flex items-center justify-between border-b border-slate-200 p-4"><div><h2 class="text-sm font-extrabold text-slate-900">Tenaga Pendidik Terbaru</h2><p class="mt-1 text-[11px] text-slate-500">{{ $tenagaPendidik->count() }} data terakhir</p></div><a href="{{ route('admin.users.tenaga-pendidik') }}" class="text-[11px] font-bold text-brand-700 no-underline hover:underline">Semua</a></header><div class="divide-y divide-slate-100">@forelse($tenagaPendidik as $tp)<article class="p-4"><div class="flex min-w-0 items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[11px] font-extrabold text-emerald-700">{{ strtoupper(substr($tp->nama_lengkap, 0, 2)) }}</span><div class="min-w-0 flex-1"><h3 class="truncate text-xs font-bold text-slate-800">{{ $tp->nama_lengkap }}</h3><p class="mt-0.5 truncate text-[10px] text-slate-500">{{ $tp->user->email ?? '-' }}</p></div><span class="rounded-full px-2 py-0.5 text-[9px] font-bold {{ $tp->user?->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ $tp->user?->is_active ? 'Aktif' : 'Nonaktif' }}</span></div><div class="mt-3 grid grid-cols-3 gap-2"><a href="{{ route('admin.users.show-tenaga-pendidik', $tp->id) }}" class="inline-flex h-8 items-center justify-center rounded-lg bg-blue-50 text-[10px] font-bold text-blue-700 no-underline">Detail</a><a href="{{ route('admin.users.edit-tenaga-pendidik', $tp->id) }}" class="inline-flex h-8 items-center justify-center rounded-lg bg-amber-50 text-[10px] font-bold text-amber-700 no-underline">Edit</a><form action="{{ route('admin.users.delete-tenaga-pendidik', $tp->id) }}" method="POST" data-confirm data-confirm-title="Hapus tenaga pendidik?" data-confirm-message="{{ $tp->nama_lengkap }} dan akun loginnya akan dihapus." data-confirm-text="Ya, hapus">@csrf @method('DELETE')<button type="submit" class="h-8 w-full rounded-lg bg-red-50 text-[10px] font-bold text-red-700">Hapus</button></form></div></article>@empty<div class="p-8 text-center text-xs text-slate-500">Belum ada tenaga pendidik.</div>@endforelse</div></section>
+
+        <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="flex items-center justify-between border-b border-slate-200 p-4"><div><h2 class="text-sm font-extrabold text-slate-900">Siswa Terbaru</h2><p class="mt-1 text-[11px] text-slate-500">{{ $siswa->count() }} data terakhir</p></div><a href="{{ route('admin.users.siswa') }}" class="text-[11px] font-bold text-brand-700 no-underline hover:underline">Semua</a></header><div class="divide-y divide-slate-100">@forelse($siswa as $s)<article class="p-4"><div class="flex min-w-0 items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[11px] font-extrabold text-blue-700">{{ strtoupper(substr($s->nama_lengkap, 0, 2)) }}</span><div class="min-w-0 flex-1"><h3 class="truncate text-xs font-bold text-slate-800">{{ $s->nama_lengkap }}</h3><p class="mt-0.5 truncate text-[10px] text-slate-500">NIS {{ $s->nis }} · {{ $s->kelas->nama_kelas ?? 'Belum ada kelas' }}</p></div><span class="rounded-full px-2 py-0.5 text-[9px] font-bold {{ $s->status === 'aktif' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ ucfirst($s->status) }}</span></div><div class="mt-3 grid grid-cols-3 gap-2"><a href="{{ route('admin.users.show-siswa', $s->id) }}" class="inline-flex h-8 items-center justify-center rounded-lg bg-blue-50 text-[10px] font-bold text-blue-700 no-underline">Detail</a><a href="{{ route('admin.users.edit-siswa', $s->id) }}" class="inline-flex h-8 items-center justify-center rounded-lg bg-amber-50 text-[10px] font-bold text-amber-700 no-underline">Edit</a><form action="{{ route('admin.users.delete-siswa', $s->id) }}" method="POST" data-confirm data-confirm-title="Hapus siswa?" data-confirm-message="{{ $s->nama_lengkap }} dan akun loginnya akan dihapus." data-confirm-text="Ya, hapus">@csrf @method('DELETE')<button type="submit" class="h-8 w-full rounded-lg bg-red-50 text-[10px] font-bold text-red-700">Hapus</button></form></div></article>@empty<div class="p-8 text-center text-xs text-slate-500">Belum ada siswa.</div>@endforelse</div></section>
+
+        <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="flex items-center justify-between border-b border-slate-200 p-4"><div><h2 class="text-sm font-extrabold text-slate-900">Wali Siswa Terbaru</h2><p class="mt-1 text-[11px] text-slate-500">{{ $orangTua->count() }} data terakhir</p></div><a href="{{ route('admin.users.wali-siswa') }}" class="text-[11px] font-bold text-brand-700 no-underline hover:underline">Semua</a></header><div class="divide-y divide-slate-100">@forelse($orangTua as $ortu)<article class="flex min-w-0 items-center gap-3 p-4"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-[11px] font-extrabold text-amber-700">{{ strtoupper(substr($ortu->name, 0, 2)) }}</span><div class="min-w-0 flex-1"><h3 class="truncate text-xs font-bold text-slate-800">{{ $ortu->name }}</h3><p class="mt-0.5 truncate text-[10px] text-slate-500">{{ $ortu->studentParents?->count() ?? 0 }} anak terhubung · {{ $ortu->username }}</p></div><a href="{{ route('admin.users.wali-siswa') }}" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 no-underline hover:bg-slate-200" title="Kelola"><i class="fas fa-arrow-right text-[10px]" aria-hidden="true"></i></a></article>@empty<div class="p-8 text-center text-xs text-slate-500">Belum ada wali siswa.</div>@endforelse</div></section>
     </div>
-
-    @include('admin.users.partials.delete-modals')
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/users/index.js'])
+</div>
 @endsection

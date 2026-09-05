@@ -1,345 +1,58 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Detail Pembayaran')
 @section('page-title', 'Detail Pembayaran')
-@section('page-subtitle', 'Validasi pembayaran siswa')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/keuangan/pembayaran/show.css'])
-@endsection
+@section('page-subtitle', 'Periksa transaksi sebelum melakukan validasi')
 
 @section('content')
-<div class="pembayaran-show-page">
-<div class="container-fluid px-0">
+@php
+    $isDigital = $pembayaran->payment_gateway === 'paywuz';
+    $isExpired = $isDigital && $pembayaran->status_validasi === 'pending' && ($pembayaran->payment_expires_at?->isPast() ?? false);
+    $canValidate = $pembayaran->status_validasi === 'pending' && ! $isExpired && ! $isDigital;
+    $tagihanStatus = match ($pembayaran->tagihan?->status) {
+        'sudah_bayar' => ['Lunas', 'bg-emerald-50 text-emerald-700'],
+        'terlambat' => ['Terlambat', 'bg-red-50 text-red-700'],
+        'cicilan' => ['Cicilan', 'bg-blue-50 text-blue-700'],
+        default => ['Belum bayar', 'bg-amber-50 text-amber-700'],
+    };
+@endphp
 
-    {{-- Breadcrumb --}}
-    <div class="mb-3">
-        <a href="{{ route('admin.keuangan.pembayaran.index') }}" class="text-primary text-decoration-none">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Daftar Pembayaran
-        </a>
-    </div>
+<div class="min-w-0 w-full space-y-5" data-payment-detail x-data="{ note: '', rejection: '' }">
+    <div class="flex flex-wrap items-center justify-between gap-3"><a href="{{ route('admin.keuangan.pembayaran.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-slate-700 no-underline ring-1 ring-slate-200 hover:bg-slate-50"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali ke pembayaran</a>@if($pembayaran->status_validasi === 'disetujui')<a href="{{ route('admin.keuangan.pembayaran.cetak-kwitansi', $pembayaran->id) }}" target="_blank" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white no-underline hover:bg-emerald-700"><i class="fas fa-print" aria-hidden="true"></i>Cetak kwitansi</a>@endif</div>
 
-    <div class="row">
-        {{-- Info Pembayaran --}}
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow h-100">
-                <div class="card-header py-3 bg-white">
-                    <h6 class="m-0 fw-bold text-primary">
-                        <i class="fas fa-receipt me-2"></i>Informasi Pembayaran
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <table class="info-table w-100">
-                        <tr>
-                            <td>Kode Pembayaran</td>
-                            <td><code class="fw-bold text-primary small">{{ $pembayaran->kode_pembayaran }}</code></td>
-                        </tr>
-                        <tr>
-                            <td>Jenis Tagihan</td>
-                            <td><strong>{{ ucwords(str_replace('_', ' ', $pembayaran->tagihan->jenis_tagihan ?? '-')) }}</strong></td>
-                        </tr>
-                        <tr>
-                            <td>Jumlah Bayar</td>
-                            <td class="fs-5 fw-bold text-success">
-                                Rp {{ number_format($pembayaran->jumlah_bayar, 0, ',', '.') }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Tanggal Bayar</td>
-                            <td>{{ $pembayaran->tanggal_bayar ? $pembayaran->tanggal_bayar->format('d F Y') : '-' }}</td>
-                        </tr>
-                        <tr>
-                            <td>Metode</td>
-                            <td>
-                                @if($pembayaran->metode_pembayaran === 'tunai')
-                                    <span class="badge bg-primary badge-custom shadow-sm">TUNAI</span>
-                                @elseif($pembayaran->metode_pembayaran === 'transfer')
-                                    <span class="badge bg-success badge-custom shadow-sm">DIRECT TRANSFER</span>
-                                @else
-                                    <x-payment-method-badge :payment="$pembayaran" class="badge-custom shadow-sm" />
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Status</td>
-                            <td>
-                                <x-payment-status-badge :payment="$pembayaran" class="badge-custom shadow-sm" />
-                                @if($pembayaran->status_validasi === 'pending')
-                                    @if($pembayaran->metode_pembayaran === 'paywuz')
-                                        @php
-                                            $isExpired = $pembayaran->payment_expires_at?->isPast() ?? false;
-                                        @endphp
-                                        @if($isExpired)
-                                            <div class="small text-muted mt-1">Sesi pembayaran digital telah berakhir</div>
-                                        @else
-                                            <div class="small text-muted mt-1">
-                                                @if($pembayaran->payment_expires_at)
-                                                    Berlaku hingga {{ $pembayaran->payment_expires_at->format('d M Y H:i') }}
-                                                @else
-                                                    Menunggu kanal pembayaran dibuat
-                                                @endif
-                                            </div>
-                                        @endif
-                                    @endif
-                                @endif
-                            </td>
-                        </tr>
-                        @if($pembayaran->status_validasi !== 'pending')
-                            <tr>
-                                <td>Divalidasi Oleh</td>
-                                <td>{{ $pembayaran->validator->name ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td>Tanggal Validasi</td>
-                                <td>{{ $pembayaran->tanggal_validasi ? $pembayaran->tanggal_validasi->format('d F Y H:i') : '-' }}</td>
-                            </tr>
-                        @endif
-                        @if($pembayaran->catatan)
-                            <tr>
-                                <td>Catatan</td>
-                                <td>{{ $pembayaran->catatan }}</td>
-                            </tr>
-                        @endif
-                    </table>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-r from-brand-800 to-brand-600 text-white shadow-sm">
+        <div class="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"><div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-widest text-blue-100">Kode pembayaran</p><h2 class="mt-1 break-all font-mono text-lg font-extrabold text-white sm:text-xl">{{ $pembayaran->kode_pembayaran }}</h2><p class="mt-2 text-xs text-blue-100">{{ $pembayaran->tanggal_bayar?->translatedFormat('d F Y') ?? 'Tanggal tidak tersedia' }}</p></div><div class="flex flex-wrap items-center gap-2"><x-payment-method-badge :payment="$pembayaran" class="bg-white/15 text-white ring-white/20" /><x-payment-status-badge :payment="$pembayaran" /></div></div>
+        <div class="grid border-t border-white/15 sm:grid-cols-2"><div class="border-white/15 p-4 sm:border-r sm:p-5"><p class="text-[10px] font-bold uppercase tracking-wide text-blue-100">Jumlah dibayar</p><p class="mt-1 text-2xl font-extrabold text-white">Rp {{ number_format($pembayaran->jumlah_bayar, 0, ',', '.') }}</p></div><div class="p-4 sm:p-5"><p class="text-[10px] font-bold uppercase tracking-wide text-blue-100">Jenis tagihan</p><p class="mt-1 text-sm font-extrabold text-white">{{ ucwords(str_replace('_', ' ', $pembayaran->tagihan->jenis_tagihan ?? '-')) }}</p></div></div>
+    </section>
 
-                    @if($pembayaran->bukti_pembayaran)
-                        <div class="mt-4 pt-3 border-top">
-                            <h6 class="mb-3 fw-bold text-gray-800"><i class="fas fa-paperclip me-2"></i>Bukti Pembayaran</h6>
-                            <a href="{{ asset('storage/' . $pembayaran->bukti_pembayaran) }}" target="_blank" class="btn btn-sm btn-info shadow-sm">
-                                <i class="fas fa-eye me-1"></i> Lihat Bukti
-                            </a>
-                        </div>
-                    @endif
-
-                    @if($pembayaran->status_validasi === 'disetujui')
-                        <div class="mt-4 pt-3 border-top">
-                            <h6 class="mb-3 fw-bold text-gray-800"><i class="fas fa-print me-2"></i>Cetak Kwitansi</h6>
-                            <a href="{{ route('admin.keuangan.pembayaran.cetak-kwitansi', $pembayaran->id) }}" 
-                               target="_blank" 
-                               class="btn btn-success shadow-sm">
-                                <i class="fas fa-print me-1"></i> Cetak Kwitansi Pembayaran
-                            </a>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        {{-- Info Siswa --}}
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow h-100">
-                <div class="card-header py-3 bg-white">
-                    <h6 class="m-0 fw-bold text-success">
-                        <i class="fas fa-user-graduate me-2"></i>Informasi Siswa
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex gap-3 align-items-start mb-4">
-                        <div class="student-avatar">
-                            {{ strtoupper(substr($pembayaran->siswa->nama_lengkap ?? 'S', 0, 1)) }}
-                        </div>
-                        <div>
-                            <h5 class="mb-1 fw-bold text-gray-800">{{ $pembayaran->siswa->nama_lengkap ?? '-' }}</h5>
-                            <p class="mb-0 text-muted small">NISN: {{ $pembayaran->siswa->nisn ?? '-' }}</p>
-                        </div>
-                    </div>
-
-                    <table class="info-table w-100">
-                        <tr>
-                            <td class="student-class-label">Kelas</td>
-                            <td>{{ $pembayaran->siswa->kelas->nama_kelas ?? '-' }} ({{ $pembayaran->siswa->kelas->jenjang ?? '-' }})</td>
-                        </tr>
-                        <tr>
-                            <td>Cabang</td>
-                            <td>{{ $pembayaran->siswa->cabang->nama_cabang ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <td>No. Telepon</td>
-                            <td>{{ $pembayaran->siswa->telepon_orangtua ?? '-' }}</td>
-                        </tr>
-                    </table>
-
-                    {{-- Note: Riwayat pembayaran siswa tidak tersedia untuk admin --}}
-                    {{-- Fitur ini hanya tersedia di panel bendahara --}}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Cek status kadaluarsa --}}
-    @php
-        $isDigital = $pembayaran->payment_gateway === 'paywuz';
-        $isKadaluarsa = $isDigital && $pembayaran->status_validasi === 'pending' && ($pembayaran->payment_expires_at?->isPast() ?? false);
-    @endphp
-
-    {{-- Info Kadaluarsa --}}
-    @if($isKadaluarsa)
-        <div class="card shadow mb-4 expired-payment-card">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-ban fa-2x text-secondary me-3"></i>
-                    <div>
-                        <h6 class="fw-bold text-secondary mb-1">Pembayaran Kadaluarsa</h6>
-                        <p class="mb-0 text-muted small">
-                            Sesi pembayaran digital ini telah melewati batas waktu kanal dan tidak memerlukan validasi manual.
-                            Siswa perlu membuat transaksi pembayaran baru jika ingin melanjutkan.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    @if($isExpired)
+        <section class="flex items-start gap-3 rounded-2xl border border-slate-300 bg-slate-100 p-4 text-xs leading-5 text-slate-700"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-500"><i class="fas fa-ban" aria-hidden="true"></i></span><div><h2 class="font-extrabold text-slate-900">Pembayaran digital kedaluwarsa</h2><p class="mt-1">Sesi kanal telah berakhir dan tidak memerlukan validasi manual. Siswa perlu membuat transaksi baru.</p></div></section>
+    @elseif($isDigital && $pembayaran->status_validasi === 'pending')
+        <section class="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-800"><i class="fas fa-circle-info mt-1 shrink-0 text-blue-600" aria-hidden="true"></i><p>Pembayaran digital diverifikasi otomatis oleh penyedia. @if($pembayaran->payment_expires_at)Kanal berlaku hingga {{ $pembayaran->payment_expires_at->format('d M Y H:i') }}.@elseKanal pembayaran masih disiapkan.@endif</p></section>
     @endif
 
-    {{-- Form Validasi (jika masih pending dan belum kadaluarsa) --}}
-    @if($pembayaran->status_validasi === 'pending' && !$isKadaluarsa && !$isDigital)
-        <div class="card shadow mb-4 validation-card">
-            <div class="card-body">
-                <h5 class="mb-4 fw-bold">
-                    <i class="fas fa-check-circle me-2"></i>Validasi Pembayaran
-                </h5>
+    <div class="grid min-w-0 gap-5 xl:grid-cols-2">
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-receipt text-brand-600" aria-hidden="true"></i>Informasi pembayaran</h2></header><dl class="divide-y divide-slate-100 text-sm">
+            @foreach([
+                ['Tanggal bayar', $pembayaran->tanggal_bayar?->translatedFormat('d F Y') ?? '-'],
+                ['Divalidasi oleh', $pembayaran->status_validasi !== 'pending' ? ($pembayaran->validator->name ?? '-') : 'Belum divalidasi'],
+                ['Tanggal validasi', $pembayaran->tanggal_validasi?->translatedFormat('d F Y H:i') ?? '-'],
+            ] as [$label, $value])<div class="grid gap-1 px-4 py-3 sm:grid-cols-[150px_1fr] sm:px-5"><dt class="text-xs font-bold text-slate-500">{{ $label }}</dt><dd class="break-words font-semibold text-slate-800 sm:text-right">{{ $value }}</dd></div>@endforeach
+            @if($pembayaran->catatan)<div class="px-4 py-3 sm:px-5"><dt class="text-xs font-bold text-slate-500">Catatan</dt><dd class="mt-2 whitespace-pre-line rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-700">{{ $pembayaran->catatan }}</dd></div>@endif
+        </dl>@if($pembayaran->bukti_pembayaran)<div class="border-t border-slate-200 p-4 sm:p-5"><a href="{{ asset('storage/' . $pembayaran->bukti_pembayaran) }}" target="_blank" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-50 px-4 text-xs font-bold text-blue-700 no-underline ring-1 ring-inset ring-blue-100"><i class="fas fa-paperclip" aria-hidden="true"></i>Lihat bukti pembayaran</a></div>@endif</section>
 
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Catatan (Opsional)</label>
-                    <textarea id="catatanValidasi" class="form-control shadow-sm validation-note-input" rows="3" placeholder="Tambahkan catatan jika diperlukan..."></textarea>
-                </div>
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-user-graduate text-emerald-600" aria-hidden="true"></i>Informasi siswa</h2></header><div class="flex min-w-0 items-center gap-3 p-4 sm:p-5"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-sm font-extrabold text-emerald-700">{{ strtoupper(substr($pembayaran->siswa->nama_lengkap ?? 'S', 0, 1)) }}</span><div class="min-w-0"><h3 class="truncate text-base font-extrabold text-slate-950">{{ $pembayaran->siswa->nama_lengkap ?? '-' }}</h3><p class="mt-1 truncate text-xs text-slate-500">NISN {{ $pembayaran->siswa->nisn ?? '-' }}</p></div></div><dl class="divide-y divide-slate-100 border-t border-slate-100 text-sm">@foreach([['Kelas', ($pembayaran->siswa->kelas->nama_kelas ?? '-').' · '.($pembayaran->siswa->kelas->jenjang ?? '-')],['Cabang', $pembayaran->siswa->cabang->nama_cabang ?? '-'],['Telepon wali', $pembayaran->siswa->telepon_orangtua ?? '-']] as [$label, $value])<div class="grid gap-1 px-4 py-3 sm:grid-cols-[130px_1fr] sm:px-5"><dt class="text-xs font-bold text-slate-500">{{ $label }}</dt><dd class="break-words font-semibold text-slate-800 sm:text-right">{{ $value }}</dd></div>@endforeach</dl><div class="border-t border-slate-200 p-4 sm:p-5"><a href="{{ route('admin.keuangan.pembayaran.riwayat-siswa', $pembayaran->siswa_id) }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i>Lihat seluruh riwayat</a></div></section>
+    </div>
 
-                <div class="d-flex gap-2 flex-wrap">
-                    <button type="button" class="btn btn-light shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#setujuiModal">
-                        <i class="fas fa-check me-1"></i> Setujui Pembayaran
-                    </button>
-                    <button type="button" class="btn btn-outline-light shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#tolakModal">
-                        <i class="fas fa-times me-1"></i> Tolak Pembayaran
-                    </button>
-                </div>
-            </div>
-        </div>
+    @if($canValidate)
+        <section class="overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm"><header class="border-b border-brand-100 bg-brand-50 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-brand-900"><i class="fas fa-clipboard-check" aria-hidden="true"></i>Validasi pembayaran</h2><p class="mt-1 text-xs text-brand-700">Pastikan nominal dan bukti sesuai sebelum menentukan hasil.</p></header><div class="p-4 sm:p-5"><label class="block text-xs font-bold text-slate-700">Catatan pemeriksaan <span class="font-normal text-slate-400">(opsional)</span><textarea x-model="note" rows="3" maxlength="500" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Tambahkan catatan jika diperlukan."></textarea></label><div class="mt-4 grid grid-cols-2 gap-2"><button type="button" @click="$refs.approveDialog.showModal()" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white hover:bg-emerald-700"><i class="fas fa-check" aria-hidden="true"></i>Setujui</button><button type="button" @click="rejection = ''; $refs.rejectDialog.showModal()" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-50 px-4 text-xs font-bold text-red-700 ring-1 ring-inset ring-red-100 hover:bg-red-100"><i class="fas fa-xmark" aria-hidden="true"></i>Tolak</button></div></div></section>
     @endif
 
-    {{-- Info Tagihan --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-white">
-            <h6 class="m-0 fw-bold text-warning">
-                <i class="fas fa-file-invoice-dollar me-2"></i>Informasi Tagihan Terkait
-            </h6>
-        </div>
-        <div class="card-body">
-            @if($pembayaran->tagihan)
-                <table class="info-table w-100">
-                    <tr>
-                        <td>Jenis Tagihan</td>
-                        <td><strong>{{ ucwords(str_replace('_', ' ', $pembayaran->tagihan->jenis_tagihan)) }}</strong></td>
-                    </tr>
-                    <tr>
-                        <td>Jumlah Tagihan</td>
-                        <td class="fw-bold">Rp {{ number_format($pembayaran->tagihan->jumlah, 0, ',', '.') }}</td>
-                    </tr>
-                    <tr>
-                        <td>Jatuh Tempo</td>
-                        <td>{{ $pembayaran->tagihan->tanggal_jatuh_tempo ? $pembayaran->tagihan->tanggal_jatuh_tempo->format('d F Y') : '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td>Status Tagihan</td>
-                        <td>
-                            @if($pembayaran->tagihan->status === 'sudah_bayar')
-                                <span class="badge bg-success shadow-sm">Lunas</span>
-                            @elseif($pembayaran->tagihan->status === 'terlambat')
-                                <span class="badge bg-danger shadow-sm">Terlambat</span>
-                            @else
-                                <span class="badge bg-warning shadow-sm">Belum Bayar</span>
-                            @endif
-                        </td>
-                    </tr>
-                </table>
-            @else
-                <p class="text-muted mb-0">Tagihan tidak ditemukan.</p>
-            @endif
-        </div>
-    </div>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-file-invoice-dollar text-amber-600" aria-hidden="true"></i>Tagihan terkait</h2></header>@if($pembayaran->tagihan)<dl class="grid text-sm sm:grid-cols-4"><div class="border-slate-100 p-4 sm:border-r sm:p-5"><dt class="text-[10px] font-bold uppercase text-slate-400">Jenis</dt><dd class="mt-1 font-extrabold text-slate-800">{{ ucwords(str_replace('_', ' ', $pembayaran->tagihan->jenis_tagihan)) }}</dd></div><div class="border-slate-100 p-4 sm:border-r sm:p-5"><dt class="text-[10px] font-bold uppercase text-slate-400">Jumlah</dt><dd class="mt-1 whitespace-nowrap font-extrabold text-slate-800">Rp {{ number_format($pembayaran->tagihan->jumlah, 0, ',', '.') }}</dd></div><div class="border-slate-100 p-4 sm:border-r sm:p-5"><dt class="text-[10px] font-bold uppercase text-slate-400">Jatuh tempo</dt><dd class="mt-1 whitespace-nowrap font-extrabold text-slate-800">{{ $pembayaran->tagihan->tanggal_jatuh_tempo?->translatedFormat('d F Y') ?? '-' }}</dd></div><div class="p-4 sm:p-5"><dt class="text-[10px] font-bold uppercase text-slate-400">Status</dt><dd class="mt-1"><span class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold {{ $tagihanStatus[1] }}">{{ $tagihanStatus[0] }}</span></dd></div></dl>@else<p class="p-5 text-sm text-slate-500">Tagihan tidak ditemukan.</p>@endif</section>
 
+    @if($canValidate)
+        <dialog x-ref="approveDialog" class="m-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/60" @click.self="$el.close()"><form action="{{ route('admin.keuangan.pembayaran.validasi', $pembayaran->id) }}" method="POST">@csrf<input type="hidden" name="status_validasi" value="disetujui"><input type="hidden" name="catatan" :value="note"><header class="flex items-start justify-between gap-4 border-b border-slate-200 p-4 sm:p-5"><div><h2 class="text-base font-extrabold text-slate-950">Setujui pembayaran?</h2><p class="mt-1 text-xs leading-5 text-slate-500">Transaksi akan divalidasi dan status tagihan diperbarui.</p></div><button type="button" @click="$refs.approveDialog.close()" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500" aria-label="Tutup"><i class="fas fa-xmark" aria-hidden="true"></i></button></header><footer class="flex justify-end gap-2 bg-slate-50 p-4"><button type="button" @click="$refs.approveDialog.close()" class="h-10 px-4 text-xs font-bold text-slate-600">Batal</button><button type="submit" class="inline-flex h-10 items-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white"><i class="fas fa-check" aria-hidden="true"></i>Ya, setujui</button></footer></form></dialog>
+        <dialog x-ref="rejectDialog" class="m-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/60" @click.self="$el.close()"><form action="{{ route('admin.keuangan.pembayaran.validasi', $pembayaran->id) }}" method="POST">@csrf<input type="hidden" name="status_validasi" value="ditolak"><input type="hidden" name="catatan" :value="note ? `${note}\n[Alasan Tolak] ${rejection.trim()}` : `[Alasan Tolak] ${rejection.trim()}`"><header class="flex items-start justify-between gap-4 border-b border-slate-200 p-4 sm:p-5"><div><h2 class="text-base font-extrabold text-slate-950">Tolak pembayaran?</h2><p class="mt-1 text-xs leading-5 text-slate-500">Berikan alasan yang jelas agar dapat ditindaklanjuti wali siswa.</p></div><button type="button" @click="$refs.rejectDialog.close()" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500" aria-label="Tutup"><i class="fas fa-xmark" aria-hidden="true"></i></button></header><div class="p-4 sm:p-5"><label class="text-xs font-bold text-slate-700">Alasan penolakan <span class="text-red-600">*</span><textarea x-model="rejection" rows="4" maxlength="400" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100" placeholder="Contoh: nominal pada bukti tidak sesuai."></textarea></label><p x-show="!rejection.trim()" class="mt-1 text-[10px] text-red-600">Alasan wajib diisi sebelum menolak.</p></div><footer class="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 p-4"><button type="button" @click="$refs.rejectDialog.close()" class="h-10 px-4 text-xs font-bold text-slate-600">Batal</button><button type="submit" :disabled="!rejection.trim()" class="inline-flex h-10 items-center gap-2 rounded-xl bg-red-600 px-4 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"><i class="fas fa-xmark" aria-hidden="true"></i>Ya, tolak</button></footer></form></dialog>
+    @endif
 </div>
-</div>
-
-@if($pembayaran->status_validasi === 'pending' && !$isKadaluarsa && !$isDigital)
-{{-- Modal Setujui --}}
-<div class="modal fade" id="setujuiModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-bold text-white">
-                    <i class="fas fa-check-circle me-2"></i>Konfirmasi Setujui Pembayaran
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body py-4 text-center">
-                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                <h6 class="fw-bold mb-2">Setujui pembayaran ini?</h6>
-                <p class="text-muted small mb-0">
-                    Status tagihan akan diubah menjadi <strong>Lunas</strong> dan bukti pembayaran diterima.
-                </p>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Batal
-                </button>
-                <form id="formSetujui" action="{{ route('admin.keuangan.pembayaran.validasi', $pembayaran->id) }}" method="POST" class="d-inline">
-                    @csrf
-                    <input type="hidden" name="status_validasi" value="disetujui">
-                    <input type="hidden" name="catatan" id="catatanSetujui">
-                    <button type="submit" class="btn btn-success fw-bold">
-                        <i class="fas fa-check me-1"></i> Ya, Setujui
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Modal Tolak --}}
-<div class="modal fade" id="tolakModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title fw-bold text-white">
-                    <i class="fas fa-times-circle me-2"></i>Konfirmasi Tolak Pembayaran
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body py-4">
-                <div class="text-center mb-3">
-                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
-                    <h6 class="fw-bold mb-1">Tolak pembayaran ini?</h6>
-                    <p class="text-muted small">Siswa akan diberitahu bahwa pembayarannya ditolak.</p>
-                </div>
-                <div>
-                    <label class="form-label fw-bold">Alasan Penolakan <span class="text-danger">*</span></label>
-                    <textarea id="alasanTolak" class="form-control" rows="3" placeholder="Tuliskan alasan penolakan..."></textarea>
-                    <div class="invalid-feedback" id="alasanError">Alasan penolakan wajib diisi.</div>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Batal
-                </button>
-                <form id="formTolak" action="{{ route('admin.keuangan.pembayaran.validasi', $pembayaran->id) }}" method="POST" class="d-inline">
-                    @csrf
-                    <input type="hidden" name="status_validasi" value="ditolak">
-                    <input type="hidden" name="catatan" id="catatanTolak">
-                    <button type="button" class="btn btn-danger fw-bold" data-submit-tolak>
-                        <i class="fas fa-times me-1"></i> Ya, Tolak
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
-
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/keuangan/pembayaran/show.js'])
 @endsection

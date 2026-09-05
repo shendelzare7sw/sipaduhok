@@ -1,283 +1,51 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Riwayat Pembayaran Siswa')
 @section('page-title', 'Riwayat Pembayaran')
-@section('page-subtitle')
-    Riwayat pembayaran {{ $siswa->nama_lengkap }}
-@endsection
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/keuangan/pembayaran/riwayat-siswa.css'])
-@endsection
+@section('page-subtitle', 'Jejak transaksi dan posisi tagihan siswa')
 
 @section('content')
-    <div class="payment-history-page">
-        <div class="container-fluid px-0">
-
-            {{-- Header Card --}}
-            <div class="card shadow mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <h5 class="mb-0 fw-bold text-primary">Riwayat Pembayaran</h5>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('admin.keuangan.pembayaran.create', $siswa->id) }}"
-                                class="btn btn-success shadow-sm">
-                                <i class="fas fa-plus me-1"></i> Input Pembayaran
-                            </a>
-                            <a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}"
-                                class="btn btn-secondary shadow-sm">
-                                <i class="fas fa-arrow-left me-1"></i> Kembali
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Info Siswa Card --}}
-            <div class="card shadow mb-4 border-start border-primary border-4">
-                <div class="card-body bg-light">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <small class="text-muted fw-bold">Nama Lengkap</small>
-                            <p class="mb-0 fw-bold">{{ $siswa->nama_lengkap }}</p>
-                        </div>
-                        <div class="col-md-3">
-                            <small class="text-muted fw-bold">NISN</small>
-                            <p class="mb-0 fw-bold">{{ $siswa->nisn }}</p>
-                        </div>
-                        <div class="col-md-3">
-                            <small class="text-muted fw-bold">Kelas</small>
-                            <p class="mb-0 fw-bold">{{ $siswa->kelas->nama_kelas ?? '-' }}</p>
-                        </div>
-                        <div class="col-md-3">
-                            <small class="text-muted fw-bold">Cabang</small>
-                            <p class="mb-0 fw-bold">{{ $siswa->cabang->nama_cabang ?? '-' }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Statistik Cards --}}
-            <div class="row g-4 mb-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="dashboard-card">
-                        <div class="stat-widget">
-                            <div class="stat-details">
-                                <div class="stat-value">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</div>
-                                <div class="stat-label">Total Tagihan</div>
-                            </div>
-                            <div class="stat-icon-wrapper stat-icon-primary">
-                                <i class="fas fa-file-invoice-dollar"></i>
-                            </div>
-                        </div>
-                        <div class="stat-footer">
-                            <span>Seluruh tagihan</span>
-                            <i class="fas fa-receipt opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="dashboard-card">
-                        <div class="stat-widget">
-                            <div class="stat-details">
-                                <div class="stat-value">Rp {{ number_format($totalTerbayar, 0, ',', '.') }}</div>
-                                <div class="stat-label">Total Terbayar</div>
-                            </div>
-                            <div class="stat-icon-wrapper stat-icon-success">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                        </div>
-                        <div class="stat-footer">
-                            <span>Pembayaran disetujui</span>
-                            <i class="fas fa-check opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="dashboard-card">
-                        <div class="stat-widget">
-                            <div class="stat-details">
-                                <div class="stat-value">Rp {{ number_format($totalPending, 0, ',', '.') }}</div>
-                                <div class="stat-label">Menunggu Validasi</div>
-                            </div>
-                            <div class="stat-icon-wrapper stat-icon-warning">
-                                <i class="fas fa-hourglass-half"></i>
-                            </div>
-                        </div>
-                        <div class="stat-footer">
-                            <span>Belum divalidasi</span>
-                            <i class="fas fa-clock opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="dashboard-card">
-                        <div class="stat-widget">
-                            <div class="stat-details">
-                                <div class="stat-value">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</div>
-                                <div class="stat-label">Sisa Tagihan</div>
-                            </div>
-                            <div class="stat-icon-wrapper stat-icon-danger">
-                                <i class="fas fa-money-bill-wave"></i>
-                            </div>
-                        </div>
-                        <div class="stat-footer">
-                            <span>Belum dibayar</span>
-                            <i class="fas fa-exclamation-circle opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Daftar Pembayaran Table --}}
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 bg-white">
-                    <h6 class="m-0 fw-bold text-primary">
-                        <i class="fas fa-receipt me-2"></i>Daftar Transaksi Pembayaran
-                    </h6>
-                </div>
-                <div class="card-body p-0">
-                    @if($pembayaran->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Kode</th>
-                                        <th>Tanggal</th>
-                                        <th>Jenis Tagihan</th>
-                                        <th class="text-end">Jumlah</th>
-                                        <th class="text-center">Metode</th>
-                                        <th class="text-center">Status</th>
-                                        <th>Divalidasi</th>
-                                        <th class="text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($pembayaran as $bayar)
-                                        <tr>
-                                            <td data-label="KODE" class="align-middle text-start text-md-center">
-                                                <code class="small">{{ $bayar->kode_pembayaran }}</code>
-                                                @if($bayar->order_id && $bayar->group_transactions_count > 1)
-                                                    <div class="mt-1">
-                                                        <span class="badge bg-info group-badge-small" title="Pembayaran ini adalah bagian dari transaksi gabungan ({{ $bayar->group_transactions_count }} item)">
-                                                            <i class="fas fa-layer-group me-1"></i> Gabungan ({{ $bayar->group_transactions_count }})
-                                                        </span>
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td data-label="TANGGAL" class="align-middle text-end text-md-start">{{ $bayar->tanggal_bayar->format('d/m/Y') }}</td>
-                                            <td data-label="JENIS TAGIHAN" class="align-middle text-end text-md-start">
-                                                @if($bayar->tagihan)
-                                                    <strong>{{ $jenisTagihan[$bayar->tagihan->jenis_tagihan] ?? ucwords(str_replace('_', ' ', $bayar->tagihan->jenis_tagihan)) }}</strong>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td data-label="JUMLAH" class="align-middle text-end fw-bold">Rp
-                                                {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
-                                            <td data-label="METODE" class="align-middle text-end text-md-center">
-                                                @if($bayar->metode_pembayaran === 'tunai')
-                                                    <span class="badge bg-info"><i class="fas fa-money-bill"></i> Tunai</span>
-                                                @elseif($bayar->metode_pembayaran === 'transfer')
-                                                    <span class="badge bg-warning"><i class="fas fa-university"></i> Direct Transfer</span>
-                                                @else
-                                                    <x-payment-method-badge :payment="$bayar" />
-                                                @endif
-                                            </td>
-                                            <td data-label="STATUS" class="align-middle text-end text-md-center">
-                                                <x-payment-status-badge :payment="$bayar" class="shadow-sm" />
-                                            </td>
-                                            <td data-label="DIVALIDASI" class="align-middle text-end text-md-start">
-                                                @if($bayar->tanggal_validasi)
-                                                    <small>
-                                                        {{ $bayar->tanggal_validasi->format('d/m/Y H:i') }}<br>
-                                                        <span class="text-muted">oleh {{ $bayar->validator->name ?? '-' }}</span>
-                                                    </small>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td data-label="AKSI" class="text-center align-middle">
-                                                <a href="{{ route('admin.keuangan.pembayaran.show', $bayar->id) }}"
-                                                    class="btn btn-sm btn-info shadow-sm" title="Detail">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                @if($bayar->status_validasi === 'disetujui')
-                                                    <a href="{{ route('admin.keuangan.pembayaran.cetak-kwitansi', $bayar->id) }}"
-                                                        class="btn btn-sm btn-success shadow-sm" title="Cetak Kwitansi" target="_blank">
-                                                        <i class="fas fa-print"></i>
-                                                    </a>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="card-footer bg-light py-3 border-top">
-                            <div class="d-flex justify-content-center">
-                                {{ $pembayaran->links() }}
-                            </div>
-                        </div>
-                    @else
-                        <div class="text-center py-5 text-muted">
-                            <i class="fas fa-receipt fa-4x mb-3 opacity-50"></i>
-                            <p class="mb-0">Belum ada riwayat pembayaran</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            {{-- Timeline Visual --}}
-            @if($pembayaran->count() > 0)
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 bg-white">
-                        <h6 class="m-0 fw-bold text-success">
-                            <i class="fas fa-clock me-2"></i>Timeline Pembayaran (10 Terbaru)
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="position-relative timeline-wrapper">
-                            @foreach($pembayaran->take(10) as $bayar)
-                                <div class="position-relative pb-4">
-                                    {{-- Line --}}
-                                    <div class="timeline-line"></div>
-
-                                    {{-- Dot --}}
-                                    <div
-                                        class="timeline-dot {{ $bayar->status_validasi === 'disetujui' ? 'bg-success' : ($bayar->status_validasi === 'ditolak' ? 'bg-danger' : 'bg-warning') }}">
-                                    </div>
-
-                                    {{-- Content --}}
-                                    <div class="bg-light p-3 rounded shadow-sm">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <strong class="text-dark">Rp
-                                                    {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</strong>
-                                                <span class="text-muted ms-2">
-                                                        via {{ $bayar->payment_channel_label }}
-                                                </span>
-                                            </div>
-                                            <small class="text-muted">{{ $bayar->tanggal_bayar->format('d M Y') }}</small>
-                                        </div>
-                                        @if($bayar->tagihan)
-                                            <small class="text-muted">
-                                                {{ $jenisTagihan[$bayar->tagihan->jenis_tagihan] ?? ucwords(str_replace('_', ' ', $bayar->tagihan->jenis_tagihan)) }}
-                                            </small>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            @endif
-
+<div class="min-w-0 w-full space-y-5" data-payment-history>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+            <div class="flex min-w-0 items-center gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-sm font-extrabold text-brand-700">{{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}</span><div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-wide text-brand-600">Riwayat siswa</p><h2 class="truncate text-lg font-extrabold text-slate-950" title="{{ $siswa->nama_lengkap }}">{{ $siswa->nama_lengkap }}</h2><p class="mt-0.5 truncate text-xs text-slate-500">{{ $siswa->nisn ?: 'NISN belum tersedia' }}</p></div></div>
+            <div class="grid grid-cols-2 gap-2 sm:flex"><a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali</a><a href="{{ route('admin.keuangan.pembayaran.create', $siswa->id) }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-xs font-bold text-white no-underline hover:bg-brand-700"><i class="fas fa-plus" aria-hidden="true"></i>Input pembayaran</a></div>
         </div>
-    </div>
+        <dl class="grid border-t border-slate-200 text-xs sm:grid-cols-3"><div class="border-slate-200 p-4 sm:border-r"><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Kelas</dt><dd class="mt-1 font-extrabold text-slate-800">{{ $siswa->kelas->nama_kelas ?? '-' }} <span class="font-semibold text-slate-500">{{ $siswa->kelas->jenjang ?? '' }}</span></dd></div><div class="border-slate-200 p-4 sm:border-r"><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Cabang</dt><dd class="mt-1 break-words font-extrabold text-slate-800">{{ $siswa->cabang->nama_cabang ?? '-' }}</dd></div><div class="p-4"><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Tahun ajaran aktif</dt><dd class="mt-1 font-extrabold text-slate-800">{{ $tahunAjaran->nama_tahun_ajaran ?? 'Belum ditetapkan' }}</dd></div></dl>
+    </section>
+
+    <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        @foreach([
+            ['Total tagihan', $totalTagihan, 'Seluruh nominal tagihan', 'fa-file-invoice-dollar', 'bg-brand-50 text-brand-600'],
+            ['Total terbayar', $totalTerbayar, 'Pembayaran disetujui', 'fa-circle-check', 'bg-emerald-50 text-emerald-600'],
+            ['Menunggu', $totalPending, 'Belum selesai divalidasi', 'fa-hourglass-half', 'bg-amber-50 text-amber-600'],
+            ['Sisa tagihan', $sisaTagihan, 'Nominal belum terbayar', 'fa-money-bill-wave', 'bg-red-50 text-red-600'],
+        ] as [$label, $value, $description, $icon, $tone])
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="truncate text-base font-extrabold text-slate-950 sm:text-lg" title="Rp {{ number_format($value, 0, ',', '.') }}">Rp {{ number_format($value, 0, ',', '.') }}</p><p class="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $label }}</p></div><span class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:flex {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div><p class="mt-3 truncate border-t border-slate-100 pt-3 text-[11px] text-slate-500">{{ $description }}</p></article>
+        @endforeach
+    </section>
+
+    <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-receipt text-brand-600" aria-hidden="true"></i>Daftar transaksi pembayaran</h2><p class="mt-1 text-xs text-slate-500">{{ number_format($pembayaran->total()) }} transaksi tercatat untuk siswa ini.</p></header>
+
+        @if($pembayaran->isEmpty())
+            <div class="px-5 py-14 text-center text-sm text-slate-500"><i class="fas fa-receipt mb-3 block text-4xl text-slate-300" aria-hidden="true"></i>Belum ada riwayat pembayaran.</div>
+        @else
+            <div class="divide-y divide-slate-100 lg:hidden">
+                @foreach($pembayaran as $bayar)
+                    <article class="p-4"><div class="flex min-w-0 items-start justify-between gap-3"><div class="min-w-0"><code class="block truncate font-mono text-[11px] font-bold text-brand-700">{{ $bayar->kode_pembayaran }}</code><p class="mt-1 break-words text-sm font-extrabold text-slate-900">{{ $bayar->tagihan ? ($jenisTagihan[$bayar->tagihan->jenis_tagihan] ?? ucwords(str_replace('_', ' ', $bayar->tagihan->jenis_tagihan))) : '-' }}</p></div><x-payment-status-badge :payment="$bayar" class="shrink-0 text-[9px]" /></div><dl class="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 text-xs"><div><dt class="text-[9px] font-bold uppercase text-slate-400">Jumlah</dt><dd class="mt-1 whitespace-nowrap font-extrabold text-slate-900">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</dd></div><div><dt class="text-[9px] font-bold uppercase text-slate-400">Tanggal</dt><dd class="mt-1 whitespace-nowrap font-bold text-slate-700">{{ $bayar->tanggal_bayar?->format('d/m/Y') ?? '-' }}</dd></div><div class="col-span-2"><dt class="text-[9px] font-bold uppercase text-slate-400">Metode</dt><dd class="mt-1"><x-payment-method-badge :payment="$bayar" /></dd></div>@if($bayar->tanggal_validasi)<div class="col-span-2"><dt class="text-[9px] font-bold uppercase text-slate-400">Divalidasi</dt><dd class="mt-1 text-slate-600">{{ $bayar->tanggal_validasi->format('d/m/Y H:i') }} oleh {{ $bayar->validator->name ?? '-' }}</dd></div>@endif</dl><div class="mt-3 grid {{ $bayar->status_validasi === 'disetujui' ? 'grid-cols-2' : 'grid-cols-1' }} gap-2"><a href="{{ route('admin.keuangan.pembayaran.show', $bayar->id) }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-blue-50 text-xs font-bold text-blue-700 no-underline ring-1 ring-inset ring-blue-100"><i class="fas fa-eye" aria-hidden="true"></i>Detail</a>@if($bayar->status_validasi === 'disetujui')<a href="{{ route('admin.keuangan.pembayaran.cetak-kwitansi', $bayar->id) }}" target="_blank" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-50 text-xs font-bold text-emerald-700 no-underline ring-1 ring-inset ring-emerald-100"><i class="fas fa-print" aria-hidden="true"></i>Cetak kwitansi</a>@endif</div></article>
+                @endforeach
+            </div>
+
+            <div class="hidden overflow-x-auto lg:block"><table class="w-full min-w-[980px] table-fixed text-left text-xs"><colgroup><col class="w-44"><col class="w-28"><col><col class="w-36"><col class="w-44"><col class="w-40"><col class="w-44"><col class="w-28"></colgroup><thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-4 py-3">Kode</th><th class="px-3 py-3">Tanggal</th><th class="px-3 py-3">Jenis tagihan</th><th class="px-3 py-3 text-right">Jumlah</th><th class="px-3 py-3">Metode</th><th class="px-3 py-3">Status</th><th class="px-3 py-3">Divalidasi</th><th class="px-4 py-3 text-right">Aksi</th></tr></thead><tbody class="divide-y divide-slate-100">
+                @foreach($pembayaran as $bayar)<tr class="hover:bg-slate-50/70"><td class="px-4 py-4"><code class="block truncate font-mono text-[11px] font-bold text-brand-700" title="{{ $bayar->kode_pembayaran }}">{{ $bayar->kode_pembayaran }}</code>@if($bayar->order_id && $bayar->group_transactions_count > 1)<span class="mt-1 inline-flex whitespace-nowrap rounded-full bg-violet-50 px-2 py-1 text-[9px] font-bold text-violet-700"><i class="fas fa-layer-group mr-1" aria-hidden="true"></i>{{ $bayar->group_transactions_count }} item</span>@endif</td><td class="whitespace-nowrap px-3 py-4 font-semibold text-slate-600">{{ $bayar->tanggal_bayar?->format('d/m/Y') ?? '-' }}</td><td class="px-3 py-4"><p class="line-clamp-2 font-bold leading-5 text-slate-800">{{ $bayar->tagihan ? ($jenisTagihan[$bayar->tagihan->jenis_tagihan] ?? ucwords(str_replace('_', ' ', $bayar->tagihan->jenis_tagihan))) : '-' }}</p></td><td class="whitespace-nowrap px-3 py-4 text-right font-extrabold text-slate-900">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td><td class="px-3 py-4"><x-payment-method-badge :payment="$bayar" /></td><td class="px-3 py-4"><x-payment-status-badge :payment="$bayar" /></td><td class="px-3 py-4">@if($bayar->tanggal_validasi)<p class="whitespace-nowrap font-semibold text-slate-700">{{ $bayar->tanggal_validasi->format('d/m/Y H:i') }}</p><p class="mt-1 truncate text-[10px] text-slate-400">{{ $bayar->validator->name ?? '-' }}</p>@else<span class="text-slate-400">—</span>@endif</td><td class="px-4 py-4"><div class="flex justify-end gap-1.5"><x-cleanflow.table-action href="{{ route('admin.keuangan.pembayaran.show', $bayar->id) }}" tone="view" icon="fas fa-eye" label="Detail pembayaran" />@if($bayar->status_validasi === 'disetujui')<x-cleanflow.table-action href="{{ route('admin.keuangan.pembayaran.cetak-kwitansi', $bayar->id) }}" tone="success" icon="fas fa-print" label="Cetak kwitansi" target="_blank" />@endif</div></td></tr>@endforeach
+            </tbody></table></div>
+            @if($pembayaran->hasPages())<footer class="border-t border-slate-200 px-4 py-3 sm:px-5">{{ $pembayaran->links() }}</footer>@endif
+        @endif
+    </section>
+
+    @if($pembayaran->isNotEmpty())
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-clock-rotate-left text-emerald-600" aria-hidden="true"></i>Aktivitas pembayaran terbaru</h2><p class="mt-1 text-xs text-slate-500">Maksimal 10 transaksi dari halaman yang sedang dilihat.</p></header><ol class="divide-y divide-slate-100">@foreach($pembayaran->take(10) as $bayar)<li class="flex gap-3 px-4 py-4 sm:px-5"><span class="mt-1 h-3 w-3 shrink-0 rounded-full {{ $bayar->status_validasi === 'disetujui' ? 'bg-emerald-500' : ($bayar->status_validasi === 'ditolak' ? 'bg-red-500' : 'bg-amber-500') }} ring-4 ring-slate-100"></span><div class="min-w-0 flex-1"><div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"><p class="font-extrabold text-slate-900">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }} <span class="font-medium text-slate-500">via {{ $bayar->payment_channel_label }}</span></p><time class="shrink-0 text-[11px] text-slate-500">{{ $bayar->tanggal_bayar?->format('d M Y') ?? '-' }}</time></div>@if($bayar->tagihan)<p class="mt-1 truncate text-xs text-slate-500">{{ $jenisTagihan[$bayar->tagihan->jenis_tagihan] ?? ucwords(str_replace('_', ' ', $bayar->tagihan->jenis_tagihan)) }}</p>@endif</div></li>@endforeach</ol></section>
+    @endif
+</div>
 @endsection

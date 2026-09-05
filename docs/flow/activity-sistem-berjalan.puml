@@ -1,0 +1,52 @@
+@startuml activity-sistem-berjalan
+title Activity Diagram Sistem Berjalan\n(Sebelum Penerapan SIPADUHOK)
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Calon Siswa / Wali|
+start
+:Mengisi Formulir Pendaftaran (Kertas);
+
+|Admin / Sekretaris|
+:Mencatat Data ke Buku Induk / Excel;
+
+|Guru Pengajar|
+:Mencatat Presensi Manual & Mengirim
+Tugas/Materi via Grup WhatsApp;
+
+|Calon Siswa / Wali|
+:Siswa Mengirim Jawaban Tugas\nvia Chat WhatsApp;
+
+|Guru Pengajar|
+:Mengoreksi Manual & Merekap\nNilai ke Buku / Excel Pribadi;
+
+note right
+  Arsip tidak terpusat,
+  rawan hilang & sulit dilacak.
+end note
+
+|Staff Keuangan|
+:Menginformasikan Tagihan SPP\nvia WA / Lisan;
+
+|Calon Siswa / Wali|
+:Transfer Bank & Kirim Foto\nBukti Struk via WhatsApp;
+
+|Staff Keuangan|
+:Cek Mutasi Rekening Manual &\nMencatat Pelunasan di Buku Kas;
+
+|Wali Kelas|
+:Mengumpulkan Nilai, Menghitung Manual\ndan Menyusun Rapor Fisik;
+
+note right
+  Risiko human error tinggi
+  dan memakan waktu lama.
+end note
+
+|Admin / Sekretaris|
+:Mendistribusikan Rapor Fisik;
+:Mengadakan Rapat Manual\nuntuk Kenaikan Kelas;
+
+:Selesai (Siklus Berulang);
+stop
+@enduml

@@ -1,13 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Import Wali Siswa')
 @section('page-title', 'Import Wali Siswa')
 @section('page-subtitle', 'Import data wali siswa dari file Excel')
-@section('sidebar-menu')@include('admin.partials.sneat-sidebar-menu')@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/users/import.css'])
-@endsection
 
 @section('content')
     @include('admin.users.partials.import-form', [
@@ -24,8 +19,4 @@
         'storeRoute' => route('admin.users.import-wali-siswa.store'),
         'backRoute' => route('admin.users.wali-siswa'),
     ])
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/users/import.js'])
 @endsection

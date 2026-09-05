@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Catatan Monitoring')
 @section('page-title', 'Catatan Monitoring')
 @section('page-subtitle', 'Masukan dari Kepala Sekolah / Wakil Kepala Sekolah / Admin')
 
-@section('sidebar-menu')
-    @include('guru.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/guru/lms/catatan-monitoring/index.css'])

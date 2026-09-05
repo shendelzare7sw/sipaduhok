@@ -1,91 +1,15 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Daftar Siswa {{ $kelas ? '- ' . $kelas->nama_kelas : '' }}</title>
-    <link rel="stylesheet" href="{{ asset('css/admin/laporan/print.css') }}">
-@include('partials.print-head')
-</head>
-<body>
-    <div class="btn-actions no-print">
-        <a href="{{ route('admin.laporan.index') }}" class="btn btn-back">&larr; Kembali</a>
-        <button type="button" class="btn btn-print btn-print-siswa" data-print-button>Cetak</button>
-    </div>
-
-    <div class="container">
-        @include('partials.print-header', ['cabang' => $cabang ?? null])
-
-        <div class="title">
-            <h3>DAFTAR SISWA</h3>
-            <p>
-                @if($kelas) Kelas: {{ $kelas->nama_kelas }} @endif
-                @if($cabang) | Cabang: {{ $cabang->nama_cabang }} @endif
-                @if($tahunAjaran) | Tahun Ajaran: {{ $tahunAjaran->nama_tahun_ajaran }} @endif
-            </p>
-        </div>
-
-        @if($siswaList->count() > 0)
-            <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="col-no">No</th>
-                        <th>NISN</th>
-                        <th>NIS</th>
-                        <th>Nama Lengkap</th>
-                        <th class="col-jk">JK</th>
-                        <th>Tempat, Tgl Lahir</th>
-                        @if(!$kelas)<th>Kelas</th>@endif
-                    </tr>
-                </thead>
-                <tbody>
-                    @php $no = 1; $currentGroup = ''; @endphp
-                    @foreach($siswaList as $siswa)
-                        @if($sortBy == 'kelas' && !$kelas)
-                            @php $groupName = $siswa->kelas->nama_kelas ?? 'Tanpa Kelas'; @endphp
-                            @if($currentGroup !== $groupName)
-                                @php $currentGroup = $groupName; @endphp
-                                <tr class="group-header">
-                                    <td colspan="{{ $kelas ? 6 : 7 }}">{{ $currentGroup }} {{ $siswa->kelas ? '(' . $siswa->kelas->jenjang . ')' : '' }}</td>
-                                </tr>
-                            @endif
-                        @endif
-                        <tr>
-                            <td class="center">{{ $no++ }}</td>
-                            <td>{{ $siswa->nisn }}</td>
-                            <td>{{ $siswa->nis ?? '-' }}</td>
-                            <td><strong>{{ $siswa->nama_lengkap }}</strong></td>
-                            <td class="center">{{ $siswa->jenis_kelamin }}</td>
-                            <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir?->format('d/m/Y') ?? '-' }}</td>
-                            @if(!$kelas)<td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>@endif
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            </div>
-
-            <div class="summary">
-                <strong>Ringkasan:</strong>
-                <div class="summary-grid">
-                    <div class="summary-item"><span class="label">Total:</span> <span class="value">{{ $siswaList->count() }}</span></div>
-                    <div class="summary-item"><span class="label">Laki-laki:</span> <span class="value">{{ $siswaList->where('jenis_kelamin', 'L')->count() }}</span></div>
-                    <div class="summary-item"><span class="label">Perempuan:</span> <span class="value">{{ $siswaList->where('jenis_kelamin', 'P')->count() }}</span></div>
-                </div>
-            </div>
-        @else
-            <p class="empty-message">Tidak ada data siswa.</p>
-        @endif
-
-        <div class="footer">
-            <div class="print-date">Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
-            <div class="footer-right">
-                <p>Tangerang Selatan, {{ now()->format('d F Y') }}</p>
-                <p>Kepala PKBM House of Knowledge</p>
-                <div class="signature-line"></div>
-                <p><strong>(_________________________)</strong></p>
-            </div>
-        </div>
-    </div>
-    <script src="{{ asset('js/admin/laporan/print.js') }}"></script>
-</body>
-</html>
+@extends('layouts.print')
+@section('title', 'Daftar Siswa')
+@section('back-url', route($backRoute ?? 'admin.laporan.index'))
+@section('document-width', 'min-w-[980px]')
+@section('report-title', 'Daftar Siswa')
+@section('report-meta')
+<p class="mt-1 text-[10px] text-slate-600 print:text-[8pt]">Tahun Ajaran <strong>{{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong> · {{ $kelas ? 'Kelas '.$kelas->nama_kelas : 'Semua kelas' }} · {{ $cabang ? $cabang->nama_cabang : 'Semua cabang' }}</p>
+@if($isHistorical ?? false)<p class="mt-1 text-[9px] font-bold text-amber-700 print:text-[7pt]">Data historis berdasarkan snapshot tahun ajaran terpilih.</p>@endif
+@endsection
+@section('report-content')
+<table class="w-full table-fixed border-collapse text-[9px] leading-4 print:text-[7pt]"><colgroup><col class="w-8"><col class="w-28"><col class="w-24"><col class="w-[23%]"><col class="w-9"><col class="w-[22%]">@unless($kelas)<col class="w-[14%]">@endunless</colgroup><thead class="bg-slate-100"><tr><th class="border border-slate-400 px-2 py-2">No</th><th class="border border-slate-400 px-2 py-2">NISN</th><th class="border border-slate-400 px-2 py-2">NIS</th><th class="border border-slate-400 px-2 py-2 text-left">Nama lengkap</th><th class="border border-slate-400 px-2 py-2">JK</th><th class="border border-slate-400 px-2 py-2 text-left">Tempat, tanggal lahir</th>@unless($kelas)<th class="border border-slate-400 px-2 py-2">Kelas</th>@endunless</tr></thead><tbody>
+@forelse($siswaList as $student)@php $className = ($isHistorical ?? false) ? ($student->kelas_snapshot_nama ?? '-') : ($student->kelas->nama_kelas ?? '-'); @endphp<tr class="break-inside-avoid"><td class="border border-slate-300 px-2 py-2 text-center">{{ $loop->iteration }}</td><td class="border border-slate-300 px-2 py-2 text-center">{{ $student->nisn ?: '-' }}</td><td class="border border-slate-300 px-2 py-2 text-center">{{ $student->nis ?: '-' }}</td><td class="border border-slate-300 px-2 py-2 font-bold">{{ $student->nama_lengkap }}</td><td class="border border-slate-300 px-2 py-2 text-center">{{ $student->jenis_kelamin }}</td><td class="border border-slate-300 px-2 py-2">{{ $student->tempat_lahir ?: '-' }}, {{ $student->tanggal_lahir?->format('d/m/Y') ?? '-' }}</td>@unless($kelas)<td class="border border-slate-300 px-2 py-2 text-center">{{ $className }}@if($isHistorical ?? false)<span class="block text-[7px] text-slate-500">{{ str_replace('_', ' ', $student->status_kelulusan_snapshot ?? '') }}</span>@endif</td>@endunless</tr>@empty<tr><td colspan="{{ $kelas ? 6 : 7 }}" class="border border-slate-300 px-3 py-8 text-center text-slate-500">Tidak ada data siswa sesuai filter.</td></tr>@endforelse
+</tbody></table>
+<section class="mt-4 grid grid-cols-3 divide-x divide-slate-300 border border-slate-300 text-center text-[9px] print:text-[7pt]"><div class="p-2"><span class="block text-slate-500">Total</span><strong>{{ $siswaList->count() }}</strong></div><div class="p-2"><span class="block text-slate-500">Laki-laki</span><strong>{{ $siswaList->where('jenis_kelamin', 'L')->count() }}</strong></div><div class="p-2"><span class="block text-slate-500">Perempuan</span><strong>{{ $siswaList->where('jenis_kelamin', 'P')->count() }}</strong></div></section>
+@endsection

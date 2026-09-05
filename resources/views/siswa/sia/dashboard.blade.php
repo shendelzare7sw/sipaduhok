@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Dashboard SIA')
 @section('page-title', 'Sistem Informasi Akademik')
 @section('page-subtitle', 'Selamat datang, ' . $siswa->nama_lengkap)
 
-@section('sidebar-menu')
-    @include('siswa.partials.sneat-sidebar-sia')
-@endsection
 
 @push('styles')
     @vite(['resources/css/siswa/sia/dashboard.css'])

@@ -1,211 +1,55 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
-@section('title', 'Siswa Kelas ' . $kelas->nama_kelas)
-
+@section('title', 'Siswa Kelas '.$kelas->nama_kelas)
 @section('page-title', 'Kelola Siswa Kelas')
-@section('page-subtitle', 'Kelas ' . $kelas->nama_kelas . ' - ' . ($kelas->tahunAjaran->nama_tahun_ajaran ?? ''))
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/manajemen-siswa/per-kelas.css'])
-@endsection
+@section('page-subtitle', $kelas->nama_kelas.' - '.($kelas->tahunAjaran->nama_tahun_ajaran ?? ''))
 
 @section('content')
-<div class="ms-per-kelas-page">
-    <div class="ms-breadcrumb">
-        <a href="{{ route('admin.dashboard') }}"><i class="fas fa-home"></i></a>
-        <span>/</span>
-        <a href="{{ route('admin.manajemen-siswa.index') }}">Manajemen Siswa</a>
-        <span>/</span>
-        <span class="current">Kelas {{ $kelas->nama_kelas }}</span>
-    </div>
-
-    <div class="info-banner">
-        <div>
-            <h2>Kelas {{ $kelas->nama_kelas }}</h2>
-            <div class="info-banner-meta">
-                <div class="info-banner-item"><i class="fas fa-building"></i> {{ $kelas->cabang->nama_cabang ?? '-' }}</div>
-                <div class="info-banner-item"><i class="fas fa-layer-group"></i> {{ $kelas->jenjang }}</div>
-                <div class="info-banner-item"><i class="fas fa-calendar"></i> {{ $kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</div>
-                @if($kelas->waliKelas)
-                    <div class="info-banner-item"><i class="fas fa-user-tie"></i> {{ $kelas->waliKelas->nama_lengkap }}</div>
-                @endif
-            </div>
+<div class="min-w-0 w-full space-y-4">
+    <header class="flex flex-wrap items-start justify-between gap-3 rounded-2xl bg-gradient-to-r from-brand-950 to-brand-700 p-4 text-white shadow-sm sm:p-5">
+        <div class="flex min-w-0 items-start gap-3">
+            <a href="{{ route('admin.manajemen-siswa.index') }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white no-underline ring-1 ring-inset ring-white/20 hover:bg-white/20"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
+            <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wide text-blue-200">Penempatan per kelas</p><h2 class="truncate text-xl font-extrabold !text-white sm:text-2xl">Kelas {{ $kelas->nama_kelas }}</h2><p class="mt-1 truncate text-xs text-blue-100">{{ $kelas->jenjang }} &middot; {{ $kelas->cabang->nama_cabang ?? 'Tanpa cabang' }} &middot; {{ $kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</p>@if($kelas->waliKelas)<p class="mt-1 truncate text-xs text-blue-100"><i class="fas fa-user-tie mr-1"></i>{{ $kelas->waliKelas->nama_lengkap }}</p>@endif</div>
         </div>
-        <div class="info-banner-stats">
-            <div class="info-banner-stat">
-                <div class="info-banner-stat-value">{{ $stats['totalSiswa'] }}</div>
-                <div class="info-banner-stat-label">Total Siswa</div>
-            </div>
-            <div class="info-banner-stat">
-                <div class="info-banner-stat-value">{{ $stats['siswaLaki'] }}</div>
-                <div class="info-banner-stat-label">Laki-laki</div>
-            </div>
-            <div class="info-banner-stat">
-                <div class="info-banner-stat-value">{{ $stats['siswaPerempuan'] }}</div>
-                <div class="info-banner-stat-label">Perempuan</div>
-            </div>
-            <div class="info-banner-stat">
-                <div class="info-banner-stat-value">{{ $stats['sisaKuota'] }}</div>
-                <div class="info-banner-stat-label">Sisa Kuota</div>
-            </div>
-        </div>
-    </div>
+        <a href="{{ route('admin.manajemen-siswa.print',['kelas_id'=>$kelas->id]) }}" target="_blank" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 text-xs font-bold text-brand-800 no-underline hover:bg-blue-50"><i class="fas fa-print"></i>Cetak kelas</a>
+    </header>
 
-    <div class="grid-2">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-plus-circle"></i> Tambah Siswa</h5>
-            </div>
-            <div class="card-body">
+    <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        @foreach([
+            ['value'=>$stats['totalSiswa'],'label'=>'Total siswa','tone'=>'bg-blue-50 text-blue-700','icon'=>'fas fa-users'],
+            ['value'=>$stats['siswaLaki'],'label'=>'Laki-laki','tone'=>'bg-cyan-50 text-cyan-700','icon'=>'fas fa-mars'],
+            ['value'=>$stats['siswaPerempuan'],'label'=>'Perempuan','tone'=>'bg-fuchsia-50 text-fuchsia-700','icon'=>'fas fa-venus'],
+            ['value'=>max(0,$stats['sisaKuota']),'label'=>'Sisa kuota','tone'=>$stats['sisaKuota'] > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700','icon'=>'fas fa-chair'],
+        ] as $stat)
+            <article class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $stat['tone'] }}"><i class="{{ $stat['icon'] }}"></i></span><div><strong class="block text-xl font-extrabold text-slate-950">{{ $stat['value'] }}</strong><span class="text-[11px] font-bold uppercase tracking-wide text-slate-500">{{ $stat['label'] }}</span></div></article>
+        @endforeach
+    </section>
+
+    <div class="grid min-w-0 gap-4 xl:grid-cols-[minmax(280px,.72fr)_minmax(0,1.28fr)]">
+        <section class="self-start overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="border-b border-slate-200 px-4 py-4 sm:px-5"><h3 class="font-extrabold text-slate-950"><i class="fas fa-user-plus mr-2 text-brand-600"></i>Tambahkan siswa</h3><p class="mt-1 text-xs text-slate-500">Hanya siswa aktif tanpa kelas dari cabang yang sama.</p></header>
+            <div class="p-4 sm:p-5">
                 @if($stats['sisaKuota'] <= 0)
-                    <div class="kuota-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Kuota kelas sudah penuh! Tidak bisa menambah siswa.
-                    </div>
-                @endif
-
-                @if($availableSiswa->count() > 0 && $stats['sisaKuota'] > 0)
-                    <form action="{{ route('admin.manajemen-siswa.add-to-kelas', $kelas) }}" method="POST">
-                        @csrf
-                        <div class="form-row">
-                            <select name="siswa_id" required>
-                                <option value="">-- Pilih Siswa --</option>
-                                @foreach($availableSiswa as $s)
-                                    <option value="{{ $s->id }}">{{ $s->nama_lengkap }} ({{ $s->nisn }})</option>
-                                @endforeach
-                            </select>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Tambah
-                            </button>
-                        </div>
-                    </form>
-                    <small class="helper-text">Menampilkan siswa tanpa kelas dari cabang {{ $kelas->cabang->nama_cabang ?? '' }}</small>
-                @elseif($stats['sisaKuota'] > 0)
-                    <div class="empty-state">
-                        <i class="fas fa-check-circle"></i>
-                        <p>Semua siswa di cabang ini sudah memiliki kelas</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-users"></i> Daftar Siswa ({{ $stats['totalSiswa'] }})</h5>
-            </div>
-            <div class="card-body is-table">
-                @if($siswaList->count() > 0)
-                    <div class="table-wrapper">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Siswa</th>
-                                    <th>JK</th>
-                                    <th class="col-actions"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($siswaList as $index => $siswa)
-                                    <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>
-                                            <div class="siswa-info">
-                                                <div class="siswa-avatar {{ $siswa->jenis_kelamin == 'P' ? 'female' : '' }}">
-                                                    {{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}
-                                                </div>
-                                                <span>{{ $siswa->nama_lengkap }}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge {{ $siswa->jenis_kelamin == 'L' ? 'badge-l' : 'badge-p' }}">
-                                                {{ $siswa->jenis_kelamin }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <form action="{{ route('admin.manajemen-siswa.remove-from-kelas', $kelas) }}"
-                                                method="POST" id="deleteForm{{ $siswa->id }}">
-                                                @csrf
-                                                <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
-                                                <button type="button"
-                                                        class="btn btn-danger btn-sm"
-                                                        title="Keluarkan"
-                                                        data-remove-siswa
-                                                        data-form-id="{{ $siswa->id }}"
-                                                        data-siswa-name="{{ $siswa->nama_lengkap }}">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                    <div class="flex gap-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"><i class="fas fa-circle-exclamation mt-0.5"></i><p><strong>Kelas sudah penuh.</strong><br>Naikkan kuota kelas atau keluarkan siswa terlebih dahulu.</p></div>
+                @elseif($availableSiswa->isNotEmpty())
+                    <form action="{{ route('admin.manajemen-siswa.add-to-kelas',$kelas) }}" method="POST" class="space-y-3">@csrf<label class="block"><span class="mb-1.5 block text-xs font-bold text-slate-700">Pilih siswa</span><select name="siswa_id" required class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Pilih siswa tanpa kelas</option>@foreach($availableSiswa as $candidate)<option value="{{ $candidate->id }}">{{ $candidate->nama_lengkap }} ({{ $candidate->nisn ?: 'tanpa NISN' }})</option>@endforeach</select></label><button type="submit" class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-plus"></i>Tambahkan ke kelas</button></form>
                 @else
-                    <div class="empty-state">
-                        <i class="fas fa-users"></i>
-                        <p>Belum ada siswa di kelas ini</p>
-                    </div>
+                    <div class="py-5 text-center"><i class="fas fa-circle-check text-3xl text-emerald-500"></i><h4 class="mt-3 font-bold text-slate-900">Tidak ada kandidat</h4><p class="mt-1 text-xs text-slate-500">Semua siswa di cabang ini sudah memiliki kelas.</p></div>
                 @endif
             </div>
-        </div>
-    </div>
+        </section>
 
-    <div class="footer-actions">
-        <a href="{{ route('admin.manajemen-siswa.index') }}" class="btn btn-outline">
-            <i class="fas fa-arrow-left"></i> Kembali ke Daftar Siswa
-        </a>
-        <a href="{{ route('admin.manajemen-siswa.print', ['kelas_id' => $kelas->id]) }}" class="btn btn-primary" target="_blank">
-            <i class="fas fa-print"></i> Cetak Daftar Kelas
-        </a>
-    </div>
-</div>
-
-<div class="modal fade remove-modal" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content remove-modal-content">
-            <button type="button" class="remove-close-btn" data-bs-dismiss="modal" aria-label="Close">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="modal-body remove-modal-body">
-                <div class="remove-modal-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-
-                <h4 class="remove-modal-title">Keluarkan Siswa?</h4>
-
-                <p class="remove-modal-text">
-                    Apakah Anda yakin ingin mengeluarkan <br>
-                    <strong id="siswaName"></strong><br>
-                    dari <span class="fw-medium">Kelas {{ $kelas->nama_kelas }}</span>?
-                </p>
-
-                <div class="remove-info-box">
-                    <i class="fas fa-info-circle"></i>
-                    <p>
-                        Siswa akan dikeluarkan dari kelas ini, namun data siswa tetap tersimpan dan dapat ditambahkan kembali kapan saja.
-                    </p>
-                </div>
-
-                <div class="remove-modal-actions">
-                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">
-                        Batal
-                    </button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                        <i class="fas fa-user-minus me-2"></i> Ya, Keluarkan
-                    </button>
-                </div>
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="border-b border-slate-200 px-4 py-4 sm:px-5"><h3 class="font-extrabold text-slate-950"><i class="fas fa-users mr-2 text-brand-600"></i>Anggota kelas</h3><p class="mt-1 text-xs text-slate-500">{{ $stats['totalSiswa'] }} dari {{ $kelas->kuota_siswa }} kursi terisi.</p></header>
+            <div class="divide-y divide-slate-100 lg:hidden">
+                @forelse($siswaList as $siswa)
+                    <article class="flex items-center gap-3 p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $siswa->jenis_kelamin === 'P' ? 'bg-fuchsia-50 text-fuchsia-700' : 'bg-blue-50 text-blue-700' }} text-xs font-extrabold">{{ strtoupper(substr($siswa->nama_lengkap,0,1)) }}</span><div class="min-w-0 flex-1"><a href="{{ route('admin.manajemen-siswa.show',$siswa) }}" class="block truncate text-sm font-extrabold text-slate-950 no-underline hover:text-brand-700">{{ $siswa->nama_lengkap }}</a><span class="block truncate text-xs text-slate-500">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }} &middot; NISN {{ $siswa->nisn ?: '-' }}</span></div><form action="{{ route('admin.manajemen-siswa.remove-from-kelas',$kelas) }}" method="POST" data-confirm data-confirm-title="Keluarkan siswa?" data-confirm-message="{{ $siswa->nama_lengkap }} akan dikeluarkan dari Kelas {{ $kelas->nama_kelas }}, tetapi datanya tetap tersimpan." data-confirm-text="Ya, keluarkan">@csrf<input type="hidden" name="siswa_id" value="{{ $siswa->id }}"><x-cleanflow.table-action type="submit" tone="delete" icon="fas fa-user-minus" label="Keluarkan siswa" /></form></article>
+                @empty
+                    <div class="p-10 text-center text-sm text-slate-500">Belum ada siswa di kelas ini.</div>
+                @endforelse
             </div>
-        </div>
+            <div class="hidden overflow-x-auto lg:block"><table class="w-full table-fixed text-left text-sm"><colgroup><col class="w-14"><col><col class="w-40"><col class="w-24"><col class="w-20"></colgroup><thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500"><tr><th class="px-4 py-3 text-center">No</th><th class="px-3 py-3">Siswa</th><th class="px-3 py-3">NISN</th><th class="px-3 py-3">JK</th><th class="px-4 py-3 text-right">Aksi</th></tr></thead><tbody class="divide-y divide-slate-100">@forelse($siswaList as $siswa)<tr class="hover:bg-slate-50/70"><td class="px-4 py-3 text-center text-xs text-slate-400">{{ $loop->iteration }}</td><td class="px-3 py-3"><a href="{{ route('admin.manajemen-siswa.show',$siswa) }}" class="block truncate font-bold text-slate-950 no-underline hover:text-brand-700" title="{{ $siswa->nama_lengkap }}">{{ $siswa->nama_lengkap }}</a></td><td class="whitespace-nowrap px-3 py-3 text-xs text-slate-600">{{ $siswa->nisn ?: '-' }}</td><td class="whitespace-nowrap px-3 py-3 text-xs text-slate-600">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td><td class="px-4 py-3"><form action="{{ route('admin.manajemen-siswa.remove-from-kelas',$kelas) }}" method="POST" class="flex justify-end" data-confirm data-confirm-title="Keluarkan siswa?" data-confirm-message="{{ $siswa->nama_lengkap }} akan dikeluarkan dari Kelas {{ $kelas->nama_kelas }}, tetapi datanya tetap tersimpan." data-confirm-text="Ya, keluarkan">@csrf<input type="hidden" name="siswa_id" value="{{ $siswa->id }}"><x-cleanflow.table-action type="submit" tone="delete" icon="fas fa-user-minus" label="Keluarkan siswa" /></form></td></tr>@empty<tr><td colspan="5" class="p-10 text-center text-sm text-slate-500">Belum ada siswa di kelas ini.</td></tr>@endforelse</tbody></table></div>
+        </section>
     </div>
 </div>
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/manajemen-siswa/per-kelas.js'])
 @endsection

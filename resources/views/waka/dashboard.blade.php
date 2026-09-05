@@ -1,13 +1,10 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Dashboard Wakil Kepala Sekolah')
 
 @section('page-title', 'Dashboard Wakil Kepala Sekolah')
 @section('page-subtitle', 'Manajemen akademik dan monitoring kegiatan pendidikan')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/dashboard.css'])

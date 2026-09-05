@@ -24,7 +24,7 @@ class PembayaranController extends Controller
     public function index(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        $kelasList = Kelas::when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
+        $kelasList = Kelas::with('cabang')->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })->orderBy('jenjang')->orderBy('nama_kelas')->get();
 

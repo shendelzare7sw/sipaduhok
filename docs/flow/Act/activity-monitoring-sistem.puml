@@ -1,0 +1,77 @@
+@startuml activity-monitoring-sistem
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin)|
+start
+:Mengakses Menu\nMonitoring & Analitik;
+
+|Sistem|
+:Menampilkan Sub-Menu Monitoring\n(Pengguna, Wali Kelas, Guru Pengajar, Siswa, LMS);
+
+|Pengguna (Admin)|
+:Memilih Kategori Monitoring\n(Decision);
+
+if (Pilihan Kategori?) then (Log Pengguna)
+    |Sistem|
+    :Memuat Log Aktivitas (Login/Logout)\ndan Riwayat Perubahan Data Pengguna;
+    |Pengguna (Admin)|
+    :Memfilter Log & Mengunduh Rekap;
+
+elseif (Pilihan Kategori?) then (Wali Kelas)
+    |Sistem|
+    :Memuat Status Pengisian Rapor\ndan Progres Validasi Presensi;
+    |Pengguna (Admin)|
+    :Mengingatkan Kelas yang\nBelum Menyelesaikan Tugas;
+
+elseif (Pilihan Kategori?) then (Guru Pengajar)
+    |Sistem|
+    :Memuat Progress Input Nilai\ndan Pembuatan Tugas oleh Guru;
+    |Pengguna (Admin)|
+    :Memantau Kepatuhan Guru\nterhadap Tenggat Waktu;
+
+elseif (Pilihan Kategori?) then (Siswa)
+    |Sistem|
+    :Memuat Ringkasan Kehadiran\ndan Aktivitas Belajar Siswa (Global);
+    |Pengguna (Admin)|
+    :Menganalisis Tingkat\nPartisipasi & Ketidakhadiran;
+
+elseif (Pilihan Kategori?) then (Monitoring LMS)
+    |Sistem|
+    :Menampilkan Daftar Kelas & Mata Pelajaran;
+
+    |Pengguna (Admin)|
+    :Memilih Kelas Tertentu;
+
+    |Sistem|
+    :Menampilkan Daftar Konten LMS\n(Materi, Tugas, Ujian);
+
+    |Pengguna (Admin)|
+    :Membuka (Preview) Konten Spesifik;
+
+    |Sistem|
+    :Menampilkan Detail Konten\nSesuai Tampilan Siswa;
+
+    |Pengguna (Admin)|
+    :Mengevaluasi Kualitas Konten;
+    :Beri Catatan / Petunjuk?\n(Decision);
+
+    if (Tinggalkan Catatan?) then (Ya)
+        :Menulis Isi Catatan / Perbaikan\nuntuk Guru Pengajar;
+        :Klik "Kirim Catatan";
+
+        |Sistem|
+        :Menyimpan Catatan ke Database;
+        :Mengirim Notifikasi ke\nGuru Pembuat Konten;
+        :Menampilkan Pesan Sukses;
+    else (Tidak)
+        |Pengguna (Admin)|
+        :Kembali ke Daftar Konten;
+    endif
+endif
+
+|Pengguna (Admin)|
+:Selesai Melakukan\nMonitoring Sistem;
+stop
+@enduml

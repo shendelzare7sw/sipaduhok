@@ -553,7 +553,9 @@ class UserController extends Controller
                 $q->where('jenjang', $request->jenjang);
             });
         }
-        if ($request->has('kelas_nama') && $request->kelas_nama != '') {
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
+        } elseif ($request->has('kelas_nama') && $request->kelas_nama != '') {
             $query->whereHas('kelas', function ($q) use ($request) {
                 $q->where('nama_kelas', $request->kelas_nama);
             });
@@ -566,7 +568,7 @@ class UserController extends Controller
         }
 
         $siswa = $query->orderBy('nama_lengkap')->paginate(15);
-        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get()
+        $kelasList = Kelas::with('cabang')->orderBy('jenjang')->orderBy('nama_kelas')->get()
             ->unique(fn ($k) => $k->cabang_id.'|'.$k->jenjang.'|'.$k->nama_kelas)
             ->values();
         $cabangList = Cabang::where('is_active', true)->get();
@@ -596,7 +598,9 @@ class UserController extends Controller
                 $q->where('jenjang', $request->jenjang);
             });
         }
-        if ($request->has('kelas_nama') && $request->kelas_nama != '') {
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
+        } elseif ($request->has('kelas_nama') && $request->kelas_nama != '') {
             $query->whereHas('kelas', function ($q) use ($request) {
                 $q->where('nama_kelas', $request->kelas_nama);
             });
@@ -615,7 +619,9 @@ class UserController extends Controller
         if ($request->jenjang) {
             $filterInfo[] = 'Jenjang: '.$request->jenjang;
         }
-        if ($request->kelas_nama) {
+        if ($request->filled('kelas_id')) {
+            $filterInfo[] = 'Kelas: '.(Kelas::find($request->kelas_id)?->nama_kelas ?? '-');
+        } elseif ($request->kelas_nama) {
             $filterInfo[] = 'Kelas: '.$request->kelas_nama;
         }
         if ($request->cabang_id) {

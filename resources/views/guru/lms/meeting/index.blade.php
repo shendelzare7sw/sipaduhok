@@ -8,10 +8,6 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
-@push('styles')
-    @vite(['resources/css/guru/lms/meeting/index.css'])
-@endpush
-
 @section('content')
 <div class="guru-lms-meeting-page">
     <div class="card border-0 shadow-sm">
@@ -34,9 +30,9 @@
                                 <h5 class="card-title fw-bold mb-1">
                                     {{ $meeting->judul }}
                                     @if($meeting->is_active)
-                                        <span class="badge bg-success ms-2 meeting-status-badge">Aktif</span>
+                                        <span class="badge bg-success ms-2 text-[0.7em]">Aktif</span>
                                     @else
-                                        <span class="badge bg-secondary ms-2 meeting-status-badge">Selesai/Non-aktif</span>
+                                        <span class="badge bg-secondary ms-2 text-[0.7em]">Selesai/Non-aktif</span>
                                     @endif
                                 </h5>
                                 <div class="mb-2">
@@ -95,7 +91,7 @@
             @empty
                 <div class="text-center py-5">
                     <img src="https://cdni.iconscout.com/illustration/premium/thumb/online-meeting-4450216-3726715.png"
-                        alt="Empty" class="empty-illustration">
+                        alt="Empty" class="w-[150px] opacity-50">
                     <p class="text-muted mt-3">Belum ada jadwal meeting/kelas virtual.</p>
                     <a href="{{ route('guru.lms.meeting.create', [$kelas->id, $mapel->id]) }}"
                         class="btn btn-outline-primary btn-sm">
@@ -122,7 +118,7 @@
                     Apakah Anda yakin ingin menghapus meeting ini?
                 </div>
                 <div class="modal-footer">
-                    <form id="deleteForm" method="POST" class="delete-form w-100 m-0">
+                    <form id="deleteForm" method="POST" class="w-100 m-0">
                         @csrf
                         @method('DELETE')
                         <div class="form-check mb-3 text-start">

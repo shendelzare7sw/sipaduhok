@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Laporan Pembayaran')
 @section('page-title', 'Laporan Pembayaran Bulanan')
 @section('page-subtitle', 'Rekap pembayaran periode ' . $bulanList[$bulan] . ' ' . $tahun)
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/bendahara/laporan/index.css'])

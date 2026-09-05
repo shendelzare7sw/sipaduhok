@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Kelola Tagihan')
 @section('page-title', 'Kelola Tagihan')
 @section('page-subtitle', 'Daftar tagihan semua siswa')
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/bendahara/tagihan/index.css'])

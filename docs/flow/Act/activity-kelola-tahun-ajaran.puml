@@ -1,0 +1,68 @@
+@startuml activity-kelola-tahun-ajaran
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin)|
+start
+:Mengakses Menu\nTahun Ajaran;
+
+|Sistem|
+:Menampilkan Daftar\nData Tahun Ajaran;
+
+|Pengguna (Admin)|
+if (Pilih Aksi?) then (Tambah)
+    |Sistem|
+    :Menampilkan Form\nTambah Tahun Ajaran;
+    |Pengguna (Admin)|
+    :Isi Form Tahun Ajaran;
+    :Klik Tombol Simpan;
+    |Sistem|
+    if (Proses?) then (Berhasil)
+        :Memperbarui Data Tahun Ajaran;
+    else (Gagal)
+        :Menampilkan Pesan Error;
+        stop
+    endif
+
+elseif (Pilih Aksi?) then (Edit)
+    |Pengguna (Admin)|
+    :Klik ikon Edit pada\nData Tahun Ajaran;
+    |Sistem|
+    :Menampilkan Form\nEdit Tahun Ajaran;
+    |Pengguna (Admin)|
+    :Mengubah Data Tahun Ajaran;
+    :Klik Tombol Simpan;
+    |Sistem|
+    if (Proses?) then (Berhasil)
+        :Memperbarui Data Tahun Ajaran;
+    else (Gagal)
+        :Menampilkan Pesan Error;
+        stop
+    endif
+
+else (Hapus)
+    |Pengguna (Admin)|
+    :Klik ikon Hapus pada\nData Tahun Ajaran;
+    |Sistem|
+    :Menampilkan\nKonfirmasi Hapus;
+    |Pengguna (Admin)|
+    if (Hapus atau Batal?) then (Hapus)
+        |Sistem|
+        :Menghapus Data;
+        if (Proses?) then (Berhasil)
+            :Memperbarui Data Tahun Ajaran;
+        else (Gagal)
+            :Menampilkan Pesan Error;
+            stop
+        endif
+    else (Batal)
+        :Kembali ke Daftar\nTahun Ajaran;
+        stop
+    endif
+endif
+
+|Pengguna (Admin)|
+:Selesai;
+stop
+@enduml

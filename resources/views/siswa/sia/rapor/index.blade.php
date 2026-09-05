@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Rapor')
 @section('page-title', 'E-Rapor Digital')
 @section('page-subtitle', 'Hasil capaian belajar siswa per semester')
 
-@section('sidebar-menu')
-    @include('siswa.partials.sneat-sidebar-sia')
-@endsection
 
 @section('styles')
 <style>

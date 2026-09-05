@@ -1,11 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Pegaturan Naik Kelas')
 @section('page-title', 'Pengaturan Naik Kelas')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">

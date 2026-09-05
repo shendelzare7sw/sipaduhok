@@ -1,11 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Ajukan Izin - ' . $siswa->nama_lengkap)
 @section('page-title', 'Ajukan Izin')
 
-@section('sidebar-menu')
-    @include('wali-siswa.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-siswa/presensi/ajukan-izin.css'])

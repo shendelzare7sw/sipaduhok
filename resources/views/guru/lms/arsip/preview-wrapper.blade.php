@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Arsip Preview - ' . ($previewTitle ?? 'Konten LMS'))
 @section('page-title', 'Mode Arsip')
 @section('page-subtitle', 'Pratinjau konten ' . ($kontenLabel ?? '') . ' dari arsip Anda')
 
-@section('sidebar-menu')
-    @include('guru.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/guru/lms/arsip/preview.css'])

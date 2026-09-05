@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Dashboard Bendahara')
 @section('page-title', 'Overview Keuangan')
 @section('page-subtitle', 'Pantau aktivitas keuangan dan pembayaran siswa')
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/dashboard/bendahara.css'])

@@ -1,0 +1,70 @@
+@startuml
+title Sequence Diagram - UC09: Kelola Landing Page (BCE / MVC Pattern)
+autonumber
+
+actor "Admin" as Admin
+boundary "Routes\n(web.php)" as Route
+boundary "View\n(Blade)" as View
+control "LandingPageController\n(Controller)" as Controller
+entity "LandingPage\n(Model)" as Model
+database "Database\n(MySQL)" as DB
+
+== Skenario: Menampilkan Form Kelola Landing Page ==
+
+Admin -> Route : 1. GET /admin/landing-page
+activate Route
+Route -> Controller : 2. index()
+deactivate Route
+activate Controller
+
+Controller -> Model : 3. first() / get()
+activate Model
+Model -> DB : 4. SELECT data
+activate DB
+DB --> Model : 5. return data
+deactivate DB
+Model --> Controller : 6. return object
+deactivate Model
+
+Controller -> View : 7. view('index', data)
+activate View
+View --> Admin : 8. Tampilkan form
+deactivate View
+deactivate Controller
+
+== Skenario: Update Data Landing Page ==
+
+Admin -> View : 9. Input & Submit
+activate View
+View -> Route : 10. PUT /update
+deactivate View
+activate Route
+Route -> Controller : 11. update(Request)
+deactivate Route
+activate Controller
+
+Controller -> Controller : 12. validate()
+alt Validasi Gagal
+    Controller --> View : 13. redirect with errors
+    activate View
+    View --> Admin : 14. Tampilkan error
+    deactivate View
+else Validasi Berhasil
+    Controller -> Model : 15. update(data)
+    activate Model
+    Model -> DB : 16. UPDATE data
+    activate DB
+    DB --> Model : 17. success
+    deactivate DB
+    Model --> Controller : 18. return success
+    deactivate Model
+
+    Controller --> View : 19. redirect with success
+    activate View
+    View --> Admin : 20. Tampilkan sukses
+    deactivate View
+end
+
+deactivate Controller
+
+@enduml

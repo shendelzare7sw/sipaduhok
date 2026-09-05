@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Tambah Jadwal Pelajaran')
 @section('page-title', 'Tambah Jadwal Pelajaran')
 @section('page-subtitle', 'Buat jadwal pelajaran baru')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/jadwal-pelajaran/form.css'])

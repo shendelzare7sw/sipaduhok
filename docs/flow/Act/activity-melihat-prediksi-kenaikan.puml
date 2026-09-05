@@ -1,0 +1,48 @@
+@startuml activity-melihat-prediksi-kenaikan
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Wali Kelas)|
+start
+:Mengakses Menu\n"Prediksi Kenaikan Kelas";
+
+|Sistem|
+:Memuat Daftar Siswa Aktif\ndi Kelas yang Diampu;
+:Mengeksekusi "Promotion Service"\nuntuk Menguji Kelayakan Setiap Siswa;
+
+fork
+    :Evaluasi Status Keuangan;
+    :Mengkalkulasi Total Tunggakan Tagihan;
+    if (Ada Tunggakan?) then (Ya)
+        :Mengecek Ketersediaan Izin\nDispensasi Khusus dari Ketua PKBM;
+    else (Lunas)
+    endif
+fork again
+    :Evaluasi Status Akademik;
+    :Menarik Nilai Rata-rata Akhir\n(Semester Ganjil & Genap) per Mapel;
+    :Mencocokkan dengan KKM Dinamis\n(Default: 70, Khusus Matematika: 65);
+    :Menghitung Persentase Mapel yang Tuntas;
+end fork
+
+:Mengkalkulasi Kelayakan Akhir\n(Syarat: Keuangan Aman/Dispensasi\nDAN Akademik di atas Persentase Minimal);
+:Memberikan Label Status Prediksi:\n[Aman] atau [Rawan];
+
+|Sistem|
+:Menampilkan Tabel Analisis\nHasil Prediksi Kenaikan Kelas;
+
+|Pengguna (Wali Kelas)|
+if (Apakah Membutuhkan Filter?) then (Ya)
+    :Memasukkan Nama Siswa\natau Memilih Status (Aman/Rawan);
+
+    |Sistem|
+    :Memproses Pencarian Nama (ke Database)\ndan Filter Status (On-Memory);
+    :Menampilkan Data Sesuai Filter;
+else (Tidak)
+endif
+
+|Pengguna (Wali Kelas)|
+:Membaca Laporan Prediksi\nsebagai Bahan Evaluasi & Tindak Lanjut;
+:Selesai Melakukan Pengecekan;
+stop
+@enduml

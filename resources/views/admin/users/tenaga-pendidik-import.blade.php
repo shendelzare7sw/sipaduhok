@@ -1,13 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Import Tenaga Pendidik')
 @section('page-title', 'Import Tenaga Pendidik')
 @section('page-subtitle', 'Import data tenaga pendidik dari file Excel')
-@section('sidebar-menu')@include('admin.partials.sneat-sidebar-menu')@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/users/import.css'])
-@endsection
 
 @section('content')
     @include('admin.users.partials.import-form', [
@@ -23,8 +18,4 @@
         'storeRoute' => route('admin.users.import-tenaga-pendidik.store'),
         'backRoute' => route('admin.users.tenaga-pendidik'),
     ])
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/users/import.js'])
 @endsection

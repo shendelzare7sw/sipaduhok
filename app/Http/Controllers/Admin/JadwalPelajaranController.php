@@ -179,7 +179,7 @@ class JadwalPelajaranController extends Controller
             ->get()
             ->groupBy('jenjang');
 
-        return view('admin.jadwal-pelajaran.create', compact(
+        return view('admin.jadwal-pelajaran.form', compact(
             'tahunAjarans',
             'currentTahunAjaran',
             'kelasList',
@@ -325,7 +325,7 @@ class JadwalPelajaranController extends Controller
             ->get()
             ->groupBy('jenjang');
 
-        return view('admin.jadwal-pelajaran.edit', compact(
+        return view('admin.jadwal-pelajaran.form', compact(
             'jadwalPelajaran',
             'tahunAjarans',
             'kelasList',
@@ -492,8 +492,9 @@ class JadwalPelajaranController extends Controller
             );
         }
 
+        $namaGuruLama = $guruLama?->nama_lengkap ?? 'Kosong';
         $message = $guruBaru
-            ? "Guru berhasil diganti dari {$guruLama->nama_lengkap} ke {$guruBaru->nama_lengkap}"
+            ? "Guru berhasil diganti dari {$namaGuruLama} ke {$guruBaru->nama_lengkap}"
             : "Jadwal diset menjadi kosong (menunggu guru pengganti)";
 
         return back()->with('success', $message);
@@ -1337,4 +1338,3 @@ class JadwalPelajaranController extends Controller
         );
     }
 }
-

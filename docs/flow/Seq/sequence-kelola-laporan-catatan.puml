@@ -1,0 +1,81 @@
+@startuml
+title Sequence Diagram - Kelola Laporan Catatan
+autonumber
+
+actor "Admin" as Admin
+boundary "UI_LaporanCatatan" as UI
+control "Control_Laporan" as Control
+entity "T_Laporan" as E_Laporan
+entity "T_CatatanMonitoring" as E_Catatan
+
+== Skenario: Menampilkan Dashboard Laporan & Catatan ==
+Admin -> UI : 1. Mengakses Menu "Laporan & Catatan"
+activate UI
+UI --> Admin : 2. Menampilkan Sub-Menu (Laporan Terpadu & Riwayat Catatan)
+deactivate UI
+
+== Skenario A: Sub-Menu Laporan Terpadu ==
+Admin -> UI : 3. Memilih "Laporan Terpadu"
+activate UI
+UI --> Admin : 4. Menampilkan Dasbor Laporan
+Admin -> UI : 5. Menentukan Jenis Laporan & Filter Data
+Admin -> UI : 6. Klik "Tampilkan" atau "Export"
+UI -> Control : 7. RequestLaporan(Jenis, Filter)
+activate Control
+
+Control -> E_Laporan : 8. QueryDataLaporan(Jenis, Filter)
+activate E_Laporan
+E_Laporan --> Control : 9. HasilDataQuery()
+deactivate E_Laporan
+
+Control -> Control : 10. FormatData(Preview / PDF / Excel)
+Control --> UI : 11. ReturnFileLaporan(File/Data)
+deactivate Control
+UI --> Admin : 12. Menampilkan Pratinjau atau File Unduhan
+deactivate UI
+
+== Skenario B: Sub-Menu Pengelolaan Catatan ==
+Admin -> UI : 13. Memilih "Pengelolaan Catatan"
+activate UI
+UI -> Control : 14. RequestRiwayatCatatan()
+activate Control
+Control -> E_Catatan : 15. AmbilRiwayatCatatan()
+activate E_Catatan
+E_Catatan --> Control : 16. DataCatatan()
+deactivate E_Catatan
+Control --> UI : 17. TampilkanRiwayat(Data)
+deactivate Control
+
+alt Aksi = Kirim Catatan Baru
+    Admin -> UI : 18. Klik "Buat Catatan Baru" & Mengisi Form
+    Admin -> UI : 19. Menentukan Prioritas & Target Penerima
+    Admin -> UI : 20. Klik "Kirim Catatan"
+    UI -> Control : 21. SubmitCatatanBaru(Data, Target)
+    activate Control
+
+    Control -> E_Catatan : 22. InsertCatatan()
+    activate E_Catatan
+    deactivate E_Catatan
+    note right of E_Catatan : Konvensi Assumed Success diterapkan
+
+    Control -> Control : 23. Broadcast Notifikasi ke Target Penerima
+
+    Control --> UI : 24. NotifikasiSukses()
+    deactivate Control
+    UI --> Admin : 25. Pesan Sukses (Catatan Terkirim)
+
+else Aksi = Hapus Riwayat Catatan
+    Admin -> UI : 26. Klik "Hapus" pada Catatan Lama
+    UI -> Control : 27. ProsesHapusCatatan(ID_Catatan)
+    activate Control
+    Control -> E_Catatan : 28. DeleteCatatan()
+    activate E_Catatan
+    deactivate E_Catatan
+
+    Control --> UI : 29. NotifikasiSukses()
+    deactivate Control
+    UI --> Admin : 30. Pesan Sukses (Catatan Dihapus)
+end
+deactivate UI
+
+@enduml

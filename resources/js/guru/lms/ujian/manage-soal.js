@@ -1,3 +1,5 @@
+import '../../../components/ai-sidebar.js';
+
 (() => {
         /**
          * Ambil huruf opsi (A-E) dari sebuah kunci jawaban, apa pun bentuknya.

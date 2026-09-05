@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Bendahara;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
-use App\Services\PromotionService;
 use App\Services\NotificationService;
+use App\Services\PromotionService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class PromotionValidationController extends Controller
 {
@@ -24,23 +24,23 @@ class PromotionValidationController extends Controller
     public function index(Request $request): View
     {
         $activeYear = TahunAjaran::where('is_active', true)->firstOrFail();
-        
+
         // Find students who are Academic OK but Financial FAIL
         // This process might be heavy if we iterate all students.
         // Optimization: Filter students who have unpaid bills first?
         // Or just iterate active students.
-        
+
         $candidates = [];
         $students = Siswa::where('status', 'aktif')->get();
-        
+
         foreach ($students as $siswa) {
             $eligibility = $this->promotionService->checkEligibility($siswa, $activeYear->id);
-            
+
             // Criteria: Academic Tuntas AND Payment Not Lunas AND No approved dispensation yet
-            if ($eligibility['academic']['is_tuntas'] && 
-                $eligibility['financial']['status'] !== 'LUNAS' && 
-                !$eligibility['financial']['is_dispensasi']) {
-                
+            if ($eligibility['academic']['is_tuntas'] &&
+                $eligibility['financial']['status'] !== 'LUNAS' &&
+                ! $eligibility['financial']['is_dispensasi']) {
+
                 // Check if already requested (MENUNGGU)
                 $pendingRequest = DB::table('izin_naik_kelas_khusus')
                     ->where('siswa_id', $siswa->id)
@@ -52,14 +52,14 @@ class PromotionValidationController extends Controller
                     'siswa' => $siswa,
                     'academic' => $eligibility['academic'],
                     'financial' => $eligibility['financial'],
-                    'pending_request' => $pendingRequest
+                    'pending_request' => $pendingRequest,
                 ];
             }
         }
 
-        return view('bendahara.promotion.validation', [
+        return view('admin.keuangan.promotion.validation', [
             'candidates' => $candidates,
-            'tahun' => $activeYear
+            'tahun' => $activeYear,
         ]);
     }
 
@@ -72,12 +72,12 @@ class PromotionValidationController extends Controller
         ]);
 
         // Get unpaid amount
-        $unpaid = 0; // Ideally fetch from Tagihan again or pass it. 
+        $unpaid = 0; // Ideally fetch from Tagihan again or pass it.
         // Let's simple fetch default unpaid sum logic
         $siswa = Siswa::find($validated['siswa_id']);
         // Re-use logic or straightforward query
         // Assuming Logic in Service is accurate check.
-        
+
         DB::table('izin_naik_kelas_khusus')->insert([
             'siswa_id' => $validated['siswa_id'],
             'tahun_ajaran_id' => $validated['tahun_ajaran_id'],
@@ -114,7 +114,7 @@ class PromotionValidationController extends Controller
                 ->where('status', 'MENUNGGU')
                 ->exists();
 
-            if (!$existing) {
+            if (! $existing) {
                 DB::table('izin_naik_kelas_khusus')->insert([
                     'siswa_id' => $siswaId,
                     'tahun_ajaran_id' => $validated['tahun_ajaran_id'],
@@ -142,7 +142,7 @@ class PromotionValidationController extends Controller
     public function history(Request $request): View
     {
         $activeYear = TahunAjaran::where('is_active', true)->firstOrFail();
-        
+
         // Filter Options
         $cabangs = \App\Models\Cabang::all();
         $kelasList = \App\Models\Kelas::where('tahun_ajaran_id', $activeYear->id)->get();
@@ -168,9 +168,9 @@ class PromotionValidationController extends Controller
         // Apply Filters
         if ($request->filled('q')) {
             $search = $request->q;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('siswa.nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('siswa.nis', 'like', "%{$search}%");
+                    ->orWhere('siswa.nis', 'like', "%{$search}%");
             });
         }
 
@@ -188,12 +188,12 @@ class PromotionValidationController extends Controller
 
         $history = $query->orderBy('izin_naik_kelas_khusus.updated_at', 'desc')->get();
 
-        return view('bendahara.promotion.history', [
+        return view('admin.keuangan.promotion.history', [
             'history' => $history,
             'tahun' => $activeYear,
             'cabangs' => $cabangs,
             'kelasList' => $kelasList,
-            'filters' => $request->all()
+            'filters' => $request->all(),
         ]);
     }
 
@@ -209,6 +209,6 @@ class PromotionValidationController extends Controller
             ->where('status', '!=', 'MENUNGGU')
             ->delete();
 
-        return back()->with('success', $count . ' riwayat pengajuan berhasil dihapus permanen.');
+        return back()->with('success', $count.' riwayat pengajuan berhasil dihapus permanen.');
     }
 }

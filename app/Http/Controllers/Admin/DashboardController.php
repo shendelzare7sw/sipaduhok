@@ -8,6 +8,10 @@ use App\Models\Siswa;
 use App\Models\Kelas;
 use App\Models\Pembayaran;
 use App\Models\Tagihan;
+use App\Models\Cabang;
+use App\Models\JadwalPelajaran;
+use App\Models\MataPelajaran;
+use App\Models\TahunAjaran;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -88,6 +92,50 @@ class DashboardController extends Controller
             '1_tahun' => $getRegistrationData(12),
         ];
 
+        // CleanFlow onboarding hanya membaca data yang sudah ada. Aturan bisnis
+        // dan proses penyimpanan setiap modul tetap berada di controller asalnya.
+        $setupSteps = collect([
+            [
+                'label' => 'Aktifkan tahun ajaran',
+                'description' => 'Periode aktif menjadi dasar kelas, jadwal, dan laporan.',
+                'route' => 'admin.tahun-ajaran.index',
+                'complete' => TahunAjaran::where('is_active', true)->exists(),
+            ],
+            [
+                'label' => 'Siapkan cabang',
+                'description' => 'Pastikan unit atau lokasi sekolah sudah tersedia.',
+                'route' => 'admin.cabang.index',
+                'complete' => Cabang::exists(),
+            ],
+            [
+                'label' => 'Input warga sekolah',
+                'description' => 'Tambah atau impor tenaga pendidik, siswa, dan wali.',
+                'route' => 'admin.users.siswa',
+                'complete' => $totalSiswa > 0 && $totalGuru > 0,
+            ],
+            [
+                'label' => 'Susun kelas',
+                'description' => 'Buat kelas, tentukan wali, lalu tempatkan siswa.',
+                'route' => 'admin.kelas.index',
+                'complete' => $totalKelas > 0,
+            ],
+            [
+                'label' => 'Siapkan mata pelajaran',
+                'description' => 'Lengkapi mapel sebelum menugaskan guru dan jadwal.',
+                'route' => 'admin.mata-pelajaran.index',
+                'complete' => MataPelajaran::exists(),
+            ],
+            [
+                'label' => 'Terbitkan jadwal',
+                'description' => 'Susun jadwal setelah kelas, mapel, dan guru siap.',
+                'route' => 'admin.jadwal-pelajaran.index',
+                'complete' => JadwalPelajaran::exists(),
+            ],
+        ]);
+
+        $setupProgress = (int) round(($setupSteps->where('complete', true)->count() / $setupSteps->count()) * 100);
+        $nextSetupStep = $setupSteps->firstWhere('complete', false);
+
         return view('dashboard.admin', compact(
             'user',
             'stats',
@@ -100,7 +148,10 @@ class DashboardController extends Controller
             'genderData',
             'kelasLabels',
             'kelasCounts',
-            'chartPendaftaran'
+            'chartPendaftaran',
+            'setupSteps',
+            'setupProgress',
+            'nextSetupStep'
         ));
     }
 }

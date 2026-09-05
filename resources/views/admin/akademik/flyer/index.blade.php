@@ -1,173 +1,45 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Kelola Flyer')
-@section('page-title', 'Kelola Flyer / Iklan')
-@section('page-subtitle', 'Pop-up informasi untuk siswa saat login')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite('resources/css/admin/akademik/flyer/index.css')
-@endsection
+@section('page-title', 'Kelola Flyer')
+@section('page-subtitle', 'Atur pop-up informasi berdasarkan target dan periode tayang')
 
 @section('content')
 @php
-    $routePrefix = 'admin.akademik';
-    $basePath = '/admin/akademik/flyer';
+    $routeBase = request()->routeIs('sekretaris.*') ? 'sekretaris' : 'admin.akademik';
     $items = is_object($flyer) && method_exists($flyer, 'getCollection') ? $flyer->getCollection() : collect($flyer);
     $total = is_object($flyer) && method_exists($flyer, 'total') ? $flyer->total() : $items->count();
 @endphp
 
-<div class="ak-page">
-    <div class="ak-toolbar">
-        <div class="ak-toolbar-title">
-            <span class="ak-toolbar-icon"><i class="fas fa-images"></i></span>
-            <div>
-                <h5>Kelola Flyer</h5>
-                <p>Pop-up informasi dan media promosi untuk pengguna saat login.</p>
-            </div>
-        </div>
-        <a href="{{ route($routePrefix . '.flyer.create') }}" class="ak-btn primary">
-            <i class="fas fa-plus"></i>
-            Tambah Flyer
-        </a>
-    </div>
+<div class="min-w-0 w-full space-y-5">
+    <section class="grid grid-cols-3 gap-2 sm:gap-3">
+        @foreach([
+            ['label' => 'Total', 'value' => $total, 'tone' => 'bg-brand-50 text-brand-700'],
+            ['label' => 'Aktif', 'value' => $items->where('status', 'aktif')->count(), 'tone' => 'bg-emerald-50 text-emerald-700'],
+            ['label' => 'Belum Aktif', 'value' => $items->where('status', '!=', 'aktif')->count(), 'tone' => 'bg-slate-100 text-slate-700'],
+        ] as $stat)
+            <article class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><p class="truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $stat['label'] }}</p><p class="mt-2 text-xl font-extrabold text-slate-900">{{ number_format($stat['value']) }}</p><span class="mt-2 block h-1.5 w-10 rounded-full {{ $stat['tone'] }}"></span></article>
+        @endforeach
+    </section>
 
-    <div class="ak-stats three">
-        <div class="ak-stat primary">
-            <span>Total Flyer</span>
-            <strong>{{ number_format($total) }}</strong>
-            <small>Media promosi dan info</small>
-            <i class="fas fa-images"></i>
-        </div>
-        <div class="ak-stat success">
-            <span>Flyer Aktif</span>
-            <strong>{{ number_format($items->where('status', 'aktif')->count()) }}</strong>
-            <small>Siap tampil ke target</small>
-            <i class="fas fa-toggle-on"></i>
-        </div>
-        <div class="ak-stat warning">
-            <span>Nonaktif</span>
-            <strong>{{ number_format($items->where('status', 'nonaktif')->count()) }}</strong>
-            <small>Belum dipublikasi</small>
-            <i class="fas fa-layer-group"></i>
-        </div>
-    </div>
+    <section class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div class="min-w-0"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fas fa-images text-brand-600" aria-hidden="true"></i>Daftar Flyer</h2><p class="mt-1 text-xs text-slate-500">Hanya flyer aktif dalam periode tayang yang muncul kepada pengguna.</p></div><a href="{{ route($routeBase . '.flyer.create') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-xs font-bold text-white no-underline hover:bg-brand-700"><i class="fas fa-plus" aria-hidden="true"></i>Tambah Flyer</a></header>
 
-    @if($items->count() > 0)
-        <div class="ak-flyer-grid">
-            @foreach($items as $item)
+        <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            @forelse($items as $item)
                 @php
-                    $statusClass = ($item->status ?? '') === 'aktif' ? 'success' : 'muted';
+                    $active = ($item->status ?? '') === 'aktif';
                 @endphp
-                <article class="ak-flyer-card">
-                    <div class="ak-flyer-media">
-                        <img src="{{ $item->gambar_url }}" alt="{{ $item->judul }}">
-                        <div class="ak-flyer-status">
-                            <span class="ak-badge {{ $statusClass }}">{{ $item->status_badge['label'] ?? ucfirst($item->status) }}</span>
-                        </div>
-                    </div>
-                    <div class="ak-flyer-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                            <div class="ak-title">{{ $item->judul }}</div>
-                            <span class="ak-badge primary">#{{ $item->urutan_tampil }}</span>
-                        </div>
-                        <div class="ak-sub">{{ \Illuminate\Support\Str::limit($item->deskripsi ?? '', 110) }}</div>
-
-                        <div class="ak-flyer-meta">
-                            <div><i class="fas fa-users text-primary me-1"></i>Target: <strong>{{ $item->target_label }}</strong></div>
-                            <div><i class="fas fa-calendar-alt text-info me-1"></i>{{ $item->tanggal_mulai?->format('d M') }} - {{ $item->tanggal_selesai?->format('d M Y') }}</div>
-                        </div>
-
-                        @if($item->link_url)
-                            <a href="{{ $item->link_url }}" target="_blank" class="ak-btn secondary w-100 mb-2">
-                                <i class="fas fa-external-link-alt"></i>
-                                Kunjungi Tautan
-                            </a>
-                        @endif
-
-                        <div class="ak-actions">
-                            <a href="{{ route($routePrefix . '.flyer.edit', $item->id) }}" class="ak-btn warning flex-fill">
-                                <i class="fas fa-edit"></i>Edit
-                            </a>
-                            <button type="button"
-                                class="ak-btn danger flex-fill"
-                                data-ak-delete
-                                data-ak-delete-id="{{ $item->id }}"
-                                data-ak-delete-title="{{ $item->judul }}">
-                                <i class="fas fa-trash"></i>Hapus
-                            </button>
-                        </div>
-                    </div>
+                <article class="group min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div class="relative aspect-[16/10] overflow-hidden bg-slate-100"><img src="{{ $item->gambar_url }}" alt="{{ $item->judul }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"><div class="absolute inset-x-0 top-0 flex items-start justify-between p-3"><span class="rounded-full px-2.5 py-1 text-[10px] font-extrabold shadow-sm {{ $active ? 'bg-emerald-50 text-emerald-700' : 'bg-white text-slate-600' }}">{{ $item->status_badge['label'] ?? ucfirst($item->status) }}</span><span class="rounded-full bg-slate-900/75 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur">Urutan {{ $item->urutan_tampil }}</span></div></div>
+                    <div class="p-4"><h3 class="break-words text-sm font-extrabold text-slate-900">{{ $item->judul }}</h3><p class="mt-1 min-h-10 text-xs leading-5 text-slate-500">{{ Str::limit($item->deskripsi ?? 'Tanpa deskripsi', 90) }}</p><dl class="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-[11px]"><div><dt class="font-bold uppercase tracking-wide text-slate-400">Target</dt><dd class="mt-1 font-bold text-slate-700">{{ $item->target_label }}</dd></div><div><dt class="font-bold uppercase tracking-wide text-slate-400">Periode</dt><dd class="mt-1 whitespace-nowrap font-bold text-slate-700">{{ $item->tanggal_mulai?->format('d M') ?? '-' }}–{{ $item->tanggal_selesai?->format('d M Y') ?? '-' }}</dd></div></dl>@if($item->link_url)<a href="{{ $item->link_url }}" target="_blank" rel="noopener" class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-50 px-3 py-2 text-xs font-bold text-brand-700 no-underline hover:bg-brand-100"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>Buka tautan</a>@endif<div class="mt-3 grid grid-cols-2 gap-2"><a href="{{ route($routeBase . '.flyer.edit', $item->id) }}" class="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-amber-50 text-xs font-bold text-amber-700 no-underline hover:bg-amber-100"><i class="fas fa-edit" aria-hidden="true"></i>Edit</a><form action="{{ route($routeBase . '.flyer.destroy', $item->id) }}" method="POST" data-confirm data-confirm-title="Hapus flyer?" data-confirm-message="{{ $item->judul }} akan dihapus permanen." data-confirm-text="Ya, hapus">@csrf @method('DELETE')<button type="submit" class="inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-red-50 text-xs font-bold text-red-700 hover:bg-red-100"><i class="fas fa-trash" aria-hidden="true"></i>Hapus</button></form></div></div>
                 </article>
-            @endforeach
+            @empty
+                <div class="py-14 text-center sm:col-span-2 xl:col-span-3 2xl:col-span-4"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400"><i class="fas fa-images" aria-hidden="true"></i></span><h3 class="mt-4 text-sm font-extrabold text-slate-800">Belum ada flyer</h3><p class="mt-1 text-xs text-slate-500">Tambahkan pop-up informasi pertama untuk pengguna.</p></div>
+            @endforelse
         </div>
 
-        @if(is_object($flyer) && method_exists($flyer, 'hasPages') && $flyer->hasPages())
-            <div class="ak-panel mt-3">
-                <div class="ak-pagination">{{ $flyer->links() }}</div>
-            </div>
-        @endif
-    @else
-        <div class="ak-panel">
-            <div class="ak-empty">
-                <i class="fas fa-images"></i>
-                <h5>Belum ada flyer</h5>
-                <p>Tambahkan flyer untuk pop-up informasi saat pengguna login.</p>
-                <a href="{{ route($routePrefix . '.flyer.create') }}" class="ak-btn primary">
-                    <i class="fas fa-plus"></i> Tambah Flyer
-                </a>
-            </div>
-        </div>
-    @endif
+        @if(is_object($flyer) && method_exists($flyer, 'hasPages') && $flyer->hasPages())<footer class="mt-5 border-t border-slate-200 pt-4">{{ $flyer->withQueryString()->links() }}</footer>@endif
+    </section>
 </div>
-
-@php
-    $modalTitle = 'Hapus Flyer';
-    $itemLabelId = 'deleteAkademikName';
-@endphp
-
-@php
-    $deleteLabelId = $itemLabelId ?? 'deleteAkademikName';
-@endphp
-
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title text-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>{{ $modalTitle ?? 'Hapus Data' }}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
-                <h6 class="fw-bold mb-2">Apakah Anda yakin ingin menghapus data ini?</h6>
-                <p class="text-muted mb-0" id="{{ $deleteLabelId }}"></p>
-                <small class="text-danger d-block mt-2">Tindakan ini tidak dapat dibatalkan.</small>
-            </div>
-            <div class="modal-footer border-0 bg-light">
-                <button type="button" class="ak-btn secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>Batal
-                </button>
-                <form id="deleteForm" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="ak-btn danger">
-                        <i class="fas fa-trash"></i>Ya, Hapus
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<template
-    id="akademikIndexConfig"
-    data-base-path="{{ $basePath ?? '' }}"
-    data-delete-label-id="{{ $deleteLabelId }}"
-></template>
-@vite('resources/js/admin/akademik/flyer/index.js')
 @endsection

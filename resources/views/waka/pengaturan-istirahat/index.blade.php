@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Pengaturan Waktu Istirahat')
 @section('page-title', 'Pengaturan Waktu Istirahat')
 @section('page-subtitle', 'Kelola waktu istirahat per jenjang pendidikan')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/pengaturan-istirahat/index.css'])

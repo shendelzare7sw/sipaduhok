@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Data Penilaian')
 @section('page-title', 'Data Penilaian Harian')
 @section('page-subtitle', 'Rekap rincian nilai tugas, latihan, dan ujian Anda')
 
-@section('sidebar-menu')
-    @include('siswa.partials.sneat-sidebar-sia')
-@endsection
 
 @section('styles')
     @vite(['resources/css/siswa/sia/penilaian/index.css', 'resources/js/siswa/sia/penilaian/index.js'])

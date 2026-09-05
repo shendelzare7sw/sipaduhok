@@ -1,0 +1,58 @@
+@startuml activity-melakukan-pembayaran
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Orang Tua)|
+start
+:Mengakses Halaman\nDetail Tagihan Anak;
+:Klik Tombol "Bayar"\npada salah satu tagihan;
+
+|Sistem|
+:Menampilkan Form\nPembayaran;
+
+repeat
+    |Pengguna (Orang Tua)|
+    :Memilih Metode Pembayaran\n(Transfer Manual / Paywuz);
+    :Memasukkan Nominal Bayar;
+    if (Pilihan Metode?) then (Transfer Manual)
+        :Mengunggah Bukti Transfer\n(Wajib File Foto/PDF);
+    else (Paywuz)
+        :Melewati proses unggah\n(Otomatis by System);
+    endif
+    :Klik "Proses Pembayaran";
+
+    |Sistem|
+    :Validasi Input & Aturan Bisnis;
+    if (Valid?) then (Tidak Valid)
+        if (Jenis Error?) then (Tagihan Lama)
+            :Menampilkan Pesan Error:\n"Tagihan lama harus dialihkan\nBendahara terlebih dahulu";
+        else (Upload Kosong)
+            :Menampilkan Pesan Error:\n"Bukti Transfer wajib diunggah\nuntuk metode manual";
+        endif
+        |Pengguna (Orang Tua)|
+        :Memperbaiki Input Form;
+    else (Ya, Valid)
+        :Generate Kode Pembayaran\n(Contoh: PAY-XXXXX);
+        :Menyimpan Record Pembayaran\nke Database;
+        if (Metode?) then (Transfer Manual)
+            :Set Status "Pending";
+            :Menampilkan Pesan Sukses\n(Menunggu Validasi Bendahara);
+        else (Paywuz)
+            :Request Token ke API Paywuz;
+            :Set Status "Menunggu Pembayaran";
+            :Menampilkan Pop-up Pembayaran\natau Redirect ke Gateway;
+            |Pengguna (Orang Tua)|
+            :Menyelesaikan Pembayaran via\nVirtual Account / E-Wallet;
+            |Sistem|
+            :Menerima Webhook (Notifikasi) API;
+            :Otomatis Update Status "Lunas";
+        endif
+        break
+    endif
+repeat while (Data Belum Valid)
+
+|Pengguna (Orang Tua)|
+:Melihat Riwayat Pembayaran;\nBisa Cetak Bukti Bayar PDF;
+stop
+@enduml

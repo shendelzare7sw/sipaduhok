@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Rapor Pending Saya')
 @section('page-title', 'Rapor Pending Saya')
 @section('page-subtitle', 'Rapor draft & revisi dari semua kelas yang pernah Anda walikan')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/rapor-pending/index.css', 'resources/js/wali-kelas/rapor-pending/index.js'])

@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Arsip LMS')
 @section('page-title', 'Arsip LMS')
 @section('page-subtitle', 'Materi, tugas, latihan, dan ujian Anda lintas tahun ajaran')
 
-@section('sidebar-menu')
-    @include('guru.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/guru/lms/arsip/index.css'])

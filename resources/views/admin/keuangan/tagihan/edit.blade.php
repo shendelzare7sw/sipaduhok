@@ -1,208 +1,85 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
-@section('title', 'Edit Tagihan - ' . $siswa->nama_lengkap)
+@section('title', 'Edit Tagihan - '.$siswa->nama_lengkap)
 @section('page-title', 'Edit Tagihan Siswa')
 @section('page-subtitle', $siswa->nama_lengkap)
 
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/keuangan/tagihan/edit.css'])
-@endsection
-
 @section('content')
-<div class="tagihan-edit-page">
-<div class="container-fluid px-0">
-
-    {{-- Breadcrumb --}}
-    <div class="mb-3">
-        <a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}" class="text-primary text-decoration-none">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Detail Tagihan
-        </a>
-    </div>
-
-    {{-- Info Siswa Card --}}
-    <div class="card shadow mb-4 border-start border-primary border-4">
-        <div class="card-body" style="background: linear-gradient(135deg, #4361ee 0%, #2b4162 100%);">
-            <div class="d-flex gap-3 align-items-center">
-                <div class="student-avatar">
-                    {{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}
-                </div>
-                <div>
-                    <h5 class="mb-1 fw-bold text-white">{{ $siswa->nama_lengkap }}</h5>
-                    <p class="mb-0 small" style="color: rgba(255,255,255,0.8);">
-                        <i class="fas fa-id-card me-1"></i> NISN: {{ $siswa->nisn }}
-                        <span class="mx-2">|</span>
-                        <i class="fas fa-school me-1"></i> Kelas: {{ $siswa->kelas->nama_kelas ?? '-' }}
-                        <span class="mx-2">|</span>
-                        <i class="fas fa-building me-1"></i> {{ $siswa->cabang->nama_cabang ?? '-' }}
-                    </p>
-                </div>
-            </div>
+<div data-tagihan-edit class="min-w-0 w-full space-y-5" x-data="{
+    formatCurrency(event) { const digits = event.target.value.replace(/\D/g, ''); event.target.value = digits ? new Intl.NumberFormat('id-ID').format(Number(digits)) : '0'; },
+    async save(event) { const result = await Swal.fire({ icon: 'question', title: 'Simpan perubahan tagihan?', text: 'Nominal dan jatuh tempo yang dapat diedit akan diperbarui.', showCancelButton: true, confirmButtonText: 'Ya, simpan', cancelButtonText: 'Periksa lagi', confirmButtonColor: '#285dcc', reverseButtons: true }); if (result.isConfirmed) event.target.submit(); },
+    async deleteItem(url, label) {
+        const result = await Swal.fire({ icon: 'warning', title: 'Hapus tagihan?', html: `<strong>${label}</strong> akan dihapus permanen.`, showCancelButton: true, confirmButtonText: 'Ya, hapus', cancelButtonText: 'Batal', confirmButtonColor: '#dc2626', reverseButtons: true });
+        if (!result.isConfirmed) return;
+        try {
+            const response = await fetch(url, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Tagihan tidak dapat dihapus.');
+            await Swal.fire({ icon: 'success', title: 'Tagihan dihapus', text: data.message || 'Data berhasil diperbarui.', timer: 1200, showConfirmButton: false });
+            window.location.reload();
+        } catch (error) { Swal.fire({ icon: 'error', title: 'Gagal menghapus', text: error.message, confirmButtonColor: '#285dcc' }); }
+    }
+}">
+    <section class="overflow-hidden rounded-2xl bg-gradient-to-r from-brand-800 to-brand-600 p-5 text-white shadow-sm sm:p-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex min-w-0 items-center gap-4"><span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-xl font-black ring-1 ring-white/20">{{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}</span><div class="min-w-0"><p class="text-[10px] font-extrabold uppercase tracking-[0.16em] text-blue-100">Atur tagihan siswa</p><h1 class="truncate text-xl font-black !text-white">{{ $siswa->nama_lengkap }}</h1><p class="mt-1 truncate text-xs text-blue-100">NISN {{ $siswa->nisn ?: '-' }} · {{ $siswa->kelas->nama_kelas ?? 'Belum ada kelas' }} · {{ $siswa->cabang->nama_cabang ?? 'Cabang belum diatur' }}</p></div></div>
+            <a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}" class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-bold text-white no-underline hover:bg-white/20"><i class="fas fa-arrow-left"></i>Kembali ke detail</a>
         </div>
-    </div>
+    </section>
 
-    {{-- Form Tagihan --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-white">
-            <h6 class="m-0 fw-bold text-warning">
-                <i class="fas fa-edit me-2"></i>Input/Edit Tagihan
-            </h6>
-        </div>
-        <div class="card-body">
-            {{-- Info Alert tentang SPP --}}
-            <div class="alert alert-info border-start border-info border-4 mb-4">
-                <div class="d-flex align-items-start">
-                    <i class="fas fa-info-circle me-2 mt-1"></i>
-                    <div>
-                        <strong>Informasi Penting:</strong>
-                        <p class="mb-0 mt-1">Untuk tagihan <strong>SPP Bulanan</strong>, silakan gunakan fitur <a href="{{ route('admin.keuangan.tagihan.generate-spp') }}" class="alert-link fw-bold">"Generate SPP"</a> yang akan membuat 12 tagihan SPP otomatis (Januari-Desember) dengan tanggal jatuh tempo yang lebih akurat.</p>
-                    </div>
-                </div>
-            </div>
+    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p class="text-sm leading-6 text-blue-900">SPP bulanan sebaiknya dibuat melalui <a href="{{ route('admin.keuangan.tagihan.generate-spp') }}" class="font-extrabold text-blue-800 underline">Generate SPP</a> agar 12 bulan dan jatuh temponya tersusun otomatis.</p></div></section>
 
-            <form action="{{ route('admin.keuangan.tagihan.update', $siswa->id) }}" method="POST">
-                @csrf
-                @method('PUT')
+    <form action="{{ route('admin.keuangan.tagihan.update', $siswa->id) }}" method="POST" @submit.prevent="save($event)" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        @csrf
+        @method('PUT')
+        <header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-lg font-extrabold text-slate-950"><i class="fas fa-pen-to-square text-amber-600"></i>Nominal dan jatuh tempo</h2><p class="mt-1 text-sm text-slate-500">Isi Rp 0 bila siswa tidak memiliki kewajiban pada jenis tersebut.</p></header>
 
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="text-center" width="50">No</th>
-                                <th class="col-jenis">Jenis Tagihan</th>
-                                <th class="col-tahun">Tahun Ajaran</th>
-                                <th class="col-jumlah">Jumlah (Rp)</th>
-                                <th class="col-jatuh-tempo">Jatuh Tempo</th>
-                                <th class="col-aksi text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($jenisTagihan as $key => $label)
-                                @php
-                                    // Cari tagihan record untuk item ini
-                                    $tagihanRecord = $allTagihan->firstWhere('jenis_tagihan', $key);
-                                    // Cek apakah ini tipe custom (tidak ada di standard list)
-                                    $isCustom = !in_array($key, $standardJenisTagihan);
-                                    // Cek apakah sudah ada pembayaran
-                                    $hasPembayaran = $tagihanRecord && $tagihanRecord->pembayaran()->where('status_validasi', 'disetujui')->exists();
-                                    // PROTEKSI: Hanya lock jika ada pembayaran dari wali siswa
-                                    // Rp 0 (setting admin) tetap bisa diedit
-                                    $isReadOnly = $hasPembayaran;
-                                    $canDelete = $tagihanRecord && !$hasPembayaran && ($isCustom || $tagihanRecord->status === 'belum_bayar');
-                                @endphp
-                                <tr class="{{ $isReadOnly ? 'table-light opacity-75' : '' }}">
-                                    <td class="text-center align-middle fw-bold text-gray-600" data-label="No">{{ $loop->iteration }}</td>
-                                    <td class="align-middle" data-label="Jenis Tagihan">
-                                        <strong>{{ $label }}</strong>
-                                        @if($isReadOnly)
-                                            <br><small class="badge bg-success">✓ Sudah Dibayar Wali Siswa</small>
-                                        @elseif($isCustom && $tagihanRecord)
-                                            <br><small class="badge bg-success">Custom</small>
-                                        @endif
-                                        @if($key === 'spp')
-                                            <br><small class="text-muted">Tagihan bulanan</small>
-                                        @endif
-                                    </td>
-                                    <td class="align-middle" data-label="Tahun Ajaran">
-                                        <select name="tahun_ajaran_id[{{ $key }}]" class="form-select form-select-sm academic-year-select" {{ $isReadOnly ? 'disabled' : '' }}>
-                                            @foreach($allYears as $thn)
-                                                <option value="{{ $thn->id }}"
-                                                        data-start="{{ $thn->tanggal_mulai->toDateString() }}"
-                                                        data-end="{{ $thn->tanggal_selesai->toDateString() }}"
-                                                        data-default-date="{{ $thn->getDefaultTagihanDueDate()->toDateString() }}"
-                                                        {{ old('tahun_ajaran_id.'.$key, $tagihanRecord?->tahun_ajaran_id ?? $tahunAjaran->id) == $thn->id ? 'selected' : '' }}>
-                                                    {{ $thn->nama_tahun_ajaran }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td class="align-middle" data-label="Jumlah (Rp)">
-                                        <div class="input-group input-group-sm tagihan-amount-input">
-                                            <span class="input-group-text bg-white">Rp</span>
-                                            @php
-                                                $rawValue = intval($tagihanExist[$key] ?? 0);
-                                            @endphp
-                                            <input type="text"
-                                                   name="tagihan[{{ $key }}]"
-                                                   class="form-control currency-input"
-                                                   value="{{ number_format(old('tagihan.'.$key, $rawValue), 0, ',', '.') }}"
-                                                   placeholder="0"
-                                                   {{ $isReadOnly ? 'disabled' : '' }}>
-                                        </div>
-                                        @error('tagihan.'.$key)
-                                            <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </td>
-                                    <td class="align-middle" data-label="Jatuh Tempo">
-                                        <input type="date"
-                                               name="tanggal_jatuh_tempo[{{ $key }}]"
-                                               value="{{ old('tanggal_jatuh_tempo.'.$key, $tagihanRecord?->tanggal_jatuh_tempo?->toDateString() ?? $defaultDueDate) }}"
-                                               min="{{ $tagihanDateMin }}"
-                                               max="{{ $tagihanDateMax }}"
-                                               class="form-control form-control-sm due-date-input"
-                                               {{ $isReadOnly ? 'disabled' : '' }}>
-                                    </td>
-                                    <td class="align-middle text-center" data-label="Aksi">
-                                        @if($canDelete && $tagihanRecord)
-                                            <button type="button" 
-                                                    class="btn btn-sm btn-danger delete-tagihan-btn"
-                                                    data-tagihan-id="{{ $tagihanRecord->id }}"
-                                                    data-tagihan-label="{{ $label }}"
-                                                    data-delete-url="{{ route('admin.keuangan.tagihan.destroy-item', $tagihanRecord->id) }}"
-                                                    title="Hapus tagihan">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-4 pt-3 border-top">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                        <div class="text-muted small">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Masukkan nominal 0 jika siswa tidak memiliki tagihan untuk jenis tersebut.
+        <div class="divide-y divide-slate-100">
+            @foreach($jenisTagihan as $key => $label)
+                @php
+                    $tagihanRecord = $allTagihan->firstWhere('jenis_tagihan', $key);
+                    $isCustom = !in_array($key, $standardJenisTagihan);
+                    $hasPembayaran = $tagihanRecord && $tagihanRecord->pembayaran()->where('status_validasi', 'disetujui')->exists();
+                    $isReadOnly = $hasPembayaran;
+                    $canDelete = $tagihanRecord && !$hasPembayaran && ($isCustom || $tagihanRecord->status === 'belum_bayar');
+                    $selectedYearId = (string) old('tahun_ajaran_id.'.$key, $tagihanRecord?->tahun_ajaran_id ?? $tahunAjaran->id);
+                    $rawValue = intval($tagihanExist[$key] ?? 0);
+                    $dueValue = old('tanggal_jatuh_tempo.'.$key, $tagihanRecord?->tanggal_jatuh_tempo?->toDateString() ?? $defaultDueDate);
+                @endphp
+                <article class="p-4 sm:p-5 {{ $isReadOnly ? 'bg-slate-50/80' : '' }}">
+                    <div class="grid gap-4 md:grid-cols-[minmax(11rem,1fr)_minmax(10rem,.8fr)_minmax(11rem,.8fr)_minmax(10rem,.7fr)_auto] md:items-start">
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-2"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[10px] font-extrabold text-slate-500">{{ $loop->iteration }}</span><h3 class="font-extrabold text-slate-950">{{ $label }}</h3></div>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                @if($isReadOnly)<span class="inline-flex rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700"><i class="fas fa-lock mr-1"></i>Sudah dibayar wali</span>
+                                @elseif($isCustom && $tagihanRecord)<span class="inline-flex rounded-full bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700">Tagihan khusus</span>@endif
+                                @if($key === 'spp')<span class="inline-flex rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">Bulanan</span>@endif
+                            </div>
                         </div>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}" class="btn btn-secondary shadow-sm">
-                                <i class="fas fa-times me-1"></i> Batal
-                            </a>
-                            <button type="submit" class="btn btn-primary shadow-sm fw-bold">
-                                <i class="fas fa-save me-1"></i> Simpan Tagihan
-                            </button>
+
+                        <label class="block"><span class="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-slate-500 md:sr-only">Tahun ajaran</span><select name="tahun_ajaran_id[{{ $key }}]" {{ $isReadOnly ? 'disabled' : '' }} class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500" @change="const option = $event.target.selectedOptions[0]; const due = $event.target.closest('article').querySelector('[data-due-date]'); due.min = option.dataset.start; due.max = option.dataset.end; if (!due.value || due.value < due.min || due.value > due.max) due.value = option.dataset.defaultDate">
+                            @foreach($allYears as $thn)<option value="{{ $thn->id }}" data-start="{{ $thn->tanggal_mulai->toDateString() }}" data-end="{{ $thn->tanggal_selesai->toDateString() }}" data-default-date="{{ $thn->getDefaultTagihanDueDate()->toDateString() }}" @selected($selectedYearId == $thn->id)>{{ $thn->nama_tahun_ajaran }}</option>@endforeach
+                        </select></label>
+
+                        <label class="block"><span class="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-slate-500 md:sr-only">Jumlah</span><span class="flex h-11 overflow-hidden rounded-xl border border-slate-300 bg-white focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100"><span class="flex items-center bg-slate-50 px-3 text-xs font-bold text-slate-500">Rp</span><input type="text" inputmode="numeric" name="tagihan[{{ $key }}]" value="{{ number_format(old('tagihan.'.$key, $rawValue), 0, ',', '.') }}" {{ $isReadOnly ? 'disabled' : '' }} @input="formatCurrency($event)" class="min-w-0 flex-1 border-0 px-3 text-right text-sm font-bold tabular-nums text-slate-900 outline-none disabled:bg-slate-100 disabled:text-slate-500"></span>@error('tagihan.'.$key)<span class="mt-1 block text-xs font-semibold text-red-600">{{ $message }}</span>@enderror</label>
+
+                        <label class="block"><span class="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-slate-500 md:sr-only">Jatuh tempo</span><input data-due-date type="date" name="tanggal_jatuh_tempo[{{ $key }}]" value="{{ $dueValue }}" min="{{ $tagihanDateMin }}" max="{{ $tagihanDateMax }}" {{ $isReadOnly ? 'disabled' : '' }} class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"></label>
+
+                        <div class="flex justify-end md:pt-1">
+                            @if($canDelete && $tagihanRecord)
+                                <x-cleanflow.table-action type="button" tone="delete" icon="fas fa-trash" label="Hapus {{ $label }}" data-delete-url="{{ route('admin.keuangan.tagihan.destroy-item', $tagihanRecord->id) }}" data-delete-label="{{ $label }}" x-on:click="deleteItem($el.dataset.deleteUrl, $el.dataset.deleteLabel)" />
+                            @else
+                                <span class="hidden h-9 w-9 md:block"></span>
+                            @endif
                         </div>
                     </div>
-                </div>
-            </form>
+                </article>
+            @endforeach
         </div>
-    </div>
 
-    {{-- Warning Alert --}}
-    <div class="alert alert-warning border-start border-warning border-4 shadow-sm">
-        <div class="d-flex">
-            <i class="fas fa-exclamation-triangle fa-lg me-2 mt-1"></i>
-            <div>
-                <strong>Catatan:</strong>
-                <ul class="mb-0 mt-2">
-                    <li>Tagihan yang sudah dibayar oleh wali siswa tidak dapat diedit atau dihapus untuk menjaga integritas data transaksi.</li>
-                    <li>Tagihan dengan nominal Rp 0 (setting admin) tetap dapat diedit kapan saja untuk fleksibilitas perubahan.</li>
-                    <li>Perubahan tagihan akan mempengaruhi status pembayaran siswa.</li>
-                    <li>Tahun ajaran: <strong>{{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong></li>
-                </ul>
-            </div>
-        </div>
-    </div>
+        <footer class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs leading-5 text-slate-600"><i class="fas fa-shield-halved mr-1 text-emerald-600"></i>Tagihan yang sudah dibayar dikunci untuk menjaga integritas transaksi.</p><div class="flex gap-2"><a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-white">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-save"></i>Simpan</button></div></footer>
+    </form>
 
+    <section class="rounded-2xl border border-amber-200 bg-amber-50 p-4"><div class="flex items-start gap-3"><i class="fas fa-triangle-exclamation mt-1 text-amber-700"></i><div class="text-sm leading-6 text-amber-900"><strong>Perlu diperhatikan</strong><ul class="mt-1 list-disc space-y-1 pl-5"><li>Tagihan yang telah dibayar wali tidak dapat diedit atau dihapus.</li><li>Nominal Rp 0 tetap dapat diubah selama belum memiliki pembayaran.</li><li>Perubahan nominal dapat memengaruhi status pembayaran siswa.</li><li>Periode aktif saat ini: <strong>{{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong>.</li></ul></div></div></section>
 </div>
-</div>
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/keuangan/tagihan/edit.js'])
 @endsection

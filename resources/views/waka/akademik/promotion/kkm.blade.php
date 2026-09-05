@@ -1,11 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Pengaturan KKM')
 @section('page-title', 'Pengaturan KKM')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/akademik/promotion/kkm.css'])

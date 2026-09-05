@@ -1,206 +1,82 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Pengaturan Waktu Istirahat')
-@section('page-title', 'Pengaturan Waktu Istirahat')
-@section('page-subtitle', 'Kelola waktu istirahat per jenjang pendidikan')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/pengaturan-istirahat/index.css'])
-@endsection
+@section('page-title', 'Pengaturan Istirahat')
+@section('page-subtitle', 'Blokir waktu jeda agar tidak terisi saat jadwal disusun')
 
 @section('content')
-    {{-- Breadcrumb / Back Button --}}
-    <div class="mb-3">
-        <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="btn btn-sm btn-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Jadwal Pelajaran
-        </a>
-    </div>
+@php
+    $totalPengaturan = collect($pengaturanPerJenjang)->sum(fn ($items) => $items->count());
+    $totalAktif = collect($pengaturanPerJenjang)->sum(fn ($items) => $items->where('is_active', true)->count());
+    $jenjangTones = [
+        'KB' => 'bg-pink-50 text-pink-700 ring-pink-100',
+        'TKA' => 'bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-100',
+        'TKB' => 'bg-violet-50 text-violet-700 ring-violet-100',
+        'SD' => 'bg-blue-50 text-blue-700 ring-blue-100',
+        'SMP' => 'bg-emerald-50 text-emerald-700 ring-emerald-100',
+        'SMA' => 'bg-amber-50 text-amber-700 ring-amber-100',
+    ];
+@endphp
 
-    {{-- Alert Messages --}}
-    {{-- Info Card --}}
-    <div class="card mb-4 border-left-info">
-        <div class="card-body">
-            <div class="d-flex align-items-start">
-                <i class="fas fa-info-circle text-info fa-2x me-3"></i>
-                <div>
-                    <h6 class="mb-2"><strong>Informasi Pengaturan Istirahat</strong></h6>
-                    <ul class="mb-0 small text-muted">
-                        <li>Waktu istirahat dikonfigurasi per jenjang (KB, TKA, TKB, SD, SMP, SMA)</li>
-                        <li>Maksimal 2 waktu istirahat per jenjang</li>
-                        <li>Waktu istirahat akan otomatis memblokir slot waktu saat membuat jadwal</li>
-                        <li>Waktu istirahat akan otomatis muncul di cetak jadwal dengan highlight kuning</li>
-                    </ul>
-                </div>
-            </div>
+<div class="min-w-0 w-full space-y-5">
+    <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex min-w-0 items-start gap-3">
+            <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali ke jadwal pelajaran"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
+            <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Pengaturan jadwal</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Waktu istirahat per jenjang</h2><p class="mt-1 text-sm text-slate-500">Atur maksimal dua jeda untuk setiap jenjang.</p></div>
         </div>
-    </div>
+        <a href="{{ route('admin.pengaturan-istirahat.create') }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white no-underline shadow-sm hover:bg-brand-700"><i class="fas fa-plus" aria-hidden="true"></i>Tambah istirahat</a>
+    </header>
 
-    {{-- Action Button --}}
-    <div class="mb-4">
-        <a href="{{ route('admin.pengaturan-istirahat.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i> Tambah Waktu Istirahat
-        </a>
-    </div>
+    <section class="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div class="flex items-center gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><i class="fas fa-mug-hot" aria-hidden="true"></i></span><div><p class="text-2xl font-extrabold leading-none text-slate-950">{{ $totalPengaturan }}</p><p class="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">Total jeda</p></div></div></article>
+        <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div class="flex items-center gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"><i class="fas fa-circle-check" aria-hidden="true"></i></span><div><p class="text-2xl font-extrabold leading-none text-slate-950">{{ $totalAktif }}</p><p class="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">Jeda aktif</p></div></div></article>
+        <article class="col-span-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:col-span-1"><div class="flex items-center gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600"><i class="fas fa-layer-group" aria-hidden="true"></i></span><div><p class="text-2xl font-extrabold leading-none text-slate-950">{{ count($jenjangList) }}</p><p class="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">Jenjang tersedia</p></div></div></article>
+    </section>
 
-    {{-- Pengaturan per Jenjang --}}
-    @foreach($jenjangList as $jenjang)
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-clock text-primary me-2"></i>
-                    Waktu Istirahat Jenjang
-                    @if($jenjang == 'KB')
-                        <span class="badge bg-secondary">KB</span>
-                    @elseif($jenjang == 'TKA')
-                        <span class="badge bg-dark">TKA</span>
-                    @elseif($jenjang == 'TKB')
-                        <span class="badge bg-danger">TKB</span>
-                    @elseif($jenjang == 'SD')
-                        <span class="badge bg-success">SD</span>
-                    @elseif($jenjang == 'SMP')
-                        <span class="badge bg-info">SMP</span>
-                    @elseif($jenjang == 'SMA')
-                        <span class="badge bg-warning">SMA</span>
+    <aside class="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-950">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600"><i class="fas fa-circle-info" aria-hidden="true"></i></span>
+        <div class="min-w-0"><h3 class="text-sm font-extrabold">Cara kerja waktu istirahat</h3><p class="mt-1 text-xs leading-5 text-blue-800">Jeda aktif otomatis memblokir slot ketika jadwal dibuat dan ditandai pada hasil cetak. Hari yang tidak dipilih tetap dapat digunakan.</p></div>
+    </aside>
+
+    <section class="grid min-w-0 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        @foreach($jenjangList as $jenjang)
+            @php $items = $pengaturanPerJenjang[$jenjang]; @endphp
+            <article class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <header class="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3.5">
+                    <div class="flex min-w-0 items-center gap-2.5">
+                        <span class="inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-xl px-2 text-xs font-extrabold ring-1 ring-inset {{ $jenjangTones[$jenjang] }}">{{ $jenjang }}</span>
+                        <div class="min-w-0"><h3 class="truncate text-sm font-extrabold text-slate-950">Jenjang {{ $jenjang }}</h3><p class="text-[11px] text-slate-500">{{ $items->count() }} dari 2 jeda digunakan</p></div>
+                    </div>
+                    @if($items->count() < 2)
+                        <a href="{{ route('admin.pengaturan-istirahat.create', ['jenjang' => $jenjang]) }}" class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-brand-50 px-3 text-xs font-bold text-brand-700 no-underline hover:bg-brand-100"><i class="fas fa-plus" aria-hidden="true"></i>Tambah</a>
                     @endif
-                </h5>
-                @if($pengaturanPerJenjang[$jenjang]->count() < 2)
-                    <a href="{{ route('admin.pengaturan-istirahat.create', ['jenjang' => $jenjang]) }}"
-                        class="btn btn-sm btn-primary">
-                        <i class="fas fa-plus me-1"></i> Tambah Istirahat
-                    </a>
-                @endif
-            </div>
-            <div class="card-body">
-                @if($pengaturanPerJenjang[$jenjang]->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered">
-                            <thead>
-                                <tr>
-                                    <th width="10%" class="text-center">Urutan</th>
-                                    <th width="20%">Nama Istirahat</th>
-                                    <th width="15%">Jam Mulai</th>
-                                    <th width="15%">Jam Selesai</th>
-                                    <th width="25%">Hari Aktif</th>
-                                    <th width="10%" class="text-center">Status</th>
-                                    <th width="15%" class="text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($pengaturanPerJenjang[$jenjang] as $pengaturan)
-                                    <tr>
-                                        <td class="text-center">
-                                            <span class="badge bg-primary">{{ $pengaturan->urutan }}</span>
-                                        </td>
-                                        <td>
-                                            <strong>{{ $pengaturan->nama_istirahat }}</strong>
-                                        </td>
-                                        <td>
-                                            <i class="fas fa-clock me-1 text-success"></i>{{ substr($pengaturan->jam_mulai, 0, 5) }}
-                                        </td>
-                                        <td>
-                                            <i class="fas fa-clock me-1 text-danger"></i>{{ substr($pengaturan->jam_selesai, 0, 5) }}
-                                        </td>
-                                        <td>
-                                            @foreach($pengaturan->hari_aktif as $hari)
-                                                <span class="badge bg-secondary me-1">{{ $hari }}</span>
-                                            @endforeach
-                                        </td>
-                                        <td class="text-center">
-                                            <form action="{{ route('admin.pengaturan-istirahat.toggle-status', $pengaturan) }}"
-                                                method="POST" class="d-inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                    class="btn btn-sm {{ $pengaturan->is_active ? 'btn-success' : 'btn-secondary' }}"
-                                                    title="Klik untuk toggle status">
-                                                    @if($pengaturan->is_active)
-                                                        <i class="fas fa-check-circle me-1"></i>Aktif
-                                                    @else
-                                                        <i class="fas fa-times-circle me-1"></i>Nonaktif
-                                                    @endif
-                                                </button>
-                                            </form>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('admin.pengaturan-istirahat.edit', $pengaturan) }}"
-                                                    class="btn btn-sm btn-warning" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteModal{{ $pengaturan->id }}" title="Hapus">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="text-center py-4">
-                        <i class="fas fa-coffee fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">Belum ada waktu istirahat untuk jenjang {{ $jenjang }}.</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-    @endforeach
+                </header>
 
-    {{-- Delete Modals --}}
-    @foreach($jenjangList as $jenjang)
-        @foreach($pengaturanPerJenjang[$jenjang] as $pengaturan)
-            <div class="modal fade" id="deleteModal{{ $pengaturan->id }}" tabindex="-1"
-                aria-labelledby="deleteModalLabel{{ $pengaturan->id }}" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header bg-danger text-white">
-                            <h5 class="modal-title" id="deleteModalLabel{{ $pengaturan->id }}">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                Konfirmasi Hapus
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p class="mb-3">Apakah Anda yakin ingin menghapus waktu istirahat:</p>
-                            <div class="break-delete-summary">
-                                <div class="break-delete-title">
-                                    <i class="fas fa-coffee text-danger me-2"></i>
-                                    {{ $pengaturan->nama_istirahat }}
+                <div class="divide-y divide-slate-100">
+                    @forelse($items as $pengaturan)
+                        <div class="p-4">
+                            <div class="flex min-w-0 items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2"><h4 class="truncate text-sm font-extrabold text-slate-900" title="{{ $pengaturan->nama_istirahat }}">{{ $pengaturan->nama_istirahat }}</h4><span class="inline-flex whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold {{ $pengaturan->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">{{ $pengaturan->is_active ? 'Aktif' : 'Nonaktif' }}</span></div>
+                                    <p class="mt-1.5 whitespace-nowrap text-sm font-bold text-slate-700"><i class="far fa-clock mr-1 text-brand-600" aria-hidden="true"></i>{{ substr($pengaturan->jam_mulai, 0, 5) }} - {{ substr($pengaturan->jam_selesai, 0, 5) }}</p>
                                 </div>
-                                <div class="break-delete-meta">
-                                    <i class="fas fa-layer-group me-1"></i> Jenjang: <strong>{{ $pengaturan->jenjang }}</strong> |
-                                    <i class="fas fa-clock me-1"></i> Waktu: <strong>{{ substr($pengaturan->jam_mulai, 0, 5) }} -
-                                        {{ substr($pengaturan->jam_selesai, 0, 5) }}</strong>
-                                </div>
+                                <span class="inline-flex h-8 min-w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 px-2 text-[10px] font-extrabold text-slate-600">Jeda {{ $pengaturan->urutan }}</span>
                             </div>
-                            <p class="mt-3 mb-0">
-                                <i class="fas fa-info-circle text-danger me-1"></i>
-                                <small class="text-muted">Tindakan ini tidak dapat dibatalkan!</small>
-                            </p>
+
+                            <div class="mt-3 flex flex-wrap gap-1.5">@foreach($pengaturan->hari_aktif ?? [] as $hari)<span class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">{{ $hari }}</span>@endforeach</div>
+
+                            <div class="mt-4 flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                                <form action="{{ route('admin.pengaturan-istirahat.toggle-status', $pengaturan->id) }}" method="POST">@csrf @method('PATCH')<x-cleanflow.table-action type="submit" :tone="$pengaturan->is_active ? 'neutral' : 'success'" :icon="$pengaturan->is_active ? 'fas fa-pause' : 'fas fa-play'" :label="$pengaturan->is_active ? 'Nonaktifkan istirahat' : 'Aktifkan istirahat'" /></form>
+                                <x-cleanflow.table-action href="{{ route('admin.pengaturan-istirahat.edit', $pengaturan->id) }}" tone="edit" icon="fas fa-edit" label="Edit waktu istirahat" />
+                                <form action="{{ route('admin.pengaturan-istirahat.destroy', $pengaturan->id) }}" method="POST" data-confirm data-confirm-title="Hapus waktu istirahat?" data-confirm-message="{{ $pengaturan->nama_istirahat }} untuk jenjang {{ $jenjang }} akan dihapus permanen." data-confirm-text="Ya, hapus">@csrf @method('DELETE')<x-cleanflow.table-action type="submit" tone="delete" icon="fas fa-trash" label="Hapus waktu istirahat" /></form>
+                            </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="fas fa-times me-1"></i> Batal
-                            </button>
-                            <form action="{{ route('admin.pengaturan-istirahat.destroy', $pengaturan) }}" method="POST"
-                                class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="fas fa-trash me-1"></i> Ya, Hapus
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+                    @empty
+                        <div class="px-4 py-9 text-center"><span class="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-400"><i class="fas fa-mug-hot" aria-hidden="true"></i></span><p class="mt-3 text-sm font-bold text-slate-700">Belum ada waktu istirahat</p><p class="mt-1 text-xs text-slate-500">Tambahkan jeda pertama untuk {{ $jenjang }}.</p></div>
+                    @endforelse
                 </div>
-            </div>
+            </article>
         @endforeach
-    @endforeach
+    </section>
+</div>
 @endsection

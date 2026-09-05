@@ -1,150 +1,94 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Kenaikan Kelas - {{ $selectedYear->nama_tahun_ajaran }}</title>
-    @vite([
-        'resources/css/admin/akademik/promotion/print.css',
-        'resources/js/admin/akademik/promotion/print.js',
-    ])
-</head>
-<body>
+@extends('layouts.print')
 
-    <div class="btn-actions no-print">
-        <button type="button" class="btn btn-back" data-history-back>&#8592; Kembali</button>
-        <button type="button" class="btn btn-print" data-print-page>&#128438; Cetak</button>
-    </div>
+@section('title', 'Laporan Kenaikan Kelas')
+@section('report-title', 'Laporan Kenaikan Kelas')
+@section('back-url', url()->previous())
 
-    <div class="container">
-        {{-- Header --}}
-        @php
-            $namaSekolah = $cabang ? preg_replace('/\s*\(?\s*Gedung\s+\w+\s*\)?$/i', '', $cabang->nama_cabang) : 'PKBM HOUSE OF KNOWLEDGE';
-            $alamat = $cabang ? ($cabang->alamat ?? 'Jl. Ruko Reni Jaya Blok AF No. 22-23 Pamulang Barat, Tangerang Selatan') : 'Jl. Ruko Reni Jaya Blok AF No. 22-23 Pamulang Barat, Tangerang Selatan';
-            $telepon = $cabang ? ($cabang->telepon ?? '021-7412345') : '021-7412345';
-        @endphp
-        <div class="header">
-            <img src="{{ asset('img/logo/hok-watermark.png') }}" alt="Logo HOK">
-            <div class="header-text">
-                <h1>{{ $namaSekolah }}</h1>
-                <h2>PUSAT KEGIATAN BELAJAR MASYARAKAT</h2>
-                <p>{{ $alamat }}</p>
-                <p>Telp: {{ $telepon }} | Email: info@hok.sch.id</p>
-            </div>
-        </div>
+@section('report-meta')
+    <p class="mt-1 text-[11px] text-slate-600 print:text-[9pt]">Tahun Ajaran {{ $selectedYear->nama_tahun_ajaran }}</p>
+    @if ($filterStatus)
+        <p class="mt-1 text-[10px] font-bold text-slate-700 print:text-[8pt]">Status: {{ str_replace('_', ' ', $filterStatus) }}</p>
+    @endif
+@endsection
 
-        {{-- Title --}}
-        <div class="title">
-            <h3>LAPORAN KENAIKAN KELAS</h3>
-            <p>Tahun Ajaran: {{ $selectedYear->nama_tahun_ajaran }}</p>
-            @if($filterStatus)
-                <p>Filter Status: <strong>{{ str_replace('_', ' ', $filterStatus) }}</strong></p>
-            @endif
-        </div>
+@section('report-content')
+    <section class="mb-5 grid grid-cols-5 gap-2 print:mb-4">
+        <article class="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-center">
+            <p class="text-lg font-extrabold text-emerald-800 print:text-[12pt]">{{ $stats['NAIK_KELAS'] ?? 0 }}</p>
+            <p class="text-[9px] font-bold uppercase text-emerald-700 print:text-[7pt]">Naik Kelas</p>
+        </article>
+        <article class="rounded-lg border border-sky-200 bg-sky-50 p-2 text-center">
+            <p class="text-lg font-extrabold text-sky-800 print:text-[12pt]">{{ $stats['LULUS'] ?? 0 }}</p>
+            <p class="text-[9px] font-bold uppercase text-sky-700 print:text-[7pt]">Lulus</p>
+        </article>
+        <article class="rounded-lg border border-amber-200 bg-amber-50 p-2 text-center">
+            <p class="text-lg font-extrabold text-amber-800 print:text-[12pt]">{{ $stats['NAIK_KELAS_TUNGGAKAN'] ?? 0 }}</p>
+            <p class="text-[9px] font-bold uppercase text-amber-700 print:text-[7pt]">Naik Dispensasi</p>
+        </article>
+        <article class="rounded-lg border border-violet-200 bg-violet-50 p-2 text-center">
+            <p class="text-lg font-extrabold text-violet-800 print:text-[12pt]">{{ $stats['LULUS_TUNGGAKAN'] ?? 0 }}</p>
+            <p class="text-[9px] font-bold uppercase text-violet-700 print:text-[7pt]">Lulus Dispensasi</p>
+        </article>
+        <article class="rounded-lg border border-red-200 bg-red-50 p-2 text-center">
+            <p class="text-lg font-extrabold text-red-800 print:text-[12pt]">{{ $stats['TIDAK_NAIK_KELAS'] ?? 0 }}</p>
+            <p class="text-[9px] font-bold uppercase text-red-700 print:text-[7pt]">Tidak Naik</p>
+        </article>
+    </section>
 
-        <p class="print-meta">Dicetak pada: {{ now()->format('d F Y, H:i') }} WIB</p>
-
-        {{-- Statistics --}}
-        <div class="stats-grid">
-            <div class="stat-box naik">
-                <div class="stat-value">{{ $stats['NAIK_KELAS'] ?? 0 }}</div>
-                <div class="stat-label">Naik Kelas</div>
-            </div>
-            <div class="stat-box lulus">
-                <div class="stat-value">{{ $stats['LULUS'] ?? 0 }}</div>
-                <div class="stat-label">Lulus</div>
-            </div>
-            <div class="stat-box dispensasi">
-                <div class="stat-value">{{ $stats['NAIK_KELAS_TUNGGAKAN'] ?? 0 }}</div>
-                <div class="stat-label">Naik (Dispensasi)</div>
-            </div>
-            <div class="stat-box lulus-disp">
-                <div class="stat-value">{{ $stats['LULUS_TUNGGAKAN'] ?? 0 }}</div>
-                <div class="stat-label">Lulus (Dispensasi)</div>
-            </div>
-            <div class="stat-box tidak-naik">
-                <div class="stat-value">{{ $stats['TIDAK_NAIK_KELAS'] ?? 0 }}</div>
-                <div class="stat-label">Tidak Naik</div>
-            </div>
-        </div>
-
-        {{-- Student Table --}}
-        <table>
-            <thead>
-                <tr>
-                    <th class="col-no">No</th>
-                    <th>Nama Siswa</th>
-                    <th>NIS</th>
-                    <th>Kelas Asal</th>
-                    <th>Kelas Tujuan</th>
-                    <th>Status Bayar</th>
-                    <th>Hasil Akhir</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($students as $i => $data)
-                <tr>
-                    <td class="center">{{ $i + 1 }}</td>
-                    <td>{{ $data->nama_lengkap }}</td>
-                    <td class="center">{{ $data->nis ?? '-' }}</td>
-                    <td>{{ $data->kelas_asal }}</td>
-                    <td>{{ $data->kelas_tujuan ?? '-' }}</td>
-                    <td class="center">
-                        @if($data->status_pembayaran == 'LUNAS')
-                            Lunas
-                        @else
-                            Belum Lunas
-                        @endif
-                    </td>
-                    <td class="center">
-                        @php
-                            $cls = match($data->status_kelulusan) {
-                                'NAIK_KELAS' => 'badge-naik',
-                                'LULUS' => 'badge-lulus',
-                                'NAIK_KELAS_TUNGGAKAN', 'LULUS_TUNGGAKAN' => 'badge-dispensasi',
-                                'TIDAK_NAIK_KELAS' => 'badge-tidak-naik',
-                                default => ''
-                            };
-                            $label = match($data->status_kelulusan) {
-                                'NAIK_KELAS' => 'Naik Kelas',
-                                'LULUS' => 'Lulus',
-                                'NAIK_KELAS_TUNGGAKAN' => 'Naik (Disp.)',
-                                'LULUS_TUNGGAKAN' => 'Lulus (Disp.)',
-                                'TIDAK_NAIK_KELAS' => 'Tidak Naik',
-                                default => str_replace('_', ' ', $data->status_kelulusan)
-                            };
-                        @endphp
-                        <span class="{{ $cls }}">{{ $label }}</span>
+    <table class="w-full table-fixed border-collapse text-[10px] print:text-[7.5pt]">
+        <colgroup>
+            <col class="w-10">
+            <col class="w-[22%]">
+            <col class="w-[12%]">
+            <col class="w-[15%]">
+            <col class="w-[15%]">
+            <col class="w-[13%]">
+            <col>
+        </colgroup>
+        <thead>
+            <tr class="bg-slate-100 text-left uppercase text-slate-700">
+                <th class="border border-slate-400 px-2 py-2 text-center">No</th>
+                <th class="border border-slate-400 px-2 py-2">Nama Siswa</th>
+                <th class="border border-slate-400 px-2 py-2">NIS</th>
+                <th class="border border-slate-400 px-2 py-2">Kelas Asal</th>
+                <th class="border border-slate-400 px-2 py-2">Kelas Tujuan</th>
+                <th class="border border-slate-400 px-2 py-2 text-center">Keuangan</th>
+                <th class="border border-slate-400 px-2 py-2 text-center">Hasil</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($students as $index => $data)
+                <tr class="break-inside-avoid">
+                    <td class="border border-slate-300 px-2 py-1.5 text-center">{{ $index + 1 }}</td>
+                    <td class="break-words border border-slate-300 px-2 py-1.5 font-bold">{{ $data->nama_lengkap }}</td>
+                    <td class="break-words border border-slate-300 px-2 py-1.5">{{ $data->nis ?? '-' }}</td>
+                    <td class="break-words border border-slate-300 px-2 py-1.5">{{ $data->kelas_asal }}</td>
+                    <td class="break-words border border-slate-300 px-2 py-1.5">{{ $data->kelas_tujuan ?? '-' }}</td>
+                    <td class="border border-slate-300 px-2 py-1.5 text-center">{{ $data->status_pembayaran === 'LUNAS' ? 'Lunas' : 'Belum Lunas' }}</td>
+                    <td class="border border-slate-300 px-2 py-1.5 text-center font-bold">
+                        @switch($data->status_kelulusan)
+                            @case('NAIK_KELAS') Naik Kelas @break
+                            @case('LULUS') Lulus @break
+                            @case('NAIK_KELAS_TUNGGAKAN') Naik (Disp.) @break
+                            @case('LULUS_TUNGGAKAN') Lulus (Disp.) @break
+                            @case('TIDAK_NAIK_KELAS') Tidak Naik @break
+                            @default {{ str_replace('_', ' ', $data->status_kelulusan) }}
+                        @endswitch
                     </td>
                 </tr>
-                @empty
+            @empty
                 <tr>
-                    <td colspan="7" class="center">Belum ada data kenaikan kelas yang dieksekusi.</td>
+                    <td colspan="7" class="border border-slate-300 px-3 py-8 text-center text-slate-500">Belum ada data kenaikan kelas yang dieksekusi.</td>
                 </tr>
-                @endforelse
-            </tbody>
-            @if($students->count() > 0)
+            @endforelse
+        </tbody>
+        @if ($students->count() > 0)
             <tfoot>
-                <tr>
-                    <td colspan="6" class="total-label">Total Siswa:</td>
-                    <td class="center total-value">{{ $students->count() }}</td>
+                <tr class="bg-slate-50 font-extrabold">
+                    <td colspan="6" class="border border-slate-400 px-2 py-2 text-right">Total Siswa</td>
+                    <td class="border border-slate-400 px-2 py-2 text-center">{{ $students->count() }}</td>
                 </tr>
             </tfoot>
-            @endif
-        </table>
-
-        {{-- Signature Footer --}}
-        <div class="footer">
-            <div></div>
-            <div class="footer-right">
-                <p>{{ now()->format('d F Y') }}</p>
-                <br>
-                <p>Kepala Sekolah,</p>
-                <div class="signature-line"></div>
-                <p>(_________________________)</p>
-            </div>
-        </div>
-    </div>
-
-</body>
-</html>
+        @endif
+    </table>
+@endsection

@@ -1,19 +1,12 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Duplikasi Tagihan')
 @section('page-title', 'Duplikasi Tagihan')
 @section('page-subtitle', 'Salin tagihan dari siswa ke siswa lain')
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/bendahara/tagihan/duplicate.css'])
-@endsection
 
 @section('content')
-    <div class="duplicate-tagihan-page">
+    <div class="mx-auto max-w-[1200px] px-4">
         <div class="container-fluid px-0">
 
             {{-- Breadcrumb --}}
@@ -104,7 +97,7 @@
                                 <label class="form-label fw-bold">
                                     Siswa Target (Salin Ke) <span class="text-danger">*</span>
                                 </label>
-                                <div class="border rounded p-3 bg-white target-list-container">
+                                <div class="max-h-[300px] overflow-y-auto rounded border bg-white p-3">
                                     <div class="mb-2">
                                         <button type="button" class="btn btn-sm btn-outline-primary me-2" data-select-targets>
                                             <i class="fas fa-check-double me-1"></i> Pilih Semua
@@ -202,5 +195,5 @@
 @endsection
 
 @section('scripts')
-    @vite(['resources/js/bendahara/tagihan/duplicate.js'])
+    @vite(['resources/js/components/tagihan-duplicate.js'])
 @endsection

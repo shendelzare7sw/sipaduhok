@@ -12,10 +12,6 @@
     $selectedTipe = $soal->tipe_soal ?? old('tipe_soal', 'pilihan_ganda');
 @endphp
 
-@push('styles')
-    @vite(['resources/css/guru/lms/ujian/soal-form.css'])
-@endpush
-
 @section('content')
 <div class="row guru-lms-soal-form-page">
     <div class="col-12">
@@ -65,7 +61,7 @@
                         <h6 class="fw-bold border-bottom pb-2 mb-3">Opsi Jawaban & Kunci</h6>
                         
                         {{-- 1. Pilihan Ganda (Single) --}}
-                        <div id="sectionPilgan" class="tipe-section {{ $selectedTipe === 'pilihan_ganda' ? 'is-active' : '' }}">
+                        <div id="sectionPilgan" class="{{ $selectedTipe === 'pilihan_ganda' ? '' : 'hidden' }}">
                             @php 
                                 $pilganOpts = ['A','B','C','D','E']; 
                                 $existingPilgan = is_array($soal->pilihan_jawaban ?? null) ? $soal->pilihan_jawaban : json_decode($soal->pilihan_jawaban ?? '{}', true);
@@ -84,7 +80,7 @@
                         </div>
 
                         {{-- 2. Pilihan Ganda Kompleks (Multiple) --}}
-                        <div id="sectionPilganKompleks" class="tipe-section {{ $selectedTipe === 'pilihan_ganda_kompleks' ? 'is-active' : '' }}">
+                        <div id="sectionPilganKompleks" class="{{ $selectedTipe === 'pilihan_ganda_kompleks' ? '' : 'hidden' }}">
                             @php 
                                 $existingKompleks = is_array($soal->pilihan_jawaban ?? null) ? $soal->pilihan_jawaban : json_decode($soal->pilihan_jawaban ?? '{}', true);
                                 $kunciKompleks = is_array($soal->kunci_jawaban ?? null) ? $soal->kunci_jawaban : (json_decode($soal->kunci_jawaban ?? '[]', true) ?? []);
@@ -102,7 +98,7 @@
                         </div>
 
                         {{-- 3. Benar Salah --}}
-                        <div id="sectionBenarSalah" class="tipe-section {{ $selectedTipe === 'benar_salah' ? 'is-active' : '' }}">
+                        <div id="sectionBenarSalah" class="{{ $selectedTipe === 'benar_salah' ? '' : 'hidden' }}">
                             <table class="table table-bordered bg-white">
                                 <thead>
                                     <tr>
@@ -137,7 +133,7 @@
                         </div>
 
                         {{-- 4. Isian Singkat --}}
-                        <div id="sectionIsian" class="tipe-section {{ $selectedTipe === 'isian_singkat' ? 'is-active' : '' }}">
+                        <div id="sectionIsian" class="{{ $selectedTipe === 'isian_singkat' ? '' : 'hidden' }}">
                             <label class="form-label text-muted">Kunci Jawaban Singkat</label>
                             <input type="text" name="kunci_jawaban_isian" class="form-control" value="{{ $soal->kunci_jawaban ?? '' }}" placeholder="Contoh: Soekarno">
                             <small class="text-info">
@@ -146,7 +142,7 @@
                         </div>
 
                         {{-- 5. Uraian --}}
-                        <div id="sectionUraian" class="tipe-section {{ $selectedTipe === 'uraian' ? 'is-active' : '' }}">
+                        <div id="sectionUraian" class="{{ $selectedTipe === 'uraian' ? '' : 'hidden' }}">
                             <div class="alert alert-info border-0">
                                 <i class="fas fa-info-circle me-1"></i>
                                 Untuk soal uraian, guru harus melakukan koreksi manual.

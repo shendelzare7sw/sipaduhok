@@ -26,7 +26,7 @@ const fallbackCopyToClipboard = (link, button, originalHtml, originalClass) => {
     const textarea = document.createElement('textarea');
     const targetContainer = button.closest('.guru-lms-meeting-page') || document.body;
     textarea.value = link;
-    textarea.className = 'clipboard-buffer';
+    textarea.className = 'pointer-events-none fixed opacity-0';
     targetContainer.appendChild(textarea);
 
     try {

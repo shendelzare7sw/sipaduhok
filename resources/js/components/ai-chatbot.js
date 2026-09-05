@@ -21,7 +21,7 @@ const chatbotState = {
     modelTeksPilihan: 'llama-3.3-70b-versatile',
     attachedFiles: [],
     availableModels: [],
-    fabPosition: { right: 96 },
+    fabPosition: { right: 104 },
     isDragging: false,
     conversations: [],
     currentConversationId: null,
@@ -31,7 +31,7 @@ const chatbotState = {
 const USER_ROLE = chatbotConfig.userRole;
 
 // ==================== Initialize Chatbot ====================
-const CHATBOT_DATA_VERSION = '3';
+const CHATBOT_DATA_VERSION = '5';
 
 function initChatbot() {
     migrateLegacyChatbotData();
@@ -54,12 +54,30 @@ function migrateLegacyChatbotData() {
                     if (!conv || !Array.isArray(conv.messages)) return conv;
                     conv.messages = conv.messages.map(msg => {
                         if (!msg || typeof msg.content !== 'string') return msg;
+                        let normalizedMessage = msg;
                         if (msg.isHtml || /<\w+[\s>]/.test(msg.content)) {
                             const tmp = document.createElement('div');
                             tmp.innerHTML = msg.content;
-                            return { role: msg.role, content: (tmp.textContent || '').trim(), structured: msg.structured || null };
+                            normalizedMessage = { role: msg.role, content: (tmp.textContent || '').trim(), structured: msg.structured || null };
                         }
-                        return { role: msg.role, content: msg.content, structured: msg.structured || null };
+
+                        if (normalizedMessage.role === 'assistant') {
+                            const parsed = parseStructuredCandidate(normalizedMessage.structured?.text)
+                                || parseStructuredCandidate(normalizedMessage.content);
+                            if (parsed?.text) {
+                                const button = normalizeClientLink(parsed.button);
+                                const related = normalizeClientLinks(parsed.related);
+                                const structured = {
+                                    text: String(parsed.text).trim(),
+                                    callout: typeof parsed.callout === 'string' && parsed.callout.trim() ? parsed.callout.trim() : null,
+                                    button,
+                                    related: related.length > 0 ? related : null,
+                                };
+                                return { role: 'assistant', content: structured.text, structured };
+                            }
+                        }
+
+                        return { role: normalizedMessage.role, content: normalizedMessage.content, structured: normalizedMessage.structured || null };
                     });
                     return conv;
                 });
@@ -178,7 +196,7 @@ function renderConversationsList() {
     const container = document.getElementById('conversationsList');
     if (!container) return;
     if (chatbotState.conversations.length === 0) {
-        container.innerHTML = '<p class="text-center text-muted conversations-empty">Belum ada conversation</p>';
+        container.innerHTML = '<p class="mt-5 text-center text-xs text-slate-500">Belum ada percakapan</p>';
         return;
     }
     const groups = { today: [], yesterday: [], thisWeek: [], older: [] };
@@ -198,19 +216,19 @@ function renderConversationsList() {
     });
     let html = '';
     if (groups.today.length > 0) {
-        html += '<div class="conversation-date-group">Today</div>';
+        html += '<div class="mb-2 mt-4 px-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 first:mt-0">Hari ini</div>';
         groups.today.forEach(conv => { html += renderConversationItem(conv); });
     }
     if (groups.yesterday.length > 0) {
-        html += '<div class="conversation-date-group">Yesterday</div>';
+        html += '<div class="mb-2 mt-4 px-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 first:mt-0">Kemarin</div>';
         groups.yesterday.forEach(conv => { html += renderConversationItem(conv); });
     }
     if (groups.thisWeek.length > 0) {
-        html += '<div class="conversation-date-group">Last 7 Days</div>';
+        html += '<div class="mb-2 mt-4 px-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 first:mt-0">7 hari terakhir</div>';
         groups.thisWeek.forEach(conv => { html += renderConversationItem(conv); });
     }
     if (groups.older.length > 0) {
-        html += '<div class="conversation-date-group">Older</div>';
+        html += '<div class="mb-2 mt-4 px-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 first:mt-0">Lebih lama</div>';
         groups.older.forEach(conv => { html += renderConversationItem(conv); });
     }
     container.innerHTML = html;
@@ -222,11 +240,14 @@ function renderConversationItem(conv) {
     const date = new Date(conv.updated_at || new Date());
     const timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     const title = conv.title || 'New Chat';
+    const stateClasses = isActive
+        ? 'border-blue-400 bg-blue-50 ring-1 ring-blue-100'
+        : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50';
     return `
-        <div class="conversation-item ${isActive ? 'active' : ''}" data-conversation-id="${escapeHtml(conv.id)}">
-            <div class="conversation-title">${escapeHtml(title)}</div>
-            <div class="conversation-date">${timeStr}</div>
-            <button class="conversation-delete" data-delete-conversation-id="${escapeHtml(conv.id)}" title="Delete">
+        <div class="group relative mb-2 cursor-pointer rounded-xl border p-3 pr-10 transition ${stateClasses}" data-conversation-id="${escapeHtml(conv.id)}">
+            <div class="truncate text-xs font-bold leading-5 text-slate-800">${escapeHtml(title)}</div>
+            <div class="mt-0.5 text-[10px] text-slate-500">${timeStr}</div>
+            <button type="button" class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-[10px] text-slate-400 opacity-100 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 md:opacity-0 md:group-hover:opacity-100" data-delete-conversation-id="${escapeHtml(conv.id)}" title="Hapus percakapan">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
@@ -241,16 +262,14 @@ function updateConversationTitle(title) {
 function clearChatMessages() {
     const container = document.getElementById('chatMessages');
     if (!container) return;
-    const messages = container.querySelectorAll('.message-group');
+    const messages = container.querySelectorAll('[data-chatbot-message]');
     messages.forEach(msg => msg.remove());
     const welcomeHtml = `
-        <div class="message-group ai-message">
-            <div class="message-avatar"><i class="fas fa-headset ai-chatbot-icon-sm"></i></div>
-            <div class="message-content">
-                <div class="message-bubble">
-                    <i class="far fa-hand-paper ai-chatbot-wave-icon"></i> Halo <strong>${escapeHtml(chatbotConfig.userName)}</strong>! Saya <strong>Asisten SIPADUHOK</strong>.<br>
-                    Butuh Bantuan? Silahkan Tanyakan
-                </div>
+        <div data-chatbot-message class="flex items-start gap-2.5">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs text-white"><i class="fas fa-headset"></i></div>
+            <div class="max-w-[82%] rounded-2xl rounded-bl bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm ring-1 ring-slate-200/80">
+                <i class="far fa-hand-paper text-amber-500"></i> Halo <strong>${escapeHtml(chatbotConfig.userName)}</strong>! Saya <strong>Asisten SIPADUHOK</strong>.<br>
+                Butuh bantuan? Silakan tanyakan.
             </div>
         </div>
     `;
@@ -265,12 +284,14 @@ function toggleConversationsSidebar() {
     const sidebar = document.getElementById('conversationsSidebar');
     const chatWindow = document.getElementById('aiChatbotWindow');
     if (!sidebar || !chatWindow) return;
-    sidebar.classList.toggle('active');
-    chatbotState.isSidebarOpen = sidebar.classList.contains('active');
+    const willOpen = sidebar.classList.contains('hidden');
+    sidebar.classList.toggle('hidden', !willOpen);
+    sidebar.classList.toggle('flex', willOpen);
+    chatbotState.isSidebarOpen = willOpen;
     if (chatbotState.isSidebarOpen) {
-        chatWindow.classList.add('sidebar-open');
+        chatWindow.classList.add('md:!w-[min(710px,calc(100vw-48px))]');
     } else {
-        chatWindow.classList.remove('sidebar-open');
+        chatWindow.classList.remove('md:!w-[min(710px,calc(100vw-48px))]');
     }
     if (chatbotState.isSidebarOpen && chatbotState.conversations.length > 0) {
         renderConversationsList();
@@ -331,16 +352,10 @@ async function openChatWindow() {
     const chatWindow = document.getElementById('aiChatbotWindow');
     const fab = document.getElementById('aiChatbotFab');
     if (!chatWindow || !fab) return;
-    chatWindow.classList.add('active');
+    chatWindow.classList.remove('hidden');
+    chatWindow.classList.add('flex');
     fab.classList.add('hidden');
     chatbotState.isOpen = true;
-    if (!chatbotState.modelsLoaded) {
-        await loadAvailableModels();
-        chatbotState.modelsLoaded = true;
-    }
-    if (!chatbotState.quickActionsLoaded) {
-        loadQuickActions();
-    }
     if (!chatbotState.currentConversationId) {
         if (chatbotState.conversations.length === 0) {
             // No conversations at all, create a fresh one.
@@ -350,6 +365,13 @@ async function openChatWindow() {
             const mostRecent = chatbotState.conversations[0];
             loadConversation(mostRecent.id);
         }
+    }
+    if (!chatbotState.quickActionsLoaded) {
+        loadQuickActions();
+    }
+    if (!chatbotState.modelsLoaded) {
+        await loadAvailableModels();
+        chatbotState.modelsLoaded = true;
     }
     localStorage.setItem('aiChatbotOpen', 'true');
     scrollToBottom();
@@ -362,9 +384,9 @@ function closeChatWindow() {
     if (chatbotState.currentConversationId) {
         saveCurrentConversation();
     }
-    chatWindow.classList.remove('active');
+    chatWindow.classList.add('hidden');
+    chatWindow.classList.remove('flex');
     fab.classList.remove('hidden');
-    fab.classList.remove('fab-hidden-mobile');
     chatbotState.isOpen = false;
     localStorage.setItem('aiChatbotOpen', 'false');
 }
@@ -431,7 +453,7 @@ function loadQuickActions() {
         {i:'fa-book-open',t:'Akses LMS'},{i:'fa-file-alt',t:'Lihat rapor'},{i:'fa-key',t:'Lupa password'},{i:'fa-bell',t:'Notifikasi'},
     ];
     container.innerHTML = actions.map(a =>
-        `<button class="quick-action-btn" data-quick-action="${escapeHtml(a.t)}"><i class="fas ${escapeHtml(a.i)} quick-action-icon"></i>${escapeHtml(a.t)}</button>`
+        `<button type="button" class="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700" data-quick-action="${escapeHtml(a.t)}"><i class="fas ${escapeHtml(a.i)} text-[10px] opacity-80"></i>${escapeHtml(a.t)}</button>`
     ).join('');
     chatbotState.quickActionsLoaded = true;
 }
@@ -440,7 +462,7 @@ function renderQuickActions(actions) {
     const container = document.getElementById('quickActionsContainer');
     if (!container || !actions || actions.length === 0) return;
     container.innerHTML = actions.map(action =>
-        `<button class="quick-action-btn" data-quick-action="${escapeHtml(action)}">${escapeHtml(action)}</button>`
+        `<button type="button" class="inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700" data-quick-action="${escapeHtml(action)}">${escapeHtml(action)}</button>`
     ).join('');
 }
 
@@ -548,23 +570,25 @@ function renderAttachmentsPreview() {
     const container = document.getElementById('attachmentsPreview');
     if (!container) return;
     if (chatbotState.attachedFiles.length === 0) {
-        container.classList.add('d-none');
+        container.classList.add('hidden');
+        container.classList.remove('flex');
         return;
     }
-    container.classList.remove('d-none');
+    container.classList.remove('hidden');
+    container.classList.add('flex');
     const html = chatbotState.attachedFiles.map((fileObj, index) => {
         const isImage = fileObj.file.type.startsWith('image/');
         if (isImage && fileObj.dataUrl) {
             return `
-                <div class="attachment-preview-item">
-                    <img src="${fileObj.dataUrl}" alt="${escapeHtml(fileObj.file.name)}" data-lightbox-src="${fileObj.dataUrl}">
-                    <button class="attachment-remove-btn" data-remove-attachment-index="${index}"><i class="fas fa-times"></i></button>
+                <div class="relative h-16 w-16 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                    <img class="h-full w-full cursor-zoom-in object-cover transition hover:opacity-80" src="${fileObj.dataUrl}" alt="${escapeHtml(fileObj.file.name)}" data-lightbox-src="${fileObj.dataUrl}">
+                    <button type="button" class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[9px] text-white shadow hover:bg-red-700" data-remove-attachment-index="${index}" aria-label="Hapus lampiran"><i class="fas fa-times"></i></button>
                 </div>`;
         } else {
             return `
-                <div class="attachment-preview-item file-preview">
+                <div class="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-blue-200 bg-blue-50 text-xl text-blue-600">
                     <i class="fas fa-file-pdf"></i>
-                    <button class="attachment-remove-btn" data-remove-attachment-index="${index}"><i class="fas fa-times"></i></button>
+                    <button type="button" class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[9px] text-white shadow hover:bg-red-700" data-remove-attachment-index="${index}" aria-label="Hapus lampiran"><i class="fas fa-times"></i></button>
                 </div>`;
         }
     }).join('');
@@ -581,12 +605,19 @@ function removeAttachmentByIndex(index) {
 function openLightbox(dataUrl) {
     const lightbox = document.getElementById('imageLightbox');
     const lightboxImg = document.getElementById('lightboxImage');
-    if (lightbox && lightboxImg) { lightboxImg.src = dataUrl; lightbox.classList.remove('d-none'); }
+    if (lightbox && lightboxImg) {
+        lightboxImg.src = dataUrl;
+        lightbox.classList.remove('hidden');
+        lightbox.classList.add('flex');
+    }
 }
 
 function closeLightbox() {
     const lightbox = document.getElementById('imageLightbox');
-    if (lightbox) lightbox.classList.add('d-none');
+    if (lightbox) {
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+    }
 }
 
 // ==================== Send Message ====================
@@ -624,8 +655,8 @@ async function sendMessage(messageText = null) {
         selaraskanModelDenganLampiran();
     }
     if (response.success) {
-        const text = response.structured?.text ?? response.response;
-        addMessage('assistant', text, null, true, false, response.structured ?? null);
+        const structured = normalizeStructuredResponse(response);
+        addMessage('assistant', structured.text, null, true, false, structured);
     } else {
         const errorMsg = response.error || 'Terjadi kesalahan tidak diketahui.';
         let errStructured;
@@ -655,6 +686,138 @@ async function sendMessage(messageText = null) {
     }
     saveCurrentConversation();
     scrollToBottom();
+}
+
+/**
+ * Normalize API output before rendering. Some providers occasionally wrap the
+ * requested JSON in a string or code fence; never expose that transport shape
+ * to users as a raw chat message.
+ */
+function normalizeStructuredResponse(response) {
+    const fallbackText = typeof response?.response === 'string'
+        ? response.response.trim()
+        : 'Jawaban tidak tersedia.';
+    const supplied = response?.structured;
+    const embedded = parseStructuredCandidate(supplied?.text);
+    const parsed = embedded
+        || (supplied?.text ? supplied : null)
+        || parseStructuredCandidate(response?.response);
+
+    if (parsed?.text) {
+        const button = normalizeClientLink(parsed.button) || normalizeClientLink(supplied?.button);
+        const parsedRelated = normalizeClientLinks(parsed.related);
+        const suppliedRelated = normalizeClientLinks(supplied?.related);
+        return {
+            text: String(parsed.text).trim(),
+            callout: typeof parsed.callout === 'string' && parsed.callout.trim() ? parsed.callout.trim() : null,
+            button,
+            related: parsedRelated.length > 0 ? parsedRelated : (suppliedRelated.length > 0 ? suppliedRelated : null),
+        };
+    }
+
+    return {
+        text: fallbackText || 'Jawaban tidak tersedia.',
+        callout: supplied?.callout ?? null,
+        button: supplied?.button ?? null,
+        related: supplied?.related ?? null,
+    };
+}
+
+function parseStructuredCandidate(candidate) {
+    if (candidate && typeof candidate === 'object') return candidate;
+    if (typeof candidate !== 'string') return null;
+
+    let value = candidate.trim()
+        .replace(/^```(?:json)?\s*/i, '')
+        .replace(/```\s*$/, '')
+        .trim();
+
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+            const parsed = JSON.parse(value);
+            if (parsed && typeof parsed === 'object') return parsed;
+            if (typeof parsed === 'string') {
+                value = parsed.trim();
+                continue;
+            }
+        } catch (error) {
+            const firstBrace = value.indexOf('{');
+            const lastBrace = value.lastIndexOf('}');
+            if (firstBrace >= 0 && lastBrace > firstBrace) {
+                const extracted = value.slice(firstBrace, lastBrace + 1);
+                if (extracted !== value) {
+                    value = extracted;
+                    continue;
+                }
+            }
+        }
+        break;
+    }
+
+    return recoverPartialStructuredCandidate(value);
+}
+
+function recoverPartialStructuredCandidate(payload) {
+    const text = extractJsonStringField(payload, 'text');
+    if (!text) return null;
+
+    const recovered = {
+        text,
+        callout: extractJsonStringField(payload, 'callout'),
+        button: null,
+        related: null,
+    };
+    const buttonStart = payload.indexOf('"button"');
+    const relatedStart = payload.indexOf('"related"');
+
+    if (buttonStart >= 0) {
+        const buttonEnd = relatedStart > buttonStart ? relatedStart : payload.length;
+        const buttonChunk = payload.slice(buttonStart, buttonEnd);
+        const label = extractJsonStringField(buttonChunk, 'label');
+        const route = extractJsonStringField(buttonChunk, 'route');
+        const url = extractJsonStringField(buttonChunk, 'url');
+        if (label && (url || route)) recovered.button = { label, url, route };
+    }
+
+    if (relatedStart >= 0) {
+        const related = [];
+        const relatedChunk = payload.slice(relatedStart);
+        for (const match of relatedChunk.matchAll(/\{([^{}]*)\}/gs)) {
+            const label = extractJsonStringField(match[1], 'label');
+            const route = extractJsonStringField(match[1], 'route');
+            const url = extractJsonStringField(match[1], 'url');
+            if (label && (url || route)) related.push({ label, url, route });
+            if (related.length >= 3) break;
+        }
+        if (related.length > 0) recovered.related = related;
+    }
+
+    return recovered;
+}
+
+function extractJsonStringField(payload, field) {
+    const escapedField = field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = payload.match(new RegExp(`"${escapedField}"\\s*:\\s*"((?:\\\\.|[^"\\\\])*)"`, 's'));
+    if (!match) return null;
+    try {
+        const decoded = JSON.parse(`"${match[1]}"`);
+        return typeof decoded === 'string' && decoded.trim() ? decoded.trim() : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function normalizeClientLink(item) {
+    if (!item?.label) return null;
+    const url = typeof item.url === 'string' && item.url.trim()
+        ? item.url.trim()
+        : (typeof item.route === 'string' && item.route.startsWith('/') ? item.route : null);
+    return url ? { label: String(item.label).trim(), url } : null;
+}
+
+function normalizeClientLinks(items) {
+    if (!Array.isArray(items)) return [];
+    return items.map(normalizeClientLink).filter(Boolean).slice(0, 3);
 }
 
 // ==================== Send Message to API ====================
@@ -722,20 +885,20 @@ function renderStructuredResponse(structured) {
     if (!structured || !structured.text) return '';
     let html = '';
     const textHtml = escapeHtml(structured.text).replace(/\n/g, '<br>');
-    html += `<div class="chatbot-response-text">${textHtml}</div>`;
+    html += `<div class="text-[13px] leading-6 text-slate-800">${textHtml}</div>`;
     if (structured.callout) {
-        html += `<div class="chatbot-callout"><i class="fas fa-info-circle"></i><span>${escapeHtml(structured.callout)}</span></div>`;
+        html += `<div class="mt-2.5 flex items-start gap-2 rounded-r-lg border-l-[3px] border-amber-500 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800"><i class="fas fa-info-circle mt-0.5 shrink-0"></i><span>${escapeHtml(structured.callout)}</span></div>`;
     }
     if (structured.button && structured.button.url && structured.button.label) {
         const safeUrl = encodeURI(structured.button.url);
-        html += `<a href="${safeUrl}" class="chatbot-cta-btn"><span>${escapeHtml(structured.button.label)}</span><i class="fas fa-arrow-right"></i></a>`;
+        html += `<a href="${safeUrl}" class="mt-2.5 inline-flex min-h-9 items-center justify-center gap-2 rounded-full bg-gradient-to-br from-blue-600 to-indigo-800 px-4 text-xs font-bold text-white no-underline shadow-sm transition hover:-translate-y-0.5 hover:text-white hover:shadow-md"><span>${escapeHtml(structured.button.label)}</span><i class="fas fa-arrow-right text-[10px]"></i></a>`;
     }
     if (Array.isArray(structured.related) && structured.related.length > 0) {
-        html += '<div class="chatbot-related-chips"><span class="chatbot-related-label"><i class="fas fa-link"></i> Terkait:</span>';
+        html += '<div class="mt-3 flex flex-wrap items-center gap-1.5 border-t border-slate-200 pt-2.5"><span class="mr-1 inline-flex items-center gap-1 text-[10px] text-slate-500"><i class="fas fa-link"></i> Terkait:</span>';
         for (const chip of structured.related) {
             if (!chip || !chip.url || !chip.label) continue;
             const safeUrl = encodeURI(chip.url);
-            html += `<a href="${safeUrl}" class="chatbot-chip">${escapeHtml(chip.label)}</a>`;
+            html += `<a href="${safeUrl}" class="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700 no-underline transition hover:bg-blue-100 hover:text-blue-800">${escapeHtml(chip.label)}</a>`;
         }
         html += '</div>';
     }
@@ -754,9 +917,9 @@ function addMessage(role, content, attachments = null, saveToHistory = true, isH
         const items = attachments.map(fileObj => {
             const isImage = fileObj.file.type.startsWith('image/');
             const icon = isImage ? 'fa-image' : 'fa-file-pdf';
-            return `<div class="message-attachment-item"><i class="fas ${icon}"></i> ${fileObj.file.name}</div>`;
+            return `<div class="flex items-center gap-1.5 rounded-lg bg-slate-950/5 px-2.5 py-1.5 text-xs"><i class="fas ${icon}"></i> ${escapeHtml(fileObj.file.name)}</div>`;
         }).join('');
-        attachmentsHtml = `<div class="message-attachments">${items}</div>`;
+        attachmentsHtml = `<div class="mb-2 flex flex-wrap gap-2">${items}</div>`;
     }
     let bubbleContent;
     if (structured) {
@@ -766,19 +929,25 @@ function addMessage(role, content, attachments = null, saveToHistory = true, isH
     } else {
         bubbleContent = escapeHtml(content).replace(/\n/g, '<br>');
     }
-    const avatarIcon = !isUser ? '<div class="message-avatar"><i class="fas fa-headset ai-chatbot-icon-sm"></i></div>' : '';
+    const avatarIcon = !isUser
+        ? '<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs text-white"><i class="fas fa-headset"></i></div>'
+        : '';
+    const groupClasses = isUser ? 'flex-row-reverse' : '';
+    const bubbleClasses = isUser
+        ? 'rounded-br bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+        : 'rounded-bl bg-white text-slate-800 shadow-sm ring-1 ring-slate-200/80';
     const messageHtml = `
-        <div class="message-group ${isUser ? 'user-message' : 'ai-message'}">
+        <div data-chatbot-message class="flex items-start gap-2.5 ${groupClasses}">
             ${avatarIcon}
-            <div class="message-content">
+            <div class="flex max-w-[82%] flex-col gap-1">
                 ${attachmentsHtml}
-                <div class="message-bubble">${bubbleContent}</div>
-                <div class="message-meta">
-                    <span class="message-time">${time}</span>
-                    ${!isUser ? '<button class="btn-copy" data-copy-message title="Copy"><i class="fas fa-copy"></i></button>' : ''}
+                <div class="whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm leading-6 ${bubbleClasses}">${bubbleContent}</div>
+                <div class="flex items-center gap-2 px-1">
+                    <span class="text-[10px] text-slate-400">${time}</span>
+                    ${!isUser ? '<button type="button" class="p-1 text-[10px] text-slate-400 opacity-70 transition hover:text-blue-600 hover:opacity-100" data-copy-message title="Salin pesan" aria-label="Salin pesan"><i class="fas fa-copy"></i></button>' : ''}
                 </div>
             </div>
-            ${isUser ? '<div class="message-avatar"><i class="fas fa-user"></i></div>' : ''}
+            ${isUser ? '<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-600 text-xs text-white"><i class="fas fa-user"></i></div>' : ''}
         </div>
     `;
     messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
@@ -803,7 +972,8 @@ function showTypingIndicator() {
             chatBody.appendChild(indicator);
         }
         
-        indicator.classList.remove('d-none');
+        indicator.classList.remove('hidden');
+        indicator.classList.add('flex');
         
         if (timerDisplay) {
             timerDisplay.textContent = '0.00 s';
@@ -823,7 +993,10 @@ function showTypingIndicator() {
 
 function hideTypingIndicator() {
     const indicator = document.getElementById('typingIndicator');
-    if (indicator) indicator.classList.add('d-none');
+    if (indicator) {
+        indicator.classList.add('hidden');
+        indicator.classList.remove('flex');
+    }
     
     if (typingTimerInterval) {
         clearInterval(typingTimerInterval);
@@ -833,7 +1006,7 @@ function hideTypingIndicator() {
 
 // ==================== Copy Message ====================
 function copyMessage(button) {
-    const messageBubble = button.closest('.message-content').querySelector('.message-bubble');
+    const messageBubble = button.closest('[data-chatbot-message]')?.querySelector('.whitespace-pre-wrap');
     if (!messageBubble) return;
     
     // Use innerText to preserve newlines and formatting
@@ -951,10 +1124,6 @@ function setupEventListeners() {
             closeChatWindow();
         } else if (action === 'close-lightbox') {
             closeLightbox();
-        } else if (action === 'confirm') {
-            confirmAction();
-        } else if (action === 'cancel-confirm') {
-            cancelConfirm();
         }
     });
 
@@ -1005,106 +1174,72 @@ function setupEventListeners() {
     }
 }
 
-// ==================== Initialize Draggable FAB ====================
+// ==================== Initialize draggable FAB ====================
 function initDraggableFab() {
     const fab = document.getElementById('aiChatbotFab');
     if (!fab) return;
 
-    chatbotState.fabPosition = { right: 96 };
+    fab.style.removeProperty('left');
+    fab.style.removeProperty('right');
 
-    let isDraggingFab = false;
+    let isDragging = false;
     let hasMoved = false;
     let startX = 0;
-    let startY = 0;
     let startRight = 0;
+    let activePointerId = null;
 
-    function isMobileView() {
-        return window.innerWidth <= 768;
-    }
+    fab.addEventListener('click', (event) => {
+        if (hasMoved) {
+            event.preventDefault();
+            hasMoved = false;
+            return;
+        }
 
-    // Click: fallback for desktop mouse clicks.
-    fab.addEventListener('click', function() {
-        if (hasMoved) { hasMoved = false; return; }
         openChatWindow();
     });
 
-    // Mouse drag, desktop only.
-    fab.addEventListener('mousedown', function(e) {
-        if (isMobileView()) return;
-        isDraggingFab = true;
+    fab.addEventListener('pointerdown', (event) => {
+        if (window.innerWidth <= 768) return;
+
+        isDragging = true;
         hasMoved = false;
-        startX = e.clientX;
-        startRight = chatbotState.fabPosition.right;
+        startX = event.clientX;
+        startRight = Number.parseFloat(window.getComputedStyle(fab).right) || 104;
+        activePointerId = event.pointerId;
+        fab.setPointerCapture(event.pointerId);
         fab.style.cursor = 'grabbing';
         fab.style.transition = 'none';
-        e.preventDefault();
+        event.preventDefault();
     });
 
-    document.addEventListener('mousemove', function(e) {
-        if (!isDraggingFab) return;
-        const deltaX = startX - e.clientX;
-        const newRight = startRight + deltaX;
-        const boundedRight = Math.max(24, Math.min(newRight, window.innerWidth - fab.offsetWidth - 24));
-        chatbotState.fabPosition.right = boundedRight;
-        fab.style.right = `${boundedRight}px`;
+    fab.addEventListener('pointermove', (event) => {
+        if (!isDragging || event.pointerId !== activePointerId) return;
+
+        const deltaX = startX - event.clientX;
+        // Reserve the right-most lane for the global scroll-up button.
+        const nextRight = Math.max(104, Math.min(
+            startRight + deltaX,
+            window.innerWidth - fab.offsetWidth - 24,
+        ));
+
+        fab.style.right = `${nextRight}px`;
         if (Math.abs(deltaX) > 5) hasMoved = true;
     });
 
-    document.addEventListener('mouseup', function() {
-        if (!isDraggingFab) return;
-        isDraggingFab = false;
+    const stopDragging = (event) => {
+        if (!isDragging || event.pointerId !== activePointerId) return;
+
+        isDragging = false;
+        if (fab.hasPointerCapture(event.pointerId)) {
+            fab.releasePointerCapture(event.pointerId);
+        }
+        activePointerId = null;
         fab.style.cursor = '';
         fab.style.transition = '';
-    });
+    };
 
-    // Touch: always record start position.
-    fab.addEventListener('touchstart', function(e) {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        if (isMobileView()) {
-            // Mobile: touchend on FAB handles tap explicitly.
-            return;
-        }
-        // Desktop touch: set up drag.
-        isDraggingFab = true;
-        hasMoved = false;
-        startRight = chatbotState.fabPosition.right;
-        fab.style.transition = 'none';
-        e.preventDefault();
-    }, { passive: false });
-
-    // Mobile tap: touchend on FAB.
-    fab.addEventListener('touchend', function(e) {
-        if (!isMobileView()) return;
-        const touch = e.changedTouches[0];
-        const deltaX = Math.abs(touch.clientX - startX);
-        const deltaY = Math.abs(touch.clientY - startY);
-        if (deltaX < 15 && deltaY < 15) {
-            e.preventDefault();
-            openChatWindow();
-        }
-    }, { passive: false });
-
-    // Desktop touch drag.
-    document.addEventListener('touchmove', function(e) {
-        if (!isDraggingFab || isMobileView()) return;
-        const deltaX = startX - e.touches[0].clientX;
-        const newRight = startRight + deltaX;
-        const boundedRight = Math.max(24, Math.min(newRight, window.innerWidth - fab.offsetWidth - 24));
-        chatbotState.fabPosition.right = boundedRight;
-        fab.style.right = `${boundedRight}px`;
-        if (Math.abs(deltaX) > 5) hasMoved = true;
-        e.preventDefault();
-    }, { passive: false });
-
-    document.addEventListener('touchend', function() {
-        if (!isDraggingFab || isMobileView()) return;
-        isDraggingFab = false;
-        fab.style.cursor = '';
-        fab.style.transition = '';
-        if (!hasMoved) openChatWindow();
-        hasMoved = false;
-    });
+    fab.addEventListener('pointerup', stopDragging);
+    fab.addEventListener('pointercancel', stopDragging);
 }
 
 // ==================== Utility ====================
@@ -1123,12 +1258,12 @@ function showChatError(message) {
     const messagesContainer = document.getElementById('chatMessages');
     if (!messagesContainer) { console.error('Chat error:', message); return; }
     const errorHtml = `
-        <div class="message-group ai-message">
-            <div class="message-avatar chatbot-warning-avatar">
-                <i class="fas fa-exclamation-triangle ai-chatbot-icon-sm"></i>
+        <div data-chatbot-message class="flex items-start gap-2.5">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-xs text-white">
+                <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <div class="message-content">
-                <div class="message-bubble chatbot-warning-bubble">
+            <div class="flex max-w-[82%] flex-col gap-1">
+                <div class="rounded-2xl rounded-bl border border-amber-300 border-l-[3px] border-l-amber-500 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
                     ${escapeHtml(message)}
                 </div>
             </div>
@@ -1152,28 +1287,18 @@ function clearAllConversations() {
     });
 }
 
-// ==================== Custom Confirmation Dialog ====================
-let confirmCallback = null;
-
 function showConfirmDialog(message, onConfirm) {
-    const dialog = document.getElementById('confirmDialog');
-    const messageEl = document.getElementById('confirmDialogMessage');
-    if (!dialog || !messageEl) return;
-    messageEl.textContent = message;
-    confirmCallback = onConfirm;
-    dialog.classList.remove('d-none');
-}
+    const confirmation = window.CleanFlow?.confirmAction
+        ? window.CleanFlow.confirmAction({
+            title: 'Konfirmasi penghapusan',
+            text: message,
+            confirmText: 'Ya, hapus',
+        })
+        : Promise.resolve({ isConfirmed: window.confirm(message) });
 
-function confirmAction() {
-    const dialog = document.getElementById('confirmDialog');
-    if (dialog) dialog.classList.add('d-none');
-    if (confirmCallback) { confirmCallback(); confirmCallback = null; }
-}
-
-function cancelConfirm() {
-    const dialog = document.getElementById('confirmDialog');
-    if (dialog) dialog.classList.add('d-none');
-    confirmCallback = null;
+    confirmation.then((result) => {
+        if (result.isConfirmed) onConfirm();
+    });
 }
 
 // ==================== Make Functions Global ====================
@@ -1192,10 +1317,10 @@ window.removeAttachmentByIndex = removeAttachmentByIndex;
 window.openLightbox = openLightbox;
 window.closeLightbox = closeLightbox;
 window.showConfirmDialog = showConfirmDialog;
-window.confirmAction = confirmAction;
-window.cancelConfirm = cancelConfirm;
 
 // ==================== Auto-initialize ====================
-document.addEventListener('DOMContentLoaded', function() {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initChatbot, { once: true });
+} else {
     initChatbot();
-});
+}

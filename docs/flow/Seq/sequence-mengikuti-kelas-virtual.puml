@@ -1,0 +1,50 @@
+@startuml
+title Sequence Diagram - Mengikuti Kelas Virtual
+autonumber
+
+actor "Siswa" as Siswa
+boundary "UI_KelasVirtual" as UI
+control "Control_Virtual" as Control
+entity "T_KelasVirtual" as E_Virtual
+
+== Skenario: Menampilkan Daftar & Status Meeting ==
+
+Siswa -> UI : 1. Mengakses Menu "Kelas Virtual (Meeting)"
+activate UI
+UI -> Control : 2. RequestDaftarMeeting(Kelas)
+activate Control
+
+Control -> E_Virtual : 3. AmbilDataJadwal(Kelas)
+activate E_Virtual
+E_Virtual --> Control : 4. DataJadwalDitemukan(Data)
+deactivate E_Virtual
+
+Control -> Control : 5. Evaluasi Status Waktu (Akan Datang / Berlangsung / Selesai)
+
+Control --> UI : 6. TampilkanDaftarKelasVirtual(Data, StatusWaktu)
+deactivate Control
+UI --> Siswa : 7. Daftar Jadwal Meeting Terbuka
+deactivate UI
+
+== Skenario: Eksekusi Masuk Meeting ==
+
+Siswa -> UI : 8. Mengecek Status Meeting Tertentu
+activate UI
+
+alt Status = Sedang Berlangsung
+    UI --> Siswa : 9. Tombol "Masuk Meeting" Aktif
+    Siswa -> UI : 10. Klik "Masuk Meeting"
+    UI -> Control : 11. RequestLinkURL(ID_Jadwal)
+    activate Control
+    Control --> UI : 12. ReturnURLPlatform(Zoom / GMeet)
+    deactivate Control
+    UI --> Siswa : 13. Redirect Tab Baru ke Platform Meeting
+    note right of Siswa : Siswa berinteraksi secara live\ndi luar lingkup LMS (Zoom/Meet)
+
+else Status = Akan Datang / Selesai
+    UI -> UI : 14. Disable (Kunci) Tombol Masuk Meeting
+    UI --> Siswa : 15. Menampilkan Peringatan ("Belum Mulai" / "Kedaluwarsa")
+end
+deactivate UI
+
+@enduml

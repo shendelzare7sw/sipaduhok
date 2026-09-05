@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Template Capaian Kompetensi')
 @section('page-title', 'Template Capaian Kompetensi')
 @section('page-subtitle', 'Kelola template deskripsi capaian untuk rapor')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/js/wali-kelas/template-capaian/index.js'])

@@ -1,0 +1,14 @@
+/* Temporary compatibility layer for page bodies that are still being migrated. */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import 'boxicons/css/boxicons.min.css';
+@import 'sneat-bootstrap-html-admin-template-free/assets/vendor/css/core.css';
+@import 'sneat-bootstrap-html-admin-template-free/assets/vendor/css/theme-default.css';
+
+:root {
+    --bs-primary: #1e90ff;
+    --bs-primary-rgb: 30, 144, 255;
+    --primary-color: #1e90ff;
+    --primary-dark: #1b3a6b;
+    --primary-light: #e8f4ff;
+}

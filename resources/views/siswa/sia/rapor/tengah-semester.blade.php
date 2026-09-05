@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Rapor Tengah Semester')
 @section('page-title', 'Rapor Tengah Semester')
 @section('page-subtitle', 'Laporan Penilaian Tengah Semester')
 
-@section('sidebar-menu')
-    @include('siswa.partials.sneat-sidebar-sia')
-@endsection
 
 @section('content')
 <style>

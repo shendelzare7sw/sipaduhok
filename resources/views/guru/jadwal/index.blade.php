@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Jadwal Mengajar')
 @section('page-title', 'Jadwal Mengajar')
 @section('page-subtitle', 'Jadwal mengajar mingguan Anda')
 
-@section('sidebar-menu')
-    @include('guru.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/guru/jadwal/index.css'])

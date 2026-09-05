@@ -1,4 +1,4 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Edit Kelas')
 
@@ -7,9 +7,6 @@
 Perbarui data kelas {{ $kelas->nama_kelas }}
 @endsection
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/kelas/form.css'])

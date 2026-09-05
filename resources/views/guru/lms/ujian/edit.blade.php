@@ -12,10 +12,6 @@
     $bisaDiulang = old('bisa_diulang', $ujian->bisa_diulang);
 @endphp
 
-@push('styles')
-    @vite(['resources/css/guru/lms/ujian/edit.css'])
-@endpush
-
 @section('content')
 <div class="guru-lms-ujian-edit-page">
     <div class="mb-3">
@@ -133,7 +129,7 @@
                         <div id="batasPengulanganContainer" data-repeat-container @if(!$bisaDiulang) hidden @endif>
                             <div class="d-flex align-items-center mt-2 ms-4">
                                 <label class="me-2 text-muted">Diulang</label>
-                                <input type="number" class="form-control form-control-sm text-center repeat-limit-input" name="batas_pengulangan" value="{{ old('batas_pengulangan', $ujian->batas_pengulangan ?? 2) }}" min="0">
+                                <input type="number" class="form-control form-control-sm w-[70px] text-center" name="batas_pengulangan" value="{{ old('batas_pengulangan', $ujian->batas_pengulangan ?? 2) }}" min="0">
                                 <label class="ms-2 text-muted">kali</label>
                             </div>
                         </div>

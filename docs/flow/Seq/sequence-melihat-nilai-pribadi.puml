@@ -1,0 +1,40 @@
+@startuml
+title Sequence Diagram - Melihat Nilai Pribadi
+autonumber
+
+actor "Siswa" as Siswa
+boundary "UI_NilaiAkademik" as UI
+control "Control_Nilai" as Control
+entity "T_Nilai" as E_Nilai
+
+Siswa -> UI : 1. Mengakses Menu "Nilai Akademik"
+activate UI
+UI -> Control : 2. RequestDaftarNilai()
+activate Control
+Control -> Control : 3. Identifikasi Semester Aktif
+Control -> E_Nilai : 4. AmbilDataNilai(ID_Siswa, SemesterAktif)
+activate E_Nilai
+E_Nilai --> Control : 5. ReturnDataMentah()
+deactivate E_Nilai
+Control -> Control : 6. Menyusun Data Atribut (Mapel, Guru)
+Control --> UI : 7. TampilkanTabelNilai()
+deactivate Control
+UI --> Siswa : 8. Halaman Daftar Nilai (Semester Berjalan) Terbuka
+
+alt Pilih Semester Lain
+    Siswa -> UI : 9. Memilih Opsi Semester Lain (Dropdown)
+    UI -> Control : 10. RequestDaftarNilaiBySemester(ID_Semester)
+    activate Control
+    Control -> E_Nilai : 11. AmbilDataNilai(ID_Siswa, SemesterLain)
+    activate E_Nilai
+    E_Nilai --> Control : 12. ReturnDataMentah()
+    deactivate E_Nilai
+    Control -> Control : 13. Menyusun Data Atribut (Mapel, Guru)
+    Control --> UI : 14. UpdateTabelNilai()
+    deactivate Control
+    UI --> Siswa : 15. Menampilkan Nilai Semester Terpilih
+end
+
+Siswa -> UI : 16. Membaca Rekapitulasi Nilai (Harian, Tugas, Ujian)
+deactivate UI
+@enduml

@@ -1,425 +1,143 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Validasi Akses')
 @section('page-title', 'Validasi Akses Ujian & Rapor')
-@section('page-subtitle', 'Validasi akses berdasarkan status pembayaran siswa')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/keuangan/validasi-akses/index.css'])
-@endsection
+@section('page-subtitle', 'Kendalikan akses berdasarkan pembayaran dan persetujuan Ketua PKBM')
 
 @section('content')
 @php
     $hasActiveFilter = request()->hasAny(['search', 'cabang_id', 'jenjang', 'kelas_id', 'status_ujian', 'status_rapor']);
     $quickClasses = $quickKelasList ?? $kelasList;
+    $studentIds = $siswa->getCollection()->map(fn ($student) => (string) $student->id)->values();
+    $raporEligibleIds = $siswa->getCollection()->filter(fn ($student) => $student->validasi_rapor_ketua)->map(fn ($student) => (string) $student->id)->values();
+    $inputClass = 'h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-xs text-slate-700 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100';
+    $isBendahara = request()->routeIs('bendahara.*');
+    $routePrefix = $isBendahara ? 'bendahara.validasi-akses' : 'admin.keuangan.validasi-akses';
+    $tagihanRoutePrefix = $isBendahara ? 'bendahara.tagihan' : 'admin.keuangan.tagihan';
+    $validatorLabel = $isBendahara ? 'Bendahara' : 'Admin';
 @endphp
 
-<div class="access-shell" data-validasi-akses data-csrf-token="{{ csrf_token() }}">
-    <div class="access-flow">
-        <span class="flow-label">Alur Validasi</span>
-        <span class="badge bg-warning text-dark"><i class="fas fa-user-check me-1"></i>Ketua Approve Rapor</span>
-        <i class="fas fa-arrow-right small d-none d-sm-inline"></i>
-        <span class="badge bg-primary"><i class="fas fa-money-bill me-1"></i>Admin/Bendahara Validasi</span>
-        <i class="fas fa-arrow-right small d-none d-sm-inline"></i>
-        <span class="badge bg-success"><i class="fas fa-unlock me-1"></i>Akses Terbuka</span>
-    </div>
+<div class="min-w-0 w-full space-y-5" data-validasi-akses x-data="{
+    selected: [],
+    allIds: @js($studentIds),
+    raporEligible: @js($raporEligibleIds),
+    toggleAll() { this.selected = this.selected.length === this.allIds.length ? [] : [...this.allIds]; },
+    selectedEligible() { return this.selected.filter(id => this.raporEligible.includes(id)); },
+    async runBulk(type) {
+        if (!this.selected.length) {
+            await Swal.fire({ icon: 'info', title: 'Pilih siswa dahulu', text: 'Pilih minimal satu siswa untuk melanjutkan.', confirmButtonColor: '#285dcc' });
+            return;
+        }
+        const eligible = type === 'rapor' ? this.selectedEligible() : this.selected;
+        if (!eligible.length) {
+            await Swal.fire({ icon: 'warning', title: 'Belum dapat divalidasi', text: 'Siswa yang dipilih belum mendapat persetujuan rapor dari Ketua PKBM.', confirmButtonColor: '#285dcc' });
+            return;
+        }
+        const skipped = this.selected.length - eligible.length;
+        const result = await Swal.fire({ icon: 'question', title: `Validasi akses ${type}?`, text: `${eligible.length} siswa akan divalidasi${skipped ? `; ${skipped} siswa yang belum disetujui Ketua akan dilewati` : ''}.`, showCancelButton: true, confirmButtonText: 'Ya, validasi', cancelButtonText: 'Batal', confirmButtonColor: '#285dcc', reverseButtons: true });
+        if (result.isConfirmed) {
+            this.$refs.bulkType.value = type;
+            this.$nextTick(() => this.$refs.bulkForm.requestSubmit());
+        }
+    },
+    async openDispensasi() {
+        if (!this.selected.length) {
+            await Swal.fire({ icon: 'info', title: 'Pilih siswa dahulu', text: 'Centang siswa yang akan diajukan dispensasi.', confirmButtonColor: '#285dcc' });
+            return;
+        }
+        this.$refs.dispensasiDialog.showModal();
+    }
+}">
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:p-5">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><i class="fas fa-route" aria-hidden="true"></i></span>
+            <div class="min-w-0"><h2 class="text-sm font-extrabold text-slate-950">Alur pembukaan akses</h2><p class="mt-1 text-xs text-slate-500">Rapor memerlukan persetujuan Ketua sebelum dapat divalidasi {{ $validatorLabel }}.</p></div>
+        </div>
+        <ol class="grid border-t border-slate-200 text-xs sm:grid-cols-3">
+            @foreach([
+                ['1', 'Ketua menyetujui', 'Persetujuan awal khusus akses rapor', 'bg-amber-50 text-amber-700'],
+                ['2', $validatorLabel.' memvalidasi', 'Periksa pembayaran atau dispensasi', 'bg-brand-50 text-brand-700'],
+                ['3', 'Akses terbuka', 'Siswa dapat membuka ujian atau rapor', 'bg-emerald-50 text-emerald-700'],
+            ] as [$number, $title, $description, $tone])
+                <li class="flex gap-3 border-slate-200 p-4 sm:border-r sm:last:border-r-0"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-extrabold {{ $tone }}">{{ $number }}</span><div><p class="font-extrabold text-slate-800">{{ $title }}</p><p class="mt-1 leading-5 text-slate-500">{{ $description }}</p></div></li>
+            @endforeach
+        </ol>
+    </section>
 
-    <div class="stat-row">
-        <div class="stat-widget">
-            <div class="stat-icon stat-icon-blue"><i class="fas fa-user-graduate"></i></div>
-            <div>
-                <div class="stat-value">{{ $totalSiswa }}</div>
-                <div class="stat-label">Total Siswa Aktif</div>
-                <div class="stat-desc">Siswa terdaftar</div>
-            </div>
-        </div>
-        <div class="stat-widget">
-            <div class="stat-icon stat-icon-green"><i class="fas fa-file-signature"></i></div>
-            <div>
-                <div class="stat-value">{{ $validasiUjian }}</div>
-                <div class="stat-label">Akses Ujian Valid</div>
-                <div class="stat-desc">Sudah divalidasi</div>
-            </div>
-        </div>
-        <div class="stat-widget">
-            <div class="stat-icon stat-icon-purple"><i class="fas fa-file-invoice"></i></div>
-            <div>
-                <div class="stat-value">{{ $validasiRapor }}</div>
-                <div class="stat-label">Akses Rapor Valid</div>
-                <div class="stat-desc">Sudah divalidasi</div>
-            </div>
-        </div>
-        <div class="stat-widget">
-            <div class="stat-icon stat-icon-orange"><i class="fas fa-hourglass-half"></i></div>
-            <div>
-                <div class="stat-value">{{ $belumValidasi }}</div>
-                <div class="stat-label">Belum Divalidasi</div>
-                <div class="stat-desc">Menunggu antrean</div>
-            </div>
-        </div>
-    </div>
+    <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        @foreach([
+            ['Total siswa', $totalSiswa, 'Siswa aktif terdaftar', 'fa-user-graduate', 'bg-brand-50 text-brand-600'],
+            ['Ujian valid', $validasiUjian, 'Akses telah divalidasi', 'fa-file-signature', 'bg-emerald-50 text-emerald-600'],
+            ['Rapor valid', $validasiRapor, 'Akses telah divalidasi', 'fa-file-invoice', 'bg-violet-50 text-violet-600'],
+            ['Belum validasi', $belumValidasi, 'Masih dalam antrean', 'fa-hourglass-half', 'bg-amber-50 text-amber-600'],
+        ] as [$label, $value, $description, $icon, $tone])
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="truncate text-xl font-extrabold text-slate-950">{{ $value }}</p><p class="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $label }}</p></div><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div><p class="mt-3 truncate border-t border-slate-100 pt-3 text-[11px] text-slate-500">{{ $description }}</p></article>
+        @endforeach
+    </section>
 
-    <div class="access-card">
-        <div class="access-card-header">
-            <div>
-                <h5 class="access-card-title">
-                    <i class="fas fa-user-shield title-icon-primary"></i> Daftar Kendali Akses Siswa
-                </h5>
-                <div class="access-card-subtitle">Pilih siswa, validasi akses, atau kirim dispensasi ke Ketua PKBM.</div>
-            </div>
-        </div>
+    <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-user-shield text-brand-600" aria-hidden="true"></i>Daftar kendali akses siswa</h2><p class="mt-1 text-xs leading-5 text-slate-500">Cari siswa, pilih akses yang perlu dibuka, atau ajukan dispensasi kepada Ketua PKBM.</p></header>
 
-        <form action="{{ route('admin.keuangan.validasi-akses.index') }}" method="GET" class="mb-0">
-            <div class="filter-wrapper">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" name="search" placeholder="Cari nama atau NISN..." value="{{ request('search') }}">
-                </div>
-                <select name="cabang_id" class="form-select filter-select" data-auto-submit>
-                    <option value="">Semua Cabang</option>
-                    @foreach($cabangList as $cabang)
-                        <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
-                    @endforeach
-                </select>
-                <select name="jenjang" class="form-select filter-select" data-auto-submit>
-                    <option value="">Semua Jenjang</option>
-                    @foreach($jenjangList as $jenjang)
-                        <option value="{{ $jenjang }}" {{ request('jenjang') == $jenjang ? 'selected' : '' }}>{{ $jenjang }}</option>
-                    @endforeach
-                </select>
-                <select name="kelas_id" class="form-select filter-select" data-auto-submit>
-                    <option value="">Semua Kelas</option>
-                    @foreach($kelasList as $kelas)
-                        <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>{{ $kelas->nama_kelas }} - {{ $kelas->cabang->nama_cabang ?? '' }}</option>
-                    @endforeach
-                </select>
-                <select name="status_ujian" class="form-select filter-select" data-auto-submit>
-                    <option value="">Status Ujian</option>
-                    <option value="valid" {{ request('status_ujian') == 'valid' ? 'selected' : '' }}>Valid</option>
-                    <option value="belum" {{ request('status_ujian') == 'belum' ? 'selected' : '' }}>Belum</option>
-                </select>
-                <select name="status_rapor" class="form-select filter-select" data-auto-submit>
-                    <option value="">Status Rapor</option>
-                    <option value="valid" {{ request('status_rapor') == 'valid' ? 'selected' : '' }}>Valid</option>
-                    <option value="belum" {{ request('status_rapor') == 'belum' ? 'selected' : '' }}>Belum</option>
-                </select>
-                <button type="submit" class="btn btn-secondary btn-sm btn-soft px-3">
-                    <i class="fas fa-filter"></i> Filter
-                </button>
-                @if($hasActiveFilter)
-                    <a href="{{ route('admin.keuangan.validasi-akses.index') }}" class="btn btn-outline-danger btn-sm btn-soft px-3">
-                        <i class="fas fa-times"></i> Reset
-                    </a>
-                @endif
-            </div>
+        <form action="{{ route($routePrefix.'.index') }}" method="GET" class="grid gap-2 border-b border-slate-200 p-4 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_repeat(5,minmax(130px,0.45fr))_auto] sm:p-5">
+            <label class="relative sm:col-span-2 xl:col-span-1"><span class="sr-only">Cari siswa</span><i class="fas fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400" aria-hidden="true"></i><input type="search" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NISN..." class="{{ $inputClass }} !pl-10"></label>
+            <select name="cabang_id" class="{{ $inputClass }}" @change="$el.form.submit()"><option value="">Semua cabang</option>@foreach($cabangList as $cabang)<option value="{{ $cabang->id }}" @selected(request('cabang_id') == $cabang->id)>{{ $cabang->nama_cabang }}</option>@endforeach</select>
+            <select name="jenjang" class="{{ $inputClass }}" @change="$el.form.submit()"><option value="">Semua jenjang</option>@foreach($jenjangList as $jenjang)<option value="{{ $jenjang }}" @selected(request('jenjang') == $jenjang)>{{ $jenjang }}</option>@endforeach</select>
+            <select name="kelas_id" class="{{ $inputClass }}" @change="$el.form.submit()"><option value="">Semua kelas</option>@foreach($kelasList as $kelas)<option value="{{ $kelas->id }}" @selected(request('kelas_id') == $kelas->id)>{{ $kelas->nama_kelas }} · {{ $kelas->cabang->nama_cabang ?? 'Tanpa cabang' }}</option>@endforeach</select>
+            <select name="status_ujian" class="{{ $inputClass }}" @change="$el.form.submit()"><option value="">Status ujian</option><option value="valid" @selected(request('status_ujian') === 'valid')>Valid</option><option value="belum" @selected(request('status_ujian') === 'belum')>Belum</option></select>
+            <select name="status_rapor" class="{{ $inputClass }}" @change="$el.form.submit()"><option value="">Status rapor</option><option value="valid" @selected(request('status_rapor') === 'valid')>Valid</option><option value="belum" @selected(request('status_rapor') === 'belum')>Belum</option></select>
+            <div class="flex gap-2"><button type="submit" class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-800 px-4 text-xs font-bold text-white hover:bg-slate-900"><i class="fas fa-filter" aria-hidden="true"></i>Filter</button>@if($hasActiveFilter)<a href="{{ route($routePrefix.'.index') }}" class="inline-flex h-11 items-center justify-center rounded-xl bg-red-50 px-3 text-xs font-bold text-red-700 no-underline ring-1 ring-inset ring-red-100" aria-label="Reset filter" title="Reset filter"><i class="fas fa-xmark" aria-hidden="true"></i></a>@endif</div>
         </form>
 
-        <div class="access-toolbar">
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <label class="mobile-select-all mb-0" for="select-all-mobile">
-                    <input type="checkbox" id="select-all-mobile" class="form-check-input m-0">
-                    <span>Pilih semua</span>
-                </label>
-                <div class="selected-badge">
-                    <i class="fas fa-check-circle"></i>
-                    <span><span id="selectedCount">0</span> siswa terpilih</span>
-                </div>
-            </div>
-            <div class="d-flex gap-2 flex-wrap">
-                <button type="button" class="btn btn-success btn-sm btn-soft" data-bulk-ujian>
-                    <i class="fas fa-check-double"></i> Validasi Ujian
-                </button>
-                <button type="button" id="btn-bulk-rapor" class="btn btn-outline-secondary btn-sm btn-soft" data-bulk-rapor title="Belum ada siswa yang di-approve Ketua">
-                    <i class="fas fa-lock" id="btn-bulk-rapor-icon"></i> Validasi Rapor <small class="opacity-75" id="btn-bulk-rapor-label">(Perlu Ketua)</small>
-                </button>
-                <button type="button" class="btn btn-warning btn-sm btn-soft" data-bs-toggle="modal" data-bs-target="#dispensasiModal">
-                    <i class="fas fa-hand-holding-heart"></i> Ajukan Dispensasi
-                    @if(($dispensasiPending ?? 0) > 0)
-                        <span class="badge bg-danger ms-1">{{ $dispensasiPending }}</span>
-                    @endif
-                </button>
-            </div>
+        <div class="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div class="flex items-center gap-3"><label class="inline-flex cursor-pointer items-center gap-2 text-xs font-bold text-slate-700"><input type="checkbox" @change="toggleAll()" :checked="allIds.length > 0 && selected.length === allIds.length" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">Pilih semua</label><span class="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-brand-700 ring-1 ring-slate-200"><span x-text="selected.length">0</span> terpilih</span></div>
+            <div class="grid grid-cols-2 gap-2 sm:flex"><button type="button" @click="runBulk('ujian')" :disabled="!selected.length" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-xs font-bold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300"><i class="fas fa-check-double" aria-hidden="true"></i>Validasi ujian</button><button type="button" @click="runBulk('rapor')" :disabled="!selected.length" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-violet-600 px-3 text-xs font-bold text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-300"><i class="fas fa-file-circle-check" aria-hidden="true"></i>Validasi rapor</button><button type="button" @click="openDispensasi()" class="col-span-2 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-amber-100 px-3 text-xs font-bold text-amber-800 hover:bg-amber-200"><i class="fas fa-hand-holding-heart" aria-hidden="true"></i>Ajukan dispensasi @if(($dispensasiPending ?? 0) > 0)<span class="rounded-full bg-red-600 px-1.5 py-0.5 text-[9px] text-white">{{ $dispensasiPending }}</span>@endif</button></div>
         </div>
 
-        <form id="bulk-form" action="{{ route('admin.keuangan.validasi-akses.bulk-validasi-selected') }}" method="POST">
-            @csrf
-            <input type="hidden" name="tipe" id="bulk-action" value="">
+        <form x-ref="bulkForm" action="{{ route($routePrefix.'.bulk-validasi-selected') }}" method="POST" class="hidden">@csrf<input x-ref="bulkType" type="hidden" name="tipe"><template x-for="id in selected" :key="id"><input type="hidden" name="siswa_ids[]" :value="id"></template></form>
 
-            <div class="table-responsive">
-                <table class="table table-clean align-middle">
-                    <thead>
-                        <tr>
-                            <th width="42" class="text-center"><input type="checkbox" id="select-all" class="form-check-input"></th>
-                            <th width="60" class="text-center">No</th>
-                            <th>Identitas Siswa</th>
-                            <th>Kelas</th>
-                            <th>Tagihan</th>
-                            <th>Sisa</th>
-                            <th>Akses Ujian</th>
-                            <th>Akses Rapor</th>
-                            <th class="text-end" width="130">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($siswa as $index => $s)
-                            <tr>
-                                <td class="text-center" data-label="Pilih">
-                                    <input type="checkbox" name="siswa_ids[]" value="{{ $s->id }}" class="siswa-checkbox form-check-input" data-ketua-approved="{{ $s->validasi_rapor_ketua ? '1' : '0' }}">
-                                </td>
-                                <td class="text-center fw-bold text-muted" data-label="No">{{ $siswa->firstItem() + $index }}</td>
-                                <td class="mobile-card-head" data-label="Siswa">
-                                    <div class="student-info">
-                                        <div class="student-avatar">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</div>
-                                        <div class="student-text">
-                                            <div class="student-name">{{ $s->nama_lengkap }}</div>
-                                            <div class="student-meta">{{ $s->nisn }} | {{ $s->cabang->nama_cabang ?? '-' }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td data-label="Kelas">
-                                    <span class="badge bg-primary text-white px-2 py-1">{{ $s->kelas->nama_kelas ?? '-' }}</span>
-                                </td>
-                                <td data-label="Tagihan">
-                                    <span class="currency-font">Rp {{ number_format($s->total_tagihan, 0, ',', '.') }}</span>
-                                </td>
-                                <td data-label="Sisa">
-                                    <span class="currency-font {{ $s->sisa_tagihan > 0 ? 'text-danger' : 'text-success' }}">Rp {{ number_format($s->sisa_tagihan, 0, ',', '.') }}</span>
-                                </td>
-                                {{-- Sama dengan halaman Bendahara: tampilkan akses yang
-                                     SEBENARNYA dialami siswa, bukan hanya flag validasi manual. --}}
-                                <td data-label="Akses Ujian">
-                                    @if($s->punya_akses_ujian ?? false)
-                                        <div class="text-end">
-                                            <span class="badge bg-success badge-status"><i class="fas fa-check-circle me-1"></i>Valid</span>
-                                            <div class="small text-muted mt-1">
-                                                @if($s->validasi_ujian_bendahara)
-                                                    {{ \Carbon\Carbon::parse($s->tanggal_validasi_ujian_bendahara)->format('d/m/Y') }}
-                                                @elseif($s->is_lunas)
-                                                    Lunas
-                                                @else
-                                                    Dispensasi
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @else
-                                        <span class="badge bg-warning text-dark badge-status"><i class="fas fa-clock me-1"></i>Belum</span>
-                                    @endif
-                                </td>
-                                <td data-label="Akses Rapor">
-                                    @if($s->validasi_rapor_bendahara)
-                                        <div class="text-end">
-                                            <span class="badge bg-success badge-status"><i class="fas fa-check-circle me-1"></i>Valid</span>
-                                            <div class="small text-muted mt-1">{{ \Carbon\Carbon::parse($s->tanggal_validasi_rapor_bendahara)->format('d/m/Y') }}</div>
-                                        </div>
-                                    @elseif(!$s->validasi_rapor_ketua)
-                                        <span class="badge bg-secondary badge-status"><i class="fas fa-hourglass-half me-1"></i>Tunggu Ketua</span>
-                                    @else
-                                        <span class="badge bg-warning text-dark badge-status"><i class="fas fa-clock me-1"></i>Belum</span>
-                                    @endif
-                                </td>
-                                <td class="mobile-card-actions" data-label="Aksi">
-                                    <div class="action-btns">
-                                        @if(!$s->validasi_ujian_bendahara)
-                                            <button type="button" class="btn btn-sm btn-success" title="Validasi Ujian" data-confirm-action data-url="{{ route('admin.keuangan.validasi-akses.validasi-ujian', $s->id) }}" data-message="Validasi ujian {{ $s->nama_lengkap }}?">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        @else
-                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Batal Ujian" data-confirm-action data-url="{{ route('admin.keuangan.validasi-akses.batalkan-ujian', $s->id) }}" data-message="Batalkan validasi ujian?">
-                                                <i class="fas fa-undo"></i>
-                                            </button>
-                                        @endif
-
-                                        @if(!$s->validasi_rapor_bendahara)
-                                            @if($s->validasi_rapor_ketua)
-                                                <button type="button" class="btn btn-sm btn-info text-white" title="Validasi Rapor" data-confirm-action data-url="{{ route('admin.keuangan.validasi-akses.validasi-rapor', $s->id) }}" data-message="Validasi rapor {{ $s->nama_lengkap }}?">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            @else
-                                                <button type="button" class="btn btn-sm btn-light border" disabled title="Menunggu validasi Ketua">
-                                                    <i class="fas fa-lock text-muted"></i>
-                                                </button>
-                                            @endif
-                                        @else
-                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Batal Rapor" data-confirm-action data-url="{{ route('admin.keuangan.validasi-akses.batalkan-rapor', $s->id) }}" data-message="Batalkan validasi rapor?">
-                                                <i class="fas fa-undo"></i>
-                                            </button>
-                                        @endif
-
-                                        <a href="{{ route('admin.keuangan.tagihan.show', $s->id) }}" class="btn btn-sm btn-secondary" title="Detail Tagihan">
-                                            <i class="fas fa-file-invoice"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="9">
-                                    <div class="empty-state">
-                                        <i class="fas fa-search"></i>
-                                        <h6 class="mb-1">Data tidak ditemukan</h6>
-                                        <p class="small mb-0">Coba ubah kata kunci atau filter yang sedang aktif.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </form>
-
-        @if($siswa->hasPages())
-            <div class="border-top p-3 d-flex justify-content-center">
-                {{ $siswa->withQueryString()->links() }}
-            </div>
-        @endif
-    </div>
-
-    <div class="access-card">
-        <div class="access-card-header">
-            <div>
-                <h5 class="access-card-title">
-                    <i class="fas fa-bolt title-icon-warning"></i> Validasi Kilat Per Kelas
-                </h5>
-                <div class="access-card-subtitle">Jalankan validasi massal sesuai filter cabang, jenjang, dan kelas yang aktif.</div>
-            </div>
-            <span class="quick-count-badge">
-                <i class="fas fa-layer-group"></i>
-                {{ $quickClasses->count() }} kelas
-            </span>
-        </div>
-        <div class="quick-grid">
-            @forelse($quickClasses as $kelas)
-                <div class="quick-card">
-                    <div class="quick-title">{{ $kelas->nama_kelas }}</div>
-                    <div class="quick-meta">{{ $kelas->jenjang }} | {{ $kelas->cabang->nama_cabang ?? '-' }} | {{ $kelas->siswa_aktif_count ?? $kelas->siswa->count() }} Siswa</div>
-                    <div class="row g-2">
-                        <div class="col">
-                            <form id="form-ujian-{{ $kelas->id }}" action="{{ route('admin.keuangan.validasi-akses.bulk-validasi-ujian', $kelas->id) }}" method="POST">
-                                @csrf
-                                <button type="button" class="btn btn-success btn-sm w-100 btn-soft" data-confirm-class-action data-form-id="form-ujian-{{ $kelas->id }}" data-title="Validasi Ujian Se-Kelas" data-message="Validasi ujian untuk seluruh siswa di kelas {{ $kelas->nama_kelas }}?">Ujian</button>
-                            </form>
-                        </div>
-                        <div class="col">
-                            <form id="form-rapor-{{ $kelas->id }}" action="{{ route('admin.keuangan.validasi-akses.bulk-validasi-rapor', $kelas->id) }}" method="POST">
-                                @csrf
-                                <button type="button" class="btn btn-info btn-sm w-100 text-white btn-soft" data-confirm-class-action data-form-id="form-rapor-{{ $kelas->id }}" data-title="Validasi Rapor Se-Kelas" data-message="Validasi rapor untuk seluruh siswa di kelas {{ $kelas->nama_kelas }}?">Rapor</button>
-                            </form>
-                        </div>
+        <div class="divide-y divide-slate-100 lg:hidden">
+            @forelse($siswa as $s)
+                <article class="p-4">
+                    <div class="flex min-w-0 items-start gap-3"><input type="checkbox" value="{{ $s->id }}" x-model="selected" class="mt-3 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-xs font-extrabold text-brand-700">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</span><div class="min-w-0 flex-1"><h3 class="break-words text-sm font-extrabold text-slate-900">{{ $s->nama_lengkap }}</h3><p class="mt-0.5 break-words text-[11px] text-slate-500">{{ $s->nisn ?: 'NISN belum tersedia' }} · {{ $s->cabang->nama_cabang ?? '-' }}</p></div><span class="shrink-0 rounded-full bg-brand-50 px-2 py-1 text-[9px] font-bold text-brand-700">{{ $s->kelas->nama_kelas ?? '-' }}</span></div>
+                    <dl class="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 text-xs"><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Total tagihan</dt><dd class="mt-1 whitespace-nowrap font-bold text-slate-800">Rp {{ number_format($s->total_tagihan, 0, ',', '.') }}</dd></div><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Sisa</dt><dd class="mt-1 whitespace-nowrap font-extrabold {{ $s->sisa_tagihan > 0 ? 'text-red-700' : 'text-emerald-700' }}">Rp {{ number_format($s->sisa_tagihan, 0, ',', '.') }}</dd></div><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Akses ujian</dt><dd class="mt-1 font-bold {{ ($s->punya_akses_ujian ?? false) ? 'text-emerald-700' : 'text-amber-700' }}">{{ ($s->punya_akses_ujian ?? false) ? 'Valid' : 'Belum' }}</dd></div><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Akses rapor</dt><dd class="mt-1 font-bold {{ $s->validasi_rapor_bendahara ? 'text-emerald-700' : 'text-amber-700' }}">{{ $s->validasi_rapor_bendahara ? 'Valid' : ($s->validasi_rapor_ketua ? 'Siap divalidasi' : 'Tunggu Ketua') }}</dd></div></dl>
+                    <div class="mt-3 grid grid-cols-3 gap-2">
+                        <form action="{{ $s->validasi_ujian_bendahara ? route($routePrefix.'.batalkan-ujian', $s->id) : route($routePrefix.'.validasi-ujian', $s->id) }}" method="POST" data-confirm data-confirm-title="{{ $s->validasi_ujian_bendahara ? 'Batalkan validasi ujian?' : 'Validasi akses ujian?' }}" data-confirm-message="Akses ujian {{ $s->nama_lengkap }} akan diperbarui." data-confirm-text="Ya, perbarui">@csrf<button type="submit" class="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl {{ $s->validasi_ujian_bendahara ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700' }} text-[11px] font-bold ring-1 ring-inset ring-current/10"><i class="fas {{ $s->validasi_ujian_bendahara ? 'fa-rotate-left' : 'fa-check' }}" aria-hidden="true"></i>Ujian</button></form>
+                        @if($s->validasi_rapor_bendahara || $s->validasi_rapor_ketua)<form action="{{ $s->validasi_rapor_bendahara ? route($routePrefix.'.batalkan-rapor', $s->id) : route($routePrefix.'.validasi-rapor', $s->id) }}" method="POST" data-confirm data-confirm-title="{{ $s->validasi_rapor_bendahara ? 'Batalkan validasi rapor?' : 'Validasi akses rapor?' }}" data-confirm-message="Akses rapor {{ $s->nama_lengkap }} akan diperbarui." data-confirm-text="Ya, perbarui">@csrf<button type="submit" class="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl {{ $s->validasi_rapor_bendahara ? 'bg-red-50 text-red-700' : 'bg-violet-50 text-violet-700' }} text-[11px] font-bold ring-1 ring-inset ring-current/10"><i class="fas {{ $s->validasi_rapor_bendahara ? 'fa-rotate-left' : 'fa-check' }}" aria-hidden="true"></i>Rapor</button></form>@else<button type="button" disabled class="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-slate-100 text-[11px] font-bold text-slate-400"><i class="fas fa-lock" aria-hidden="true"></i>Rapor</button>@endif
+                        <a href="{{ route($tagihanRoutePrefix.'.show', $s->id) }}" class="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-blue-50 text-[11px] font-bold text-blue-700 no-underline ring-1 ring-inset ring-blue-100"><i class="fas fa-file-invoice" aria-hidden="true"></i>Tagihan</a>
                     </div>
-                </div>
+                </article>
             @empty
-                <div class="empty-state">
-                    <i class="fas fa-school"></i>
-                    <h6 class="mb-1">Tidak ada kelas</h6>
-                    <p class="small mb-0">Coba ubah filter cabang atau jenjang.</p>
-                </div>
+                <div class="px-5 py-14 text-center text-sm text-slate-500"><i class="fas fa-search mb-3 block text-4xl text-slate-300" aria-hidden="true"></i>Data siswa tidak ditemukan.<p class="mt-1 text-xs">Coba ubah kata kunci atau filter aktif.</p></div>
             @endforelse
         </div>
-    </div>
-</div>
 
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow modal-content-clean">
-            <div class="modal-header border-0 modal-header-warning">
-                <h5 class="modal-title fw-bold text-dark">
-                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                    <span id="modalTitle">Konfirmasi Aksi</span>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-4">
-                <p class="mb-0 text-dark" id="modalMessage">Apakah Anda yakin?</p>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Batal
-                </button>
-                <button type="button" class="btn btn-warning fw-bold" id="confirmBtn">
-                    <i class="fas fa-check me-1"></i> Ya, Lanjutkan
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+        @if($siswa->isNotEmpty())
+            <div class="hidden overflow-x-auto lg:block"><table class="w-full min-w-[1060px] table-fixed text-left text-xs">
+                <colgroup><col class="w-12"><col class="w-12"><col><col class="w-36"><col class="w-36"><col class="w-36"><col class="w-32"><col class="w-32"><col class="w-36"></colgroup>
+                <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-3 py-3"><input type="checkbox" @change="toggleAll()" :checked="allIds.length > 0 && selected.length === allIds.length" class="h-4 w-4 rounded border-slate-300 text-brand-600"></th><th class="px-2 py-3 text-center">No</th><th class="px-3 py-3">Siswa</th><th class="px-3 py-3">Kelas</th><th class="px-3 py-3">Tagihan</th><th class="px-3 py-3">Sisa</th><th class="px-3 py-3">Ujian</th><th class="px-3 py-3">Rapor</th><th class="px-4 py-3 text-right">Aksi</th></tr></thead>
+                <tbody class="divide-y divide-slate-100">@foreach($siswa as $index => $s)<tr class="hover:bg-slate-50/70">
+                    <td class="px-3 py-4"><input type="checkbox" value="{{ $s->id }}" x-model="selected" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"></td><td class="px-2 py-4 text-center text-slate-400">{{ $siswa->firstItem() + $index }}</td>
+                    <td class="min-w-0 px-3 py-4"><div class="flex min-w-0 items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 font-extrabold text-brand-700">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</span><div class="min-w-0"><p class="truncate text-sm font-bold text-slate-900" title="{{ $s->nama_lengkap }}">{{ $s->nama_lengkap }}</p><p class="truncate text-[11px] text-slate-500" title="{{ $s->nisn }} · {{ $s->cabang->nama_cabang ?? '-' }}">{{ $s->nisn ?: 'Tanpa NISN' }} · {{ $s->cabang->nama_cabang ?? '-' }}</p></div></div></td>
+                    <td class="px-3 py-4"><span class="inline-flex max-w-full truncate rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-bold text-brand-700">{{ $s->kelas->nama_kelas ?? '-' }}</span></td><td class="whitespace-nowrap px-3 py-4 font-bold text-slate-700">Rp {{ number_format($s->total_tagihan, 0, ',', '.') }}</td><td class="whitespace-nowrap px-3 py-4 font-extrabold {{ $s->sisa_tagihan > 0 ? 'text-red-700' : 'text-emerald-700' }}">Rp {{ number_format($s->sisa_tagihan, 0, ',', '.') }}</td>
+                    <td class="px-3 py-4">@if($s->punya_akses_ujian ?? false)<span class="inline-flex whitespace-nowrap rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700"><i class="fas fa-check-circle mr-1" aria-hidden="true"></i>Valid</span><p class="mt-1 text-[10px] text-slate-400">{{ $s->validasi_ujian_bendahara ? \Carbon\Carbon::parse($s->tanggal_validasi_ujian_bendahara)->format('d/m/Y') : ($s->is_lunas ? 'Lunas' : 'Dispensasi') }}</p>@else<span class="inline-flex whitespace-nowrap rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">Belum</span>@endif</td>
+                    <td class="px-3 py-4">@if($s->validasi_rapor_bendahara)<span class="inline-flex whitespace-nowrap rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">Valid</span><p class="mt-1 text-[10px] text-slate-400">{{ \Carbon\Carbon::parse($s->tanggal_validasi_rapor_bendahara)->format('d/m/Y') }}</p>@elseif($s->validasi_rapor_ketua)<span class="inline-flex whitespace-nowrap rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-bold text-violet-700">Siap</span>@else<span class="inline-flex whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">Tunggu Ketua</span>@endif</td>
+                    <td class="px-4 py-4"><div class="flex justify-end gap-1.5"><form action="{{ $s->validasi_ujian_bendahara ? route($routePrefix.'.batalkan-ujian', $s->id) : route($routePrefix.'.validasi-ujian', $s->id) }}" method="POST" data-confirm data-confirm-title="{{ $s->validasi_ujian_bendahara ? 'Batalkan validasi ujian?' : 'Validasi akses ujian?' }}" data-confirm-message="Akses ujian {{ $s->nama_lengkap }} akan diperbarui." data-confirm-text="Ya, perbarui">@csrf<x-cleanflow.table-action type="submit" :tone="$s->validasi_ujian_bendahara ? 'delete' : 'success'" icon="fas {{ $s->validasi_ujian_bendahara ? 'fa-rotate-left' : 'fa-check' }}" label="{{ $s->validasi_ujian_bendahara ? 'Batalkan validasi ujian' : 'Validasi akses ujian' }}" /></form>@if($s->validasi_rapor_bendahara || $s->validasi_rapor_ketua)<form action="{{ $s->validasi_rapor_bendahara ? route($routePrefix.'.batalkan-rapor', $s->id) : route($routePrefix.'.validasi-rapor', $s->id) }}" method="POST" data-confirm data-confirm-title="{{ $s->validasi_rapor_bendahara ? 'Batalkan validasi rapor?' : 'Validasi akses rapor?' }}" data-confirm-message="Akses rapor {{ $s->nama_lengkap }} akan diperbarui." data-confirm-text="Ya, perbarui">@csrf<x-cleanflow.table-action type="submit" :tone="$s->validasi_rapor_bendahara ? 'delete' : 'visibility'" icon="fas {{ $s->validasi_rapor_bendahara ? 'fa-rotate-left' : 'fa-check' }}" label="{{ $s->validasi_rapor_bendahara ? 'Batalkan validasi rapor' : 'Validasi akses rapor' }}" /></form>@else<x-cleanflow.table-action type="button" icon="fas fa-lock" label="Menunggu persetujuan Ketua" disabled />@endif<x-cleanflow.table-action href="{{ route($tagihanRoutePrefix.'.show', $s->id) }}" tone="view" icon="fas fa-file-invoice" label="Detail tagihan" /></div></td>
+                </tr>@endforeach</tbody>
+            </table></div>
+        @endif
+        @if($siswa->hasPages())<div class="border-t border-slate-200 px-4 py-3 sm:px-5">{{ $siswa->withQueryString()->links() }}</div>@endif
+    </section>
 
-<div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow modal-content-clean">
-            <div class="modal-header border-0 modal-header-danger">
-                <h5 class="modal-title fw-bold text-dark">
-                    <i class="fas fa-exclamation-circle text-danger me-2"></i>
-                    <span id="alertTitle">Peringatan</span>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-4">
-                <p class="mb-0 text-dark" id="alertMessage">Terjadi kesalahan!</p>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-primary fw-bold" data-bs-dismiss="modal">
-                    <i class="fas fa-check me-1"></i> Mengerti
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 sm:p-5"><div><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-bolt text-amber-500" aria-hidden="true"></i>Validasi kilat per kelas</h2><p class="mt-1 text-xs leading-5 text-slate-500">Validasi satu kelas sekaligus sesuai cabang dan jenjang pada filter.</p></div><span class="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-600">{{ $quickClasses->count() }} kelas</span></header>
+        <div class="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3 sm:p-5">@forelse($quickClasses as $kelas)<article class="rounded-xl border border-slate-200 p-4"><div class="flex min-w-0 items-start justify-between gap-3"><div class="min-w-0"><h3 class="truncate text-sm font-extrabold text-slate-900">{{ $kelas->nama_kelas }}</h3><p class="mt-1 truncate text-[11px] text-slate-500" title="{{ $kelas->cabang->nama_cabang ?? '-' }}">{{ $kelas->jenjang }} · {{ $kelas->cabang->nama_cabang ?? '-' }}</p></div><span class="shrink-0 rounded-lg bg-brand-50 px-2 py-1 text-[10px] font-bold text-brand-700">{{ $kelas->siswa_aktif_count ?? $kelas->siswa->count() }} siswa</span></div><div class="mt-4 grid grid-cols-2 gap-2"><form action="{{ route($routePrefix.'.bulk-validasi-ujian', $kelas->id) }}" method="POST" data-confirm data-confirm-title="Validasi ujian sekelas?" data-confirm-message="Seluruh siswa kelas {{ $kelas->nama_kelas }} akan divalidasi untuk akses ujian." data-confirm-text="Ya, validasi">@csrf<button type="submit" class="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-emerald-50 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-100 hover:bg-emerald-100"><i class="fas fa-check-double" aria-hidden="true"></i>Ujian</button></form><form action="{{ route($routePrefix.'.bulk-validasi-rapor', $kelas->id) }}" method="POST" data-confirm data-confirm-title="Validasi rapor sekelas?" data-confirm-message="Siswa kelas {{ $kelas->nama_kelas }} yang sudah disetujui Ketua akan divalidasi." data-confirm-text="Ya, validasi">@csrf<button type="submit" class="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-violet-50 text-xs font-bold text-violet-700 ring-1 ring-inset ring-violet-100 hover:bg-violet-100"><i class="fas fa-file-circle-check" aria-hidden="true"></i>Rapor</button></form></div></article>@empty<div class="col-span-full py-10 text-center text-sm text-slate-500"><i class="fas fa-school mb-3 block text-4xl text-slate-300" aria-hidden="true"></i>Tidak ada kelas untuk filter aktif.</div>@endforelse</div>
+    </section>
 
-<div class="modal fade" id="dispensasiModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow modal-content-clean">
-            <form action="{{ route('admin.keuangan.validasi-akses.dispensasi') }}" method="POST">
-                @csrf
-                <div class="modal-header border-0 modal-header-warning">
-                    <h5 class="modal-title fw-bold text-dark">
-                        <i class="fas fa-hand-holding-heart text-warning me-2"></i>Ajukan Dispensasi ke Ketua PKBM
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Tipe Dispensasi</label>
-                        <select name="tipe" class="form-select" required>
-                            <option value="ujian">Akses Ujian</option>
-                            <option value="rapor">Akses Rapor</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Periode</label>
-                        <select name="periode" class="form-select">
-                            <option value="">Semua Periode</option>
-                            <option value="pts_ganjil">PTS Ganjil</option>
-                            <option value="pas_ganjil">PAS Ganjil</option>
-                            <option value="pts_genap">PTS Genap</option>
-                            <option value="pas_genap">PAS Genap</option>
-                            <option value="ujian_akhir">Ujian Akhir</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Alasan Dispensasi</label>
-                        <textarea name="alasan" class="form-control" rows="3" required placeholder="Contoh: Siswa memiliki cicilan yang sedang berjalan..."></textarea>
-                    </div>
-                    <div class="alert alert-info border-0 small mb-0">
-                        <i class="fas fa-info-circle me-1"></i> Siswa yang dicentang di tabel akan dimasukkan ke pengajuan dispensasi.
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <div id="dispensasi-siswa-ids"></div>
-                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-warning fw-bold" id="submitDispensasi">
-                        <i class="fas fa-paper-plane me-1"></i> Kirim ke Ketua
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <dialog x-ref="dispensasiDialog" class="m-auto w-[calc(100%-2rem)] max-w-lg overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/60" @click.self="$el.close()">
+        <form action="{{ route($routePrefix.'.dispensasi') }}" method="POST">@csrf<template x-for="id in selected" :key="id"><input type="hidden" name="siswa_ids[]" :value="id"></template><header class="flex items-start justify-between gap-4 border-b border-slate-200 p-4 sm:p-5"><div><h2 class="text-base font-extrabold text-slate-950">Ajukan dispensasi</h2><p class="mt-1 text-xs text-slate-500"><strong x-text="selected.length"></strong> siswa akan diajukan kepada Ketua PKBM.</p></div><button type="button" @click="$refs.dispensasiDialog.close()" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200" aria-label="Tutup"><i class="fas fa-xmark" aria-hidden="true"></i></button></header>
+            <div class="space-y-4 p-4 sm:p-5"><label class="block text-xs font-bold text-slate-700">Jenis akses<select name="tipe" required class="{{ $inputClass }} mt-2"><option value="ujian">Akses ujian</option><option value="rapor">Akses rapor</option></select></label><label class="block text-xs font-bold text-slate-700">Periode<select name="periode" class="{{ $inputClass }} mt-2"><option value="">Semua periode</option><option value="pts_ganjil">PTS Ganjil</option><option value="pas_ganjil">PAS Ganjil</option><option value="pts_genap">PTS Genap</option><option value="pas_genap">PAS Genap</option><option value="ujian_akhir">Ujian Akhir</option></select></label><label class="block text-xs font-bold text-slate-700">Alasan dispensasi <span class="text-red-600">*</span><textarea name="alasan" rows="4" maxlength="500" required class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Jelaskan alasan secara ringkas dan objektif."></textarea></label><p class="rounded-xl bg-blue-50 p-3 text-[11px] leading-5 text-blue-700"><i class="fas fa-circle-info mr-1" aria-hidden="true"></i>Pengajuan tidak langsung membuka akses; Ketua PKBM tetap harus menyetujuinya.</p></div>
+            <footer class="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-4 py-3 sm:px-5"><button type="button" @click="$refs.dispensasiDialog.close()" class="h-10 px-4 text-xs font-bold text-slate-600">Batal</button><button type="submit" class="inline-flex h-10 items-center gap-2 rounded-xl bg-amber-500 px-4 text-xs font-bold text-white hover:bg-amber-600"><i class="fas fa-paper-plane" aria-hidden="true"></i>Kirim pengajuan</button></footer>
+        </form>
+    </dialog>
 </div>
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/keuangan/validasi-akses/index.js'])
 @endsection

@@ -104,7 +104,6 @@ class KnowledgeBaseLoader
             'Kelola Tagihan => bendahara.tagihan.index: daftar tagihan semua siswa (termasuk ALUMNI/lulus). Buat tagihan: Tagihan Massal, Generate SPP, Tagihan Custom, Duplikasi. Tombol "Alumni Menunggak": tampilkan alumni yang masih berhutang lintas TA (untuk penebusan ijazah). Cari siswa lewat NAMA. Sisa dihitung dari pembayaran disetujui (cicilan akurat)',
             'Tarik Tunggakan (carryover) => bendahara.tagihan.carryover: pindahkan tunggakan TA lama jadi tagihan di TA aktif (termasuk sisa cicilan)',
             'Kelola Pembayaran => bendahara.pembayaran.index: validasi/tolak pembayaran masuk (manual/transfer/pembayaran digital); ortu dapat notifikasi hasil; Riwayat per siswa',
-            'Config/Info Pembayaran => bendahara.info-pembayaran.index: rekening, pembayaran digital, info pembayaran',
             'Validasi Akses => bendahara.validasi-akses.index: buka akses Ujian & Rapor siswa berdasarkan status LUNAS; bisa ajukan dispensasi ke Ketua PKBM',
             'Kenaikan Kelas: Validasi Dispensasi => bendahara.kenaikan-kelas.validation.index: ajukan dispensasi naik kelas untuk siswa menunggak ke Ketua PKBM (approval balik ke sini)',
             'Laporan: Laporan Pembayaran, Rekap Tagihan, Siswa Belum Lunas',
@@ -401,11 +400,14 @@ class KnowledgeBaseLoader
         $lines = [];
         foreach (self::FEATURE_OWNERSHIP as $keywords => $entry) {
             $owners = $entry['owner'];
-            if (in_array($role, $owners, true)) continue;
+            if (in_array($role, $owners, true)) {
+                continue;
+            }
             $kwLabel = explode('|', $keywords)[0];
-            $ownerLabel = implode(' / ', array_map(fn($r) => $this->roleLabel($r), $owners));
+            $ownerLabel = implode(' / ', array_map(fn ($r) => $this->roleLabel($r), $owners));
             $lines[] = "- Topik '{$kwLabel}' → DIKELOLA OLEH: {$ownerLabel}. {$entry['description']}";
         }
+
         return implode("\n", $lines);
     }
 
@@ -416,7 +418,7 @@ class KnowledgeBaseLoader
             return '- Tidak ada snapshot menu khusus; gunakan knowledge base dan route map yang tersedia.';
         }
 
-        return implode("\n", array_map(fn($line) => "- {$line}", $lines));
+        return implode("\n", array_map(fn ($line) => "- {$line}", $lines));
     }
 
     public function roleLabel(string $role): string
@@ -443,11 +445,12 @@ class KnowledgeBaseLoader
         $cacheKey = "chatbot_kb_{$role}_{$mtime}";
 
         return Cache::remember($cacheKey, 3600, function () use ($path) {
-            if (!file_exists($path)) {
+            if (! file_exists($path)) {
                 return '';
             }
 
             $content = file_get_contents($path);
+
             return $this->trimToEssentials($content);
         });
     }
@@ -458,9 +461,10 @@ class KnowledgeBaseLoader
         $mtime = file_exists($path) ? filemtime($path) : 0;
 
         return Cache::remember("chatbot_kb_landing_{$mtime}", 3600, function () use ($path) {
-            if (!file_exists($path)) {
+            if (! file_exists($path)) {
                 return '';
             }
+
             return $this->trimToEssentials(file_get_contents($path));
         });
     }
@@ -492,6 +496,7 @@ class KnowledgeBaseLoader
             foreach ($pages as $path => $desc) {
                 $lines[] = "{$path} — {$desc}";
             }
+
             return implode("\n", $lines);
         });
     }
@@ -523,8 +528,12 @@ class KnowledgeBaseLoader
 
             $map = [];
             foreach (Route::getRoutes()->getRoutesByName() as $name => $route) {
-                if (!$name) continue;
-                if ($this->isExcludedRoute($name)) continue;
+                if (! $name) {
+                    continue;
+                }
+                if ($this->isExcludedRoute($name)) {
+                    continue;
+                }
 
                 $matchesRolePrefix = false;
                 foreach ($prefixes as $prefix) {
@@ -536,22 +545,28 @@ class KnowledgeBaseLoader
 
                 $matchesSharedPrefix = false;
                 foreach ($sharedPrefixes as $shared) {
-                    if ($shared === '' && !str_contains($name, '.')) {
+                    if ($shared === '' && ! str_contains($name, '.')) {
                         $matchesSharedPrefix = true;
                         break;
                     }
-                    if ($shared !== '' && (str_starts_with($name, $shared . '.') || $name === $shared)) {
+                    if ($shared !== '' && (str_starts_with($name, $shared.'.') || $name === $shared)) {
                         $matchesSharedPrefix = true;
                         break;
                     }
                 }
 
-                if (!$matchesRolePrefix && !$matchesSharedPrefix) continue;
+                if (! $matchesRolePrefix && ! $matchesSharedPrefix) {
+                    continue;
+                }
 
-                if ($route->methods()[0] !== 'GET') continue;
-                if (preg_match('/\{[^}]+\}/', $route->uri())) continue;
+                if ($route->methods()[0] !== 'GET') {
+                    continue;
+                }
+                if (preg_match('/\{[^}]+\}/', $route->uri())) {
+                    continue;
+                }
 
-                $map[$name] = '/' . ltrim($route->uri(), '/');
+                $map[$name] = '/'.ltrim($route->uri(), '/');
             }
 
             return $map;
@@ -561,6 +576,7 @@ class KnowledgeBaseLoader
     public function isRouteAllowedForRole(string $routeName, string $role): bool
     {
         $map = $this->getRouteMapForRole($role);
+
         return array_key_exists($routeName, $map);
     }
 
@@ -589,6 +605,7 @@ class KnowledgeBaseLoader
         foreach ($lines as $line) {
             if (preg_match('/^##\s+Detail Sub-Halaman per Menu/i', $line)) {
                 $inDetailSection = true;
+
                 continue;
             }
             if ($inDetailSection) {
@@ -598,6 +615,7 @@ class KnowledgeBaseLoader
                     }
                     $currentSubsection = trim($m[1]);
                     $subsectionBuffer = [];
+
                     continue;
                 }
                 if (preg_match('/^##\s+/', $line)) {
@@ -607,22 +625,27 @@ class KnowledgeBaseLoader
                         $currentSubsection = null;
                     }
                     $inDetailSection = false;
+
                     continue;
                 }
                 if ($currentSubsection !== null) {
                     $subsectionBuffer[] = $line;
                 }
+
                 continue;
             }
             // Not in detail section
             if (preg_match($skipPatterns, $line)) {
                 $skipSection = true;
+
                 continue;
             }
             if ($skipSection && preg_match('/^#{1,3}\s+/', $line)) {
                 $skipSection = false;
             }
-            if ($skipSection) continue;
+            if ($skipSection) {
+                continue;
+            }
             $intro[] = $line;
         }
         if ($currentSubsection !== null) {
@@ -636,13 +659,13 @@ class KnowledgeBaseLoader
             $detail .= "### {$name}\n{$condensed}\n\n";
         }
 
-        $result = $introText . "\n\n" . $detail;
+        $result = $introText."\n\n".$detail;
         $result = preg_replace('/`/', '', $result);
         $result = trim($result);
 
         $maxChars = 18000;
         if (strlen($result) > $maxChars) {
-            $result = substr($result, 0, $maxChars) . "\n\n[... knowledge base dipotong ...]";
+            $result = substr($result, 0, $maxChars)."\n\n[... knowledge base dipotong ...]";
         }
 
         return $result;
@@ -660,27 +683,45 @@ class KnowledgeBaseLoader
 
         foreach ($bodyLines as $line) {
             $trimmed = trim($line);
-            if ($trimmed === '') continue;
-            if (preg_match('/^\*\*Tampilan index\*\*:/i', $trimmed)) continue;
-            if (preg_match('/^\*\*Catatan\*\*:\s*Mirror/i', $trimmed)) continue;
-            if (preg_match('/^---+$/', $trimmed)) continue;
+            if ($trimmed === '') {
+                continue;
+            }
+            if (preg_match('/^\*\*Tampilan index\*\*:/i', $trimmed)) {
+                continue;
+            }
+            if (preg_match('/^\*\*Catatan\*\*:\s*Mirror/i', $trimmed)) {
+                continue;
+            }
+            if (preg_match('/^---+$/', $trimmed)) {
+                continue;
+            }
 
             if (preg_match('/^\|/', $trimmed)) {
-                if (preg_match('/^\|---+/', $trimmed)) continue;
-                if ($tableRowCount >= 12) continue;
+                if (preg_match('/^\|---+/', $trimmed)) {
+                    continue;
+                }
+                if ($tableRowCount >= 12) {
+                    continue;
+                }
                 $tableStarted = true;
                 $tableRowCount++;
                 $out[] = $trimmed;
+
                 continue;
             }
-            if ($tableStarted) continue;
+            if ($tableStarted) {
+                continue;
+            }
 
-            if (!$foundFirstText) {
-                if (strlen($trimmed) > 240) $trimmed = substr($trimmed, 0, 240) . '...';
+            if (! $foundFirstText) {
+                if (strlen($trimmed) > 240) {
+                    $trimmed = substr($trimmed, 0, 240).'...';
+                }
                 $out[] = $trimmed;
                 $foundFirstText = true;
             }
         }
+
         return implode("\n", $out);
     }
 
@@ -688,8 +729,11 @@ class KnowledgeBaseLoader
     {
         $excluded = ['_debugbar', 'ignition', 'livewire', 'sanctum', 'telescope', 'horizon', 'passport', 'l5-swagger'];
         foreach ($excluded as $prefix) {
-            if (str_starts_with($name, $prefix)) return true;
+            if (str_starts_with($name, $prefix)) {
+                return true;
+            }
         }
+
         return false;
     }
 }

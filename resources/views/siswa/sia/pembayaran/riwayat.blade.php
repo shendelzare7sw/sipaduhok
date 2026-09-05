@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Riwayat Pembayaran')
 @section('page-title', 'Riwayat Pembayaran')
 @section('page-subtitle', 'Lihat riwayat transaksi pembayaran')
 
-@section('sidebar-menu')
-    @include('siswa.partials.sneat-sidebar-sia')
-@endsection
 
 @push('styles')
     @vite(['resources/css/siswa/sia/pembayaran/riwayat.css'])

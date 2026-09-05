@@ -1,299 +1,33 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Monitoring Siswa')
-@section('page-title', 'Monitoring Data Siswa')
-@section('page-subtitle', 'Lihat progress LMS dan status tagihan siswa')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/monitoring/siswa.css', 'resources/js/admin/monitoring/siswa.js'])
-@endsection
+@section('page-title', 'Monitoring Aktivitas Siswa')
+@section('page-subtitle', 'Pantau penyelesaian LMS dan kondisi tagihan siswa')
 
 @section('content')
 @php
-    $routeBase = 'admin.monitoring';
-    $scopeLabel = request('cabang_id') ? 'Cabang terfilter' : 'Semua cabang';
-    $showCabangFilter = isset($cabangs);
-    $visibleRows = $siswa->getCollection();
-    $avgTugasPage = $visibleRows->count() > 0 ? round($visibleRows->avg('progress_tugas'), 1) : 0;
-    $avgUjianPage = $visibleRows->count() > 0 ? round($visibleRows->avg('progress_ujian'), 1) : 0;
-    $sisaTagihanPage = $visibleRows->sum('sisa_tagihan');
+    $routeName=request()->routeIs('ketua.*')?'ketua.monitoring.siswa':'admin.monitoring.siswa';
+    $rows=$siswa->getCollection();
+    $avgTugas=$rows->isNotEmpty()?round($rows->avg('progress_tugas'),1):0;
+    $avgUjian=$rows->isNotEmpty()?round($rows->avg('progress_ujian'),1):0;
+    $sisaTagihan=$rows->sum('sisa_tagihan');
 @endphp
+<div class="min-w-0 w-full space-y-4">
+    <header><p class="text-xs font-bold uppercase tracking-wide text-brand-600">Pantau siswa</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Aktivitas belajar dan keuangan</h2><p class="mt-1 text-sm text-slate-500">Progress dihitung dari aktivitas LMS yang benar-benar tersedia untuk kelas siswa.</p></header>
+    <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">@foreach([['value'=>$siswa->total(),'label'=>'Siswa terpantau','icon'=>'fas fa-user-graduate','tone'=>'bg-blue-50 text-blue-700'],['value'=>number_format($avgTugas,1).'%','label'=>'Rata-rata tugas','icon'=>'fas fa-list-check','tone'=>'bg-emerald-50 text-emerald-700'],['value'=>number_format($avgUjian,1).'%','label'=>'Rata-rata ujian','icon'=>'fas fa-file-circle-check','tone'=>'bg-violet-50 text-violet-700'],['value'=>'Rp '.number_format($sisaTagihan,0,',','.'),'label'=>'Sisa tagihan halaman','icon'=>'fas fa-wallet','tone'=>'bg-amber-50 text-amber-700']] as $stat)<article class="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $stat['tone'] }}"><i class="{{ $stat['icon'] }}"></i></span><div class="min-w-0"><strong class="block truncate text-lg font-extrabold text-slate-950 sm:text-xl" title="{{ $stat['value'] }}">{{ $stat['value'] }}</strong><span class="block truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $stat['label'] }}</span></div></article>@endforeach</section>
 
-<div class="container-xxl flex-grow-1 container-p-y monitoring-page">
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon primary"><i class="fas fa-user-graduate"></i></div>
-                <span>Siswa Aktif</span>
-                <strong>{{ $siswa->total() }}</strong>
-            </div>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 p-4 sm:p-5"><div class="flex flex-wrap items-start justify-between gap-3"><div><h3 class="font-extrabold text-slate-950"><i class="fas fa-chart-line mr-2 text-brand-600"></i>Progress per siswa</h3><p class="mt-1 text-xs text-slate-500">Filter siswa berdasarkan cabang atau kelas aktif.</p></div>@if(request()->anyFilled(['search','cabang_id','kelas_id']))<a href="{{ route($routeName) }}" class="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-700 no-underline">Reset filter</a>@endif</div>
+            <form action="{{ route($routeName) }}" method="GET" class="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(240px,1fr)_210px_180px_auto]"><label class="relative sm:col-span-2 xl:col-span-1"><i class="fas fa-search absolute left-3.5 top-3.5 text-xs text-slate-400"></i><input name="search" value="{{ request('search') }}" placeholder="Cari siswa..." class="h-11 w-full rounded-xl border border-slate-300 !pl-10 pr-3 text-sm"></label><select name="cabang_id" @change="$el.form.submit()" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Semua cabang</option>@foreach($cabangs as $cabang)<option value="{{ $cabang->id }}" @selected((string)request('cabang_id')===(string)$cabang->id)>{{ $cabang->nama_cabang }}</option>@endforeach</select><select name="kelas_id" @change="$el.form.submit()" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm"><option value="">Semua kelas</option>@foreach($kelasList as $kelas)<option value="{{ $kelas->id }}" @selected((string)request('kelas_id')===(string)$kelas->id)>{{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})</option>@endforeach</select><button class="h-11 rounded-xl bg-slate-800 px-4 text-xs font-bold text-white">Cari</button></form>
+        </header>
+        <div class="divide-y divide-slate-100 xl:hidden">
+            @forelse($siswa as $student)
+                <article class="p-4"><div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-xs font-extrabold text-blue-700">{{ strtoupper(substr($student->nama_lengkap,0,1)) }}</span><div class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-950">{{ $student->nama_lengkap }}</strong><span class="block truncate text-xs text-slate-500">NISN {{ $student->nisn ?: '-' }} &middot; {{ $student->kelas?->nama_kelas ?? 'Belum ada kelas' }}</span></div><span class="rounded-full px-2 py-1 text-[10px] font-bold {{ ($student->status_bayar??'belum_lunas')==='lunas' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ ($student->status_bayar??'belum_lunas')==='lunas' ? 'Lunas' : 'Belum lunas' }}</span></div><div class="mt-3 grid grid-cols-2 gap-3"><div class="rounded-xl bg-slate-50 p-3"><div class="flex justify-between text-[10px] font-bold text-slate-500"><span>Tugas</span><span>{{ number_format($student->progress_tugas??0,1) }}%</span></div><progress max="100" value="{{ min($student->progress_tugas??0,100) }}" class="mt-2 h-2 w-full accent-emerald-600"></progress><small class="block text-slate-400">{{ $student->tugas_selesai??0 }}/{{ $student->total_tugas??0 }} selesai</small></div><div class="rounded-xl bg-slate-50 p-3"><div class="flex justify-between text-[10px] font-bold text-slate-500"><span>Ujian</span><span>{{ number_format($student->progress_ujian??0,1) }}%</span></div><progress max="100" value="{{ min($student->progress_ujian??0,100) }}" class="mt-2 h-2 w-full accent-violet-600"></progress><small class="block text-slate-400">{{ $student->ujian_selesai??0 }}/{{ $student->total_ujian??0 }} selesai</small></div></div><div class="mt-3 flex flex-wrap justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs"><span class="text-slate-500">Terbayar <strong class="text-emerald-700">Rp {{ number_format($student->total_bayar??0,0,',','.') }}</strong></span><span class="text-slate-500">Sisa <strong class="text-amber-700">Rp {{ number_format($student->sisa_tagihan??0,0,',','.') }}</strong></span></div></article>
+            @empty<p class="p-10 text-center text-sm text-slate-500">Tidak ada data siswa.</p>@endforelse
         </div>
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon success"><i class="fas fa-tasks"></i></div>
-                <span>Rata-rata Tugas</span>
-                <strong>{{ number_format($avgTugasPage, 1) }}%</strong>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon info"><i class="fas fa-file-alt"></i></div>
-                <span>Rata-rata Ujian</span>
-                <strong>{{ number_format($avgUjianPage, 1) }}%</strong>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="summary-card">
-                <div class="summary-icon warning"><i class="fas fa-wallet"></i></div>
-                <span>Sisa Tagihan</span>
-                <strong>Rp {{ number_format($sisaTagihanPage, 0, ',', '.') }}</strong>
-                <span class="meta-text">Halaman ini</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="content-card">
-        <div class="content-card-header">
-            <div>
-                <h5 class="mb-1">Aktivitas Siswa</h5>
-                <p class="text-muted mb-0">Progress tugas memakai status dinilai; progress ujian memakai status selesai atau dinilai.</p>
-            </div>
-            <form action="{{ route($routeBase . '.siswa') }}" method="GET" class="filter-toolbar">
-                <input type="text" name="search" class="form-control" placeholder="Cari siswa..." value="{{ request('search') }}">
-
-                @if($showCabangFilter)
-                    <select name="cabang_id" class="form-select" data-monitoring-auto-submit>
-                        <option value="">Semua Cabang</option>
-                        @foreach($cabangs as $cabang)
-                            <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
-                        @endforeach
-                    </select>
-                @endif
-
-                <select name="kelas_id" class="form-select" data-monitoring-auto-submit>
-                    <option value="">Semua Kelas</option>
-                    @foreach($kelasList as $kelas)
-                        <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>{{ $kelas->nama_kelas }}</option>
-                    @endforeach
-                </select>
-
-                <button type="submit" class="btn btn-primary"><i class="fas fa-filter me-1"></i> Filter</button>
-                @if(request()->anyFilled($showCabangFilter ? ['search', 'cabang_id', 'kelas_id'] : ['search', 'kelas_id']))
-                    <a href="{{ route($routeBase . '.siswa') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-1"></i> Reset
-                    </a>
-                @endif
-            </form>
-        </div>
-
-        <div class="content-card-body">
-            @if($siswa->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-clean align-middle">
-                        <thead>
-                            <tr>
-                                <th>Siswa</th>
-                                <th>Kelas</th>
-                                <th>Progress LMS</th>
-                                <th>Keuangan</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($siswa as $s)
-                                @php
-                                    $taskProgress = $s->progress_tugas ?? 0;
-                                    $examProgress = $s->progress_ujian ?? 0;
-                                    $taskClass = $taskProgress >= 75 ? 'high' : ($taskProgress >= 50 ? 'medium' : 'low');
-                                    $examClass = $examProgress >= 75 ? 'high' : ($examProgress >= 50 ? 'medium' : 'low');
-                                @endphp
-                                <tr>
-                                    <td data-label="Siswa" class="mobile-primary-cell">
-                                        <span class="entity-title">{{ $s->nama_lengkap }}</span>
-                                        <span class="entity-subtitle">NISN: {{ $s->nisn ?? '-' }}</span>
-                                        <details class="mobile-row-details">
-                                            <summary>
-                                                <span>
-                                                    <span class="mobile-summary-main">Detail monitoring</span>
-                                                    <span class="mobile-summary-meta">Tugas {{ number_format($taskProgress, 0) }}%, Ujian {{ number_format($examProgress, 0) }}%</span>
-                                                </span>
-                                                <span class="mobile-summary-link">Selengkapnya</span>
-                                            </summary>
-                                            <div class="mobile-row-details-body">
-                                                <div class="mobile-detail-section">
-                                                    <div class="mobile-detail-title">Kelas</div>
-                                                    @if($s->kelas)
-                                                        <span class="soft-badge primary">{{ $s->kelas->nama_kelas }}</span>
-                                                        <span class="entity-subtitle">{{ $s->kelas->cabang->nama_cabang ?? '-' }}</span>
-                                                    @else
-                                                        <span class="soft-badge warning">Belum ada kelas</span>
-                                                    @endif
-                                                </div>
-                                                <div class="mobile-detail-section">
-                                                    <div class="mobile-detail-title">Progress LMS</div>
-                                                    <div class="metric-grid">
-                                                        <div class="metric-chip">
-                                                            <span>Tugas Dinilai</span>
-                                                            <strong>{{ $s->tugas_selesai ?? 0 }}/{{ $s->total_tugas ?? 0 }}</strong>
-                                                        </div>
-                                                        <div class="metric-chip">
-                                                            <span>Dikumpulkan</span>
-                                                            <strong>{{ $s->tugas_dikumpulkan ?? 0 }}</strong>
-                                                        </div>
-                                                        <div class="metric-chip">
-                                                            <span>Ujian Selesai</span>
-                                                            <strong>{{ $s->ujian_selesai ?? 0 }}/{{ $s->total_ujian ?? 0 }}</strong>
-                                                        </div>
-                                                        <div class="metric-chip">
-                                                            <span>Status LMS</span>
-                                                            <strong>{{ $taskProgress >= 75 && $examProgress >= 75 ? 'Aman' : 'Pantau' }}</strong>
-                                                        </div>
-                                                    </div>
-                                                    <div class="progress-wrap mt-2">
-                                                        <div class="progress-caption">
-                                                            <span>Tugas {{ number_format($taskProgress, 0) }}%</span>
-                                                            <span>Ujian {{ number_format($examProgress, 0) }}%</span>
-                                                        </div>
-                                                        <div class="progress-track mb-1">
-                                                            <div class="progress-fill {{ $taskClass }}" data-monitoring-progress="{{ min($taskProgress, 100) }}"></div>
-                                                        </div>
-                                                        <div class="progress-track">
-                                                            <div class="progress-fill {{ $examClass }}" data-monitoring-progress="{{ min($examProgress, 100) }}"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="mobile-detail-section">
-                                                    <div class="mobile-detail-title">Keuangan</div>
-                                                    <div class="metric-grid">
-                                                        <div class="metric-chip money-chip">
-                                                            <span>Total Tagihan</span>
-                                                            <strong>Rp {{ number_format($s->total_tagihan ?? 0, 0, ',', '.') }}</strong>
-                                                        </div>
-                                                        <div class="metric-chip money-chip">
-                                                            <span>Terbayar</span>
-                                                            <strong class="text-success">Rp {{ number_format($s->total_bayar ?? 0, 0, ',', '.') }}</strong>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="mobile-detail-section">
-                                                    <div class="mobile-detail-title">Status</div>
-                                                    @if(($s->status_bayar ?? 'belum_lunas') === 'lunas')
-                                                        <span class="soft-badge success"><i class="fas fa-check-circle me-1"></i> Lunas</span>
-                                                    @else
-                                                        <span class="soft-badge warning"><i class="fas fa-exclamation-triangle me-1"></i> Sisa Rp {{ number_format($s->sisa_tagihan ?? 0, 0, ',', '.') }}</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </details>
-                                    </td>
-                                    <td data-label="Kelas" class="desktop-detail-cell">
-                                        @if($s->kelas)
-                                            <span class="soft-badge primary">{{ $s->kelas->nama_kelas }}</span>
-                                            <span class="entity-subtitle">{{ $s->kelas->cabang->nama_cabang ?? '-' }}</span>
-                                        @else
-                                            <span class="soft-badge warning">Belum ada kelas</span>
-                                        @endif
-                                    </td>
-                                    <td data-label="Progress LMS" class="complex-cell desktop-detail-cell">
-                                        <details class="mobile-details">
-                                            <summary>
-                                                <span>
-                                                    <span class="mobile-summary-main">{{ $taskProgress >= 75 && $examProgress >= 75 ? 'Aman' : 'Pantau' }}</span>
-                                                    <span class="mobile-summary-meta">Tugas {{ number_format($taskProgress, 0) }}%, Ujian {{ number_format($examProgress, 0) }}%</span>
-                                                </span>
-                                                <span class="mobile-summary-link">Selengkapnya</span>
-                                            </summary>
-                                            <div class="mobile-details-body">
-                                                <div class="metric-grid">
-                                                    <div class="metric-chip">
-                                                        <span>Tugas Dinilai</span>
-                                                        <strong>{{ $s->tugas_selesai ?? 0 }}/{{ $s->total_tugas ?? 0 }}</strong>
-                                                    </div>
-                                                    <div class="metric-chip">
-                                                        <span>Dikumpulkan</span>
-                                                        <strong>{{ $s->tugas_dikumpulkan ?? 0 }}</strong>
-                                                    </div>
-                                                    <div class="metric-chip">
-                                                        <span>Ujian Selesai</span>
-                                                        <strong>{{ $s->ujian_selesai ?? 0 }}/{{ $s->total_ujian ?? 0 }}</strong>
-                                                    </div>
-                                                    <div class="metric-chip">
-                                                        <span>Status LMS</span>
-                                                        <strong>{{ $taskProgress >= 75 && $examProgress >= 75 ? 'Aman' : 'Pantau' }}</strong>
-                                                    </div>
-                                                </div>
-                                                <div class="progress-wrap mt-2">
-                                                    <div class="progress-caption">
-                                                        <span>Tugas {{ number_format($taskProgress, 0) }}%</span>
-                                                        <span>Ujian {{ number_format($examProgress, 0) }}%</span>
-                                                    </div>
-                                                    <div class="progress-track mb-1">
-                                                        <div class="progress-fill {{ $taskClass }}" data-monitoring-progress="{{ min($taskProgress, 100) }}"></div>
-                                                    </div>
-                                                    <div class="progress-track">
-                                                        <div class="progress-fill {{ $examClass }}" data-monitoring-progress="{{ min($examProgress, 100) }}"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </details>
-                                    </td>
-                                    <td data-label="Keuangan" class="complex-cell desktop-detail-cell">
-                                        <details class="mobile-details">
-                                            <summary>
-                                                <span>
-                                                    <span class="mobile-summary-main">{{ ($s->status_bayar ?? 'belum_lunas') === 'lunas' ? 'Lunas' : 'Sisa Rp ' . number_format($s->sisa_tagihan ?? 0, 0, ',', '.') }}</span>
-                                                    <span class="mobile-summary-meta">Terbayar Rp {{ number_format($s->total_bayar ?? 0, 0, ',', '.') }}</span>
-                                                </span>
-                                                <span class="mobile-summary-link">Selengkapnya</span>
-                                            </summary>
-                                            <div class="mobile-details-body">
-                                                <div class="metric-grid">
-                                                    <div class="metric-chip money-chip">
-                                                        <span>Total Tagihan</span>
-                                                        <strong>Rp {{ number_format($s->total_tagihan ?? 0, 0, ',', '.') }}</strong>
-                                                    </div>
-                                                    <div class="metric-chip money-chip">
-                                                        <span>Terbayar</span>
-                                                        <strong class="text-success">Rp {{ number_format($s->total_bayar ?? 0, 0, ',', '.') }}</strong>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </details>
-                                    </td>
-                                    <td data-label="Status" class="desktop-detail-cell">
-                                        @if(($s->status_bayar ?? 'belum_lunas') === 'lunas')
-                                            <span class="soft-badge success"><i class="fas fa-check-circle me-1"></i> Lunas</span>
-                                        @else
-                                            <span class="soft-badge warning"><i class="fas fa-exclamation-triangle me-1"></i> Sisa Rp {{ number_format($s->sisa_tagihan ?? 0, 0, ',', '.') }}</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-4">{{ $siswa->withQueryString()->links() }}</div>
-            @else
-                <div class="empty-state">
-                    <i class="fas fa-user-graduate"></i>
-                    <h6>Tidak ada data siswa</h6>
-                    <p>Coba ubah filter pencarian atau pastikan siswa aktif sudah terdaftar di kelas.</p>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <div class="info-panel">
-        <div class="info-icon primary"><i class="fas fa-info-circle"></i></div>
-        <div>
-            <h6>Catatan Data LMS</h6>
-            <p>Tugas dihitung dari penugasan kelas dan jawaban siswa. Ujian dihitung dari ujian kelas dan hasil siswa, sehingga indikator lebih selaras dengan halaman LMS siswa dan guru.</p>
-        </div>
-    </div>
+        <div class="hidden overflow-x-auto xl:block"><table class="w-full table-fixed text-left text-sm"><colgroup><col class="w-[24%]"><col class="w-[15%]"><col class="w-[18%]"><col class="w-[18%]"><col><col class="w-28"></colgroup><thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500"><tr><th class="px-5 py-3">Siswa</th><th class="px-3 py-3">Kelas</th><th class="px-3 py-3">Tugas</th><th class="px-3 py-3">Ujian</th><th class="px-3 py-3">Keuangan</th><th class="px-5 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-100">@forelse($siswa as $student)<tr><td class="px-5 py-3"><strong class="block truncate text-slate-950">{{ $student->nama_lengkap }}</strong><span class="block truncate text-xs text-slate-500">NISN {{ $student->nisn ?: '-' }}</span></td><td class="px-3 py-3"><span class="block truncate whitespace-nowrap text-xs font-bold text-slate-700">{{ $student->kelas?->nama_kelas ?? 'Belum ada kelas' }}</span><small class="block truncate text-slate-400">{{ $student->kelas?->cabang?->nama_cabang ?? '-' }}</small></td><td class="px-3 py-3"><div class="flex justify-between text-[10px] text-slate-500"><span>{{ $student->tugas_selesai??0 }}/{{ $student->total_tugas??0 }}</span><span>{{ number_format($student->progress_tugas??0,1) }}%</span></div><progress max="100" value="{{ min($student->progress_tugas??0,100) }}" class="mt-1 h-2 w-full accent-emerald-600"></progress></td><td class="px-3 py-3"><div class="flex justify-between text-[10px] text-slate-500"><span>{{ $student->ujian_selesai??0 }}/{{ $student->total_ujian??0 }}</span><span>{{ number_format($student->progress_ujian??0,1) }}%</span></div><progress max="100" value="{{ min($student->progress_ujian??0,100) }}" class="mt-1 h-2 w-full accent-violet-600"></progress></td><td class="px-3 py-3"><span class="block truncate text-xs text-slate-500">Tagihan Rp {{ number_format($student->total_tagihan??0,0,',','.') }}</span><span class="block truncate text-xs font-bold text-emerald-700">Bayar Rp {{ number_format($student->total_bayar??0,0,',','.') }}</span></td><td class="px-5 py-3"><span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold {{ ($student->status_bayar??'belum_lunas')==='lunas' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">{{ ($student->status_bayar??'belum_lunas')==='lunas' ? 'Lunas' : 'Sisa Rp '.number_format($student->sisa_tagihan??0,0,',','.') }}</span></td></tr>@empty<tr><td colspan="6" class="p-10 text-center text-sm text-slate-500">Tidak ada data siswa.</td></tr>@endforelse</tbody></table></div>
+        @if($siswa->hasPages())<footer class="border-t border-slate-200 p-4">{{ $siswa->withQueryString()->links() }}</footer>@endif
+    </section>
+    <div class="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs text-blue-700"><i class="fas fa-circle-info mt-0.5"></i><p>Tugas dihitung dari penugasan kelas dan jawaban siswa. Ujian dihitung dari ujian kelas dan hasil siswa agar indikator selaras dengan LMS.</p></div>
 </div>
 @endsection

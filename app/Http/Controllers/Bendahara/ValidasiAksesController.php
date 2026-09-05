@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Bendahara;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Kelas;
+use App\Models\Pembayaran;
+use App\Models\PengajuanRaporKetua;
+use App\Models\PengaturanBatasPembayaran;
 use App\Models\Siswa;
 use App\Models\Tagihan;
-use App\Models\Pembayaran;
-use App\Models\Kelas;
 use App\Models\TahunAjaran;
-use App\Models\PengaturanBatasPembayaran;
-use App\Models\PengajuanRaporKetua;
 use App\Services\NotificationService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ValidasiAksesController extends Controller
@@ -22,7 +22,7 @@ class ValidasiAksesController extends Controller
     public function index(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
+
         // Data untuk filter dropdown
         $cabangList = \App\Models\Cabang::all();
         $jenjangList = Kelas::select('jenjang')->distinct()->orderBy('jenjang')->pluck('jenjang');
@@ -32,13 +32,13 @@ class ValidasiAksesController extends Controller
             ->withCount(['siswa as siswa_aktif_count' => function ($q) {
                 $q->where('status', 'aktif');
             }])
-            ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+            ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             })
-            ->when($request->filled('cabang_id'), function($q) use ($request) {
+            ->when($request->filled('cabang_id'), function ($q) use ($request) {
                 return $q->where('cabang_id', $request->cabang_id);
             })
-            ->when($request->filled('jenjang'), function($q) use ($request) {
+            ->when($request->filled('jenjang'), function ($q) use ($request) {
                 return $q->where('jenjang', $request->jenjang);
             })
             ->orderBy('jenjang')->orderBy('nama_kelas')->get();
@@ -52,14 +52,14 @@ class ValidasiAksesController extends Controller
 
         // Filter Cabang (via kelas atau langsung siswa jika ada)
         if ($request->filled('cabang_id')) {
-            $query->whereHas('kelas', function($q) use ($request) {
+            $query->whereHas('kelas', function ($q) use ($request) {
                 $q->where('cabang_id', $request->cabang_id);
             });
         }
 
         // Filter Jenjang
         if ($request->filled('jenjang')) {
-            $query->whereHas('kelas', function($q) use ($request) {
+            $query->whereHas('kelas', function ($q) use ($request) {
                 $q->where('jenjang', $request->jenjang);
             });
         }
@@ -89,22 +89,22 @@ class ValidasiAksesController extends Controller
 
         // Pencarian
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('nama_lengkap', 'like', '%' . $request->search . '%')
-                  ->orWhere('nisn', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('nama_lengkap', 'like', '%'.$request->search.'%')
+                    ->orWhere('nisn', 'like', '%'.$request->search.'%');
             });
         }
 
         $siswaList = $query->orderBy(
             Kelas::select('jenjang')->whereColumn('kelas.id', 'siswa.kelas_id')
         )->orderBy('nama_lengkap', 'asc')
-        ->paginate(15)
-        ->appends($request->query());
+            ->paginate(15)
+            ->appends($request->query());
 
         // Hitung status keuangan per siswa
-        $siswaList->getCollection()->transform(function($siswa) use ($tahunAjaranAktif) {
+        $siswaList->getCollection()->transform(function ($siswa) use ($tahunAjaranAktif) {
             $tagihan = Tagihan::where('siswa_id', $siswa->id)
-                ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 })
                 ->get();
@@ -153,7 +153,7 @@ class ValidasiAksesController extends Controller
         // Dispensasi pending count
         $dispensasiPending = PengajuanRaporKetua::where('status', 'menunggu')->count();
 
-        return view('bendahara.validasi-akses.index', [
+        return view('admin.keuangan.validasi-akses.index', [
             'siswa' => $siswaList,
             'kelasList' => $kelasList,
             'quickKelasList' => $quickKelasList,
@@ -191,10 +191,12 @@ class ValidasiAksesController extends Controller
             $notificationService->notifyValidasiAksesUjian($siswa, 'disetujui');
 
             DB::commit();
+
             return redirect()->back()->with('success', "Akses ujian untuk {$siswa->nama_lengkap} berhasil divalidasi.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -222,7 +224,7 @@ class ValidasiAksesController extends Controller
                 ->where('status', 'disetujui')
                 ->update([
                     'status' => 'ditolak',
-                    'catatan_ketua' => 'Dispensasi dibatalkan/ditarik oleh ' . (auth()->user()->name ?? 'Validator')
+                    'catatan_ketua' => 'Dispensasi dibatalkan/ditarik oleh '.(auth()->user()->name ?? 'Validator'),
                 ]);
 
             // Notify wali siswa and siswa
@@ -230,10 +232,12 @@ class ValidasiAksesController extends Controller
             $notificationService->notifyValidasiAksesUjian($siswa, 'dibatalkan');
 
             DB::commit();
+
             return redirect()->back()->with('success', "Validasi akses ujian untuk {$siswa->nama_lengkap} dibatalkan.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -244,7 +248,7 @@ class ValidasiAksesController extends Controller
     {
         $siswa = Siswa::findOrFail($siswaId);
 
-        if (!$siswa->validasi_rapor_ketua) {
+        if (! $siswa->validasi_rapor_ketua) {
             return redirect()->back()->with('error', 'Rapor belum divalidasi oleh Ketua PKBM.');
         }
 
@@ -261,10 +265,12 @@ class ValidasiAksesController extends Controller
             $notificationService->notifyValidasiAksesRapor($siswa, 'disetujui');
 
             DB::commit();
+
             return redirect()->back()->with('success', "Akses rapor untuk {$siswa->nama_lengkap} berhasil divalidasi. Wali kelas kini dapat menerbitkan rapor.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -290,7 +296,7 @@ class ValidasiAksesController extends Controller
                 ->where('status', 'disetujui')
                 ->update([
                     'status' => 'ditolak',
-                    'catatan_ketua' => 'Dispensasi dibatalkan/ditarik oleh ' . (auth()->user()->name ?? 'Validator')
+                    'catatan_ketua' => 'Dispensasi dibatalkan/ditarik oleh '.(auth()->user()->name ?? 'Validator'),
                 ]);
 
             // Notify wali siswa
@@ -298,10 +304,12 @@ class ValidasiAksesController extends Controller
             $notificationService->notifyValidasiAksesRapor($siswa, 'dibatalkan');
 
             DB::commit();
+
             return redirect()->back()->with('success', "Validasi akses rapor untuk {$siswa->nama_lengkap} dibatalkan.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -330,10 +338,12 @@ class ValidasiAksesController extends Controller
             }
 
             DB::commit();
+
             return redirect()->back()->with('success', "Akses ujian berhasil divalidasi untuk {$siswaList->count()} siswa.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -363,10 +373,12 @@ class ValidasiAksesController extends Controller
             }
 
             DB::commit();
+
             return redirect()->back()->with('success', "Akses rapor berhasil divalidasi untuk {$siswaList->count()} siswa.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -397,12 +409,14 @@ class ValidasiAksesController extends Controller
             $query->update($field);
 
             DB::commit();
-            
+
             $label = $request->tipe === 'ujian' ? 'ujian' : 'rapor';
-            return redirect()->back()->with('success', "Akses {$label} berhasil divalidasi untuk " . count($request->siswa_ids) . " siswa.");
+
+            return redirect()->back()->with('success', "Akses {$label} berhasil divalidasi untuk ".count($request->siswa_ids).' siswa.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -419,13 +433,13 @@ class ValidasiAksesController extends Controller
         DB::beginTransaction();
         try {
             $query = Siswa::where('status', 'aktif');
-            
+
             if ($request->filled('kelas_id')) {
                 $query->where('kelas_id', $request->kelas_id);
             }
 
             $updateFields = [];
-            
+
             if ($request->tipe === 'ujian' || $request->tipe === 'semua') {
                 $updateFields = array_merge($updateFields, [
                     'validasi_ujian_bendahara' => false,
@@ -435,7 +449,7 @@ class ValidasiAksesController extends Controller
                     'validasi_ujian_oleh' => null,
                 ]);
             }
-            
+
             if ($request->tipe === 'rapor' || $request->tipe === 'semua') {
                 $updateFields = array_merge($updateFields, [
                     'validasi_rapor_bendahara' => false,
@@ -457,7 +471,7 @@ class ValidasiAksesController extends Controller
                     ->where('status', 'disetujui')
                     ->update([
                         'status' => 'ditolak',
-                        'catatan_ketua' => 'Dibatalkan melalui fitur Reset Validasi oleh ' . (auth()->user()->name ?? 'Sistem')
+                        'catatan_ketua' => 'Dibatalkan melalui fitur Reset Validasi oleh '.(auth()->user()->name ?? 'Sistem'),
                     ]);
             }
             if ($request->tipe === 'rapor' || $request->tipe === 'semua') {
@@ -466,15 +480,17 @@ class ValidasiAksesController extends Controller
                     ->where('status', 'disetujui')
                     ->update([
                         'status' => 'ditolak',
-                        'catatan_ketua' => 'Dibatalkan melalui fitur Reset Validasi oleh ' . (auth()->user()->name ?? 'Sistem')
+                        'catatan_ketua' => 'Dibatalkan melalui fitur Reset Validasi oleh '.(auth()->user()->name ?? 'Sistem'),
                     ]);
             }
 
             DB::commit();
+
             return redirect()->back()->with('success', "Validasi berhasil direset untuk {$count} siswa.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -490,7 +506,7 @@ class ValidasiAksesController extends Controller
         ]);
 
         $tahunAjaran = TahunAjaran::where('is_active', true)->first();
-        if (!$tahunAjaran) {
+        if (! $tahunAjaran) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
@@ -506,6 +522,7 @@ class ValidasiAksesController extends Controller
         );
 
         $label = str_replace('_', ' ', strtoupper($request->periode));
+
         return redirect()->back()->with('success', "Pengaturan batas pembayaran {$label} berhasil disimpan.");
     }
 
@@ -530,7 +547,7 @@ class ValidasiAksesController extends Controller
                 ->where('status', 'menunggu')
                 ->exists();
 
-            if (!$exists) {
+            if (! $exists) {
                 PengajuanRaporKetua::create([
                     'siswa_id' => $siswaId,
                     'diajukan_oleh' => auth()->id(),

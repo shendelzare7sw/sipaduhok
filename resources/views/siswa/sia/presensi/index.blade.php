@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Presensi')
 @section('page-title', 'Presensi Kehadiran')
 @section('page-subtitle', 'Lihat rekap presensi kehadiran')
 
-@section('sidebar-menu')
-    @include('siswa.partials.sneat-sidebar-sia')
-@endsection
 
 @section('styles')
     @vite(['resources/css/siswa/sia/presensi/index.css', 'resources/js/siswa/sia/presensi/index.js'])

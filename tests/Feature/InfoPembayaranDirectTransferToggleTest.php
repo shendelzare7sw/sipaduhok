@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class InfoPembayaranDirectTransferToggleTest extends TestCase
 {
-    public function test_admin_dan_bendahara_dapat_menyembunyikan_dan_mengaktifkan_direct_transfer(): void
+    public function test_hanya_admin_dapat_menyembunyikan_dan_mengaktifkan_direct_transfer(): void
     {
         config([
             'database.default' => 'mysql',
@@ -42,9 +42,8 @@ class InfoPembayaranDirectTransferToggleTest extends TestCase
             $this->assertFalse((bool) $info->fresh()->direct_transfer_enabled);
             $this->assertFalse($info->fresh()->isDirectTransferEnabled());
 
-            $bendahara = $this->makeUser('bendahara', "bendahara.transfer.$suffix@test.local");
-            $this->actingAs($bendahara)->withoutMiddleware()
-                ->post(route('bendahara.info-pembayaran.update'), [
+            $this->actingAs($admin)->withoutMiddleware()
+                ->post(route('admin.keuangan.info-pembayaran.update'), [
                     'type' => 'direct_transfer_toggle',
                     'direct_transfer_enabled' => '1',
                 ])
@@ -52,6 +51,7 @@ class InfoPembayaranDirectTransferToggleTest extends TestCase
 
             $this->assertTrue((bool) $info->fresh()->direct_transfer_enabled);
             $this->assertTrue($info->fresh()->isDirectTransferEnabled());
+            $this->assertFalse(\Illuminate\Support\Facades\Route::has('bendahara.info-pembayaran.update'));
         } finally {
             DB::connection('mysql')->rollBack();
         }

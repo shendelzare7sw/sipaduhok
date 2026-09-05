@@ -21,7 +21,7 @@ class AdminRecoveryTicketController extends Controller
     {
         $tickets = RecoveryTicket::with('user')
             ->whereIn('status', ['pending_admin', 'processing', 'failed', 'sent'])
-            ->orderByRaw("FIELD(status, 'pending_admin', 'failed', 'processing', 'sent')")
+            ->orderByRaw("CASE status WHEN 'pending_admin' THEN 1 WHEN 'failed' THEN 2 WHEN 'processing' THEN 3 WHEN 'sent' THEN 4 ELSE 5 END")
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 

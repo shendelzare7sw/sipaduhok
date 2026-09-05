@@ -1,0 +1,78 @@
+@startuml activity-kelola-materi-pembelajaran
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Guru Pengajar)|
+start
+:Mengakses Dashboard LMS Kelas;
+
+|Sistem|
+:Menampilkan Daftar Materi\npada Tab "Materi Pembelajaran";
+
+|Pengguna (Guru Pengajar)|
+:Memilih Aksi (Decision);
+
+if (Aksi?) then (Upload Materi Baru)
+    :Klik Tombol "Tambah Materi";
+
+    |Sistem|
+    :Menampilkan Form Tambah Materi;
+
+    |Pengguna (Guru Pengajar)|
+    :Mengisi Judul Materi & Deskripsi;
+    :Memilih Kategori\n(Materi Umum / Modul Ajar);
+    :Memilih Tipe File\n(PDF, Video, PPT, DOC, atau Link);
+
+    if (Tipe File?) then (Upload Dokumen / Video)
+        :Mengunggah File dari Perangkat\n(Batas Maksimal 50MB);
+    else (Tautan / Link)
+        :Memasukkan URL Eksternal\n(Misal: YouTube, Google Drive);
+    endif
+
+    :Memilih Opsi "Duplikasi ke Kelas Lain"\n(Hanya untuk mapel yang sama);
+    :Klik "Simpan Materi";
+
+    |Sistem|
+    :Memvalidasi Input dan File;
+    :Menyimpan Data & Mengunggah File ke Storage;
+    :Menggandakan Data ke Kelas Tambahan\n(Sesuai jumlah duplikasi);
+    :Mengirim Notifikasi Otomatis\nkepada Seluruh Siswa di Kelas Tersebut;
+    :Menampilkan Pesan Sukses;
+
+elseif (Aksi?) then (Edit Materi)
+    |Pengguna (Guru Pengajar)|
+    :Klik "Edit" pada Materi;
+
+    |Sistem|
+    :Menampilkan Form Edit Materi;
+
+    |Pengguna (Guru Pengajar)|
+    :Mengubah Data (Judul, File, Deskripsi);
+    :Memilih Opsi "Update Semua Kelas Terkait"\n(Jika materi ini hasil duplikasi);
+    :Klik "Simpan Perubahan";
+
+    |Sistem|
+    :Memperbarui Data Materi;
+    :Menampilkan Pesan Sukses;
+
+elseif (Aksi?) then (Hapus Materi)
+    |Pengguna (Guru Pengajar)|
+    :Klik "Hapus" pada Materi;
+
+    |Sistem|
+    :Menampilkan Konfirmasi Hapus;
+
+    |Pengguna (Guru Pengajar)|
+    :Mengonfirmasi Penghapusan\n(Satu kelas atau beserta semua duplikatnya);
+
+    |Sistem|
+    :Menghapus File Fisik dari Storage (Server);
+    :Menghapus Data dari Database;
+    :Menampilkan Pesan Sukses;
+endif
+
+|Pengguna (Guru Pengajar)|
+:Selesai Melakukan Kelola\nMateri Pembelajaran;
+stop
+@enduml

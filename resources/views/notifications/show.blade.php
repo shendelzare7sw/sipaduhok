@@ -1,124 +1,90 @@
 @php
     $userRole = auth()->user()->role ?? 'siswa';
-    $ctx = request('ctx'); // 'lms', 'lms-guru', or null (Sneat context)
-
-    // Determine layout based on role and context (ctx param from index or bell)
+    $ctx = request('ctx');
     $layout = match ($userRole) {
-        'siswa'         => ($ctx === 'lms')      ? 'layouts.lms'      : 'layouts.sneat',
-        'guru_pengajar' => ($ctx === 'lms-guru') ? 'layouts.lms-guru' : 'layouts.sneat',
-        default         => 'layouts.sneat',
+        'siswa' => $ctx === 'lms' ? 'layouts.lms' : 'layouts.app',
+        'guru_pengajar' => $ctx === 'lms-guru' ? 'layouts.lms-guru' : 'layouts.app',
+        default => 'layouts.app',
     };
-
-    // Determine sidebar partial
     $sidebarPartial = match (true) {
-        $userRole === 'siswa'         && $ctx === 'lms'      => 'siswa.partials.sidebar-lms',
-        $userRole === 'siswa'                                 => 'siswa.partials.sneat-sidebar-sia',
+        $userRole === 'siswa' && $ctx === 'lms' => 'siswa.partials.sidebar-lms',
+        $userRole === 'siswa' => 'siswa.partials.sidebar-sia',
         $userRole === 'guru_pengajar' && $ctx === 'lms-guru' => 'guru.partials.sidebar-lms-notif',
-        $userRole === 'guru_pengajar'                        => 'guru.partials.sneat-sidebar-menu',
-        $userRole === 'admin'                                => 'admin.partials.sneat-sidebar-menu',
-        $userRole === 'bendahara'                            => 'bendahara.partials.sneat-sidebar-menu',
-        $userRole === 'wali_kelas'                           => 'wali-kelas.partials.sneat-sidebar-menu',
-        $userRole === 'ketua_pkbm'                           => 'ketua.partials.sneat-sidebar-menu',
-        $userRole === 'wakil_kepala_sekolah'                 => 'waka.partials.sneat-sidebar-menu',
-        $userRole === 'sekretaris'                           => 'sekretaris.partials.sneat-sidebar-menu',
-        $userRole === 'orang_tua'                            => 'wali-siswa.partials.sneat-sidebar-menu',
-        default                                              => 'partials.sneat-sidebar',
+        $userRole === 'guru_pengajar' => 'guru.partials.sidebar',
+        $userRole === 'admin' => 'admin.partials.cleanflow-sidebar',
+        $userRole === 'bendahara' => 'bendahara.partials.sidebar',
+        $userRole === 'wali_kelas' => 'wali-kelas.partials.sidebar',
+        $userRole === 'ketua_pkbm' => 'ketua.partials.sidebar',
+        $userRole === 'wakil_kepala_sekolah' => 'waka.partials.sidebar',
+        $userRole === 'sekretaris' => 'sekretaris.partials.sidebar',
+        $userRole === 'orang_tua' => 'wali-siswa.partials.sidebar',
+        default => 'admin.partials.cleanflow-sidebar',
     };
-
-    $notificationColorKeys = ['primary', 'success', 'danger', 'warning', 'info', 'secondary'];
-    $colorKey = in_array($notification->color ?? 'secondary', $notificationColorKeys, true)
-        ? ($notification->color ?? 'secondary')
-        : 'secondary';
-
-    $tipeLabels = [
-        'materi' => 'Materi', 'tugas' => 'Tugas', 'ujian' => 'Ujian',
-        'forum' => 'Forum', 'pengumuman' => 'Pengumuman', 'deadline' => 'Tenggat',
-        'nilai' => 'Nilai', 'izin' => 'Izin', 'catatan' => 'Catatan',
-        'pembayaran' => 'Keuangan', 'rapor' => 'Rapor', 'sistem' => 'Sistem',
-        'kelas' => 'Kelas', 'kenaikan' => 'Kenaikan',
+    $typeLabels = [
+        'materi' => 'Materi', 'tugas' => 'Tugas', 'ujian' => 'Ujian', 'forum' => 'Forum',
+        'pengumuman' => 'Pengumuman', 'deadline' => 'Tenggat', 'nilai' => 'Nilai', 'izin' => 'Izin',
+        'catatan' => 'Catatan', 'pembayaran' => 'Keuangan', 'rapor' => 'Rapor', 'sistem' => 'Sistem',
+        'kelas' => 'Kelas', 'kenaikan' => 'Kenaikan', 'recovery' => 'Pemulihan',
     ];
-    $tipeLabel = $tipeLabels[$notification->tipe] ?? ucfirst($notification->tipe);
+    $toneClasses = [
+        'primary' => ['bar' => 'bg-blue-600', 'icon' => 'bg-blue-600', 'badge' => 'bg-blue-50 text-blue-700'],
+        'success' => ['bar' => 'bg-emerald-600', 'icon' => 'bg-emerald-600', 'badge' => 'bg-emerald-50 text-emerald-700'],
+        'danger' => ['bar' => 'bg-red-600', 'icon' => 'bg-red-600', 'badge' => 'bg-red-50 text-red-700'],
+        'warning' => ['bar' => 'bg-amber-500', 'icon' => 'bg-amber-500', 'badge' => 'bg-amber-50 text-amber-700'],
+        'info' => ['bar' => 'bg-cyan-600', 'icon' => 'bg-cyan-600', 'badge' => 'bg-cyan-50 text-cyan-700'],
+        'secondary' => ['bar' => 'bg-slate-600', 'icon' => 'bg-slate-600', 'badge' => 'bg-slate-100 text-slate-700'],
+    ];
+    $tone = $toneClasses[$notification->color] ?? $toneClasses['secondary'];
+    $typeLabel = $typeLabels[$notification->tipe] ?? ucfirst($notification->tipe);
 @endphp
 
 @extends($layout)
 @section('title', 'Detail Notifikasi')
-@section('page-title', 'Notifikasi')
-@section('page-subtitle', 'Detail pesan')
-
-@push('styles')
-    @vite(['resources/css/notifications/show.css'])
-@endpush
+@section('page-title', 'Detail Notifikasi')
+@section('page-subtitle', 'Baca pesan dan buka sumber terkait')
 
 @section('sidebar-menu')
     @include($sidebarPartial)
 @endsection
 
 @section('content')
-<div class="container-fluid py-4">
-<div>
+<div data-notification-detail-page class="min-w-0 space-y-4">
+    <a href="{{ route('notifications.index', $ctx ? ['ctx' => $ctx] : []) }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 no-underline shadow-sm transition hover:border-brand-200 hover:text-brand-700">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i> Kembali ke notifikasi
+    </a>
 
-    {{-- Back button --}}
-    <div class="mb-3">
-        <a href="{{ route('notifications.index', $ctx ? ['ctx' => $ctx] : []) }}" class="btn btn-sm btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Notifikasi
-        </a>
-    </div>
-
-    {{-- Notification Card --}}
-    <div class="card shadow-sm notification-detail-card">
-
-        {{-- Color Banner --}}
-        <div class="notification-detail-banner notif-tone-bg-{{ $colorKey }}"></div>
-
-        <div class="card-body p-4">
-
-            {{-- Header row --}}
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div class="notification-detail-icon notif-tone-{{ $colorKey }}">
-                    <i class="{{ $notification->icon ?? 'fas fa-bell' }} text-white fa-lg"></i>
+    <article class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="h-2 {{ $tone['bar'] }}"></div>
+        <header class="flex min-w-0 flex-col gap-4 border-b border-slate-200 px-5 py-5 sm:flex-row sm:items-start sm:px-7 sm:py-6">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg text-white shadow-sm {{ $tone['icon'] }}">
+                <i class="{{ $notification->icon ?? 'fas fa-bell' }}" aria-hidden="true"></i>
+            </span>
+            <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-full px-2.5 py-1 text-[10px] font-extrabold {{ $tone['badge'] }}">{{ $typeLabel }}</span>
+                    <time datetime="{{ $notification->created_at->toIso8601String() }}" class="text-[11px] font-medium text-slate-500">
+                        <i class="far fa-clock mr-1" aria-hidden="true"></i>{{ $notification->created_at->copy()->locale('id')->translatedFormat('d M Y, H:i') }}
+                    </time>
                 </div>
-                <div class="flex-grow-1 min-width-0">
-                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                        <span class="badge rounded-pill px-3 py-1 notification-detail-badge notif-tone-soft-{{ $colorKey }}">
-                            {{ $tipeLabel }}
-                        </span>
-                        <span class="text-muted small">
-                            <i class="fas fa-clock me-1"></i>
-                            {{ $notification->created_at->copy()->locale('id')->translatedFormat('d M Y, H:i') }}
-                            <span class="ms-1">({{ $notification->created_at->copy()->locale('id')->diffForHumans() }})</span>
-                        </span>
-                    </div>
-                    <h5 class="mb-0 fw-bold">{{ $notification->judul }}</h5>
-                </div>
+                <h2 class="mt-3 break-words text-lg font-extrabold leading-snug text-slate-950 sm:text-xl">{{ $notification->judul }}</h2>
             </div>
+        </header>
 
-            <hr class="my-3">
+        <div class="px-5 py-6 sm:px-7 sm:py-8">
+            <p class="whitespace-pre-line break-words text-sm leading-7 text-slate-700">{{ $notification->pesan }}</p>
 
-            {{-- Message body --}}
-            <div class="mb-4">
-                <p class="text-secondary notification-message-text">{{ $notification->pesan }}</p>
-            </div>
-
-            {{-- Link to source --}}
             @if($notification->link && !str_contains($notification->link, '/notifications'))
-                <div class="d-grid">
-                    <a href="{{ $notification->link }}" class="btn btn-primary">
-                        <i class="fas fa-external-link-alt me-2"></i> Lihat Sumber
+                <div class="mt-7 border-t border-slate-100 pt-5">
+                    <a href="{{ $notification->link }}" class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white no-underline shadow-sm transition hover:bg-brand-700 sm:w-auto">
+                        <i class="fas fa-external-link-alt" aria-hidden="true"></i> Buka sumber terkait
                     </a>
                 </div>
             @endif
-
         </div>
 
-        {{-- Footer actions --}}
-        <div class="card-footer bg-light px-4 py-2">
-            <small class="text-muted">
-                <i class="fas fa-check me-1 text-success"></i> Sudah dibaca
-            </small>
-        </div>
-    </div>
-
+        <footer class="flex items-center gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3 text-[11px] font-semibold text-emerald-700 sm:px-7">
+            <i class="fas fa-check-circle" aria-hidden="true"></i> Notifikasi sudah dibaca
+        </footer>
+    </article>
 </div>
-</div>
-
 @endsection

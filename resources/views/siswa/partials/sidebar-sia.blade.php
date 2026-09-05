@@ -1,0 +1,59 @@
+{{--
+Navigasi CleanFlow untuk Siswa SIA.
+--}}
+
+@php
+    $currentRoute = Route::currentRouteName();
+    // Logika pengecekan akses LMS
+    $siswa = \App\Models\Siswa::where('user_id', auth()->id())->with('kelas')->first();
+
+    // Ambil setting dari database
+    $setting = \App\Models\AppSetting::where('key', 'lms_allowed_jenjang')->first();
+    $allowedJenjang = $setting ? json_decode($setting->value, true) : [];
+
+    $showLms = $siswa && $siswa->kelas && in_array($siswa->kelas->jenjang, $allowedJenjang);
+@endphp
+
+<!-- Dashboard SIA -->
+<li class="menu-item {{ request()->routeIs('siswa.sia.dashboard') ? 'active' : '' }}">
+    <a href="{{ route('siswa.sia.dashboard') }}" class="menu-link">
+        <i class="menu-icon fas fa-home"></i>
+        <div>Dashboard SIA</div>
+    </a>
+</li>
+
+@if($showLms)
+    <!-- LMS Section -->
+    <li class="menu-header small text-uppercase">
+        <span class="menu-header-text">Learning Management</span>
+    </li>
+
+    <li class="menu-item {{ request()->routeIs('siswa.lms.*') ? 'active' : '' }}">
+        <a href="{{ route('siswa.lms.dashboard') }}" class="menu-link">
+            <i class="menu-icon fas fa-graduation-cap"></i>
+            <div class="fw-bold">HOK-LMS</div>
+        </a>
+    </li>
+@endif
+
+<!-- Akademik Section -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Akademik</span>
+</li>
+
+<li class="menu-item {{ request()->routeIs('siswa.sia.presensi.*') ? 'active' : '' }}">
+    <a href="{{ route('siswa.sia.presensi.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-calendar-check"></i>
+        <div>Presensi</div>
+    </a>
+</li>
+
+<li class="menu-item {{ request()->routeIs('siswa.sia.penilaian') ? 'active' : '' }}">
+    <a href="{{ route('siswa.sia.penilaian') }}" class="menu-link">
+        <i class="menu-icon fas fa-chart-line"></i>
+        <div>Data Penilaian</div>
+    </a>
+</li>
+
+<!-- Note: Menu Rapor & Pembayaran dipindahkan ke akses Wali Siswa -->
+<!-- Siswa fokus pada pembelajaran, wali siswa yang mengelola keuangan dan monitoring rapor -->

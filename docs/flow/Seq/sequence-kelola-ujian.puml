@@ -1,0 +1,111 @@
+@startuml
+title Sequence Diagram - Kelola Ujian
+autonumber
+
+actor "Guru" as Guru
+boundary "UI_KelolaUjian" as UI
+control "Control_Ujian" as Control
+entity "T_Ujian" as E_Ujian
+entity "T_SesiUjian" as E_Sesi
+
+== Skenario: Menampilkan Daftar Ujian ==
+
+Guru -> UI : 1. Mengakses Dashboard LMS Kelas (Tab Ujian)
+activate UI
+UI -> Control : 2. RequestDaftarUjian(Kelas)
+activate Control
+Control -> E_Ujian : 3. AmbilDataUjian()
+activate E_Ujian
+E_Ujian --> Control : 4. DataUjianDitemukan(Data)
+deactivate E_Ujian
+Control --> UI : 5. TampilkanDaftarUjian(Data)
+deactivate Control
+UI --> Guru : 6. Daftar Ujian Terbuka
+deactivate UI
+
+== Skenario A: Buat Ujian Baru ==
+
+Guru -> UI : 7. Klik "Buat Ujian" & Mengisi Pengaturan (Judul, Durasi)
+activate UI
+UI -> Control : 8. SimpanPengaturanUjian(DataAturan)
+activate Control
+Control -> E_Ujian : 9. InsertUjianBaru()
+activate E_Ujian
+E_Ujian --> Control : 10. Kembalikan ID_Ujian
+deactivate E_Ujian
+
+Guru -> UI : 11. Menambahkan Soal (Manual / Import / AI)
+UI -> Control : 12. SimpanBankSoal(ID_Ujian, DataSoal)
+Control -> E_Ujian : 13. InsertSoal()
+activate E_Ujian
+deactivate E_Ujian
+note right of E_Ujian: Konvensi Assumed Success diterapkan
+
+Control -> E_Sesi : 14. PersiapkanSesiUntukSeluruhSiswa()
+activate E_Sesi
+deactivate E_Sesi
+
+Control --> UI : 15. NotifikasiSukses()
+deactivate Control
+UI --> Guru : 16. Pesan Sukses (Ujian Berhasil Dibuat)
+deactivate UI
+
+== Skenario B: Pengawasan Ujian (Live Proctoring) ==
+
+Guru -> UI : 17. Klik "Pengawasan (Live Monitoring)" pada Ujian Berjalan
+activate UI
+UI -> Control : 18. MulaiSesiPengawasan(ID_Ujian)
+activate Control
+
+loop Selama Ujian Berlangsung
+    Control -> E_Sesi : 19. AmbilStatusRealTime()
+    activate E_Sesi
+    E_Sesi --> Control : 20. DataStatus(Waktu, Log Aktivitas)
+    deactivate E_Sesi
+    Control --> UI : 21. UpdateDashboardPengawasan(DataStatus)
+    UI --> Guru : 22. Memantau Jalannya Ujian & Log Siswa
+
+    alt Guru Melakukan Tindakan Khusus (Pause / Hentikan)
+        Guru -> UI : 23. Hentikan Paksa / Pause Sesi Siswa Tertentu
+        UI -> Control : 24. EksekusiTindakan(ID_SesiSiswa, Aksi)
+        Control -> E_Sesi : 25. UpdateStatusSesiSiswa()
+        activate E_Sesi
+        deactivate E_Sesi
+        Control -> Control : 26. Push Notifikasi & Eksekusi ke Layar Siswa
+    end
+end
+deactivate Control
+deactivate UI
+
+== Skenario C: Koreksi & Publikasi Nilai ==
+
+Guru -> UI : 27. Klik "Lihat Hasil & Koreksi" (Ujian Berakhir)
+activate UI
+UI -> Control : 28. RequestRekapHasil(ID_Ujian)
+activate Control
+Control -> E_Ujian : 29. HitungNilaiPilihanGandaOtomatis()
+activate E_Ujian
+E_Ujian --> Control : 30. RekapHasilSementara()
+deactivate E_Ujian
+Control --> UI : 31. TampilkanRekap(Data)
+deactivate Control
+
+Guru -> UI : 32. Mengoreksi Esai (Dibantu AI) & Simpan Nilai
+UI -> Control : 33. SimpanNilaiAkhir(ID_Ujian, DataNilai)
+activate Control
+Control -> E_Ujian : 34. UpdateNilaiAkhir()
+activate E_Ujian
+deactivate E_Ujian
+
+Guru -> UI : 35. Klik "Publikasikan Nilai"
+UI -> Control : 36. BukaAksesNilai(ID_Ujian)
+Control -> E_Ujian : 37. UpdateStatusPublikasi(True)
+activate E_Ujian
+deactivate E_Ujian
+
+Control --> UI : 38. NotifikasiSukses()
+deactivate Control
+UI --> Guru : 39. Pesan Sukses (Nilai Dapat Dilihat Siswa)
+deactivate UI
+
+@enduml

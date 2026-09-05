@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Kirim Catatan Baru')
 @section('page-title', 'Kirim Catatan Baru')
 @section('page-subtitle', 'Kirim catatan atau teguran kepada tenaga pendidik dan siswa')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite('resources/css/waka/catatan/create.css')

@@ -1,0 +1,98 @@
+@startuml
+title Sequence Diagram - Kelola & Koreksi Tugas
+autonumber
+
+actor "Guru" as Guru
+boundary "UI_KelolaTugas" as UI
+control "Control_Tugas" as Control
+entity "T_Tugas" as E_Tugas
+entity "T_TugasSiswa" as E_Lembar
+
+== Skenario: Menampilkan Daftar Tugas ==
+
+Guru -> UI : 1. Mengakses Dashboard LMS (Tab Tugas Pembelajaran)
+activate UI
+UI -> Control : 2. RequestDaftarTugas(Kelas)
+activate Control
+Control -> E_Tugas : 3. AmbilDataTugas()
+activate E_Tugas
+E_Tugas --> Control : 4. DataTugasDitemukan(Data)
+deactivate E_Tugas
+Control --> UI : 5. TampilkanDaftarTugas(Data)
+deactivate Control
+UI --> Guru : 6. Daftar Tugas Terbuka
+deactivate UI
+
+== Skenario A: Buat Tugas Baru (dengan Duplikasi) ==
+
+Guru -> UI : 7. Klik "Tambah Tugas" & Mengisi Form Pengaturan
+activate UI
+Guru -> UI : 8. Mengatur Deadline, Opsi, & Centang Duplikasi Kelas
+Guru -> UI : 9. Klik "Publikasikan Tugas"
+UI -> Control : 10. SubmitTugasBaru(Data)
+activate Control
+
+Control -> E_Tugas : 11. InsertDataTugas()
+activate E_Tugas
+deactivate E_Tugas
+
+alt Opsi Duplikasi Aktif
+    Control -> E_Tugas : 12. Looping InsertDataTugas (Ke Kelas Lain)
+    activate E_Tugas
+    deactivate E_Tugas
+end
+
+Control -> E_Lembar : 13. Generate Slot (TugasSiswa) untuk Seluruh Siswa
+activate E_Lembar
+deactivate E_Lembar
+note right of E_Lembar : Konvensi Assumed Success diterapkan
+
+Control -> Control : 14. Kirim Notifikasi "Tugas Baru" ke Seluruh Siswa
+
+Control --> UI : 15. NotifikasiSukses()
+deactivate Control
+UI --> Guru : 16. Pesan Sukses (Tugas Dipublikasikan)
+deactivate UI
+
+== Skenario B: Koreksi Tugas Masuk ==
+
+Guru -> UI : 17. Klik "Lihat Daftar Pengumpulan" pada Tugas
+activate UI
+UI -> Control : 18. RequestStatistikDanDaftar(ID_Tugas)
+activate Control
+Control -> E_Lembar : 19. AmbilDataPengumpulanSiswa()
+activate E_Lembar
+E_Lembar --> Control : 20. DataKumpulanSiswa()
+deactivate E_Lembar
+Control --> UI : 21. TampilkanStatistik(Data) & Daftar Status
+deactivate Control
+UI --> Guru : 22. Halaman Pengumpulan Terbuka
+
+alt Metode Penilaian = Individual
+    Guru -> UI : 23. Membuka Hasil Pekerjaan 1 Siswa
+    UI -> Control : 24. RequestFileJawaban(ID_TugasSiswa)
+    activate Control
+    Control --> UI : 25. TampilkanJawaban()
+    deactivate Control
+    Guru -> UI : 26. Memberikan Nilai & Feedback lalu Klik "Simpan Nilai"
+    UI -> Control : 27. SubmitKoreksiIndividual(ID_TugasSiswa, DataNilai)
+    activate Control
+else Metode Penilaian = Massal (Bulk Grade)
+    Guru -> UI : 28. Mencentang Banyak Siswa & Klik "Nilai Sekaligus"
+    UI --> Guru : 29. Tampilkan Pop-up Bulk Grade
+    Guru -> UI : 30. Memasukkan 1 Nilai Seragam & Klik "Terapkan Nilai"
+    UI -> Control : 31. SubmitKoreksiMassal(Array_ID_Siswa, DataNilai)
+end
+
+Control -> E_Lembar : 32. Update Nilai, Feedback, & Status("Dinilai")
+activate E_Lembar
+deactivate E_Lembar
+
+Control -> Control : 33. Kirim Notifikasi "Update Nilai" ke Siswa Terkait
+
+Control --> UI : 34. NotifikasiSukses()
+deactivate Control
+UI --> Guru : 35. Pesan Sukses
+deactivate UI
+
+@enduml

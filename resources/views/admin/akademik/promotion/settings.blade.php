@@ -1,172 +1,46 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
-@section('title', 'Admin - Pengaturan Kenaikan Kelas')
+@section('title', 'Pengaturan Kenaikan Kelas')
 @section('page-title', 'Pengaturan Kenaikan Kelas')
-
-@section('sidebar-menu')
-    @if(auth()->user()->isWakilKepalaSekolah())
-        @include('waka.partials.sneat-sidebar-menu')
-    @elseif(auth()->user()->isAdmin())
-        @include('admin.partials.sneat-sidebar-menu')
-    @endif
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/akademik/promotion/settings.css'])
-@endsection
+@section('page-subtitle', 'Tentukan ambang akademik dan jadwal proses otomatis')
 
 @section('content')
 @php
     $routePrefix = request()->routeIs('waka.*') ? 'waka.kenaikan-kelas' : 'admin.akademik.kenaikan-kelas';
     $tahunLabel = $tahun->nama_tahun_ajaran ?? $tahun->nama ?? $tahun->tahun_ajaran ?? '-';
-    $tanggalRapor = $setting && $setting->tanggal_pengambilan_rapor ? \Carbon\Carbon::parse($setting->tanggal_pengambilan_rapor)->format('Y-m-d') : '';
-    $tanggalEksekusi = $setting && $setting->tanggal_eksekusi ? \Carbon\Carbon::parse($setting->tanggal_eksekusi)->format('Y-m-d') : '';
-    $waktuEksekusi = $setting && $setting->tanggal_eksekusi ? \Carbon\Carbon::parse($setting->tanggal_eksekusi)->format('H:i') : '02:00';
-    $minimalTuntas = $setting->persentase_minimal_tuntas ?? 70;
+    $tanggalRapor = old('tanggal_pengambilan_rapor', $setting && $setting->tanggal_pengambilan_rapor ? \Carbon\Carbon::parse($setting->tanggal_pengambilan_rapor)->format('Y-m-d') : '');
+    $tanggalEksekusi = old('tanggal_eksekusi', $setting && $setting->tanggal_eksekusi ? \Carbon\Carbon::parse($setting->tanggal_eksekusi)->format('Y-m-d') : '');
+    $waktuEksekusi = old('waktu_eksekusi', $setting && $setting->tanggal_eksekusi ? \Carbon\Carbon::parse($setting->tanggal_eksekusi)->format('H:i') : '02:00');
+    $minimalTuntas = old('persentase_minimal_tuntas', $setting->persentase_minimal_tuntas ?? 70);
+    $inputClass = 'mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400';
 @endphp
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="promotion-page">
-        <div class="page-panel mb-4">
-            <div>
-                <span class="panel-kicker">Akademik</span>
-                <h4 class="panel-title">Pengaturan Kenaikan Kelas</h4>
-                <p class="panel-subtitle mb-0">Tetapkan tanggal rapor, jadwal otomatis, dan ambang akademik untuk proses kenaikan kelas.</p>
+<div class="min-w-0 w-full space-y-5">
+    @if(!$promotionReadiness['hasNextTA'])
+        <section class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i></span><div class="min-w-0"><h2 class="font-extrabold">Tahun ajaran berikutnya belum dibuat</h2><p class="mt-1 text-xs leading-5 text-red-700">Jadwal otomatis baru dapat diaktifkan setelah tahun ajaran tujuan tersedia.</p><a href="{{ route('admin.tahun-ajaran.create') }}" class="mt-2 inline-flex items-center gap-1 text-xs font-extrabold text-red-800 no-underline hover:underline">Buat Tahun Ajaran <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div></section>
+    @elseif($promotionReadiness['kelasBaruCount'] == 0)
+        <section class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600"><i class="fas fa-exclamation-circle" aria-hidden="true"></i></span><div class="min-w-0"><h2 class="font-extrabold">Kelas tujuan belum dibuat</h2><p class="mt-1 text-xs leading-5 text-amber-700">Tambahkan kelas pada tahun ajaran {{ $promotionReadiness['nextTA']->nama_tahun_ajaran }} sebelum mengaktifkan jadwal otomatis.</p><a href="{{ route('admin.kelas.index') }}" class="mt-2 inline-flex items-center gap-1 text-xs font-extrabold text-amber-800 no-underline hover:underline">Kelola Kelas <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div></section>
+    @else
+        <section class="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"><i class="fas fa-circle-check" aria-hidden="true"></i></span><div><h2 class="text-sm font-extrabold text-emerald-900">Tujuan kenaikan kelas siap</h2><p class="mt-1 text-xs text-emerald-700">{{ $promotionReadiness['nextTA']->nama_tahun_ajaran }} memiliki {{ $promotionReadiness['kelasBaruCount'] }} kelas tujuan.</p></div></section>
+    @endif
+
+    @if($errors->any())<section class="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-800"><p class="font-extrabold">Periksa kembali pengaturan berikut:</p><ul class="mt-2 list-disc space-y-1 pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></section>@endif
+
+    <div class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <form action="{{ route($routePrefix . '.settings.store') }}" method="POST" class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            @csrf
+            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
+            <header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fas fa-sliders text-brand-600" aria-hidden="true"></i>Konfigurasi utama</h2><p class="mt-1 text-xs text-slate-500">Digunakan oleh simulasi, eksekusi manual, dan jadwal otomatis.</p></header>
+            <div class="grid gap-5 p-4 sm:p-5">
+                <label class="block text-xs font-bold text-slate-700">Tahun ajaran aktif<input type="text" value="{{ $tahunLabel }}" disabled class="{{ $inputClass }}"></label>
+                <label class="block text-xs font-bold text-slate-700 sm:max-w-md">Tanggal pembagian rapor <span class="text-red-500">*</span><input type="date" name="tanggal_pengambilan_rapor" value="{{ $tanggalRapor }}" required class="{{ $inputClass }} @error('tanggal_pengambilan_rapor') !border-red-400 @enderror"><span class="mt-1.5 block text-[11px] font-normal text-slate-500">Tanggal resmi rapor diterima siswa.</span>@error('tanggal_pengambilan_rapor')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
+                <fieldset class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><legend class="px-1 text-xs font-extrabold text-slate-800">Jadwal eksekusi otomatis</legend><div class="mt-1 grid gap-4 sm:grid-cols-2"><label class="block text-xs font-bold text-slate-700">Tanggal<input type="date" name="tanggal_eksekusi" value="{{ $tanggalEksekusi }}" {{ $promotionReadiness['isReady'] ? '' : 'disabled' }} class="{{ $inputClass }} @error('tanggal_eksekusi') !border-red-400 @enderror">@error('tanggal_eksekusi')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label><label class="block text-xs font-bold text-slate-700">Waktu (WIB)<input type="time" name="waktu_eksekusi" value="{{ $waktuEksekusi }}" {{ $promotionReadiness['isReady'] ? '' : 'disabled' }} class="{{ $inputClass }} @error('waktu_eksekusi') !border-red-400 @enderror">@error('waktu_eksekusi')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label></div><p class="mt-3 text-[11px] leading-5 {{ $promotionReadiness['isReady'] ? 'text-slate-500' : 'font-semibold text-red-600' }}">{{ $promotionReadiness['isReady'] ? 'Kosongkan tanggal jika proses hanya akan dijalankan manual.' : 'Dinonaktifkan sampai tahun ajaran dan kelas tujuan siap. Jadwal lama yang tersimpan tidak akan terhapus.' }}</p></fieldset>
+                <label class="block text-xs font-bold text-slate-700 sm:max-w-md">Persentase minimal tuntas <span class="text-red-500">*</span><span class="relative mt-1.5 block"><input type="number" name="persentase_minimal_tuntas" value="{{ $minimalTuntas }}" min="0" max="100" required class="h-11 w-full rounded-xl border border-slate-200 bg-white pl-3 pr-10 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 @error('persentase_minimal_tuntas') !border-red-400 @enderror"><span class="pointer-events-none absolute right-3 top-3 text-sm font-bold text-slate-400">%</span></span><span class="mt-1.5 block text-[11px] font-normal leading-5 text-slate-500">Persentase mata pelajaran yang harus memenuhi KKM agar siswa tuntas secara akademik.</span>@error('persentase_minimal_tuntas')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
             </div>
-        </div>
+            <footer class="flex justify-end border-t border-slate-200 bg-slate-50/70 p-4"><button type="submit" class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-xs font-bold text-white hover:bg-brand-700 sm:w-auto"><i class="fas fa-save" aria-hidden="true"></i>Simpan pengaturan</button></footer>
+        </form>
 
-        <div class="row g-4">
-            <div class="col-lg-7">
-                <div class="content-card">
-                    <div class="content-card-header">
-                        <div>
-                            <h5 class="mb-1">Konfigurasi Utama</h5>
-                            <p class="text-muted mb-0">Pengaturan ini dipakai saat simulasi dan eksekusi kenaikan kelas.</p>
-                        </div>
-                    </div>
-                    <div class="content-card-body">
-                    {{-- TA Readiness Warning - sama seperti tab Proses & Rekap, supaya admin
-                         diperingatkan SEBELUM set jadwal otomatis, bukan sesudah gagal diam-diam --}}
-                    @if(!$promotionReadiness['hasNextTA'])
-                        <div class="alert alert-danger d-flex align-items-start mb-3">
-                            <i class="fas fa-exclamation-triangle fa-lg me-3 mt-1"></i>
-                            <div>
-                                <strong>Tahun Ajaran Baru Belum Dibuat!</strong><br>
-                                <small>Jadwal eksekusi otomatis tidak bisa diaktifkan sebelum Tahun Ajaran baru dibuat.
-                                <a href="{{ route('admin.tahun-ajaran.create') }}" class="alert-link">Buat Tahun Ajaran →</a></small>
-                            </div>
-                        </div>
-                    @elseif($promotionReadiness['kelasBaruCount'] == 0)
-                        <div class="alert alert-warning d-flex align-items-start mb-3">
-                            <i class="fas fa-exclamation-circle fa-lg me-3 mt-1"></i>
-                            <div>
-                                <strong>Kelas Belum Dibuat di TA Baru!</strong><br>
-                                <small>Jadwal eksekusi otomatis tidak bisa diaktifkan sebelum ada kelas di TA {{ $promotionReadiness['nextTA']->nama_tahun_ajaran }}.
-                                <a href="{{ route('admin.kelas.index') }}" class="alert-link">Kelola Kelas →</a></small>
-                            </div>
-                        </div>
-                    @endif
-
-                    <form action="{{ route($routePrefix . '.settings.store') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
-
-                        <div class="form-block">
-                            <label class="form-label">Tahun Ajaran Aktif</label>
-                            <input type="text" class="form-control" value="{{ $tahunLabel }}" disabled>
-                        </div>
-
-                        <div class="form-block">
-                            <label class="form-label">Tanggal Pembagian Rapor</label>
-                            <input type="date" name="tanggal_pengambilan_rapor" class="form-control"
-                                   value="{{ $tanggalRapor }}"
-                                   required>
-                            <div class="form-text">Tanggal resmi pembagian rapor kepada siswa.</div>
-                        </div>
-
-                        <div class="form-block">
-                            <label class="form-label">Tanggal Eksekusi Kenaikan (Otomatis)</label>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <input type="date" name="tanggal_eksekusi" class="form-control"
-                                           value="{{ $tanggalEksekusi }}"
-                                           {{ $promotionReadiness['isReady'] ? '' : 'disabled' }}>
-                                    <div class="form-text">Tanggal eksekusi</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <input type="time" name="waktu_eksekusi" class="form-control"
-                                           value="{{ $waktuEksekusi }}"
-                                           {{ $promotionReadiness['isReady'] ? '' : 'disabled' }}>
-                                    <div class="form-text">Waktu eksekusi (WIB)</div>
-                                </div>
-                            </div>
-                            @if($promotionReadiness['isReady'])
-                                <div class="form-text mt-2">Jika diisi, sistem akan menjalankan job kenaikan otomatis pada tanggal & waktu ini. Kosongkan jika ingin eksekusi manual via tombol.</div>
-                            @else
-                                <div class="form-text mt-2 text-danger">Nonaktif sampai Tahun Ajaran baru & kelasnya siap (lihat peringatan di atas) - eksekusi otomatis akan gagal diam-diam kalau dipaksa jalan tanpa kelas tujuan.</div>
-                            @endif
-                        </div>
-
-                        <div class="form-block">
-                            <label class="form-label">Persentase Minimal Tuntas (%)</label>
-                            <div class="input-group">
-                                <input type="number" name="persentase_minimal_tuntas" class="form-control" min="0" max="100" value="{{ $minimalTuntas }}" required>
-                                <span class="input-group-text">%</span>
-                            </div>
-                            <div class="form-text">Berapa % mata pelajaran yang harus tuntas (>= KKM) agar siswa dianggap layak naik kelas secara akademik.</div>
-                        </div>
-
-                        <div class="action-footer">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bx bx-save me-1"></i> Simpan Pengaturan
-                            </button>
-                        </div>
-                    </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-5">
-                <div class="content-card h-100">
-                    <div class="content-card-header">
-                        <div>
-                            <h5 class="mb-1">Informasi Sistem</h5>
-                            <p class="text-muted mb-0">Syarat yang diperiksa saat siswa diproses.</p>
-                        </div>
-                    </div>
-                    <div class="content-card-body">
-                        <div class="info-list">
-                            <div class="info-item">
-                                <div class="info-icon success"><i class="fas fa-wallet"></i></div>
-                                <div>
-                                    <h6>Syarat Keuangan</h6>
-                                    <p>Status tagihan harus lunas atau memiliki izin khusus dari ketua PKBM.</p>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon primary"><i class="fas fa-graduation-cap"></i></div>
-                                <div>
-                                    <h6>Syarat Akademik</h6>
-                                    <p>Persentase mata pelajaran yang nilainya memenuhi KKM harus melewati ambang batas.</p>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon warning"><i class="fas fa-bullseye"></i></div>
-                                <div>
-                                    <h6>Pastikan KKM Siap</h6>
-                                    <p>Lengkapi KKM semua mata pelajaran sebelum menjalankan eksekusi kenaikan kelas.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <a href="{{ route($routePrefix . '.kkm.index') }}" class="btn btn-outline-primary w-100 mt-3">
-                            <i class="fas fa-sliders-h me-1"></i> Buka Pengaturan KKM
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <aside class="h-fit overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm xl:sticky xl:top-24"><header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-circle-info text-brand-600" aria-hidden="true"></i>Syarat yang diperiksa</h2></header><div class="space-y-3 p-4 sm:p-5">@foreach([['icon'=>'fas fa-wallet','title'=>'Keuangan','text'=>'Tagihan lunas atau memiliki dispensasi yang sah.','tone'=>'bg-emerald-50 text-emerald-600'],['icon'=>'fas fa-graduation-cap','title'=>'Akademik','text'=>'Nilai mata pelajaran memenuhi ambang ketuntasan.','tone'=>'bg-brand-50 text-brand-600'],['icon'=>'fas fa-bullseye','title'=>'KKM','text'=>'KKM harus tersedia sebelum simulasi akhir dijalankan.','tone'=>'bg-amber-50 text-amber-600']] as $item)<div class="flex gap-3 rounded-xl bg-slate-50 p-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ $item['tone'] }}"><i class="{{ $item['icon'] }}" aria-hidden="true"></i></span><div><h3 class="text-xs font-extrabold text-slate-800">{{ $item['title'] }}</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">{{ $item['text'] }}</p></div></div>@endforeach<a href="{{ route($routePrefix . '.kkm.index') }}" class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-brand-50 px-4 text-xs font-bold text-brand-700 no-underline hover:bg-brand-100"><i class="fas fa-sliders" aria-hidden="true"></i>Buka Pengaturan KKM</a></div></aside>
     </div>
 </div>
-
 @endsection

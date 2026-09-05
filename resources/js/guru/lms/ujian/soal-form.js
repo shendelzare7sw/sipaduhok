@@ -15,8 +15,9 @@
     };
 
     const showSection = (type) => {
-        Object.values(sections).forEach((section) => section?.classList.remove('is-active'));
-        sections[type]?.classList.add('is-active');
+        Object.entries(sections).forEach(([sectionType, section]) => {
+            section?.classList.toggle('hidden', sectionType !== type);
+        });
     };
 
     tipeSelect?.addEventListener('change', () => showSection(tipeSelect.value));

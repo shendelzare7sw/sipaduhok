@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Daftar Kelas')
 @section('page-title', 'Daftar Kelas')
 @section('page-subtitle', 'Pilih kelas untuk mengelola pembelajaran')
 
-@section('sidebar-menu')
-    @include('guru.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/guru/kelas/index.css'])

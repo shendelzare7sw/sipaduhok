@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Validasi Izin Ketidakhadiran')
 @section('page-title', 'Validasi Izin')
 @section('page-subtitle', 'Validasi pengajuan izin dan sakit siswa')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/presensi/validasi-izin.css', 'resources/js/wali-kelas/presensi/validasi-izin.js'])

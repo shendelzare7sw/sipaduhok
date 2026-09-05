@@ -1,13 +1,10 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Siswa Kelas ' . $kelas->nama_kelas)
 
 @section('page-title', 'Kelola Siswa Kelas')
 @section('page-subtitle', 'Kelas ' . $kelas->nama_kelas . ' - ' . ($kelas->tahunAjaran->nama_tahun_ajaran ?? ''))
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/manajemen-siswa/per-kelas.css'])

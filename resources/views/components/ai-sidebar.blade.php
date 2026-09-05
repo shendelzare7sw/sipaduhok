@@ -11,14 +11,14 @@
 --}}
 
 {{-- Sidebar Container --}}
-<div id="aiQuestionSidebar" class="ai-sidebar">
+<div id="aiQuestionSidebar" class="fixed inset-y-0 right-0 z-[80] flex w-full translate-x-full flex-col overflow-hidden bg-white shadow-2xl transition-transform duration-300 md:w-[450px] md:min-w-[350px] md:max-w-[800px]">
     {{-- Resize Handle --}}
-    <div class="ai-sidebar-resize-handle" id="aiSidebarResizeHandle" title="Drag untuk resize sidebar">
-        <div class="resize-indicator"></div>
+    <div class="absolute inset-y-0 left-0 z-20 hidden w-2 cursor-ew-resize items-center justify-center hover:bg-cyan-50 md:flex" id="aiSidebarResizeHandle" title="Geser untuk mengubah ukuran panel">
+        <div class="h-10 w-0.5 rounded-full bg-cyan-300"></div>
     </div>
 
     {{-- Sidebar Header --}}
-    <div class="ai-sidebar-header">
+    <div class="z-10 flex shrink-0 items-center justify-between gap-3 bg-gradient-to-r from-cyan-600 to-brand-700 px-5 py-4 text-white">
         <div>
             <h5 class="mb-0 fw-bold">
                 <i class="fas fa-robot me-2"></i>
@@ -27,11 +27,11 @@
             </h5>
             <small class="opacity-90">Generate soal otomatis dengan AI</small>
         </div>
-        <button type="button" class="btn-close btn-close-white" data-close-ai-sidebar title="Tutup sidebar"></button>
+        <button type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-0 bg-white/10 text-white hover:bg-white/20" data-close-ai-sidebar title="Tutup panel" aria-label="Tutup panel"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
     {{-- Sidebar Body (Scrollable) --}}
-    <div class="ai-sidebar-body">
+    <div class="min-h-0 flex-1 overflow-y-auto px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6">
 
 
         {{-- Model Status Badge --}}
@@ -44,10 +44,10 @@
         <div class="d-flex align-items-center gap-2 mb-3 px-1" id="aiModelStatusContainer">
             <small class="text-muted"><i class="fas fa-microchip me-1"></i> Model:</small>
             <span class="badge bg-dark bg-opacity-75" id="aiModelStatusBadge" title="{{ $currentModel }}">
-                <i class="fas fa-circle text-success me-1 ai-sidebar-model-dot"></i>
+                <i class="fas fa-circle text-success me-1 text-[8px]"></i>
                 {{ $modelShortName }}
             </span>
-            <span class="badge bg-light text-muted d-none ai-sidebar-model-switch-info" id="aiModelSwitchInfo">
+            <span class="badge bg-light text-muted d-none text-[10px]" id="aiModelSwitchInfo">
                 {{-- Updated dynamically via JS after generation --}}
             </span>
         </div>
@@ -80,7 +80,7 @@
                     Mata Pelajaran
                 </label>
                 <input type="text"
-                       class="form-control ai-sidebar-subject-input"
+                       class="form-control bg-slate-50"
                        value="{{ $subjectName }}"
                        readonly>
             </div>
@@ -239,40 +239,7 @@
 </div>
 
 {{-- Backdrop (click to close) --}}
-<div id="aiSidebarBackdrop" class="ai-sidebar-backdrop" data-close-ai-sidebar></div>
-
-{{-- Regenerate Confirmation Modal --}}
-<div class="modal fade" id="regenerateConfirmModal" tabindex="-1" aria-labelledby="regenerateConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-warning bg-opacity-10 border-bottom border-warning">
-                <h5 class="modal-title fw-bold" id="regenerateConfirmModalLabel">
-                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                    Konfirmasi Regenerate Soal
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-warning mb-3">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Perhatian:</strong> Hasil generate sebelumnya akan hilang!
-                </div>
-                <p class="mb-0">
-                    Apakah Anda yakin ingin melakukan regenerate soal?
-                    Semua soal yang telah di-generate sebelumnya akan digantikan dengan hasil generate yang baru.
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Batal
-                </button>
-                <button type="button" class="btn btn-warning" id="confirmRegenerateBtn">
-                    <i class="fas fa-redo me-1"></i> Ya, Regenerate
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<div id="aiSidebarBackdrop" class="invisible fixed inset-0 z-[70] bg-slate-950/55 opacity-0 backdrop-blur-sm transition" data-close-ai-sidebar></div>
 
 {{-- Hidden inputs for component data --}}
 <input type="hidden" id="aiGeneratorUjianId" value="{{ $ujianId }}">

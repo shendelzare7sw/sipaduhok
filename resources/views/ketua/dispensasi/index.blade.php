@@ -1,268 +1,63 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Dispensasi Keuangan')
 @section('page-title', 'Dispensasi Keuangan')
-@section('page-subtitle', 'Kelola pengajuan dispensasi dari Bendahara')
-
-@section('sidebar-menu')
-    @include('ketua.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/ketua/dispensasi/index.css'])
-@endsection
+@section('page-subtitle', 'Putuskan permohonan akses ujian atau rapor dari Bendahara')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+@php
+    $pendingIds = $dispensasiList->where('status', 'menunggu')->pluck('id')->map(fn ($id) => (string) $id)->values();
+@endphp
+<div class="min-w-0 w-full space-y-5"
+    x-data="{
+        selected: [],
+        available: @js($pendingIds),
+        decision: { action: 'approve', url: '', name: '', bulk: false },
+        toggleAll() { this.selected = this.selected.length === this.available.length ? [] : [...this.available]; },
+        openOne(action, url, name, id) {
+            this.selected = [String(id)];
+            this.decision = { action, url, name, bulk: false };
+            this.$refs.decisionDialog.showModal();
+        },
+        openBulk(action, url) {
+            if (!this.selected.length) return;
+            this.decision = { action, url, name: `${this.selected.length} pengajuan terpilih`, bulk: true };
+            this.$refs.decisionDialog.showModal();
+        }
+    }">
+    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-900 sm:p-5">
+        <div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-700"><i class="fas fa-circle-info" aria-hidden="true"></i></span><div><h2 class="font-extrabold">Alur dispensasi keuangan</h2><p class="mt-1 text-xs leading-5 text-blue-800">Bendahara mengajukan akses khusus untuk siswa yang belum lunas. Persetujuan memberi akses ujian atau rapor sesuai tipe pengajuan; penolakan mempertahankan kewajiban pelunasan.</p></div></div>
+    </section>
 
-    {{-- ALUR INFO --}}
-    <div class="alert alert-warning alert-dismissible d-flex align-items-baseline" role="alert">
-        <span class="alert-icon alert-icon-lg text-warning me-2">
-            <i class="bx bx-info-circle bx-sm"></i>
-        </span>
-        <div class="d-flex flex-column ps-1">
-            <h6 class="alert-heading d-flex align-items-center fw-bold mb-1">Informasi Dispensasi</h6>
-            <span><strong>Dispensasi Keuangan</strong> diajukan oleh Bendahara untuk siswa yang belum lunas pembayaran tetapi perlu akses ujian/rapor. Jika <strong>disetujui</strong>, siswa otomatis mendapat akses. Jika <strong>ditolak</strong>, siswa harus melunasi pembayaran.</span>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    <section class="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        @foreach([
+            ['Menunggu', $stats['menunggu'], 'Perlu keputusan', 'fa-clock', 'bg-amber-50 text-amber-700'],
+            ['Disetujui', $stats['disetujui'], 'Akses telah diberikan', 'fa-circle-check', 'bg-emerald-50 text-emerald-700'],
+            ['Ditolak', $stats['ditolak'], 'Perlu pelunasan', 'fa-circle-xmark', 'bg-red-50 text-red-700'],
+        ] as [$label, $value, $description, $icon, $tone])
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm {{ $loop->last ? 'col-span-2 lg:col-span-1' : '' }}"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><strong class="block text-xl font-extrabold text-slate-950">{{ $value }}</strong><span class="mt-1 block text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $label }}</span></div><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div><p class="mt-3 border-t border-slate-100 pt-3 text-[11px] text-slate-500">{{ $description }}</p></article>
+        @endforeach
+    </section>
 
-    {{-- STATISTIK (Sneat Widgets) --}}
-    <div class="row mb-4">
-        <div class="col-sm-6 col-lg-4 mb-4">
-            <div class="card card-border-shadow-warning h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-2 pb-1">
-                        <div class="avatar me-2">
-                            <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-time-five"></i></span>
-                        </div>
-                        <h4 class="ms-1 mb-0">{{ $stats['menunggu'] }}</h4>
-                    </div>
-                    <p class="mb-1 fw-medium">Menunggu Keputusan</p>
-                    <p class="mb-0 text-muted small">Pengajuan yang perlu ditinjau</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-4 mb-4">
-            <div class="card card-border-shadow-success h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-2 pb-1">
-                        <div class="avatar me-2">
-                            <span class="avatar-initial rounded bg-label-success"><i class="bx bx-check-double"></i></span>
-                        </div>
-                        <h4 class="ms-1 mb-0">{{ $stats['disetujui'] }}</h4>
-                    </div>
-                    <p class="mb-1 fw-medium">Disetujui</p>
-                    <p class="mb-0 text-muted small">Total pengajuan yang di-ACC</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-4 mb-4">
-            <div class="card card-border-shadow-danger h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-2 pb-1">
-                        <div class="avatar me-2">
-                            <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-x"></i></span>
-                        </div>
-                        <h4 class="ms-1 mb-0">{{ $stats['ditolak'] }}</h4>
-                    </div>
-                    <p class="mb-1 fw-medium">Ditolak</p>
-                    <p class="mb-0 text-muted small">Total pengajuan ditolak</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 p-4 sm:p-5"><div><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-hand-holding-heart text-brand-600" aria-hidden="true"></i>Daftar pengajuan</h2><p class="mt-1 text-xs text-slate-500">Filter berdasarkan status dan jenis akses yang diminta.</p></div><form action="{{ route('ketua.dispensasi.index') }}" method="GET" class="mt-4 grid gap-2 sm:grid-cols-[minmax(150px,1fr)_minmax(150px,1fr)_auto_auto]"><select name="status" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800"><option value="">Semua status</option><option value="menunggu" @selected(request('status')==='menunggu')>Menunggu</option><option value="disetujui" @selected(request('status')==='disetujui')>Disetujui</option><option value="ditolak" @selected(request('status')==='ditolak')>Ditolak</option></select><select name="tipe" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800"><option value="">Semua tipe</option><option value="ujian" @selected(request('tipe')==='ujian')>Ujian</option><option value="rapor" @selected(request('tipe')==='rapor')>Rapor</option></select><button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-xs font-bold text-white"><i class="fas fa-filter" aria-hidden="true"></i>Terapkan</button><a href="{{ route('ketua.dispensasi.index') }}" class="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 text-slate-600 no-underline hover:bg-slate-100" aria-label="Reset filter"><i class="fas fa-rotate-left" aria-hidden="true"></i></a></form></header>
 
-    {{-- FILTER & TABEL DISPENSASI --}}
-    <div class="card shadow-sm mb-4">
-        <div class="card-header border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <h5 class="card-title m-0 fw-bold"><i class="fas fa-hand-holding-heart me-2 text-primary"></i>Daftar Pengajuan Dispensasi</h5>
-            
-            <form action="{{ route('ketua.dispensasi.index') }}" method="GET" class="d-flex flex-column flex-sm-row gap-2">
-                <select name="status" class="form-select form-select-sm" style="min-width: 140px;">
-                    <option value="">Semua Status</option>
-                    <option value="menunggu" {{ request('status') == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
-                    <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                    <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                </select>
-                <select name="tipe" class="form-select form-select-sm" style="min-width: 120px;">
-                    <option value="">Semua Tipe</option>
-                    <option value="ujian" {{ request('tipe') == 'ujian' ? 'selected' : '' }}>Ujian</option>
-                    <option value="rapor" {{ request('tipe') == 'rapor' ? 'selected' : '' }}>Rapor</option>
-                </select>
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1"><i class="fas fa-filter me-1"></i> Filter</button>
-                    <a href="{{ route('ketua.dispensasi.index') }}" class="btn btn-label-secondary btn-sm"><i class="fas fa-redo"></i></a>
-                </div>
-            </form>
-        </div>
-
-        @if($stats['menunggu'] > 0)
-            <div class="card-body border-bottom py-3 bg-lighter">
-                <div class="d-flex gap-2 align-items-center">
-                    <span class="text-muted small fw-bold me-2">Aksi Massal:</span>
-                    <button type="button" class="btn btn-success btn-sm fw-bold" data-bulk-action data-action="{{ route('ketua.dispensasi.approve') }}" data-label="Setujui" data-button-class="btn-success">
-                        <i class="fas fa-check-double me-1"></i> Setujui Terpilih
-                    </button>
-                    <button type="button" class="btn btn-danger btn-sm fw-bold" data-bulk-action data-action="{{ route('ketua.dispensasi.reject') }}" data-label="Tolak" data-button-class="btn-danger">
-                        <i class="fas fa-times me-1"></i> Tolak Terpilih
-                    </button>
-                </div>
-            </div>
+        @if($pendingIds->isNotEmpty())
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 sm:px-5"><label class="inline-flex cursor-pointer items-center gap-2 text-xs font-bold text-slate-700"><input type="checkbox" @change="toggleAll()" :checked="available.length > 0 && selected.length === available.length" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">Pilih semua yang menunggu</label><div class="flex flex-wrap gap-2"><button type="button" @click="openBulk('approve', @js(route('ketua.dispensasi.approve')))" :disabled="!selected.length" class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-emerald-600 px-3 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"><i class="fas fa-check-double" aria-hidden="true"></i>Setujui <span x-show="selected.length">(<span x-text="selected.length"></span>)</span></button><button type="button" @click="openBulk('reject', @js(route('ketua.dispensasi.reject')))" :disabled="!selected.length" class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-red-600 px-3 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"><i class="fas fa-xmark" aria-hidden="true"></i>Tolak <span x-show="selected.length">(<span x-text="selected.length"></span>)</span></button></div></div>
         @endif
 
-        <div class="table-responsive text-nowrap">
-            <table class="table table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th width="40"><input type="checkbox" id="select-all" class="form-check-input"></th>
-                        <th>NO</th>
-                        <th>SISWA</th>
-                        <th>TIPE</th>
-                        <th>PERIODE</th>
-                        <th>ALASAN</th>
-                        <th>DIAJUKAN OLEH</th>
-                        <th>TANGGAL</th>
-                        <th>STATUS</th>
-                        <th>AKSI</th>
-                    </tr>
-                </thead>
-                <tbody class="table-border-bottom-0">
-                    @forelse($dispensasiList as $index => $d)
-                        <tr>
-                            <td class="text-center align-middle">
-                                @if($d->status === 'menunggu')
-                                    <input type="checkbox" class="disp-checkbox form-check-input" value="{{ $d->id }}">
-                                @endif
-                            </td>
-                            <td class="align-middle fw-medium">{{ $dispensasiList->firstItem() + $index }}</td>
-                            <td class="align-middle">
-                                <div class="d-flex flex-column">
-                                    <span class="fw-bold text-heading">{{ $d->siswa->nama_lengkap ?? '-' }}</span>
-                                    <small class="text-muted">{{ $d->siswa->kelas->nama_kelas ?? '-' }}</small>
-                                </div>
-                            </td>
-                            <td class="align-middle">
-                                <span class="badge {{ $d->tipe === 'ujian' ? 'bg-label-info' : 'bg-label-primary' }}">{{ strtoupper($d->tipe ?? '-') }}</span>
-                            </td>
-                            <td class="align-middle">
-                                <span class="small fw-bold">{{ $d->periode ? strtoupper(str_replace('_', ' ', $d->periode)) : '-' }}</span>
-                            </td>
-                            <td class="align-middle text-wrap" style="min-width: 200px;">
-                                <span class="small">{{ Str::limit($d->alasan, 60) }}</span>
-                            </td>
-                            <td class="align-middle small">{{ $d->pengaju->name ?? '-' }}</td>
-                            <td class="align-middle small">{{ $d->tanggal_pengajuan ? $d->tanggal_pengajuan->format('d/m/Y') : '-' }}</td>
-                            <td class="align-middle">
-                                @if($d->status === 'menunggu')
-                                    <span class="badge bg-warning"><i class="fas fa-clock me-1"></i> Menunggu</span>
-                                @elseif($d->status === 'disetujui')
-                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i> Disetujui</span>
-                                @else
-                                    <span class="badge bg-danger"><i class="fas fa-times me-1"></i> Ditolak</span>
-                                @endif
-                            </td>
-                            <td class="align-middle">
-                                @if($d->status === 'menunggu')
-                                    <div class="d-flex gap-2">
-                                        <button type="button" class="btn btn-sm btn-icon btn-success rounded-circle" title="Setujui"
-                                            data-single-action
-                                            data-action="{{ route('ketua.dispensasi.approve') }}"
-                                            data-id="{{ $d->id }}"
-                                            data-message="Setujui dispensasi untuk {{ $d->siswa->nama_lengkap ?? '' }}?"
-                                            data-label="Setujui"
-                                            data-button-class="btn-success">
-                                            <i class="bx bx-check"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-icon btn-danger rounded-circle" title="Tolak"
-                                            data-single-action
-                                            data-action="{{ route('ketua.dispensasi.reject') }}"
-                                            data-id="{{ $d->id }}"
-                                            data-message="Tolak dispensasi untuk {{ $d->siswa->nama_lengkap ?? '' }}?"
-                                            data-label="Tolak"
-                                            data-button-class="btn-danger">
-                                            <i class="bx bx-x"></i>
-                                        </button>
-                                    </div>
-                                @else
-                                    <span class="text-muted small">
-                                        @if($d->catatan_ketua)
-                                            <i class="fas fa-comment-dots text-primary cursor-pointer" title="{{ $d->catatan_ketua }}" data-bs-toggle="tooltip"></i>
-                                        @endif
-                                        {{ $d->tanggal_keputusan ? $d->tanggal_keputusan->format('d/m/Y') : '' }}
-                                    </span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="10" class="text-center py-5 text-muted fst-italic">Belum ada pengajuan dispensasi</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if($dispensasiList->hasPages())
-        <div class="card-footer border-top pt-3 pb-0">
-            <div class="d-flex justify-content-center">
-                {{ $dispensasiList->withQueryString()->links() }}
-            </div>
-        </div>
-        @endif
-    </div>
+        <div class="hidden overflow-x-auto xl:block"><table class="w-full min-w-[70rem] table-fixed text-left text-xs"><colgroup><col class="w-12"><col><col class="w-24"><col class="w-32"><col class="w-64"><col class="w-44"><col class="w-32"><col class="w-32"><col class="w-28"></colgroup><thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-4 py-3"></th><th class="px-3 py-3">Siswa</th><th class="px-3 py-3">Tipe</th><th class="px-3 py-3">Periode</th><th class="px-3 py-3">Alasan</th><th class="px-3 py-3">Diajukan oleh</th><th class="px-3 py-3">Tanggal</th><th class="px-3 py-3">Status</th><th class="py-3 pl-5 pr-4 text-right">Aksi</th></tr></thead><tbody class="divide-y divide-slate-100">
+            @forelse($dispensasiList as $d)
+                @php $pending=$d->status==='menunggu'; $approved=$d->status==='disetujui'; @endphp
+                <tr class="hover:bg-slate-50/70"><td class="px-4 py-4">@if($pending)<input type="checkbox" value="{{ $d->id }}" x-model="selected" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">@endif</td><td class="px-3 py-4"><p class="truncate text-sm font-bold text-slate-900" title="{{ $d->siswa->nama_lengkap ?? '-' }}">{{ $d->siswa->nama_lengkap ?? '-' }}</p><p class="mt-0.5 truncate text-[11px] text-slate-500">{{ $d->siswa->kelas->nama_kelas ?? 'Belum ada kelas' }}</p></td><td class="px-3 py-4"><span class="rounded-full px-2.5 py-1 text-[10px] font-bold {{ $d->tipe==='ujian'?'bg-cyan-50 text-cyan-700':'bg-violet-50 text-violet-700' }}">{{ strtoupper($d->tipe ?? '-') }}</span></td><td class="px-3 py-4 font-semibold text-slate-700">{{ $d->periode ? strtoupper(str_replace('_',' ',$d->periode)) : '-' }}</td><td class="px-3 py-4"><p class="line-clamp-2 whitespace-normal leading-5 text-slate-600" title="{{ $d->alasan }}">{{ $d->alasan ?: '-' }}</p></td><td class="px-3 py-4"><p class="truncate text-slate-600" title="{{ $d->pengaju->name ?? '-' }}">{{ $d->pengaju->name ?? '-' }}</p></td><td class="whitespace-nowrap px-3 py-4 text-slate-600">{{ $d->tanggal_pengajuan?->format('d/m/Y') ?? '-' }}</td><td class="px-3 py-4"><span class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-bold {{ $pending?'bg-amber-50 text-amber-700':($approved?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700') }}">{{ ucfirst($d->status) }}</span>@if(!$pending && $d->tanggal_keputusan)<time class="mt-1 block text-[10px] text-slate-400">{{ $d->tanggal_keputusan->format('d/m/Y') }}</time>@endif</td><td class="py-4 pl-5 pr-4">@if($pending)<div class="flex justify-end gap-2"><x-cleanflow.table-action type="button" tone="success" icon="fas fa-check" label="Setujui dispensasi" data-action-url="{{ route('ketua.dispensasi.approve') }}" data-student-name="{{ $d->siswa->nama_lengkap ?? 'Siswa' }}" data-record-id="{{ $d->id }}" x-on:click="openOne('approve', $el.dataset.actionUrl, $el.dataset.studentName, $el.dataset.recordId)" /><x-cleanflow.table-action type="button" tone="delete" icon="fas fa-xmark" label="Tolak dispensasi" data-action-url="{{ route('ketua.dispensasi.reject') }}" data-student-name="{{ $d->siswa->nama_lengkap ?? 'Siswa' }}" data-record-id="{{ $d->id }}" x-on:click="openOne('reject', $el.dataset.actionUrl, $el.dataset.studentName, $el.dataset.recordId)" /></div>@elseif($d->catatan_ketua)<span class="block truncate text-right text-[11px] text-slate-500" title="{{ $d->catatan_ketua }}"><i class="fas fa-message mr-1 text-brand-600" aria-hidden="true"></i>{{ $d->catatan_ketua }}</span>@else<span class="block text-right text-slate-400">-</span>@endif</td></tr>
+            @empty<tr><td colspan="9" class="px-4 py-14 text-center text-sm text-slate-500"><i class="fas fa-inbox mb-3 block text-4xl text-slate-300" aria-hidden="true"></i>Belum ada pengajuan dispensasi.</td></tr>@endforelse
+        </tbody></table></div>
 
+        <div class="divide-y divide-slate-100 xl:hidden">@forelse($dispensasiList as $d)@php $pending=$d->status==='menunggu'; $approved=$d->status==='disetujui'; @endphp<article class="p-4"><div class="flex min-w-0 items-start gap-3">@if($pending)<input type="checkbox" value="{{ $d->id }}" x-model="selected" class="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500">@endif<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-xs font-extrabold text-brand-700">{{ strtoupper(substr($d->siswa->nama_lengkap ?? 'S',0,1)) }}</span><div class="min-w-0 flex-1"><h3 class="break-words text-sm font-extrabold text-slate-900">{{ $d->siswa->nama_lengkap ?? '-' }}</h3><p class="mt-0.5 text-[11px] text-slate-500">{{ $d->siswa->kelas->nama_kelas ?? 'Belum ada kelas' }} &middot; {{ strtoupper($d->tipe ?? '-') }}</p></div><span class="shrink-0 rounded-full px-2 py-1 text-[9px] font-bold {{ $pending?'bg-amber-50 text-amber-700':($approved?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700') }}">{{ ucfirst($d->status) }}</span></div><div class="mt-3 rounded-xl bg-slate-50 p-3"><p class="text-[9px] font-bold uppercase text-slate-400">Alasan &middot; {{ $d->pengaju->name ?? '-' }}</p><p class="mt-1 break-words text-xs leading-5 text-slate-600">{{ $d->alasan ?: '-' }}</p></div>@if($pending)<div class="mt-3 grid grid-cols-2 gap-2"><button type="button" @click="openOne('approve', @js(route('ketua.dispensasi.approve')), @js($d->siswa->nama_lengkap ?? 'Siswa'), @js($d->id))" class="min-h-10 rounded-xl bg-emerald-600 px-3 text-xs font-bold text-white">Setujui</button><button type="button" @click="openOne('reject', @js(route('ketua.dispensasi.reject')), @js($d->siswa->nama_lengkap ?? 'Siswa'), @js($d->id))" class="min-h-10 rounded-xl bg-red-600 px-3 text-xs font-bold text-white">Tolak</button></div>@elseif($d->catatan_ketua)<p class="mt-3 rounded-xl border border-slate-200 p-3 text-xs text-slate-600"><strong>Catatan:</strong> {{ $d->catatan_ketua }}</p>@endif</article>@empty<div class="p-12 text-center text-sm text-slate-500"><i class="fas fa-inbox mb-3 block text-4xl text-slate-300" aria-hidden="true"></i>Belum ada pengajuan dispensasi.</div>@endforelse</div>
+
+        @if($dispensasiList->hasPages())<footer class="border-t border-slate-200 p-4 sm:p-5">{{ $dispensasiList->withQueryString()->links() }}</footer>@endif
+    </section>
+
+    <dialog x-ref="decisionDialog" class="m-auto w-[calc(100%-2rem)] max-w-lg overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/60" @click.self="$el.close()"><form :action="decision.url" method="POST">@csrf<template x-for="id in selected" :key="id"><input type="hidden" name="dispensasi_ids[]" :value="id"></template><header class="flex items-start justify-between gap-4 border-b border-slate-200 p-4 sm:p-5"><div><p class="text-[10px] font-bold uppercase tracking-wide" :class="decision.action==='approve'?'text-emerald-700':'text-red-700'" x-text="decision.action==='approve'?'Persetujuan akses':'Penolakan akses'"></p><h2 class="mt-1 text-base font-extrabold text-slate-950" x-text="decision.name"></h2></div><button type="button" @click="$refs.decisionDialog.close()" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500" aria-label="Tutup"><i class="fas fa-xmark" aria-hidden="true"></i></button></header><div class="space-y-4 p-4 sm:p-5"><p class="rounded-xl border p-3 text-xs leading-5" :class="decision.action==='approve'?'border-emerald-200 bg-emerald-50 text-emerald-800':'border-red-200 bg-red-50 text-red-800'" x-text="decision.action==='approve'?'Akses sesuai tipe pengajuan akan diberikan setelah keputusan disimpan.':'Siswa tetap harus melunasi pembayaran untuk memperoleh akses.'"></p><label class="block"><span class="text-xs font-bold text-slate-700">Catatan keputusan <span class="font-normal text-slate-400">(opsional)</span></span><textarea name="catatan_ketua" rows="3" maxlength="500" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Pesan untuk Bendahara..."></textarea></label></div><footer class="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-4 py-3 sm:px-5"><button type="button" @click="$refs.decisionDialog.close()" class="h-10 px-4 text-xs font-bold text-slate-600">Batal</button><button type="submit" class="h-10 rounded-xl px-4 text-xs font-bold text-white" :class="decision.action==='approve'?'bg-emerald-600':'bg-red-600'" x-text="decision.action==='approve'?'Ya, setujui':'Ya, tolak'"></button></footer></form></dialog>
 </div>
-@endsection
-
-@section('scripts')
-{{-- MODAL KONFIRMASI AKSI --}}
-<div class="modal fade" id="catatanModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <form id="catatanForm" method="POST">
-                @csrf
-                <div class="modal-header border-bottom pb-3" id="catatanModalHeader">
-                    <h5 class="modal-title fw-bold" id="catatanModalTitle">
-                        <i class="fas fa-question-circle me-2 text-primary" id="catatanModalIcon"></i> Konfirmasi
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body py-4">
-                    <p class="mb-3 fs-6" id="catatanModalMessage">Apakah Anda yakin?</p>
-                    <div id="catatanBulkIds"></div>
-                    <div class="mb-0">
-                        <label class="form-label fw-medium">Catatan (opsional)</label>
-                        <textarea name="catatan_ketua" class="form-control" rows="3" placeholder="Tambahkan pesan/alasan untuk bendahara..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer border-top pt-3">
-                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary" id="catatanSubmitBtn">Konfirmasi</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{{-- MODAL PERINGATAN --}}
-<div class="modal fade" id="peringatanModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-body text-center py-4 px-3">
-                <i class="bx bx-error-circle text-warning mb-3" style="font-size: 3rem;"></i>
-                <h5 class="fw-bold mb-2">Perhatian</h5>
-                <p class="mb-4">Pilih minimal 1 pengajuan terlebih dahulu.</p>
-                <button type="button" class="btn btn-warning w-100" data-bs-dismiss="modal">Mengerti</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@vite(['resources/js/ketua/dispensasi/index.js'])
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
-    });
-</script>
 @endsection

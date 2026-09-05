@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Detail Nilai - ' . $siswa->nama_lengkap)
 @section('page-title', 'Detail Nilai Siswa')
 @section('page-subtitle', $siswa->nama_lengkap . ' - ' . $kelas->nama_kelas)
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/nilai/show.css', 'resources/js/wali-kelas/nilai/show.js'])

@@ -1,240 +1,87 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
-@section('title', 'Admin - Riwayat Dispensasi')
+@section('title', 'Riwayat Dispensasi')
 @section('page-title', 'Riwayat Dispensasi')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/keuangan/promotion/history.css'])
-@endsection
+@section('page-subtitle', 'Telusuri keputusan pengajuan dispensasi kenaikan kelas')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-primary fw-bold">
-                        <i class="bi bi-clock-history me-2"></i>Riwayat Pengajuan Dispensasi
-                    </h5>
-                    <a href="{{ route('admin.keuangan.kenaikan-kelas.validation.index') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-arrow-left me-1"></i>Kembali
-                    </a>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.keuangan.kenaikan-kelas.validation.history') }}" method="GET" class="mb-4">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label">Cari Siswa</label>
-                                <input type="text" name="q" class="form-control" placeholder="Nama atau NIS..." value="{{ $filters['q'] ?? '' }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Cabang</label>
-                                <select name="cabang" class="form-select">
-                                    <option value="">Semua Cabang</option>
-                                    @foreach($cabangs as $cabang)
-                                        <option value="{{ $cabang->id }}" {{ ($filters['cabang'] ?? '') == $cabang->id ? 'selected' : '' }}>
-                                            {{ $cabang->nama_cabang }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Kelas</label>
-                                <select name="kelas" class="form-select">
-                                    <option value="">Semua Kelas</option>
-                                    @foreach($kelasList as $kelas)
-                                        <option value="{{ $kelas->id }}" {{ ($filters['kelas'] ?? '') == $kelas->id ? 'selected' : '' }}>
-                                            {{ $kelas->nama_kelas }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-select">
-                                    <option value="">Semua Status</option>
-                                    <option value="DISETUJUI" {{ ($filters['status'] ?? '') == 'DISETUJUI' ? 'selected' : '' }}>Disetujui</option>
-                                    <option value="DITOLAK" {{ ($filters['status'] ?? '') == 'DITOLAK' ? 'selected' : '' }}>Ditolak</option>
-                                </select>
-                            </div>
-                            <div class="col-md-1 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary w-100"><i class="bx bx-search"></i></button>
-                            </div>
-                        </div>
-                    </form>
+@php
+    $approvedCount = $history->where('status', 'DISETUJUI')->count();
+    $rejectedCount = $history->where('status', 'DITOLAK')->count();
+    $filterActive = collect($filters)->only(['q', 'cabang', 'kelas', 'status'])->filter(fn ($value) => filled($value))->isNotEmpty();
+    $isKetua = request()->routeIs('ketua.*');
+    $isBendahara = request()->routeIs('bendahara.*');
+    $routePrefix = $isKetua
+        ? 'ketua.kenaikan-kelas.approval'
+        : ($isBendahara ? 'bendahara.kenaikan-kelas.validation' : 'admin.keuangan.kenaikan-kelas.validation');
+    $indexRoute = $routePrefix.'.index';
+    $historyRoute = $routePrefix.'.history';
+    $deleteRoute = $routePrefix.'.history.bulk-delete';
+@endphp
 
-                    <form id="bulkDeleteForm" method="POST" action="{{ route('admin.keuangan.kenaikan-kelas.validation.history.bulk-delete') }}">
-                        @csrf
-                        <div class="mb-3 d-flex justify-content-between align-items-center">
-                            <button type="button" class="btn btn-danger btn-sm" onclick="confirmBulkDelete()" id="btnBulkDelete" disabled>
-                                <i class="bx bx-trash me-1"></i> Hapus Terpilih
-                            </button>
-                            
-                            <div class="form-check d-md-none">
-                                <input class="form-check-input" type="checkbox" id="checkAllMobile">
-                                <label class="form-check-label" for="checkAllMobile">
-                                    Pilih Semua
-                                </label>
-                            </div>
-                        </div>
+<div
+    class="min-w-0 w-full space-y-5"
+    x-data="{
+        selected: [],
+        available: @js($history->pluck('id')->map(fn ($id) => (string) $id)->values()),
+        toggleAll() { this.selected = this.selected.length === this.available.length ? [] : [...this.available]; },
+        removeSelected() { if (this.selected.length) this.$refs.deleteDialog.showModal(); }
+    }"
+>
+    <section class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        @foreach([
+            ['Total keputusan', $history->count(), 'fa-clock-rotate-left', 'bg-brand-50 text-brand-600'],
+            ['Disetujui', $approvedCount, 'fa-circle-check', 'bg-emerald-50 text-emerald-600'],
+            ['Ditolak', $rejectedCount, 'fa-circle-xmark', 'bg-red-50 text-red-600'],
+        ] as [$label, $value, $icon, $tone])
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm {{ $loop->first ? 'col-span-2 sm:col-span-1' : '' }}"><div class="flex min-w-0 items-start justify-between gap-3"><div class="min-w-0"><p class="text-xl font-extrabold text-slate-950">{{ number_format($value) }}</p><p class="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-slate-500" title="{{ $label }}">{{ $label }}</p></div><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div></article>
+        @endforeach
+    </section>
 
-                        <div class="table-responsive text-nowrap">
-                            <table class="table table-hover table-card-mobile align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th style="width: 40px;" class="mobile-hide"><input class="form-check-input" type="checkbox" id="checkAll"></th>
-                                        <th>Siswa</th>
-                                    <th>Tanggal Pengajuan</th>
-                                    <th>Kelas</th>
-                                    <th>Status</th>
-                                    <th>Diajukan Oleh</th>
-                                    <th>Disetujui/Ditolak Oleh</th>
-                                    <th>Tanggal Keputusan</th>
-                                    <th>Catatan</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($history as $item)
-                                <tr>
-                                    <td class="mobile-hide text-center">
-                                        <input class="form-check-input history-checkbox" type="checkbox" name="ids[]" value="{{ $item->id }}">
-                                    </td>
-                                    <td class="mobile-card-head">
-                                        <div class="d-flex justify-content-between align-items-center gap-2 history-head-row">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <div class="form-check form-check-inline m-0 mobile-only-cell">
-                                                    <input class="form-check-input history-checkbox" type="checkbox" name="ids[]" value="{{ $item->id }}" style="transform: scale(1.2);">
-                                                </div>
-                                                <span class="text-wrap text-break lh-sm fw-semibold history-student-name">{{ $item->nama_siswa }}</span>
-                                            </div>
-                                            <span class="mobile-only-cell flex-shrink-0 ms-auto">
-                                                @if($item->status == 'DISETUJUI')
-                                                    <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
-                                                @elseif($item->status == 'DITOLAK')
-                                                    <span class="text-danger"><i class="bi bi-x-circle-fill"></i></span>
-                                                @else
-                                                    <span class="text-secondary"><i class="bi bi-clock-fill"></i></span>
-                                                @endif
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td data-label="Tgl Pengajuan" class="force-d-flex-mobile">
-                                        <div class="mobile-text-end">{{ \Carbon\Carbon::parse($item->tanggal_pengajuan)->locale('id')->translatedFormat('d F Y') }}</div>
-                                    </td>
-                                    <td data-label="Kelas" class="force-d-flex-mobile">
-                                        <div class="mobile-text-end">{{ $item->nama_kelas }}</div>
-                                    </td>
-                                    <td data-label="Status" class="force-d-flex-mobile">
-                                        <div class="mobile-text-end">
-                                            @if($item->status == 'DISETUJUI')
-                                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Disetujui</span>
-                                            @elseif($item->status == 'DITOLAK')
-                                                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Ditolak</span>
-                                            @else
-                                                <span class="badge bg-secondary">{{ $item->status }}</span>
-                                            @endif
-                                        </div>
-                                    </td>
-                                    <td data-label="Diajukan Oleh" class="force-d-flex-mobile">
-                                        <div class="mobile-text-end">{{ $item->pengaju }}</div>
-                                    </td>
-                                    <td data-label="Disetujui Oleh" class="force-d-flex-mobile">
-                                        <div class="mobile-text-end">{{ $item->penyetuju ?? '-' }}</div>
-                                    </td>
-                                    <td data-label="Tgl Keputusan" class="force-d-flex-mobile">
-                                        <div class="mobile-text-end">
-                                            @if($item->tanggal_persetujuan)
-                                                {{ \Carbon\Carbon::parse($item->tanggal_persetujuan)->locale('id')->translatedFormat('d F Y') }}
-                                            @else
-                                                -
-                                            @endif
-                                        </div>
-                                    </td>
-                                    <td data-label="Catatan" class="force-d-flex-mobile">
-                                        <div class="mobile-text-end text-wrap text-break lh-sm">{{ $item->catatan_ketua ?? '-' }}</div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="9" class="text-center py-4 text-muted">
-                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                        Belum ada riwayat pengajuan.
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    </form>
-                </div>
+    <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="flex flex-col gap-4 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"><div><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-clock-rotate-left text-brand-600" aria-hidden="true"></i>Riwayat keputusan</h2><p class="mt-1 text-xs leading-5 text-slate-500">Keputusan pada tahun ajaran {{ $tahun->nama_tahun_ajaran }}.</p></div><a href="{{ route($indexRoute) }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200"><i class="fas fa-arrow-left" aria-hidden="true"></i>{{ $isKetua ? 'Kembali ke persetujuan' : 'Kembali ke kandidat' }}</a></header>
+
+        <form action="{{ route($historyRoute) }}" method="GET" class="grid gap-3 border-b border-slate-200 bg-slate-50/70 p-4 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1.4fr)_repeat(3,minmax(150px,.7fr))_auto] sm:p-5">
+            <label class="block"><span class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Cari siswa</span><span class="relative mt-1.5 block"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400" aria-hidden="true"></i><input type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nama atau NIS..." class="h-11 w-full rounded-xl border border-slate-300 bg-white !pl-10 pr-3 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"></span></label>
+            <label class="block"><span class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Cabang</span><select name="cabang" class="mt-1.5 h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"><option value="">Semua cabang</option>@foreach($cabangs as $cabang)<option value="{{ $cabang->id }}" @selected(($filters['cabang'] ?? '') == $cabang->id)>{{ $cabang->nama_cabang }}</option>@endforeach</select></label>
+            <label class="block"><span class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Kelas</span><select name="kelas" class="mt-1.5 h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"><option value="">Semua kelas</option>@foreach($kelasList as $kelas)<option value="{{ $kelas->id }}" @selected(($filters['kelas'] ?? '') == $kelas->id)>{{ $kelas->nama_kelas }} · {{ $kelas->jenjang }} · {{ $kelas->cabang->nama_cabang ?? '-' }}</option>@endforeach</select></label>
+            <label class="block"><span class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Status</span><select name="status" class="mt-1.5 h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"><option value="">Semua status</option><option value="DISETUJUI" @selected(($filters['status'] ?? '') === 'DISETUJUI')>Disetujui</option><option value="DITOLAK" @selected(($filters['status'] ?? '') === 'DITOLAK')>Ditolak</option></select></label>
+            <div class="flex items-end gap-2 sm:col-span-2 xl:col-span-1"><button type="submit" class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-xs font-bold text-white hover:bg-slate-800"><i class="fas fa-filter" aria-hidden="true"></i>Filter</button>@if($filterActive)<a href="{{ route($historyRoute) }}" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-600 no-underline hover:bg-slate-100" aria-label="Reset filter"><i class="fas fa-rotate-left" aria-hidden="true"></i></a>@endif</div>
+        </form>
+
+        <form x-ref="deleteForm" method="POST" action="{{ route($deleteRoute) }}">
+            @csrf
+            <template x-for="id in selected" :key="id"><input type="hidden" name="ids[]" :value="id"></template>
+            @if($history->isNotEmpty())
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 sm:px-5"><label class="inline-flex cursor-pointer items-center gap-2 text-xs font-bold text-slate-700"><input type="checkbox" @change="toggleAll()" :checked="available.length > 0 && selected.length === available.length" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">Pilih semua</label><button type="button" @click="removeSelected()" :disabled="!selected.length" class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-red-50 px-3 text-xs font-bold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"><i class="fas fa-trash" aria-hidden="true"></i>Hapus <span x-show="selected.length">(<span x-text="selected.length"></span>)</span></button></div>
+            @endif
+
+            <div class="hidden lg:block">
+                <table class="w-full table-fixed text-left text-xs">
+                    <colgroup><col class="w-12"><col><col class="w-48"><col class="w-52"><col class="w-64"></colgroup>
+                    <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-4 py-3"></th><th class="px-3 py-3">Siswa</th><th class="px-3 py-3">Kelas & cabang</th><th class="px-3 py-3">Pengajuan</th><th class="px-4 py-3">Keputusan</th></tr></thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($history as $item)
+                            @php $approved = $item->status === 'DISETUJUI'; @endphp
+                            <tr class="hover:bg-slate-50/70"><td class="px-4 py-4"><input type="checkbox" value="{{ $item->id }}" x-model="selected" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"></td><td class="px-3 py-4"><p class="truncate text-sm font-bold text-slate-900" title="{{ $item->nama_siswa }}">{{ $item->nama_siswa }}</p><p class="mt-0.5 truncate text-[11px] text-slate-500">NIS {{ $item->nis ?: '-' }}</p></td><td class="px-3 py-4"><p class="truncate font-bold text-slate-800">{{ $item->nama_kelas }}</p><p class="mt-0.5 truncate text-[11px] text-slate-500" title="{{ $item->nama_cabang ?? '-' }}">{{ $item->nama_cabang ?? '-' }}</p></td><td class="px-3 py-4"><p class="whitespace-nowrap font-semibold text-slate-700">{{ \Carbon\Carbon::parse($item->tanggal_pengajuan)->locale('id')->translatedFormat('d M Y') }}</p><p class="mt-0.5 truncate text-[11px] text-slate-500" title="{{ $item->pengaju }}">oleh {{ $item->pengaju }}</p></td><td class="px-4 py-4"><div class="flex items-start gap-3"><span class="inline-flex shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-bold {{ $approved ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}"><i class="fas {{ $approved ? 'fa-circle-check' : 'fa-circle-xmark' }} mr-1" aria-hidden="true"></i>{{ $approved ? 'Disetujui' : 'Ditolak' }}</span><div class="min-w-0"><p class="truncate text-[11px] font-semibold text-slate-700" title="{{ $item->penyetuju ?? '-' }}">{{ $item->penyetuju ?? '-' }}</p><p class="mt-0.5 truncate text-[10px] text-slate-500" title="{{ $item->catatan_ketua ?? '-' }}">{{ $item->catatan_ketua ?? 'Tanpa catatan' }}</p>@if($item->tanggal_persetujuan)<time class="mt-0.5 block text-[10px] text-slate-400">{{ \Carbon\Carbon::parse($item->tanggal_persetujuan)->locale('id')->translatedFormat('d M Y') }}</time>@endif</div></div></td></tr>
+                        @empty
+                            <tr><td colspan="5" class="px-4 py-14 text-center text-sm text-slate-500"><i class="fas fa-inbox mb-3 block text-4xl text-slate-300" aria-hidden="true"></i>Belum ada riwayat yang sesuai.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-        </div>
-    </div>
+
+            <div class="divide-y divide-slate-100 lg:hidden">
+                @forelse($history as $item)
+                    @php $approved = $item->status === 'DISETUJUI'; @endphp
+                    <article class="p-4"><div class="flex min-w-0 items-start gap-3"><input type="checkbox" value="{{ $item->id }}" x-model="selected" class="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500"><div class="min-w-0 flex-1"><h3 class="break-words text-sm font-extrabold text-slate-900">{{ $item->nama_siswa }}</h3><p class="mt-0.5 text-[11px] text-slate-500">NIS {{ $item->nis ?: '-' }} · {{ $item->nama_kelas }}</p></div><span class="shrink-0 rounded-full px-2 py-1 text-[9px] font-bold {{ $approved ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">{{ $approved ? 'Disetujui' : 'Ditolak' }}</span></div><dl class="mt-3 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 text-xs"><div><dt class="text-[9px] font-bold uppercase text-slate-400">Diajukan</dt><dd class="mt-1 font-semibold text-slate-700">{{ \Carbon\Carbon::parse($item->tanggal_pengajuan)->locale('id')->translatedFormat('d M Y') }}</dd><dd class="mt-0.5 break-words text-[10px] text-slate-500">{{ $item->pengaju }}</dd></div><div><dt class="text-[9px] font-bold uppercase text-slate-400">Diputuskan oleh</dt><dd class="mt-1 break-words font-semibold text-slate-700">{{ $item->penyetuju ?? '-' }}</dd>@if($item->tanggal_persetujuan)<dd class="mt-0.5 text-[10px] text-slate-500">{{ \Carbon\Carbon::parse($item->tanggal_persetujuan)->locale('id')->translatedFormat('d M Y') }}</dd>@endif</div></dl><div class="mt-3 rounded-xl border border-slate-200 p-3"><p class="text-[9px] font-bold uppercase text-slate-400">Catatan keputusan</p><p class="mt-1 break-words text-xs leading-5 text-slate-600">{{ $item->catatan_ketua ?? 'Tanpa catatan' }}</p></div></article>
+                @empty
+                    <div class="p-12 text-center text-sm text-slate-500"><i class="fas fa-inbox mb-3 block text-4xl text-slate-300" aria-hidden="true"></i>Belum ada riwayat yang sesuai.</div>
+                @endforelse
+            </div>
+        </form>
+    </section>
+
+    <dialog x-ref="deleteDialog" class="m-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/60" @click.self="$el.close()"><div class="p-5 text-center"><span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-700"><i class="fas fa-trash" aria-hidden="true"></i></span><h2 class="mt-3 text-base font-extrabold text-slate-950">Hapus riwayat terpilih?</h2><p class="mt-2 text-xs leading-5 text-slate-500"><strong x-text="selected.length"></strong> riwayat akan dihapus permanen.</p><div class="mt-5 grid grid-cols-2 gap-2"><button type="button" @click="$refs.deleteDialog.close()" class="h-10 rounded-xl bg-slate-100 text-xs font-bold text-slate-700">Batal</button><button type="button" @click="$refs.deleteForm.requestSubmit()" class="h-10 rounded-xl bg-red-600 text-xs font-bold text-white">Ya, hapus</button></div></div></dialog>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const checkAll = document.getElementById('checkAll');
-        const checkAllMobile = document.getElementById('checkAllMobile');
-        const checkboxes = document.querySelectorAll('.history-checkbox');
-        const btnBulkDelete = document.getElementById('btnBulkDelete');
-
-        function updateButtonState() {
-            const checkedCount = document.querySelectorAll('.history-checkbox:checked').length;
-            if(btnBulkDelete) {
-                btnBulkDelete.disabled = checkedCount === 0;
-            }
-            const allChecked = checkedCount === checkboxes.length && checkboxes.length > 0;
-            if (checkAll) {
-                checkAll.checked = allChecked;
-            }
-            if (checkAllMobile) {
-                checkAllMobile.checked = allChecked;
-            }
-        }
-
-        function toggleAll(checked) {
-            checkboxes.forEach(cb => cb.checked = checked);
-            updateButtonState();
-        }
-
-        if (checkAll) {
-            checkAll.addEventListener('change', function() {
-                toggleAll(this.checked);
-            });
-        }
-        
-        if (checkAllMobile) {
-            checkAllMobile.addEventListener('change', function() {
-                toggleAll(this.checked);
-            });
-        }
-
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', updateButtonState);
-        });
-    });
-
-    function confirmBulkDelete() {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Riwayat yang dipilih akan dihapus permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#8592a3',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('bulkDeleteForm').submit();
-            }
-        });
-    }
-</script>
 @endsection

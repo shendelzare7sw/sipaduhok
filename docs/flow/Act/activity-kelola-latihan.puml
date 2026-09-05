@@ -1,0 +1,93 @@
+@startuml activity-kelola-latihan
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Guru Pengajar)|
+start
+:Mengakses Dashboard LMS Kelas;
+
+|Sistem|
+:Menampilkan Daftar Latihan\npada Tab "Latihan";
+
+|Pengguna (Guru Pengajar)|
+:Memilih Aksi Utama\n(Decision);
+
+if (Aksi?) then (Buat Set Latihan Baru)
+    :Klik Tombol "Buat Latihan";
+
+    |Sistem|
+    :Menampilkan Form Pengaturan;
+
+    |Pengguna (Guru Pengajar)|
+    :Mengisi Judul, Batas Waktu Pengerjaan,\ndan Aturan Latihan;
+    :Klik "Simpan Pengaturan";
+
+    |Sistem|
+    :Menyimpan Data Set Latihan Baru;
+
+    |Pengguna (Guru Pengajar)|
+    :Melanjutkan ke "Manajemen Soal";
+
+    |Sistem|
+    :Menampilkan Dashboard Bank Soal Latihan;
+
+    |Pengguna (Guru Pengajar)|
+    :Memilih Metode Penambahan Soal\n(Decision);
+
+    if (Metode Tambah Soal?) then (Input Manual)
+        :Mengetik Pertanyaan dan\nPilihan Jawaban Satu per Satu;
+    elseif (Metode Tambah Soal?) then (Import Excel)
+        :Mengunduh Template Excel;
+        :Mengunggah File Soal Massal (Import);
+    elseif (Metode Tambah Soal?) then (AI Generate)
+        :Memasukkan Topik Pembelajaran\nke dalam Prompt AI;
+        |Sistem (Kecerdasan Buatan)|
+        :Menganalisis Topik dan\nMeng-generate Daftar Soal Otomatis;
+        |Pengguna (Guru Pengajar)|
+        :Review, Menyortir, dan Menyimpan Soal AI;
+    endif
+
+    |Sistem|
+    :Menyimpan Seluruh Bank Soal ke Database;
+    :Mengaktifkan Status Latihan;
+
+else (Koreksi & Hasil Latihan)
+    |Pengguna (Guru Pengajar)|
+    :Memilih Latihan yang Sudah Dikerjakan;
+    :Klik "Lihat Hasil & Koreksi";
+
+    |Sistem|
+    :Menampilkan Daftar Nilai (Skor Otomatis\nuntuk Soal Pilihan Ganda);
+
+    |Pengguna (Guru Pengajar)|
+    :Membuka Jawaban Esai Siswa (Jika Ada);
+
+    |Sistem|
+    :Menampilkan Teks Jawaban Siswa;
+
+    |Pengguna (Guru Pengajar)|
+    :Klik "Minta AI Suggestion"\n(Opsi Bantuan Koreksi Pintar);
+
+    |Sistem (Kecerdasan Buatan)|
+    :Menganalisis Jawaban Esai Siswa\ndan Memberikan Rekomendasi Nilai;
+
+    |Pengguna (Guru Pengajar)|
+    :Mempertimbangkan Rekomendasi AI;
+    :Memutuskan Nilai Akhir & Menulis Feedback;
+    :Klik "Simpan Koreksi";
+
+    |Sistem|
+    :Mengakumulasi Total Skor Siswa;
+
+    |Pengguna (Guru Pengajar)|
+    :Mengaktifkan "Publikasikan Nilai"\n(Toggle Result Visibility);
+
+    |Sistem|
+    :Nilai Akhir Dapat Dilihat oleh Siswa;
+endif
+
+|Pengguna (Guru Pengajar)|
+:Selesai Melakukan\nPengelolaan Latihan;
+stop
+@enduml

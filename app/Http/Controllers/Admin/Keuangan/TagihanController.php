@@ -82,12 +82,17 @@ class TagihanController extends BendaharaTagihanController
     }
 
     /**
-     * Override cetak method to use admin/bendahara view (same view for both)
+     * Use the CleanFlow print view for the admin route.
      */
     public function cetak($siswa)
     {
-        // Use parent method which already returns the correct view
-        return parent::cetak($siswa);
+        $response = parent::cetak($siswa);
+
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.keuangan.tagihan.cetak', $response->getData());
+        }
+
+        return $response;
     }
 
     /**

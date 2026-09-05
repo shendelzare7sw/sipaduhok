@@ -1,4 +1,4 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Riwayat Pembayaran Siswa')
 @section('page-title', 'Riwayat Pembayaran')
@@ -6,9 +6,6 @@
     Riwayat pembayaran {{ $siswa->nama_lengkap }}
 @endsection
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/bendahara/pembayaran/riwayat-siswa.css'])

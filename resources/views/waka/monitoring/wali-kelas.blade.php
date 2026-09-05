@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Monitoring Wali Kelas')
 @section('page-title', 'Monitoring Data Wali Kelas')
 @section('page-subtitle', 'Fokus pada wali kelas di cabang yang Anda kelola')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/monitoring/wali-kelas.css', 'resources/js/waka/monitoring/wali-kelas.js'])

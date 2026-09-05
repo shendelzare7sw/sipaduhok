@@ -1,13 +1,10 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Detail Tahun Ajaran')
 
 @section('page-title', 'Detail Tahun Ajaran')
 @section('page-subtitle', 'Informasi lengkap tahun ajaran')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/tahun-ajaran/show.css'])

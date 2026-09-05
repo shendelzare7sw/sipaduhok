@@ -51,7 +51,7 @@ class SekretarisController extends Controller
      */
     protected function viewPath($view)
     {
-        return $view;
+        return str_replace('sekretaris.', 'admin.akademik.', $view);
     }
 
     // Kalender Akademik
@@ -275,7 +275,7 @@ class SekretarisController extends Controller
             ]);
         }
 
-        return view('sekretaris.kalender.index', compact(
+        return view($this->viewPath('sekretaris.kalender.index'), compact(
             'kalender',
             'allCalendarEvents',
             'tahunAjaranAktif',
@@ -303,7 +303,7 @@ class SekretarisController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        return view('sekretaris.kalender.form', compact('tahunAjaranAktif'));
+        return view($this->viewPath('sekretaris.kalender.form'), compact('tahunAjaranAktif'));
     }
 
     public function kalenderStore(Request $request)
@@ -344,7 +344,7 @@ class SekretarisController extends Controller
     {
         $kalender = KalenderAkademik::findOrFail($id);
 
-        return view('sekretaris.kalender.show', compact('kalender'));
+        return view($this->viewPath('sekretaris.kalender.show'), compact('kalender'));
     }
 
     public function kalenderEdit($id)
@@ -352,7 +352,7 @@ class SekretarisController extends Controller
         $kalender = KalenderAkademik::findOrFail($id);
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        return view('sekretaris.kalender.form', compact('kalender', 'tahunAjaranAktif'));
+        return view($this->viewPath('sekretaris.kalender.form'), compact('kalender', 'tahunAjaranAktif'));
     }
 
     public function kalenderUpdate(Request $request, $id)
@@ -661,7 +661,7 @@ class SekretarisController extends Controller
             ->orderBy('tanggal_pengumuman', 'desc')
             ->paginate(15);
 
-        return view('sekretaris.pengumuman.index', compact('pengumuman'));
+        return view($this->viewPath('sekretaris.pengumuman.index'), compact('pengumuman'));
     }
 
     public function pengumumanCreate()
@@ -671,7 +671,7 @@ class SekretarisController extends Controller
             ->orderBy('tanggal_mulai')
             ->get();
 
-        return view('sekretaris.pengumuman.form', compact('kalender'));
+        return view($this->viewPath('sekretaris.pengumuman.form'), compact('kalender'));
     }
 
     public function pengumumanStore(Request $request)
@@ -708,7 +708,7 @@ class SekretarisController extends Controller
             ->orderBy('tanggal_mulai')
             ->get();
 
-        return view('sekretaris.pengumuman.form', compact('pengumuman', 'kalender'));
+        return view($this->viewPath('sekretaris.pengumuman.form'), compact('pengumuman', 'kalender'));
     }
 
     public function pengumumanUpdate(Request $request, $id)
@@ -764,12 +764,12 @@ class SekretarisController extends Controller
             ->orderBy('urutan_tampil')
             ->paginate(15);
 
-        return view('sekretaris.flyer.index', compact('flyer'));
+        return view($this->viewPath('sekretaris.flyer.index'), compact('flyer'));
     }
 
     public function flyerCreate()
     {
-        return view('sekretaris.flyer.form');
+        return view($this->viewPath('sekretaris.flyer.form'));
     }
 
     public function flyerStore(Request $request)
@@ -803,7 +803,7 @@ class SekretarisController extends Controller
     {
         $flyer = Flyer::findOrFail($id);
 
-        return view('sekretaris.flyer.form', compact('flyer'));
+        return view($this->viewPath('sekretaris.flyer.form'), compact('flyer'));
     }
 
     public function flyerUpdate(Request $request, $id)
@@ -878,7 +878,7 @@ class SekretarisController extends Controller
         $kategoriOptions = Berita::getKategoriOptions();
         $statusOptions = Berita::getStatusOptions();
 
-        return view('sekretaris.berita.index', compact('berita', 'kategoriOptions', 'statusOptions'));
+        return view($this->viewPath('sekretaris.berita.index'), compact('berita', 'kategoriOptions', 'statusOptions'));
     }
 
     public function beritaCreate()
@@ -886,7 +886,7 @@ class SekretarisController extends Controller
         $kategoriOptions = Berita::getKategoriOptions();
         $statusOptions = Berita::getStatusOptions();
 
-        return view('sekretaris.berita.form', compact('kategoriOptions', 'statusOptions'));
+        return view($this->viewPath('sekretaris.berita.form'), compact('kategoriOptions', 'statusOptions'));
     }
 
     public function beritaStore(Request $request)
@@ -952,7 +952,7 @@ class SekretarisController extends Controller
         $kategoriOptions = Berita::getKategoriOptions();
         $statusOptions = Berita::getStatusOptions();
 
-        return view('sekretaris.berita.form', compact('berita', 'kategoriOptions', 'statusOptions'));
+        return view($this->viewPath('sekretaris.berita.form'), compact('berita', 'kategoriOptions', 'statusOptions'));
     }
 
     public function beritaUpdate(Request $request, $id)

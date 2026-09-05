@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Status Akses Siswa')
 @section('page-title', 'Status Akses')
 @section('page-subtitle', isset($kelas) && $kelas ? 'Status akses ujian dan rapor siswa kelas ' . $kelas->nama_kelas : 'Status akses siswa')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/validasi-akses/index.css', 'resources/js/wali-kelas/validasi-akses/index.js'])

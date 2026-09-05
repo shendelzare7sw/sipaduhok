@@ -81,7 +81,7 @@ class ProfileController extends Controller
                 $siswa = Siswa::where('user_id', $user->id)->first();
                 if ($siswa) {
                     $siswa->update([
-                        'no_telepon' => $validated['no_telepon'],
+                        'telepon_orangtua' => $validated['no_telepon'],
                         'alamat' => $validated['alamat'],
                     ]);
                 }
@@ -96,7 +96,7 @@ class ProfileController extends Controller
                 $tenagaPendidik = TenagaPendidik::where('user_id', $user->id)->first();
                 if ($tenagaPendidik) {
                     $tenagaPendidik->update([
-                        'no_telepon' => $validated['no_telepon'],
+                        'telepon' => $validated['no_telepon'],
                         'alamat' => $validated['alamat'],
                     ]);
                 }

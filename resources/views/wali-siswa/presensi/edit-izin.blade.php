@@ -1,11 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Edit Pengajuan Izin')
 @section('page-title', 'Edit Pengajuan Izin')
 
-@section('sidebar-menu')
-    @include('wali-siswa.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-siswa/presensi/edit-izin.css'])

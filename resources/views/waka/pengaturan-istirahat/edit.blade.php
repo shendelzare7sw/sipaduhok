@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Edit Waktu Istirahat')
 @section('page-title', 'Edit Waktu Istirahat')
 @section('page-subtitle', 'Edit Pengaturan Waktu Istirahat')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('content')
 <div class="row justify-content-center">

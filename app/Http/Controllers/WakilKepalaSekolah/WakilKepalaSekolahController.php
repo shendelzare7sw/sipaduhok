@@ -628,7 +628,7 @@ class WakilKepalaSekolahController extends Controller
     private function lmsViewContext(): array
     {
         return [
-            'rolePartial' => 'waka.partials.sneat-sidebar-menu',
+            'rolePartial' => 'waka.partials.sidebar',
             'baseRoute' => 'waka.monitoring.lms',
             'cabangScope' => (int) auth()->user()->cabang_id,
         ];

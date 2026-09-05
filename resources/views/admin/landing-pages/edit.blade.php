@@ -1,21 +1,10 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Edit ' . $landingPage->title)
 
 @section('page-title', 'Manajemen Landing Page')
 @section('page-subtitle', 'Edit Konten ' . $landingPage->title)
 
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/landing-pages/edit.css'])
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/landing-pages/edit.js'])
-@endsection
 
 @php
     // Urutan section sesuai tampilan di halaman depan (home.blade.php) & tentang kami
@@ -113,69 +102,51 @@
 @endphp
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    
-    {{-- Page Header --}}
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx bx-edit-alt text-primary me-2"></i>Edit Landing Page
-            </h4>
-            <p class="text-muted mb-0">
-                <a href="{{ route('admin.landing-pages.index') }}" class="text-decoration-none">Manajemen Landing Page</a>
-                <span class="mx-1">/</span>
-                <span class="fw-medium">{{ $landingPage->title }}</span>
-            </p>
-        </div>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#resetModal">
-                <i class="bx bx-reset me-1"></i> Reset
-            </button>
-            <a href="{{ route('admin.landing-pages.index') }}" class="btn btn-outline-secondary">
-                <i class="bx bx-arrow-back me-1"></i> Kembali
-            </a>
-        </div>
-    </div>
+<div class="min-w-0 w-full space-y-4" data-landing-page-editor x-data="landingPageEditor()" @keydown.escape.window="resetOpen = false">
+    <header class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div class="min-w-0"><p class="text-xs font-bold text-brand-600">Editor halaman publik</p><h2 class="mt-1 truncate text-xl font-extrabold text-slate-950">{{ $landingPage->title }}</h2><p class="mt-1 text-sm text-slate-500">Atur isi dan visibilitas setiap bagian tanpa mengubah alamat halaman.</p></div>
+        <div class="grid grid-cols-2 gap-2 sm:flex"><button type="button" @click="resetOpen = true" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-amber-50 px-4 text-sm font-bold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100"><i class="fas fa-rotate-left" aria-hidden="true"></i>Reset</button><a href="{{ route('admin.landing-pages.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali</a></div>
+    </header>
 
-    <form action="{{ route('admin.landing-pages.update', $landingPage->slug) }}" method="POST" enctype="multipart/form-data" id="editForm">
+    <form action="{{ route('admin.landing-pages.update', $landingPage->slug) }}" method="POST" enctype="multipart/form-data" id="editForm" @submit="submitting = true">
         @csrf
         @method('PUT')
 
-        <div class="row">
-            
-            {{-- Sidebar Navigasi --}}
-            <div class="col-lg-3 col-md-4 mb-4">
-                <div class="card sticky-top landing-editor-sidebar">
-                    <div class="card-header py-3">
-                        <h6 class="mb-0 fw-bold">
-                            <i class="bx bx-list-ul me-1"></i> Navigasi Section
-                        </h6>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="list-group list-group-flush">
+        <div class="sticky top-20 z-30 mb-4 grid grid-cols-[minmax(0,1fr)_2.75rem] gap-2 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur lg:hidden">
+            <label class="relative min-w-0">
+                <span class="sr-only">Pindah ke bagian halaman</span>
+                <i class="fas fa-list-ol pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-brand-600" aria-hidden="true"></i>
+                <select x-model="activeSection" @change="goToSection(activeSection)" class="h-11 w-full min-w-0 appearance-none rounded-xl border border-slate-300 bg-white !pl-10 pr-8 text-xs font-bold text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    @foreach($sortedSections as $index => $section)
+                        <option value="{{ $section->section_key }}">{{ $index + 1 }}. {{ $sectionLabels[$section->section_key] ?? ucwords(str_replace('_', ' ', $section->section_key)) }}{{ $section->is_visible ? '' : ' (tersembunyi)' }}</option>
+                    @endforeach
+                </select>
+                <i class="fas fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400" aria-hidden="true"></i>
+            </label>
+            <button type="submit" :disabled="submitting" class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm hover:bg-brand-700 disabled:cursor-wait disabled:opacity-60" aria-label="Simpan perubahan" title="Simpan perubahan"><i class="fas" :class="submitting ? 'fa-spinner fa-spin' : 'fa-floppy-disk'" aria-hidden="true"></i></button>
+        </div>
+
+        <div class="grid min-w-0 gap-4 lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start">
+            <aside class="hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:sticky lg:top-24 lg:flex lg:max-h-[calc(100vh-7rem)] lg:flex-col lg:self-start">
+                <header class="border-b border-slate-200 px-4 py-3"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-list-ol text-brand-600" aria-hidden="true"></i>Navigasi bagian</h3><p class="mt-1 text-xs text-slate-500">{{ $sortedSections->count() }} bagian dapat dikelola.</p></header>
+                <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto p-2" aria-label="Bagian halaman">
                             @foreach($sortedSections as $index => $section)
                                 <a href="#section-{{ $section->section_key }}"
-                                   class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-3 section-nav-link {{ $index === 0 ? 'active' : '' }} {{ $section->is_visible ? '' : 'section-hidden-nav' }}"
-                                   data-section-id="{{ $section->id }}">
-                                    <span class="badge bg-label-primary rounded-circle">{{ $index + 1 }}</span>
-                                    <span class="text-truncate">{{ $sectionLabels[$section->section_key] ?? ucwords(str_replace('_', ' ', $section->section_key)) }}</span>
+                                   @click="activeSection = '{{ $section->section_key }}'"
+                                   :class="activeSection === '{{ $section->section_key }}' ? 'border-brand-200 bg-brand-50 text-brand-800' : 'border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+                                   class="flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold no-underline">
+                                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-[10px] font-extrabold ring-1 ring-slate-200">{{ $index + 1 }}</span>
+                                    <span class="min-w-0 flex-1 truncate {{ $section->is_visible ? '' : 'line-through opacity-60' }}">{{ $sectionLabels[$section->section_key] ?? ucwords(str_replace('_', ' ', $section->section_key)) }}</span>
                                     @if(!$section->is_visible)
-                                        <i class="bx bx-hide ms-auto text-muted" title="Tersembunyi"></i>
+                                        <i class="fas fa-eye-slash shrink-0 text-slate-400" title="Tersembunyi" aria-hidden="true"></i>
                                     @endif
                                 </a>
                             @endforeach
-                        </div>
-                    </div>
-                    <div class="card-footer p-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bx bx-save me-1"></i> Simpan
-                        </button>
-                    </div>
-                </div>
-            </div>
+                </nav>
+                <div class="border-t border-slate-200 p-3"><button type="submit" :disabled="submitting" class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white hover:bg-brand-700 disabled:cursor-wait disabled:opacity-60"><i class="fas" :class="submitting ? 'fa-spinner fa-spin' : 'fa-floppy-disk'" aria-hidden="true"></i><span x-text="submitting ? 'Menyimpan...' : 'Simpan perubahan'"></span></button></div>
+            </aside>
 
-            {{-- Konten Section --}}
-            <div class="col-lg-9 col-md-8">
+            <div class="min-w-0 space-y-4">
                 @foreach($sortedSections as $index => $section)
                     @php
                         $sectionKey = $section->section_key;
@@ -253,91 +224,63 @@
                         };
                     @endphp
                     
-                    <div class="card mb-4 section-card {{ $section->is_visible ? '' : 'section-hidden' }}" id="section-{{ $sectionKey }}">
+                    <section class="scroll-mt-36 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:scroll-mt-24 {{ $section->is_visible ? '' : 'opacity-75' }}" id="section-{{ $sectionKey }}" data-editor-section="{{ $sectionKey }}" x-data="{ visible: {{ $section->is_visible ? 'true' : 'false' }} }">
                         <input type="hidden" name="sections[{{ $section->id }}][type]" value="{{ $section->type }}">
                         <input type="hidden" name="sections[{{ $section->id }}][is_visible]" value="0">
 
-                        {{-- Section Header --}}
-                        <div class="card-header bg-light border-bottom">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="badge bg-primary rounded-circle fs-6 section-number-badge">{{ $index + 1 }}</span>
-                                <div class="flex-grow-1 min-w-0">
-                                    <h5 class="mb-0 fw-bold">
-                                        {{ $label }}
-                                        @if(!$section->is_visible)
-                                            <span class="badge bg-label-secondary ms-1" title="Section ini tidak ditampilkan di halaman publik">
-                                                <i class="bx bx-hide"></i> Tersembunyi
-                                            </span>
-                                        @endif
-                                    </h5>
-                                    @if($description)
-                                        <small class="text-muted d-block mb-1">{{ $description }}</small>
-                                    @endif
-                                    <div class="form-check form-switch mb-0 mt-1">
-                                        <input class="form-check-input section-visibility-toggle" type="checkbox"
-                                            role="switch"
-                                            id="visible-{{ $section->id }}"
-                                            name="sections[{{ $section->id }}][is_visible]"
-                                            value="1"
-                                            {{ $section->is_visible ? 'checked' : '' }}>
-                                        <label class="form-check-label small fw-semibold" for="visible-{{ $section->id }}">
-                                            Tampilkan di halaman
+                        <header class="border-b border-slate-200 bg-slate-50 p-4 sm:p-5">
+                            <div class="flex items-start gap-3">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-sm font-extrabold text-white">{{ $index + 1 }}</span>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                        <div class="min-w-0"><h3 class="font-extrabold text-slate-950">{{ $label }}</h3>@if($description)<p class="mt-1 text-xs leading-5 text-slate-500">{{ $description }}</p>@endif</div>
+                                        <label class="inline-flex min-h-10 cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700">
+                                            <input type="checkbox" id="visible-{{ $section->id }}" name="sections[{{ $section->id }}][is_visible]" value="1" x-model="visible" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" {{ $section->is_visible ? 'checked' : '' }}>
+                                            <span x-text="visible ? 'Ditampilkan' : 'Disembunyikan'"></span>
+                                            <i class="fas text-slate-400" :class="visible ? 'fa-eye' : 'fa-eye-slash'" aria-hidden="true"></i>
                                         </label>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </header>
 
-                        <div class="card-body">
+                        <div class="p-4 sm:p-5">
                             
                             {{-- Tipe List (dengan items) --}}
                             @if($section->type === 'list')
                                 
                                 {{-- Header Section (jika ada) --}}
                                 @if(!empty($header))
-                                    <div class="card bg-label-secondary border-0 mb-4">
-                                        <div class="card-body">
-                                            <h6 class="card-title fw-bold mb-3">
-                                                <i class="bx bx-heading me-1"></i> Pengaturan Header
-                                            </h6>
-                                            <div class="row g-3">
+                                    <section class="mb-5 rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
+                                            <h4 class="mb-4 flex items-center gap-2 text-sm font-extrabold text-blue-950"><i class="fas fa-heading text-blue-600" aria-hidden="true"></i>Pengaturan header</h4>
+                                            <div class="grid gap-4 md:grid-cols-2">
                                                 @foreach($header as $hKey => $hValue)
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">
-                                                            {{ ucwords(str_replace('_', ' ', $hKey)) }}
-                                                        </label>
+                                                    <label class="block min-w-0"><span class="mb-1.5 block text-xs font-bold text-slate-700">{{ ucwords(str_replace('_', ' ', $hKey)) }}</span>
                                                         @if($hKey === 'image' || str_contains($hKey, 'image'))
-                                                            <div class="input-group">
+                                                            <span class="flex min-w-0 items-center gap-2">
                                                                 @if($hValue && (str_contains($hValue, '/') || str_contains($hValue, '.')))
-                                                                    <span class="input-group-text p-0 overflow-hidden landing-preview-thumb-wrap">
-                                                                        <img src="{{ asset($hValue) }}" alt="Preview" class="w-100 h-100 landing-preview-thumb-img" data-hide-parent-on-error="true">
-                                                                    </span>
+                                                                    <span data-image-preview class="flex h-11 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white"><img src="{{ asset($hValue) }}" alt="Pratinjau" class="h-full w-full object-cover" x-on:error="$el.parentElement.hidden = true"></span>
                                                                 @endif
-                                                                {{-- Hidden input to preserve old value when no new file is uploaded --}}
                                                                 @if($hValue)
                                                                     <input type="hidden" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue }}">
                                                                 @endif
-                                                                <input type="file" class="form-control" name="sections[{{ $section->id }}][header][{{ $hKey }}]" accept="image/*">
-                                                            </div>
+                                                                <input type="file" name="sections[{{ $section->id }}][header][{{ $hKey }}]" accept="image/*" @change="previewImage($event)" class="block min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 file:mr-2 file:rounded-lg file:border-0 file:bg-brand-50 file:px-2 file:py-1.5 file:font-bold file:text-brand-700">
+                                                            </span>
                                                         @elseif(str_contains($hKey, 'color'))
-                                                            <div class="input-group">
-                                                                <input type="color" class="form-control form-control-color" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue && str_starts_with($hValue, '#') ? $hValue : '#165fac' }}" title="Pilih warna">
-                                                                <input type="text" class="form-control landing-color-text" value="{{ $hValue }}" readonly>
-                                                            </div>
+                                                            <span class="flex h-11 items-center gap-3 rounded-xl border border-slate-300 bg-white px-2"><input type="color" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue && str_starts_with($hValue, '#') ? $hValue : '#165fac' }}" class="h-8 w-14 cursor-pointer rounded-lg border-0 bg-transparent" title="Pilih warna"><code class="text-xs text-slate-500">{{ $hValue }}</code></span>
                                                         @elseif(str_contains($hKey, 'description') || str_contains($hKey, 'note') || (is_string($hValue) && strlen($hValue) > 80))
-                                                            <textarea class="form-control" name="sections[{{ $section->id }}][header][{{ $hKey }}]" rows="3">{{ $hValue }}</textarea>
+                                                            <textarea name="sections[{{ $section->id }}][header][{{ $hKey }}]" rows="3" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm leading-6 text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">{{ $hValue }}</textarea>
                                                         @else
-                                                            <input type="text" class="form-control" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue }}">
+                                                            <input type="text" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue }}" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
                                                         @endif
-                                                    </div>
+                                                    </label>
                                                 @endforeach
                                             </div>
-                                        </div>
-                                    </div>
+                                    </section>
                                 @endif
 
                                 {{-- Items List --}}
-                                <div class="items-container" data-section-id="{{ $section->id }}">
+                                <div class="items-container space-y-4" data-section-id="{{ $section->id }}">
 
                                     {{-- Layout for List Items --}}
                                     @foreach($items as $itemIndex => $item)
@@ -423,9 +366,9 @@
                                     @endforeach
                                 </div>
 
-                                {{-- Template Item (Hidden) for JS Cloning --}}
+                                {{-- Template item untuk Alpine cloning --}}
                                 @if($canAddRemove)
-                                    <div class="item-template d-none" data-template-for="{{ $section->id }}">
+                                    <template data-template-for="{{ $section->id }}">
                                         @php
                                             $templateVisualFields = [];
                                             $templateTextFields = [];
@@ -502,77 +445,138 @@
                                             }
                                         @endphp
                                         @include('admin.landing-pages.partials.item-card', ['item' => $defaultItem, 'itemIndex' => 'TEMPLATE_INDEX', 'section' => $section, 'visualFields' => $templateVisualFields, 'textFields' => $templateTextFields, 'canAddRemove' => true, 'isTemplate' => true])
-                                    </div>
+                                    </template>
 
-                                    <button type="button" class="btn btn-outline-primary w-100 mt-3 add-item" data-section-id="{{ $section->id }}">
-                                        <i class="bx bx-plus-circle me-1"></i> Tambah Item Baru
+                                    <button type="button" @click="addItem('{{ $section->id }}')" class="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-brand-300 bg-brand-50 text-sm font-bold text-brand-700 hover:bg-brand-100">
+                                        <i class="fas fa-circle-plus" aria-hidden="true"></i>Tambah item baru
                                     </button>
                                 @endif
 
                             {{-- Tipe Single/Text --}}
                             @else
-                                <div class="row g-3">
+                                <div class="grid gap-4 md:grid-cols-2">
                                     @foreach($section->content as $key => $value)
                                         @if(is_array($value)) @continue @endif
                                         @if($sectionKey === 'hero' && $key === 'image') @continue @endif
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">
-                                                {{ ucwords(str_replace('_', ' ', $key)) }}
-                                            </label>
+                                        <label class="block min-w-0"><span class="mb-1.5 block text-xs font-bold text-slate-700">{{ ucwords(str_replace('_', ' ', $key)) }}</span>
                                             @if($key === 'image' || str_contains($key, 'image') || $key === 'icon')
-                                                <div class="input-group">
+                                                <span class="flex min-w-0 items-center gap-2">
                                                     @if($value && (str_contains($value, '/') || str_contains($value, '.')))
                                                         <input type="hidden" name="sections[{{ $section->id }}][{{ $key }}]" value="{{ $value }}">
-                                                        <span class="input-group-text p-0 overflow-hidden landing-preview-thumb-wrap">
-                                                            <img src="{{ asset($value) }}" alt="Preview" class="w-100 h-100 landing-preview-thumb-img" data-hide-parent-on-error="true">
-                                                        </span>
+                                                        <span data-image-preview class="flex h-11 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50"><img src="{{ asset($value) }}" alt="Pratinjau" class="h-full w-full object-cover" x-on:error="$el.parentElement.hidden = true"></span>
                                                     @endif
-                                                    <input type="file" class="form-control" name="sections[{{ $section->id }}][{{ $key }}]" accept="image/*">
-                                                </div>
+                                                    <input type="file" name="sections[{{ $section->id }}][{{ $key }}]" accept="image/*" @change="previewImage($event)" class="block min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 file:mr-2 file:rounded-lg file:border-0 file:bg-brand-50 file:px-2 file:py-1.5 file:font-bold file:text-brand-700">
+                                                </span>
                                             @elseif(str_contains($key, 'description') || (is_string($value) && strlen($value) > 80))
-                                                <textarea class="form-control" name="sections[{{ $section->id }}][{{ $key }}]" rows="3">{{ $value }}</textarea>
+                                                <textarea name="sections[{{ $section->id }}][{{ $key }}]" rows="3" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm leading-6 text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">{{ $value }}</textarea>
                                             @elseif(str_contains($key, 'color'))
-                                                <div class="input-group">
-                                                    <input type="color" class="form-control form-control-color landing-color-input" name="sections[{{ $section->id }}][{{ $key }}]" value="{{ $value && substr($value, 0, 1) === '#' ? $value : '#566a7f' }}">
-                                                    <input type="text" class="form-control" name="sections[{{ $section->id }}][{{ $key }}_text]" value="{{ $value }}" placeholder="Hex Color or Class Name">
-                                                </div>
+                                                <span class="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-2"><input type="color" name="sections[{{ $section->id }}][{{ $key }}]" value="{{ $value && substr($value, 0, 1) === '#' ? $value : '#566a7f' }}" class="h-11 w-full cursor-pointer rounded-xl border border-slate-300 bg-white p-1"><input type="text" name="sections[{{ $section->id }}][{{ $key }}_text]" value="{{ $value }}" placeholder="Kode hex atau nama kelas" class="h-11 min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"></span>
                                             @else
-                                                <input type="text" class="form-control" name="sections[{{ $section->id }}][{{ $key }}]" value="{{ $value }}">
+                                                <input type="text" name="sections[{{ $section->id }}][{{ $key }}]" value="{{ $value }}" class="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
                                             @endif
-                                        </div>
+                                        </label>
                                     @endforeach
                                 </div>
                             @endif
                             
                         </div>
-                    </div>
+                    </section>
                 @endforeach
 
-                {{-- Tombol Simpan (Mobile) --}}
-                <div class="d-lg-none">
-                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-4">
-                        <i class="bx bx-save me-1"></i> Simpan Semua Perubahan
-                    </button>
-                </div>
+                <button type="submit" :disabled="submitting" class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white shadow-sm hover:bg-brand-700 disabled:cursor-wait disabled:opacity-60 lg:hidden"><i class="fas" :class="submitting ? 'fa-spinner fa-spin' : 'fa-floppy-disk'" aria-hidden="true"></i><span x-text="submitting ? 'Menyimpan...' : 'Simpan semua perubahan'"></span></button>
             </div>
         </div>
     </form>
+
+    <template x-teleport="body">
+        <div x-cloak x-show="resetOpen" x-transition.opacity class="fixed inset-0 z-[1100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" @click.self="resetOpen = false">
+            <section x-show="resetOpen" x-transition class="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="reset-title">
+                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-xl text-amber-700"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span><h3 id="reset-title" class="mt-4 text-lg font-extrabold text-slate-950">Reset ke konten awal?</h3><p class="mt-2 text-sm leading-6 text-slate-600">Semua perubahan pada halaman ini akan diganti dengan data bawaan. Tindakan ini memengaruhi konten publik.</p>
+                <div class="mt-5 grid grid-cols-2 gap-2"><button type="button" @click="resetOpen = false" class="h-11 rounded-xl border border-slate-300 bg-white text-sm font-bold text-slate-700 hover:bg-slate-50">Batal</button><a href="{{ route('admin.landing-pages.reset', $landingPage->slug) }}" class="inline-flex h-11 items-center justify-center rounded-xl bg-red-600 px-4 text-sm font-bold text-white no-underline hover:bg-red-700">Reset konten</a></div>
+            </section>
+        </div>
+    </template>
 </div>
 
-{{-- Modal Reset --}}
-<div class="modal fade" id="resetModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-            <div class="modal-body text-center py-4">
-                <i class="bx bx-error-circle text-warning landing-reset-icon"></i>
-                <h5 class="mt-3 mb-2">Reset ke Default?</h5>
-                <p class="text-muted mb-4">Semua perubahan akan hilang dan dikembalikan ke pengaturan awal.</p>
-                <div class="d-flex gap-2 justify-content-center">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <a href="{{ route('admin.landing-pages.reset', $landingPage->slug) }}" class="btn btn-danger">Reset</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@push('scripts')
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('landingPageEditor', () => ({
+        activeSection: @js($sortedSections->first()?->section_key ?? ''),
+        resetOpen: false,
+        submitting: false,
+        goToSection(sectionKey) {
+            document.getElementById(`section-${sectionKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        },
+        addItem(sectionId) {
+            const container = this.$root.querySelector(`.items-container[data-section-id="${sectionId}"]`);
+            const template = this.$root.querySelector(`template[data-template-for="${sectionId}"]`);
+            if (!container || !template) return;
+            const clone = template.content.firstElementChild.cloneNode(true);
+            const index = container.querySelectorAll(':scope > .item-wrapper').length;
+            clone.querySelector('.item-title').textContent = `Item #${index + 1}`;
+            clone.querySelectorAll('input, textarea, select').forEach((field) => {
+                if (field.name) field.name = field.name.replaceAll('TEMPLATE_INDEX', String(index));
+                field.disabled = false;
+            });
+            container.appendChild(clone);
+            Alpine.initTree(clone);
+            clone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        },
+        async removeItem(button) {
+            const item = button.closest('.item-wrapper');
+            const container = item?.closest('.items-container');
+            if (!item || !container) return;
+            const result = await Swal.fire({ icon: 'warning', title: 'Hapus item ini?', text: 'Item akan dihapus setelah perubahan disimpan.', showCancelButton: true, confirmButtonText: 'Hapus item', cancelButtonText: 'Batal', confirmButtonColor: '#dc2626', reverseButtons: true, focusCancel: true });
+            if (!result.isConfirmed) return;
+            item.remove();
+            this.reindexItems(container);
+        },
+        reindexItems(container) {
+            container.querySelectorAll(':scope > .item-wrapper').forEach((item, index) => {
+                item.querySelector('.item-title').textContent = `Item #${index + 1}`;
+                item.querySelectorAll('input, textarea, select').forEach((field) => {
+                    if (field.name) field.name = field.name.replace(/\[items\]\[\d+\]/g, `[items][${index}]`);
+                });
+            });
+        },
+        previewImage(event) {
+            const input = event.target;
+            const file = input.files?.[0];
+            if (!file?.type.startsWith('image/')) return;
+            const parent = input.closest('label') || input.parentElement;
+            let preview = parent?.querySelector('[data-image-preview]');
+            if (!preview) {
+                preview = document.createElement('span');
+                preview.dataset.imagePreview = '';
+                preview.className = 'flex h-11 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50';
+                input.parentElement.prepend(preview);
+            }
+            const image = document.createElement('img');
+            image.src = URL.createObjectURL(file);
+            image.alt = 'Pratinjau gambar baru';
+            image.className = 'h-full max-h-24 w-full object-contain';
+            preview.replaceChildren(image);
+            preview.hidden = false;
+        },
+        init() {
+            this.$root.addEventListener('click', (event) => {
+                const button = event.target.closest('.remove-item');
+                if (button) { event.preventDefault(); this.removeItem(button); }
+            });
+            const sections = [...this.$root.querySelectorAll('[data-editor-section]')];
+            if ('IntersectionObserver' in window && sections.length) {
+                const observer = new IntersectionObserver((entries) => {
+                    const visible = entries
+                        .filter(entry => entry.isIntersecting)
+                        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+                    if (visible) this.activeSection = visible.target.dataset.editorSection;
+                }, { rootMargin: '-22% 0px -68% 0px', threshold: 0 });
+                sections.forEach(section => observer.observe(section));
+            }
+        },
+    }));
+});
+</script>
+@endpush
 @endsection

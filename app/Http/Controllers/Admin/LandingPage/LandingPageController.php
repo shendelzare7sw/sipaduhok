@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Admin\LandingPage;
 
 use App\Http\Controllers\Controller;
 use App\Models\LandingPage;
-use App\Models\LandingPageSection;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class LandingPageController extends Controller
@@ -14,26 +12,27 @@ class LandingPageController extends Controller
     public function index()
     {
         $pages = LandingPage::orderBy('order')->get();
+
         return view('admin.landing-pages.index', compact('pages'));
     }
 
     public function edit(LandingPage $landingPage)
     {
         $landingPage->load('sections');
+
         return view('admin.landing-pages.edit', compact('landingPage'));
     }
 
     public function update(Request $request, LandingPage $landingPage)
     {
         $data = $request->input('sections', []);
+        $allFiles = $request->allFiles();
         $hasUpdatedSection = false;
 
         foreach ($landingPage->sections as $section) {
-            if (!isset($data[$section->id])) {
-                continue; 
+            if (! isset($data[$section->id])) {
+                continue;
             }
-
-            \Illuminate\Support\Facades\Log::info("Updating Section ID: {$section->id}", ['input' => $data[$section->id]]);
 
             $sectionInput = $data[$section->id];
 
@@ -51,25 +50,25 @@ class LandingPageController extends Controller
                 // If it has 'items' key, it's Program-style.
                 // If it's a direct array (index 0 exists), it's Stats-style.
                 $isDirectArray = false;
-                if (is_array($content) && !empty($content) && isset($content[0])) {
-                     $isDirectArray = true;
+                if (is_array($content) && ! empty($content) && isset($content[0])) {
+                    $isDirectArray = true;
                 } elseif (isset($content['items']) && is_array($content['items'])) {
-                     $isDirectArray = false;
+                    $isDirectArray = false;
                 } else {
                     // Fallback/Empty: Check if input looks like direct array items without 'items' wrapper in input?
                     // Actually, the form ALWAYS sends `items` array for list types (see edit.blade.php).
                     // So we must rely on what the section is SUPPOSED to be.
                     // Let's assume complex sections (Programs) have 'items' key structure.
                     // Simple lists (Stats) tend to be direct arrays.
-                    // If content is empty/null, default to 'items' structure UNLESS it is specifically 'stats' key? 
-                    // But we don't have section key here easily available unless we load it. 
+                    // If content is empty/null, default to 'items' structure UNLESS it is specifically 'stats' key?
+                    // But we don't have section key here easily available unless we load it.
                     // Fortunately $section->section_key is available.
                     if ($section->section_key === 'stats') {
                         $isDirectArray = true;
                     } elseif (
-                        Str::contains($section->section_key, 'ruang_') || 
-                        Str::contains($section->section_key, 'area_') || 
-                        Str::contains($section->section_key, 'perpustakaan') || 
+                        Str::contains($section->section_key, 'ruang_') ||
+                        Str::contains($section->section_key, 'area_') ||
+                        Str::contains($section->section_key, 'perpustakaan') ||
                         Str::contains($section->section_key, 'gallery') ||
                         Str::contains($section->section_key, 'biaya_')
                     ) {
@@ -78,31 +77,30 @@ class LandingPageController extends Controller
                 }
 
                 if ($isDirectArray) {
-                     // STATS Style: Direct Array
-                     // The form input still comes as ['items' => [...]] because of how the form is built.
-                     // We need to extract that and save as direct array.
-                     
-                     if (isset($sectionInput['items']) && is_array($sectionInput['items'])) {
+                    // STATS Style: Direct Array
+                    // The form input still comes as ['items' => [...]] because of how the form is built.
+                    // We need to extract that and save as direct array.
+
+                    if (isset($sectionInput['items']) && is_array($sectionInput['items'])) {
                         $newItems = [];
                         foreach ($sectionInput['items'] as $index => $item) {
                             $processedItem = $item;
 
                             // Handle image upload for list item
                             $sectionIdStr = (string) $section->id;
-                            $allFiles = $request->allFiles();
                             if (isset($allFiles['sections'][$sectionIdStr]['items'][$index])) {
                                 foreach ($allFiles['sections'][$sectionIdStr]['items'][$index] as $fileKey => $file) {
                                     if ($file instanceof \Illuminate\Http\UploadedFile) {
                                         $path = $file->store('landing-pages', 'public');
-                                        $processedItem[$fileKey] = 'storage/' . $path;
+                                        $processedItem[$fileKey] = 'storage/'.$path;
                                     }
                                 }
                             }
-                            
+
                             $newItems[] = $processedItem;
                         }
                         $section->content = $newItems;
-                     }
+                    }
                 } else {
                     // PROGRAM Style: {items: [...], header: {...}}
                     if (isset($sectionInput['items']) && is_array($sectionInput['items'])) {
@@ -112,12 +110,11 @@ class LandingPageController extends Controller
 
                             // Handle image upload for list item
                             $sectionIdStr = (string) $section->id;
-                            $allFiles = $request->allFiles();
                             if (isset($allFiles['sections'][$sectionIdStr]['items'][$index])) {
                                 foreach ($allFiles['sections'][$sectionIdStr]['items'][$index] as $fileKey => $file) {
                                     if ($file instanceof \Illuminate\Http\UploadedFile) {
                                         $path = $file->store('landing-pages', 'public');
-                                        $processedItem[$fileKey] = 'storage/' . $path;
+                                        $processedItem[$fileKey] = 'storage/'.$path;
                                     }
                                 }
                             }
@@ -134,16 +131,15 @@ class LandingPageController extends Controller
 
                         // Handle Header File Uploads (Icon/Image in Header)
                         $sectionIdStr = (string) $section->id;
-                        $allFiles = $request->allFiles();
                         if (isset($allFiles['sections'][$sectionIdStr]['header'])) {
                             foreach ($allFiles['sections'][$sectionIdStr]['header'] as $key => $file) {
                                 if ($file instanceof \Illuminate\Http\UploadedFile) {
                                     $path = $file->store('landing-pages', 'public');
                                     // Ensure header array exists
-                                    if (!isset($content['header'])) {
+                                    if (! isset($content['header'])) {
                                         $content['header'] = [];
                                     }
-                                    $content['header'][$key] = 'storage/' . $path;
+                                    $content['header'][$key] = 'storage/'.$path;
                                 }
                             }
                         }
@@ -166,7 +162,6 @@ class LandingPageController extends Controller
 
                 // 2. Handle ANY File Uploads
                 // We iterate through all keys in the input that *might* be files
-                $allFiles = $request->allFiles();
                 // Cast section ID to string because form array keys come as strings
                 $sectionIdKey = (string) $section->id;
                 $currentSectionFiles = $allFiles['sections'][$sectionIdKey] ?? [];
@@ -175,7 +170,7 @@ class LandingPageController extends Controller
                     // $file is already the UploadedFile object because we got it from allFiles structure
                     if ($file instanceof \Illuminate\Http\UploadedFile) {
                         $path = $file->store('landing-pages', 'public');
-                        $content[$fileKey] = 'storage/' . $path;
+                        $content[$fileKey] = 'storage/'.$path;
                     }
                 }
 
@@ -211,8 +206,9 @@ class LandingPageController extends Controller
 
             return redirect()->back()->with('success', 'Konten halaman berhasil direset ke pengaturan awal.');
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Landing page reset failed: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Gagal mereset konten halaman: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Landing page reset failed: '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal mereset konten halaman: '.$e->getMessage());
         }
     }
 }

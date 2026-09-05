@@ -3,119 +3,68 @@
     'title' => 'File',
     'class' => null,
     'label' => null,
-    'iconClass' => 'fas fa-eye'
+    'iconClass' => 'fas fa-eye',
 ])
 
 @if($path)
-@php
-    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-    $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-    $isPdf = $extension === 'pdf';
+    @php
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
+        $isPdf = $extension === 'pdf';
+        $downloadUrl = asset('storage/' . $path);
+        $previewUrl = preview_url($path);
+        $dialogId = 'file-preview-' . md5($path . uniqid());
+        $defaultButton = $isPdf
+            ? 'inline-flex min-h-9 items-center justify-center gap-2 rounded-lg bg-red-50 px-3 text-xs font-bold text-red-700 hover:bg-red-100'
+            : 'inline-flex min-h-9 items-center justify-center gap-2 rounded-lg bg-blue-50 px-3 text-xs font-bold text-blue-700 hover:bg-blue-100';
+    @endphp
 
-    $downloadUrl = asset('storage/' . $path);
+    <span class="inline-flex flex-wrap items-center gap-2">
+        @if($isImage || $isPdf)
+            <button type="button" class="{{ $class ?? $defaultButton }}" data-dialog-open="{{ $dialogId }}">
+                <i class="{{ $iconClass }}" aria-hidden="true"></i>
+                {{ $label ?? ($isPdf ? 'Lihat PDF' : 'Lihat Gambar') }}
+            </button>
 
-    // Preview URL: token acak terikat pemilik (extensionless), lihat helper preview_url().
-    $previewUrl = preview_url($path);
+            <a href="{{ $downloadUrl }}" download class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 no-underline hover:bg-slate-200" title="Unduh {{ $title }}" aria-label="Unduh {{ $title }}">
+                <i class="fas fa-download" aria-hidden="true"></i>
+            </a>
 
-    $modalId = 'filemodal' . md5($path . uniqid());
-@endphp
+            @push('modals')
+                <dialog id="{{ $dialogId }}" class="m-auto w-[calc(100%-1.5rem)] max-w-5xl overflow-hidden rounded-2xl border-0 bg-white p-0 text-slate-800 shadow-2xl backdrop:bg-slate-950/60 backdrop:backdrop-blur-sm">
+                    <div class="flex max-h-[92vh] min-h-0 flex-col">
+                        <header class="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 sm:px-5">
+                            <h2 class="min-w-0 truncate text-sm font-extrabold text-slate-900 sm:text-base">
+                                <i class="fas {{ $isPdf ? 'fa-file-pdf text-red-600' : 'fa-image text-blue-600' }} mr-2" aria-hidden="true"></i>
+                                {{ $title ?: ($isPdf ? 'Pratinjau PDF' : 'Pratinjau Gambar') }}
+                            </h2>
+                            <button type="button" data-dialog-close class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200" aria-label="Tutup pratinjau">
+                                <i class="fas fa-times" aria-hidden="true"></i>
+                            </button>
+                        </header>
 
-@once
-    @push('styles')
-        @vite(['resources/css/components/file-preview.css'])
-    @endpush
+                        <div class="min-h-0 flex-1 overflow-auto bg-slate-100 p-2 sm:p-4">
+                            @if($isImage)
+                                <img src="{{ $downloadUrl }}" alt="Pratinjau {{ $title }}" class="mx-auto max-h-[72vh] max-w-full rounded-xl object-contain shadow-sm">
+                            @else
+                                <iframe src="" data-src="{{ $previewUrl }}" title="Pratinjau {{ $title }}" class="h-[70vh] w-full rounded-xl border-0 bg-white"></iframe>
+                            @endif
+                        </div>
 
-    @push('scripts')
-        @vite(['resources/js/components/file-preview.js'])
-    @endpush
-@endonce
-
-<div class="d-inline-block">
-    @if($isImage)
-        <!-- Image Preview Modal Trigger -->
-        <button type="button"
-                class="{{ $class ?? 'btn btn-sm btn-info' }}"
-                data-bs-toggle="modal"
-                data-bs-target="#{{ $modalId }}">
-            <i class="{{ $iconClass }} me-1"></i>{{ $label ?? 'Lihat Gambar' }}
-        </button>
-
-        <!-- Download Button -->
-        <a href="{{ $downloadUrl }}" download class="btn btn-sm btn-outline-primary" title="Unduh File">
-            <i class="fas fa-download"></i>
-        </a>
-
-        <!-- Image Modal -->
-        @push('modals')
-        <div class="modal fade file-preview-modal" id="{{ $modalId }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="fas fa-image me-2"></i>Pratinjau Gambar
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <footer class="flex shrink-0 flex-col-reverse gap-2 border-t border-slate-200 px-4 py-3 sm:flex-row sm:justify-end sm:px-5">
+                            <button type="button" data-dialog-close class="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700 hover:bg-slate-200">Tutup</button>
+                            <a href="{{ $downloadUrl }}" download class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-xs font-bold text-white no-underline hover:bg-brand-700">
+                                <i class="fas fa-download" aria-hidden="true"></i> Unduh {{ $isPdf ? 'PDF' : 'Gambar' }}
+                            </a>
+                        </footer>
                     </div>
-                    <div class="modal-body text-center p-0">
-                        <img src="{{ $downloadUrl }}" alt="Pratinjau" class="img-fluid file-preview-image">
-                    </div>
-                    <div class="modal-footer">
-                        <a href="{{ $downloadUrl }}" download class="btn btn-primary">
-                            <i class="fas fa-download me-1"></i>Unduh Gambar
-                        </a>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endpush
-
-    @elseif($isPdf)
-        <!-- PDF Preview Modal Trigger -->
-        <button type="button"
-                class="{{ $class ?? 'btn btn-sm btn-danger' }}"
-                data-bs-toggle="modal"
-                data-bs-target="#{{ $modalId }}">
-            <i class="{{ $iconClass }} me-1"></i>{{ $label ?? 'Lihat PDF' }}
-        </button>
-
-        <!-- Download Button -->
-        <a href="{{ $downloadUrl }}" download class="btn btn-sm btn-outline-primary" title="Unduh File">
-            <i class="fas fa-download"></i>
-        </a>
-
-        <!-- PDF Modal -->
-        @push('modals')
-        <div class="modal fade file-preview-modal" id="{{ $modalId }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-xl">
-                <div class="modal-content file-preview-pdf-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="fas fa-file-pdf me-2"></i>Pratinjau PDF
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-0 h-100">
-                        <iframe src="" data-src="{{ $previewUrl }}" width="100%" height="100%" class="file-preview-frame"></iframe>
-                    </div>
-                    <div class="modal-footer">
-                        <a href="{{ $downloadUrl }}" download class="btn btn-primary">
-                            <i class="fas fa-download me-1"></i>Unduh PDF
-                        </a>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endpush
-
-    @else
-        <!-- Other Files (No Preview, Direct Download) -->
-        <a href="{{ $downloadUrl }}"
-           download
-           class="{{ $class ?? 'btn btn-sm btn-secondary' }}">
-            <i class="fas fa-download me-1"></i>Unduh File ({{ strtoupper($extension) }})
-        </a>
-    @endif
-</div>
+                </dialog>
+            @endpush
+        @else
+            <a href="{{ $downloadUrl }}" download class="{{ $class ?? 'inline-flex min-h-9 items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200' }}">
+                <i class="fas fa-download" aria-hidden="true"></i>
+                {{ $label ?? 'Unduh File (' . strtoupper($extension) . ')' }}
+            </a>
+        @endif
+    </span>
 @endif

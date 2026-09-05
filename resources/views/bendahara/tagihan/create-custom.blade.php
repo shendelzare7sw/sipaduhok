@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Tambah Tagihan Custom')
 @section('page-title', 'Tambah Tagihan Custom')
 @section('page-subtitle', 'Input tagihan khusus untuk beberapa siswa sekaligus')
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/bendahara/tagihan/create-custom.css'])

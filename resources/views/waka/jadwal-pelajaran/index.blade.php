@@ -1,4 +1,4 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Jadwal Pelajaran')
 @section('page-title', 'Kelola Jadwal Pelajaran')
@@ -6,9 +6,6 @@
     Susun jadwal mengajar untuk {{ $currentTahunAjaran ? $currentTahunAjaran->nama_tahun_ajaran : 'semua tahun ajaran' }}
 @endsection
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
 @vite(['resources/css/waka/jadwal-pelajaran/index.css'])

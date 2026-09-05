@@ -1,0 +1,22 @@
+@startuml activity-logout
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Semua Role)|
+start
+:Mengklik Menu Profil atau Navigasi;
+:Memilih Opsi "Keluar" (Logout);
+
+|Sistem|
+:Menerima HTTP Request Logout (POST);
+:Mengakhiri Sesi (Session) Pengguna\n(Auth::logout);
+:Menghapus (Invalidate) Data Sesi\ndi Server;
+:Me-regenerate CSRF Token\nuntuk Keamanan;
+:Mengarahkan (Redirect) Pengguna;
+
+|Pengguna (Semua Role)|
+:Dialihkan ke Halaman Login\natau Landing Page Utama;
+:Akses ke Dashboard Terkunci;
+stop
+@enduml

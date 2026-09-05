@@ -1,13 +1,10 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Edit Tahun Ajaran')
 
 @section('page-title', 'Edit Tahun Ajaran')
 @section('page-subtitle', 'Form untuk mengubah data tahun ajaran')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/tahun-ajaran/form.css'])

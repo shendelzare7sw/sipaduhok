@@ -1,0 +1,56 @@
+@startuml activity-kelola-presensi-siswa
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Wali Kelas)|
+start
+:Mengakses Menu Presensi\n(Decision);
+
+if (Pilih Sub-Menu?) then (Presensi Harian)
+    |Sistem|
+    :Menampilkan Halaman Presensi\n(Filter: Tanggal & Kelas);
+    :Memuat Daftar Siswa;
+
+    |Pengguna (Wali Kelas)|
+    :Memilih Status Kehadiran Siswa\n(Hadir / Sakit / Izin / Alpha);
+    :Menambahkan Keterangan\n(Opsional);
+    :Klik "Simpan Presensi";
+
+    |Sistem|
+    :Menyimpan Data Presensi;
+    if (Status = Sakit / Izin?) then (Ya)
+        :Otomatis Mengubah Status Validasi\nmenjadi "Disetujui"\n(karena diinput langsung oleh Wali Kelas);
+    else (Tidak)
+    endif
+    :Menampilkan Pesan Sukses;
+
+else (Validasi Izin)
+    |Sistem|
+    :Menampilkan Daftar Izin / Sakit\nyang Diajukan oleh Orang Tua\n(Status Validasi = Pending);
+
+    |Pengguna (Wali Kelas)|
+    :Melihat Bukti Surat / Foto Sakit\nyang Diunggah Orang Tua;
+    :Memilih Keputusan Validasi\n(Decision);
+
+    if (Keputusan?) then (Setuju)
+        |Sistem|
+        :Mengupdate Status Validasi\nmenjadi "Disetujui";
+        :Mempertahankan Status Presensi\n(Sakit / Izin);
+    else (Tolak)
+        |Pengguna (Wali Kelas)|
+        :Mengisi Alasan Penolakan;
+        |Sistem|
+        :Mengupdate Status Validasi\nmenjadi "Ditolak";
+        :Mengubah Status Presensi\nmenjadi "Alpha";
+    endif
+
+    |Sistem|
+    :Mengirim Notifikasi Hasil Validasi\nke Aplikasi Orang Tua;
+    :Menampilkan Pesan Sukses;
+endif
+
+|Pengguna (Wali Kelas)|
+:Selesai Melakukan\nPengelolaan Presensi;
+stop
+@enduml

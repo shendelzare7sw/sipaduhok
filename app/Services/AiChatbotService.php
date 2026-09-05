@@ -418,6 +418,12 @@ PROMPT;
         }
 
         $parsed = json_decode($cleaned, true);
+        if (is_string($parsed)) {
+            $parsed = json_decode(trim($parsed), true);
+        }
+        if (!is_array($parsed) || empty($parsed['text'])) {
+            $parsed = $this->recoverPartialStructuredResponse($cleaned);
+        }
         if (!is_array($parsed) || empty($parsed['text'])) {
             return $fallback;
         }
@@ -455,6 +461,73 @@ PROMPT;
         }
 
         return $structured;
+    }
+
+    /**
+     * Recover useful fields when a provider stops midway through otherwise
+     * valid JSON. Complete links remain usable; an unfinished final item is
+     * ignored instead of exposing the transport payload to the user.
+     */
+    private function recoverPartialStructuredResponse(string $payload): ?array
+    {
+        $text = $this->extractJsonStringField($payload, 'text');
+        if (!$text) {
+            return null;
+        }
+
+        $parsed = [
+            'text' => $text,
+            'callout' => $this->extractJsonStringField($payload, 'callout'),
+            'button' => null,
+            'related' => null,
+        ];
+
+        $buttonStart = strpos($payload, '"button"');
+        $relatedStart = strpos($payload, '"related"');
+        if ($buttonStart !== false) {
+            $buttonEnd = $relatedStart !== false && $relatedStart > $buttonStart
+                ? $relatedStart
+                : strlen($payload);
+            $buttonChunk = substr($payload, $buttonStart, $buttonEnd - $buttonStart);
+            $label = $this->extractJsonStringField($buttonChunk, 'label');
+            $route = $this->extractJsonStringField($buttonChunk, 'route');
+            if ($label && $route) {
+                $parsed['button'] = ['label' => $label, 'route' => $route];
+            }
+        }
+
+        if ($relatedStart !== false) {
+            $related = [];
+            $relatedChunk = substr($payload, $relatedStart);
+            preg_match_all('/\{([^{}]*)\}/s', $relatedChunk, $items);
+            foreach ($items[1] ?? [] as $item) {
+                if (count($related) >= 3) {
+                    break;
+                }
+                $label = $this->extractJsonStringField($item, 'label');
+                $route = $this->extractJsonStringField($item, 'route');
+                if ($label && $route) {
+                    $related[] = ['label' => $label, 'route' => $route];
+                }
+            }
+            if ($related !== []) {
+                $parsed['related'] = $related;
+            }
+        }
+
+        return $parsed;
+    }
+
+    private function extractJsonStringField(string $payload, string $field): ?string
+    {
+        $field = preg_quote($field, '/');
+        if (!preg_match('/"' . $field . '"\s*:\s*"((?:\\\\.|[^"\\\\])*)"/s', $payload, $match)) {
+            return null;
+        }
+
+        $decoded = json_decode('"' . $match[1] . '"', true);
+
+        return is_string($decoded) && trim($decoded) !== '' ? trim($decoded) : null;
     }
 
     /**

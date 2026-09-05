@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Laporan Siswa Belum Lunas')
 @section('page-title', 'Laporan Siswa Belum Lunas')
 @section('page-subtitle', 'Daftar siswa dengan tagihan belum lunas')
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
 <style>

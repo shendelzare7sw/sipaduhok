@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Prediksi Kenaikan Kelas')
 @section('page-title', 'Prediksi Kenaikan Kelas')
 @section('page-subtitle', 'Simulasi kelayakan naik kelas berdasarkan data akademik dan keuangan')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/promotion/index.css', 'resources/js/wali-kelas/promotion/index.js'])

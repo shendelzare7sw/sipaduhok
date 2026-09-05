@@ -1,0 +1,51 @@
+@startuml activity-validasi-akses-ujian-rapor
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin / Bendahara)|
+start
+:Mengakses Menu\nValidasi Akses;
+
+|Sistem|
+:Menampilkan Halaman Daftar Siswa\n& Status Keuangan (Lunas/Tunggak);
+
+|Pengguna (Admin / Bendahara)|
+:Memilih Filter Kelas\natau Menandai Siswa;
+:Memilih Aksi Validasi\n(Decision);
+
+if (Aksi?) then (Validasi Ujian)
+    |Sistem|
+    :Mengupdate Status Validasi\nUjian (Bendahara = Valid);
+    :Mengirim Notifikasi\nke Siswa & Orang Tua;
+    :Menampilkan Pesan Sukses;
+
+elseif (Aksi?) then (Validasi Rapor)
+    |Sistem|
+    :Memeriksa Status\nValidasi Ketua PKBM;
+    if (Divalidasi Ketua?) then (Belum)
+        :Menampilkan Pesan Error\n(Rapor belum divalidasi Ketua);
+    else (Sudah)
+        :Mengupdate Status Validasi\nRapor (Bendahara = Valid);
+        :Mengirim Notifikasi\nke Wali Kelas;
+        :Menampilkan Pesan Sukses;
+    endif
+
+elseif (Aksi?) then (Batalkan Validasi Ujian)
+    |Sistem|
+    :Mereset Status Validasi Bendahara\nsekaligus Validasi Wali Kelas;
+    :Mengirim Notifikasi Pembatalan;
+    :Menampilkan Pesan Sukses;
+
+else (Bulk Validasi Massal)
+    |Pengguna (Admin / Bendahara)|
+    :Klik "Bulk Validasi"\n(Ujian / Rapor);
+    |Sistem|
+    :Melakukan Looping Proses\npada Semua Siswa Terpilih;
+    :Menampilkan Pesan Sukses Massal;
+endif
+
+|Pengguna (Admin / Bendahara)|
+:Selesai Melakukan Validasi;
+stop
+@enduml

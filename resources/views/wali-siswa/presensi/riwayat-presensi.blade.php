@@ -1,11 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Riwayat Presensi - ' . $siswa->nama_lengkap)
 @section('page-title', 'Riwayat Presensi')
 
-@section('sidebar-menu')
-    @include('wali-siswa.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-siswa/presensi/riwayat-presensi.css'])

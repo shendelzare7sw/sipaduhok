@@ -1,0 +1,69 @@
+@startuml
+title Sequence Diagram - UC22: Mengelola Permintaan Unduh Rapor
+autonumber
+
+actor "Wali Kelas" as Wali
+boundary "UI_PermintaanUnduh" as UI
+control "Control_Permintaan" as Control
+entity "T_PermintaanUnduh" as Entity
+
+== Skenario: Menampilkan Daftar Permintaan Unduh ==
+
+Wali -> UI : 1. Mengakses Menu Permintaan Unduh Rapor
+activate UI
+UI -> Control : 2. RequestDataPermintaan(Kelas)
+activate Control
+Control -> Entity : 3. AmbilData(Urutkan Status="Menunggu")
+activate Entity
+Entity --> Control : 4. DataDitemukan(Data)
+deactivate Entity
+Control --> UI : 5. TampilkanTabelDaftar(Data)
+deactivate Control
+UI --> Wali : 6. Daftar Permintaan Terbuka
+deactivate UI
+
+== Skenario: Mengevaluasi Permintaan (Setujui / Tolak) ==
+
+Wali -> UI : 7. Memeriksa Detail Permintaan (Nama, Pemohon, Tanggal)
+Wali -> UI : 8. Memasukkan Catatan / Pesan Balasan (Opsional)
+UI --> Wali : 9. Form Menunggu Keputusan
+
+alt Keputusan = Setujui (Approve)
+    Wali -> UI : 10. Klik Tombol "Setujui"
+    activate UI
+    UI -> Control : 11. ProsesPersetujuan(ID, Catatan)
+    activate Control
+
+    Control -> Control : 12. Generate Token Akses Unduh (Berlaku 24 Jam)
+
+    Control -> Entity : 13. UpdateStatus("Disetujui", Token, Catatan)
+    activate Entity
+    deactivate Entity
+    note right of Entity : Konvensi Assumed Success diterapkan
+
+    Control -> Control : 14. Kirim Notifikasi Persetujuan (+ Link Unduh) ke Wali Siswa
+
+    Control --> UI : 15. NotifikasiSukses()
+    deactivate Control
+    UI --> Wali : 16. Pesan Konfirmasi (Sukses) & Refresh Daftar
+    deactivate UI
+
+else Keputusan = Tolak (Reject)
+    Wali -> UI : 17. Klik Tombol "Tolak"
+    activate UI
+    UI -> Control : 18. ProsesPenolakan(ID, Catatan)
+    activate Control
+
+    Control -> Entity : 19. UpdateStatus("Ditolak", Catatan)
+    activate Entity
+    deactivate Entity
+
+    Control -> Control : 20. Kirim Notifikasi Penolakan (+ Catatan) ke Wali Siswa
+
+    Control --> UI : 21. NotifikasiSukses()
+    deactivate Control
+    UI --> Wali : 22. Pesan Konfirmasi (Sukses) & Refresh Daftar
+    deactivate UI
+end
+
+@enduml

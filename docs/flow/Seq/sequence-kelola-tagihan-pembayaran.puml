@@ -1,0 +1,116 @@
+@startuml
+title Sequence Diagram - Kelola Tagihan & Pembayaran
+autonumber
+
+actor "Bendahara / Admin" as Pengguna
+boundary "UI_KelolaKeuangan" as UI
+control "Control_Keuangan" as Control
+entity "T_Tagihan" as E_Tagihan
+entity "T_Pembayaran" as E_Pembayaran
+entity "Config_Pembayaran" as E_Config
+
+== Skenario: Menampilkan Menu Kelola Tagihan & Pembayaran ==
+Pengguna -> UI : 1. Mengakses Menu "Tagihan & Pembayaran"
+activate UI
+UI --> Pengguna : 2. Menampilkan Dropdown Menu
+deactivate UI
+
+== Skenario A: Data Tagihan (Generate SPP) ==
+Pengguna -> UI : 3. Memilih Sub-Menu "Data Tagihan" & Klik Generate
+activate UI
+Pengguna -> UI : 4. Mengisi Form (Nominal, Bulan, Siswa) & Simpan
+UI -> Control : 5. SubmitTagihanBaru(Data)
+activate Control
+
+Control -> Control : 6. Validasi Input & Duplikasi
+alt Validasi Gagal (Duplikat)
+    Control --> UI : 7. ReturnPesanError("Tagihan bulan ini sudah ada")
+    UI --> Pengguna : 8. Menampilkan Pesan Error
+else Validasi Sukses
+    Control -> E_Tagihan : 9. InsertDataTagihan()
+    activate E_Tagihan
+    deactivate E_Tagihan
+    note right of E_Tagihan : Konvensi Assumed Success diterapkan
+    Control --> UI : 10. NotifikasiSukses()
+    UI --> Pengguna : 11. Pesan Sukses
+end
+deactivate Control
+deactivate UI
+
+== Skenario B: Pembayaran Masuk (Validasi) ==
+Pengguna -> UI : 12. Memilih Sub-Menu "Pembayaran Masuk"
+activate UI
+UI -> Control : 13. RequestDataPembayaran()
+activate Control
+Control -> E_Pembayaran : 14. AmbilDataMenungguValidasi()
+activate E_Pembayaran
+E_Pembayaran --> Control : 15. ReturnData()
+deactivate E_Pembayaran
+Control --> UI : 16. TampilkanDaftarPembayaran()
+deactivate Control
+
+Pengguna -> UI : 17. Klik "Validasi" (Lihat Bukti Transfer)
+Pengguna -> UI : 18. Memutuskan Setuju (Lunas) / Tolak
+UI -> Control : 19. ProsesValidasiPembayaran(Status)
+activate Control
+
+alt Status = Lunas
+    Control -> E_Pembayaran : 20. UpdateStatusLunas()
+    activate E_Pembayaran
+    deactivate E_Pembayaran
+
+    Control -> E_Tagihan : 21. UpdateSaldoDanStatusTagihan()
+    activate E_Tagihan
+    deactivate E_Tagihan
+
+    Control --> UI : 22. NotifikasiSukses()
+    UI --> Pengguna : 23. Pesan Sukses (Tagihan Lunas)
+else Status = Tolak
+    Control -> E_Pembayaran : 24. UpdateStatusDitolak()
+    activate E_Pembayaran
+    deactivate E_Pembayaran
+    Control --> UI : 25. NotifikasiPenolakan()
+    UI --> Pengguna : 26. Pesan Penolakan
+end
+deactivate Control
+deactivate UI
+
+== Skenario C: Tarik Tunggakan (Carryover) ==
+Pengguna -> UI : 27. Memilih Sub-Menu "Tarik Tunggakan"
+activate UI
+Pengguna -> UI : 28. Klik "Preview Tunggakan Tahun Sebelumnya"
+UI -> Control : 29. RequestPreviewTunggakan()
+activate Control
+Control -> E_Tagihan : 30. CekTunggakanSiswa()
+activate E_Tagihan
+E_Tagihan --> Control : 31. ReturnDaftarTunggakan()
+deactivate E_Tagihan
+Control --> UI : 32. TampilkanDaftarTunggakan()
+deactivate Control
+
+Pengguna -> UI : 33. Klik "Eksekusi Tarik Tunggakan"
+UI -> Control : 34. EksekusiCarryover()
+activate Control
+Control -> E_Tagihan : 35. InsertSisaTagihanKeTahunAktif()
+activate E_Tagihan
+deactivate E_Tagihan
+Control --> UI : 36. NotifikasiSukses()
+deactivate Control
+UI --> Pengguna : 37. Pesan Sukses (Tunggakan Ditarik)
+deactivate UI
+
+== Skenario D: Config Pembayaran ==
+Pengguna -> UI : 38. Memilih Sub-Menu "Config Pembayaran"
+activate UI
+Pengguna -> UI : 39. Memperbarui Data Rekening / API Key Paywuz
+UI -> Control : 40. SubmitConfigPembayaran(Data)
+activate Control
+Control -> E_Config : 41. UpdateKonfigurasi()
+activate E_Config
+deactivate E_Config
+Control --> UI : 42. NotifikasiSukses()
+deactivate Control
+UI --> Pengguna : 43. Pesan Sukses
+deactivate UI
+
+@enduml

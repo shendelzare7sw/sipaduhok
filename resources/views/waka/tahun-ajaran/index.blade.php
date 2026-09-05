@@ -1,13 +1,10 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Manajemen Tahun Ajaran')
 
 @section('page-title', 'Tahun Ajaran')
 @section('page-subtitle', 'Kelola periode akademik dan status aktif')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/tahun-ajaran/index.css'])

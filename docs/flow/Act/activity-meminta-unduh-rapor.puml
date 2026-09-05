@@ -1,0 +1,64 @@
+@startuml activity-meminta-unduh-rapor
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Wali Murid)|
+start
+:Mengakses Menu Rapor Anak;
+
+|Sistem|
+:Menampilkan Daftar Rapor\n(Berdasarkan Semester & Jenis: PTS/PAS);
+
+|Pengguna (Wali Murid)|
+:Memilih Rapor Tertentu;
+
+|Sistem|
+:Menampilkan Ringkasan Nilai\ndan Catatan Rapor;
+
+|Pengguna (Wali Murid)|
+:Klik Tombol "Ajukan Unduh (Cetak)";
+
+|Sistem|
+:Mengecek Status Permintaan Sebelumnya;
+if (Ada Request Pending\natau Token Masih Aktif?) then (Ya)
+    :Menampilkan Pesan Info\n(Request sedang diproses\natau link unduh masih bisa dipakai);
+    |Pengguna (Wali Murid)|
+    :Menunggu atau Menggunakan\nLink yang Sudah Ada;
+else (Tidak)
+    |Pengguna (Wali Murid)|
+    :Mengisi Alasan Permintaan Unduh\n(Opsional);
+    :Klik "Kirim Permintaan";
+
+    |Sistem|
+    :Menyimpan Permintaan\n(Status: Menunggu);
+    :Mengirim Notifikasi ke Wali Kelas;
+    :Menampilkan Pesan Sukses;
+endif
+
+|Pengguna (Wali Murid)|
+:Menunggu Persetujuan dari\nPihak Sekolah (Wali Kelas);
+
+|Sistem (Otomatis)|
+:Setelah Disetujui oleh Wali Kelas,\nSistem Meng-generate "Token Unduh";
+:Mengatur Batas Waktu Kedaluwarsa Token;
+:Mengirim Notifikasi & Link Unduh\nke Aplikasi Wali Murid;
+
+|Pengguna (Wali Murid)|
+:Menerima Notifikasi dan\nMembuka Link Unduhan;
+
+|Sistem|
+:Memvalidasi Token dan Sesi User;
+if (Token Valid & Belum Kedaluwarsa?) then (Ya)
+    :Men-generate Tampilan\nRapor Siap Cetak (PDF);
+    |Pengguna (Wali Murid)|
+    :Mencetak (Ctrl+P) atau\nMenyimpan File PDF;
+else (Tidak)
+    |Sistem|
+    :Menampilkan Pesan Error\n(Link Tidak Valid / Telah Kedaluwarsa);
+endif
+
+|Pengguna (Wali Murid)|
+:Selesai Melakukan\nProses Unduh Rapor;
+stop
+@enduml

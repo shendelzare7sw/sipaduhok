@@ -1,366 +1,237 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Kelola Tagihan')
 @section('page-title', 'Kelola Tagihan')
-@section('page-subtitle', 'Daftar tagihan semua siswa (Admin)')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/keuangan/tagihan/index.css'])
-@endsection
+@section('page-subtitle', 'Pantau kewajiban siswa dan pilih proses tagihan yang sesuai')
 
 @section('content')
-    <div class="tagihan-index-page">
-        <div class="container-fluid px-0">
-            {{-- ALERT TUNGGAKAN TAHUN SEBELUMNYA --}}
-            @if(!empty($tunggakanSummary))
-            <div class="alert alert-danger border-start border-danger border-4 shadow-sm mb-4">
-                <div class="d-flex align-items-start">
-                    <i class="fas fa-exclamation-triangle fa-lg me-3 mt-1 text-danger"></i>
-                    <div class="flex-grow-1">
-                        <h6 class="fw-bold text-danger mb-1">Tunggakan Tahun Sebelumnya</h6>
-                        <p class="mb-2 small">
-                            Terdapat <strong>{{ $tunggakanSummary['jumlah_siswa'] }} siswa</strong> dengan total tunggakan
-                            <strong class="text-danger">Rp {{ number_format($tunggakanSummary['total_tunggakan'], 0, ',', '.') }}</strong>
-                            dari tahun ajaran sebelumnya.
-                        </p>
-                        <div class="d-flex flex-wrap gap-2">
-                            @foreach($tunggakanSummary['per_tahun'] as $item)
-                                <a href="{{ route('admin.keuangan.tagihan.index', ['tahun_ajaran_id' => $item['tahun_ajaran_id']]) }}"
-                                   class="btn btn-outline-danger btn-sm fw-bold">
-                                    <i class="fas fa-eye me-1"></i> {{ $item['nama_tahun'] }}
-                                    ({{ $item['jumlah_siswa'] }} siswa - Rp {{ number_format($item['total'], 0, ',', '.') }})
-                                </a>
-                            @endforeach
+@php
+    $students = $siswaList ?? collect();
+    $pageIds = collect($students->items())->pluck('id')->map(fn ($id) => (string) $id)->values();
+    $studentNames = collect($students->items())->mapWithKeys(fn ($student) => [(string) $student->id => $student->nama_lengkap ?? 'Siswa'])->all();
+    $filters = $filters ?? [];
+@endphp
+
+<div
+    data-tagihan-index
+    class="min-w-0 w-full space-y-4"
+    x-data="{
+        selected: [],
+        pageIds: @js($pageIds),
+        names: @js($studentNames),
+        actionsOpen: false,
+        search: @js((string) ($filters['search'] ?? '')),
+        get allSelected() { return this.pageIds.length > 0 && this.pageIds.every(id => this.selected.includes(id)); },
+        toggleAll() { this.selected = this.allSelected ? [] : [...this.pageIds]; },
+        async resetSelected() {
+            if (!this.selected.length) return;
+            const preview = this.selected.slice(0, 4).map(id => this.names[id]).join(', ');
+            const more = this.selected.length > 4 ? `, dan ${this.selected.length - 4} lainnya` : '';
+            const result = await Swal.fire({
+                icon: 'warning',
+                title: 'Reset tagihan terpilih?',
+                html: `<strong>${this.selected.length} siswa</strong> akan dikembalikan ke kondisi kosong.<br><span class='text-sm'>${preview}${more}</span><br><br>Semua tagihan dan pembayaran pada tahun ajaran ini akan dihapus permanen.`,
+                showCancelButton: true,
+                confirmButtonText: 'Ya, reset tagihan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#dc2626',
+                reverseButtons: true,
+                focusCancel: true,
+            });
+            if (!result.isConfirmed) return;
+            this.$refs.resetIds.value = JSON.stringify(this.selected);
+            this.$nextTick(() => this.$refs.resetForm.submit());
+        }
+    }"
+    @keydown.escape.window="actionsOpen = false"
+>
+    @if(!empty($tunggakanSummary))
+        <section class="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm sm:p-5">
+            <div class="flex items-start gap-3">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-700"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span>
+                <div class="min-w-0 flex-1">
+                    <h2 class="font-extrabold text-red-900">Tunggakan tahun sebelumnya</h2>
+                    <p class="mt-1 text-sm leading-6 text-red-800">
+                        <strong>{{ $tunggakanSummary['jumlah_siswa'] }} siswa</strong> memiliki tunggakan senilai
+                        <strong>Rp {{ number_format($tunggakanSummary['total_tunggakan'], 0, ',', '.') }}</strong> dari periode sebelumnya.
+                    </p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        @foreach($tunggakanSummary['per_tahun'] as $item)
+                            <a href="{{ route('admin.keuangan.tagihan.index', ['tahun_ajaran_id' => $item['tahun_ajaran_id']]) }}" class="inline-flex min-h-9 items-center gap-2 rounded-xl border border-red-200 bg-white px-3 text-xs font-bold text-red-700 no-underline hover:bg-red-100">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                                {{ $item['nama_tahun'] }} · {{ $item['jumlah_siswa'] }} siswa · Rp {{ number_format($item['total'], 0, ',', '.') }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
+    <section class="rounded-2xl border {{ ($isAlumniMode ?? false) ? 'border-amber-200 bg-amber-50' : 'border-blue-200 bg-blue-50' }} p-4">
+        <div class="flex items-start gap-3">
+            <i class="fas {{ ($isAlumniMode ?? false) ? 'fa-user-graduate text-amber-700' : 'fa-circle-info text-blue-700' }} mt-1" aria-hidden="true"></i>
+            <p class="text-sm leading-6 {{ ($isAlumniMode ?? false) ? 'text-amber-900' : 'text-blue-900' }}">
+                @if($isAlumniMode ?? false)
+                    <strong>Mode Alumni Menunggak:</strong> sisa tagihan dihitung lintas seluruh tahun ajaran untuk membantu proses pelunasan akhir.
+                @else
+                    Total mencakup seluruh kewajiban siswa pada periode terpilih. Gunakan <strong>Tagihan massal</strong> bila nominal seragam untuk banyak siswa.
+                @endif
+            </p>
+        </div>
+    </section>
+
+    <section class="overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 p-4 sm:p-5">
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div class="min-w-0">
+                    <h2 class="flex items-center gap-2 text-lg font-extrabold text-slate-950"><i class="fas fa-list text-brand-600" aria-hidden="true"></i>Daftar tagihan siswa</h2>
+                    <p class="mt-1 text-sm text-slate-500">{{ $students->total() }} siswa ditemukan.</p>
+                </div>
+
+                <div class="relative flex w-full flex-wrap gap-2 sm:w-auto">
+                    <a href="{{ route('admin.keuangan.tagihan.import') }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-cyan-50 px-3 text-xs font-bold text-cyan-700 no-underline hover:bg-cyan-100 sm:text-sm"><i class="fas fa-file-import" aria-hidden="true"></i>Import</a>
+                    <a href="{{ route('admin.keuangan.tagihan.cetak-laporan', request()->query()) }}" target="_blank" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-slate-100 px-3 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200 sm:text-sm"><i class="fas fa-print" aria-hidden="true"></i>Cetak</a>
+                    <a href="{{ route('admin.keuangan.tagihan.duplicate') }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-violet-50 px-3 text-xs font-bold text-violet-700 no-underline hover:bg-violet-100 sm:text-sm"><i class="fas fa-copy" aria-hidden="true"></i>Duplikasi</a>
+                    <div class="static sm:relative" @click.outside="actionsOpen = false">
+                        <button type="button" @click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-brand-600 px-3 text-xs font-bold text-white hover:bg-brand-700 sm:text-sm">
+                            <i class="fas fa-plus" aria-hidden="true"></i>Buat tagihan<i class="fas fa-chevron-down text-[10px]" aria-hidden="true"></i>
+                        </button>
+                        <div x-cloak x-show="actionsOpen" x-transition.origin.top.left class="absolute inset-x-0 top-full z-30 mt-2 w-auto overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-xl sm:inset-x-auto sm:right-0 sm:w-64">
+                            <a href="{{ route('admin.keuangan.tagihan.bulk-create') }}" class="flex items-start gap-3 rounded-lg px-3 py-2.5 text-sm no-underline hover:bg-slate-50"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700"><i class="fas fa-users"></i></span><span><strong class="block text-slate-900">Tagihan massal</strong><small class="text-slate-500">Satu tagihan untuk banyak siswa</small></span></a>
+                            <a href="{{ route('admin.keuangan.tagihan.create-custom') }}" class="flex items-start gap-3 rounded-lg px-3 py-2.5 text-sm no-underline hover:bg-slate-50"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700"><i class="fas fa-user-plus"></i></span><span><strong class="block text-slate-900">Tagihan khusus</strong><small class="text-slate-500">Buat untuk siswa tertentu</small></span></a>
+                            <a href="{{ route('admin.keuangan.tagihan.generate-spp') }}" class="flex items-start gap-3 rounded-lg px-3 py-2.5 text-sm no-underline hover:bg-slate-50"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-700"><i class="fas fa-calendar-days"></i></span><span><strong class="block text-slate-900">Generate SPP</strong><small class="text-slate-500">Buat kewajiban bulanan</small></span></a>
                         </div>
                     </div>
                 </div>
             </div>
-            @endif
 
-            {{-- INFORMASI TAMBAHAN --}}
-            @if($isAlumniMode ?? false)
-                <div class="alert alert-warning border-start border-warning border-4 shadow-sm mb-4">
-                    <div class="d-flex">
-                        <i class="fas fa-user-graduate fa-lg me-2 mt-1"></i>
-                        <small class="fw-bold text-gray-800">
-                            Mode <strong>Alumni Menunggak</strong>: menampilkan siswa berstatus <strong>lulus</strong> yang masih memiliki
-                            tunggakan, dihitung <strong>lintas semua tahun ajaran</strong>. Kolom <strong>SISA</strong> = total tebusan
-                            yang harus dilunasi (mis. untuk pengambilan ijazah). Cari cepat lewat kotak pencarian nama.
-                        </small>
-                    </div>
+            <form action="{{ route('admin.keuangan.tagihan.index') }}" method="GET" class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(15rem,1.5fr)_repeat(3,minmax(10rem,.7fr))_auto]">
+                @if($isAlumniMode ?? false)<input type="hidden" name="tunggakan_alumni" value="1">@endif
+                <label class="relative block min-w-0">
+                    <span class="sr-only">Cari siswa</span>
+                    <i class="fas fa-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400" aria-hidden="true"></i>
+                    <input type="search" name="search" x-model="search" value="{{ $filters['search'] ?? '' }}" placeholder="Cari nama atau NISN..." class="h-11 w-full rounded-xl border border-slate-300 bg-white !pl-10 pr-9 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    <button x-cloak x-show="search" type="button" @click="search = ''; $nextTick(() => $el.previousElementSibling.focus())" class="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg bg-slate-100 text-xs text-slate-500" aria-label="Hapus pencarian"><i class="fas fa-times"></i></button>
+                </label>
+                <select name="tahun_ajaran_id" class="h-11 min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    @forelse($allTahunAjaran ?? [] as $ta)
+                        <option value="{{ $ta->id }}" @selected(optional($selectedYear)->id == $ta->id)>{{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' · Aktif' : '' }}</option>
+                    @empty
+                        <option value="">Tidak ada tahun ajaran</option>
+                    @endforelse
+                </select>
+                <select name="kelas_id" class="h-11 min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    <option value="">Semua kelas</option>
+                    @foreach($kelasList ?? [] as $kelas)
+                        <option value="{{ $kelas->id }}" @selected(($filters['kelas_id'] ?? '') == $kelas->id)>{{ $kelas->nama_kelas }} · {{ $kelas->jenjang ?? '-' }} · {{ optional($kelas->cabang)->nama_cabang ?? 'Cabang belum diatur' }}</option>
+                    @endforeach
+                </select>
+                <select name="status_tagihan" class="h-11 min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
+                    <option value="">Semua status</option>
+                    <option value="belum_lunas" @selected(($filters['status_tagihan'] ?? '') === 'belum_lunas')>Belum lunas</option>
+                    <option value="lunas" @selected(($filters['status_tagihan'] ?? '') === 'lunas')>Lunas</option>
+                    <option value="kosong" @selected(($filters['status_tagihan'] ?? '') === 'kosong')>Belum ada tagihan</option>
+                </select>
+                <div class="flex gap-2 md:col-span-2 xl:col-span-1">
+                    <button type="submit" class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white hover:bg-slate-800 xl:flex-none"><i class="fas fa-filter"></i>Terapkan</button>
+                    <a href="{{ route('admin.keuangan.tagihan.index', ($isAlumniMode ?? false) ? ['tunggakan_alumni' => 1] : []) }}" class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-bold text-slate-600 no-underline hover:bg-slate-50" aria-label="Reset filter"><i class="fas fa-rotate-left"></i></a>
                 </div>
-            @else
-                <div class="alert alert-warning border-start border-warning border-4 shadow-sm mb-4">
-                    <div class="d-flex">
-                        <i class="fas fa-info-circle fa-lg me-2 mt-1"></i>
-                        <small class="fw-bold text-gray-800">
-                            Catatan: Total Tagihan mencakup seluruh kewajiban siswa di periode berjalan. Gunakan fitur "Buat
-                            Tagihan Massal" untuk efisiensi waktu jika tagihan per jenjang bersifat seragam.
-                        </small>
-                    </div>
-                </div>
-            @endif
+            </form>
 
-            {{-- TABEL UTAMA --}}
-            <div class="card shadow mb-4">
-                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
-                    {{-- Left Group: Title & Filter --}}
-                    <div class="d-flex flex-wrap align-items-center gap-3 w-100-mobile">
-                        {{-- Title --}}
-                        <div>
-                            <h6 class="mb-0 fw-bold text-primary">
-                                <i class="fas fa-list me-2"></i>Daftar Tagihan Siswa
-                            </h6>
-                            <small class="text-muted">{{ $siswaList ? $siswaList->total() : 0 }} siswa terdaftar</small>
-                        </div>
-                        <form id="filterForm" action="{{ route('admin.keuangan.tagihan.index') }}" method="GET" class="search-form">
-                            <div class="dropdown filter-dropdown">
-                                <button class="btn btn-secondary dropdown-toggle w-100-mobile d-flex justify-content-between align-items-center" type="button" id="filterDropdown"
-                                    data-bs-toggle="dropdown" aria-expanded="false"
-                                    data-bs-auto-close="outside" data-bs-display="static">
-                                    <span><i class="fas fa-filter me-1"></i> Filter</span>
-                                </button>
-                                <div class="dropdown-menu p-3 shadow-lg border-0 tagihan-filter-menu" aria-labelledby="filterDropdown">
-                                    <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
+            <div class="mt-2">
+                @if($isAlumniMode ?? false)
+                    <a href="{{ route('admin.keuangan.tagihan.index') }}" class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-amber-100 px-3 text-xs font-bold text-amber-800 no-underline"><i class="fas fa-user-graduate"></i>Alumni Menunggak aktif <i class="fas fa-times"></i></a>
+                @else
+                    <a href="{{ route('admin.keuangan.tagihan.index', ['tunggakan_alumni' => 1]) }}" class="inline-flex min-h-9 items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-bold text-amber-800 no-underline hover:bg-amber-100"><i class="fas fa-user-graduate"></i>Lihat alumni menunggak</a>
+                @endif
+            </div>
+        </header>
 
-                                    {{-- Filter Tahun Ajaran --}}
-                                    <div class="mb-2">
-                                        <label class="form-label small fw-bold">Tahun Ajaran</label>
-                                        <select name="tahun_ajaran_id" class="form-select form-select-sm" data-auto-submit>
-                                            @forelse($allTahunAjaran ?? [] as $ta)
-                                                <option value="{{ $ta->id ?? '' }}" {{ optional($selectedYear)->id == ($ta->id ?? null) ? 'selected' : '' }}>
-                                                    {{ $ta->nama_tahun_ajaran ?? 'Tahun Ajaran' }} {{ optional($ta)->is_active ? '(Aktif)' : '' }}
-                                                </option>
-                                            @empty
-                                                <option value="">Tidak ada tahun ajaran</option>
-                                            @endforelse
-                                        </select>
-                                    </div>
+        @if($students->isEmpty())
+            <div class="px-5 py-16 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400"><i class="fas fa-folder-open"></i></span><h3 class="mt-4 font-extrabold text-slate-900">Data siswa tidak ditemukan</h3><p class="mt-1 text-sm text-slate-500">Ubah filter atau pilih tahun ajaran lainnya.</p></div>
+        @else
+            <div class="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-4 py-3 xl:hidden">
+                <input type="checkbox" :checked="allSelected" @change="toggleAll" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+                <button type="button" @click="toggleAll" class="text-xs font-bold text-slate-700">Pilih semua siswa di halaman ini</button>
+            </div>
 
-                                    {{-- Filter Kelas --}}
-                                    <div class="mb-2">
-                                        <label class="form-label small fw-bold">Kelas</label>
-                                        <select name="kelas_id" class="form-select form-select-sm">
-                                            <option value="">Semua Kelas</option>
-                                            @forelse($kelasList ?? [] as $kelas)
-                                                <option value="{{ $kelas->id ?? '' }}" {{ (($filters ?? [])['kelas_id'] ?? '') == ($kelas->id ?? '') ? 'selected' : '' }}>
-                                                    {{ $kelas->nama_kelas ?? 'Kelas' }} ({{ $kelas->jenjang ?? '-' }}) - {{ optional($kelas->cabang)->nama_cabang ?? 'Cabang tidak diketahui' }}
-                                                </option>
-                                            @empty
-                                            @endforelse
-                                        </select>
-                                    </div>
-
-                                    {{-- Filter Status Tagihan --}}
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold">Status Tagihan</label>
-                                        <select name="status_tagihan" class="form-select form-select-sm">
-                                            <option value="">Semua Status</option>
-                                            <option value="belum_lunas" {{ (($filters ?? [])['status_tagihan'] ?? '') == 'belum_lunas' ? 'selected' : '' }}>Belum Lunas</option>
-                                            <option value="lunas" {{ (($filters ?? [])['status_tagihan'] ?? '') == 'lunas' ? 'selected' : '' }}>Lunas</option>
-                                            <option value="kosong" {{ (($filters ?? [])['status_tagihan'] ?? '') == 'kosong' ? 'selected' : '' }}>Kosong (Belum Ada Tagihan)</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-primary btn-sm">Terapkan Filter</button>
-                                        <a href="{{ route('admin.keuangan.tagihan.index') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
-                                    </div>
+            <div class="divide-y divide-slate-100 xl:hidden">
+                @foreach($students as $index => $siswa)
+                    @php
+                        $isPaid = $siswa->sisa_tagihan <= 0 && $siswa->total_tagihan > 0;
+                        $isEmpty = $siswa->total_tagihan == 0;
+                    @endphp
+                    <article class="p-4" :class="selected.includes('{{ $siswa->id }}') && 'bg-blue-50/60'">
+                        <div class="flex items-start gap-3">
+                            <input type="checkbox" value="{{ $siswa->id }}" x-model="selected" class="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0"><h3 class="truncate text-sm font-extrabold text-slate-950">{{ $siswa->nama_lengkap }}</h3><p class="mt-0.5 truncate text-xs text-slate-500">NISN {{ $siswa->nisn ?: '-' }} · {{ ($siswa->status ?? '') === 'lulus' ? 'Alumni' : 'Siswa aktif' }}</p></div>
+                                    <span class="inline-flex shrink-0 rounded-full px-2 py-1 text-[10px] font-extrabold {{ $isPaid ? 'bg-emerald-50 text-emerald-700' : ($isEmpty ? 'bg-slate-100 text-slate-600' : 'bg-red-50 text-red-700') }}">{{ $isPaid ? 'Lunas' : ($isEmpty ? 'Kosong' : 'Belum lunas') }}</span>
+                                </div>
+                                <div class="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-xs">
+                                    <div><span class="block text-[10px] font-bold uppercase tracking-wide text-slate-400">Kelas</span><strong class="text-slate-800">{{ optional($siswa->kelas)->nama_kelas ?? '-' }}</strong></div>
+                                    <div><span class="block text-[10px] font-bold uppercase tracking-wide text-slate-400">Cabang</span><strong class="text-slate-800">{{ optional($siswa->cabang)->kode_cabang ?? '-' }}</strong></div>
+                                    <div><span class="block text-[10px] font-bold uppercase tracking-wide text-slate-400">Total</span><strong class="tabular-nums text-slate-800">Rp {{ number_format($siswa->total_tagihan, 0, ',', '.') }}</strong></div>
+                                    <div><span class="block text-[10px] font-bold uppercase tracking-wide text-slate-400">Sisa</span><strong class="tabular-nums {{ $siswa->sisa_tagihan > 0 ? 'text-red-700' : 'text-emerald-700' }}">Rp {{ number_format($siswa->sisa_tagihan, 0, ',', '.') }}</strong></div>
+                                </div>
+                                <div class="mt-3 flex justify-end gap-1.5">
+                                    <x-cleanflow.table-action :href="route('admin.keuangan.tagihan.show', $siswa->id)" tone="view" icon="fas fa-eye" label="Lihat detail tagihan" />
+                                    <x-cleanflow.table-action :href="route('admin.keuangan.tagihan.edit', $siswa->id)" tone="edit" icon="fas fa-pen" label="Edit tagihan" />
+                                    <x-cleanflow.table-action :href="route('admin.keuangan.pembayaran.riwayat-siswa', $siswa->id)" tone="success" icon="fas fa-clock-rotate-left" label="Riwayat pembayaran" />
+                                    <x-cleanflow.table-action :href="route('admin.keuangan.tagihan.cetak', $siswa->id)" tone="neutral" icon="fas fa-print" label="Cetak tagihan" target="_blank" />
                                 </div>
                             </div>
-
-                            {{-- Search Input --}}
-                            <div class="search-input-wrapper w-100-mobile">
-                                <i class="fas fa-search search-icon"></i>
-                                <input type="text" name="search" id="searchInput" class="search-input"
-                                    placeholder="Cari nama/NISN..." value="{{ ($filters ?? [])['search'] ?? '' }}"
-                                    autocomplete="off">
-                                <button type="button" class="clear-search {{ (($filters ?? [])['search'] ?? '') ? 'show' : '' }}"
-                                    id="clearSearch" title="Hapus pencarian">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </form>
-
-                        {{-- Toggle: Alumni yang masih menunggak (lintas tahun ajaran) --}}
-                        @if($isAlumniMode ?? false)
-                            <a href="{{ route('admin.keuangan.tagihan.index') }}" class="btn btn-warning btn-sm fw-bold shadow-sm w-100-mobile" title="Kembali ke daftar semua siswa">
-                                <i class="fas fa-user-graduate me-1"></i> Alumni Menunggak
-                                <span class="badge bg-dark ms-1">aktif</span> <i class="fas fa-times ms-1"></i>
-                            </a>
-                        @else
-                            <a href="{{ route('admin.keuangan.tagihan.index', ['tunggakan_alumni' => 1]) }}" class="btn btn-outline-warning btn-sm fw-bold w-100-mobile" title="Tampilkan alumni yang masih punya tunggakan (lintas tahun ajaran)">
-                                <i class="fas fa-user-graduate me-1"></i> Alumni Menunggak
-                            </a>
-                        @endif
-                    </div>
-
-                    {{-- Right Group: Action Buttons --}}
-                    <div class="d-flex gap-2 action-group-mobile">
-                        <a href="{{ route('admin.keuangan.tagihan.import') }}"
-                            class="btn btn-outline-danger btn-sm shadow-sm fw-bold">
-                            <i class="fas fa-file-import me-1"></i> Import
-                        </a>
-                        <a href="{{ route('admin.keuangan.tagihan.cetak-laporan', request()->query()) }}"
-                            class="btn btn-outline-secondary btn-sm shadow-sm fw-bold" target="_blank">
-                            <i class="fas fa-print me-1"></i> Cetak Laporan
-                        </a>
-                        <div class="btn-group shadow-sm" role="group">
-                            <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle fw-bold" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-plus-circle me-1"></i> Buat Tagihan
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('admin.keuangan.tagihan.bulk-create') }}">
-                                    <i class="fas fa-users text-success me-2"></i> Tagihan Massal
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ route('admin.keuangan.tagihan.create-custom') }}">
-                                    <i class="fas fa-user-plus text-primary me-2"></i> Tagihan Custom
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ route('admin.keuangan.tagihan.generate-spp') }}">
-                                    <i class="fas fa-calendar-alt text-info me-2"></i> Generate SPP
-                                </a></li>
-                            </ul>
                         </div>
-                        <a href="{{ route('admin.keuangan.tagihan.duplicate') }}" class="btn btn-outline-info btn-sm shadow-sm fw-bold">
-                            <i class="fas fa-copy me-1"></i> Duplikasi
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    @if(!$siswaList || $siswaList->isEmpty())
-                        <div class="text-center py-5 text-muted opacity-50">
-                            <i class="fas fa-folder-open fa-4x mb-3"></i>
-                            <h5>Data siswa tidak ditemukan</h5>
-                        </div>
-                    @else
-                        {{-- Mobile Select All (Only visible on small screens since thead is hidden) --}}
-                        <div class="d-md-none p-3 border-bottom d-flex align-items-center bg-light">
-                            <input type="checkbox" id="selectAllMobile" class="me-2 mobile-select-checkbox" title="Pilih Semua" data-select-all-tagihan>
-                            <label for="selectAllMobile" class="fw-bold text-gray-700 mb-0 mobile-select-label">Pilih Semua Siswa</label>
-                        </div>
-                        
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="checkbox-cell">
-                                            <input type="checkbox" id="selectAll" title="Pilih Semua" data-select-all-tagihan>
-                                        </th>
-                                        <th width="50">NO</th>
-                                        <th class="text-start">IDENTITAS SISWA</th>
-                                        <th>NISN</th>
-                                        <th>KELAS</th>
-                                        <th>CABANG</th>
-                                        <th>TOTAL TAGIHAN</th>
-                                        <th>SUDAH BAYAR</th>
-                                        <th>SISA</th>
-                                        <th>STATUS</th>
-                                        <th width="120">AKSI</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($siswaList ?? [] as $index => $siswa)
-                                        <tr data-siswa-id="{{ $siswa->id ?? '' }}" data-siswa-name="{{ $siswa->nama_lengkap ?? 'Siswa' }}">
-                                            <td class="checkbox-cell align-middle" data-label="PILIH UNTUK RESET">
-                                                <input type="checkbox" class="row-checkbox" value="{{ $siswa->id ?? '' }}" data-row-checkbox>
-                                            </td>
-                                            <td class="text-center align-middle fw-bold text-gray-600" data-label="NO">
-                                                {{ ($siswaList && method_exists($siswaList, 'firstItem')) ? $siswaList->firstItem() + $index : $index + 1 }}</td>
-                                            <td class="align-middle" data-label="IDENTITAS SISWA">
-                                                <div class="student-identity">
-                                                    <span class="student-name">{{ $siswa->nama_lengkap }}</span>
-                                                    <span class="student-nisn">{{ ($siswa->status ?? '') === 'lulus' ? 'Alumni' : 'Siswa Aktif' }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="text-center align-middle fw-bold text-gray-800" data-label="NISN">{{ $siswa->nisn }}</td>
-                                            <td class="text-center align-middle" data-label="KELAS">
-                                                <span class="badge bg-primary px-2 py-1 fw-bold text-uppercase tagihan-kelas-badge">
-                                                    {{ optional($siswa->kelas)->nama_kelas ?? '-' }}
-                                                </span>
-                                            </td>
-                                            <td class="text-center align-middle" data-label="CABANG">
-                                                <span class="cabang-badge">{{ optional($siswa->cabang)->kode_cabang ?? '-' }}</span>
-                                            </td>
-                                            <td class="align-middle currency-font text-dark" data-label="TOTAL TAGIHAN">
-                                                Rp {{ number_format($siswa->total_tagihan, 0, ',', '.') }}
-                                            </td>
-                                            <td class="align-middle currency-font text-success" data-label="SUDAH BAYAR">
-                                                Rp {{ number_format($siswa->tagihan_lunas, 0, ',', '.') }}
-                                            </td>
-                                            <td data-label="SISA"
-                                                class="align-middle currency-font {{ $siswa->sisa_tagihan > 0 ? 'text-danger' : 'text-success' }}">
-                                                Rp {{ number_format($siswa->sisa_tagihan, 0, ',', '.') }}
-                                            </td>
-                                            <td class="text-center align-middle" data-label="STATUS">
-                                                @if($siswa->sisa_tagihan <= 0 && $siswa->total_tagihan > 0)
-                                                    <span class="badge bg-success badge-status shadow-sm"><i
-                                                            class="fas fa-check-circle"></i> LUNAS</span>
-                                                @elseif($siswa->total_tagihan == 0)
-                                                    <span class="badge bg-light border badge-status text-muted">KOSONG</span>
-                                                @else
-                                                    <span class="badge bg-danger badge-status shadow-sm"><i
-                                                            class="fas fa-times-circle"></i> BELUM LUNAS</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center align-middle" data-label="AKSI">
-                                                <div class="btn-group shadow-sm">
-                                                    <a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}"
-                                                        class="btn btn-sm btn-info" title="Lihat Detail">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="{{ route('admin.keuangan.tagihan.edit', $siswa->id) }}"
-                                                        class="btn btn-sm btn-warning" title="Edit Tagihan">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="{{ route('admin.keuangan.pembayaran.riwayat-siswa', $siswa->id) }}"
-                                                        class="btn btn-sm btn-success" title="Riwayat Bayar">
-                                                        <i class="fas fa-history"></i>
-                                                    </a>
-                                                    <a href="{{ route('admin.keuangan.tagihan.cetak', $siswa->id) }}"
-                                                        class="btn btn-sm btn-secondary" title="Cetak Tagihan" target="_blank">
-                                                        <i class="fas fa-print"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="card-footer bg-light py-3 border-top">
-                            <div class="d-flex justify-content-center">
-                                {{ $siswaList ? $siswaList->withQueryString()->links() : '' }}
-                            </div>
-                        </div>
-                    @endif
-                </div>
+                    </article>
+                @endforeach
             </div>
 
-        </div>
-    </div>
-
-    {{-- Floating Reset Toolbar --}}
-    <div class="reset-toolbar" id="resetToolbar">
-        <span class="selected-count">
-            <i class="fas fa-check-square me-1"></i>
-            <span id="selectedCount">0</span> siswa dipilih
-        </span>
-        <button type="button" class="btn-cancel-select" data-clear-selection>
-            <i class="fas fa-times me-1"></i> Batal
-        </button>
-        <button type="button" class="btn-reset" data-bs-toggle="modal" data-bs-target="#resetTagihanModal">
-            <i class="fas fa-trash-restore me-1"></i> Reset Tagihan
-        </button>
-    </div>
-
-    {{-- Modal Konfirmasi Reset Tagihan --}}
-    <div class="modal fade" id="resetTagihanModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header reset-modal-header">
-                    <h5 class="modal-title fw-bold text-white">
-                        <i class="fas fa-exclamation-triangle me-2"></i>PERINGATAN: Reset Tagihan
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body py-4">
-                    <div class="text-center mb-3">
-                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3 reset-warning-icon"></i>
-                        <h5 class="fw-bold text-danger mb-2">TINDAKAN BERBAHAYA!</h5>
-                    </div>
-
-                    <div class="card bg-light border mb-3">
-                        <div class="card-body p-3">
-                            <h6 class="fw-bold small text-uppercase text-muted mb-2">
-                                <i class="fas fa-users me-1"></i> Siswa yang akan direset:
-                            </h6>
-                            <div id="resetSiswaList" class="small reset-siswa-list"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> Batalkan
-                    </button>
-                    <form id="formResetTagihan" action="{{ url('admin/keuangan/tagihan/reset-tagihan') }}" method="POST" class="d-inline">
-                        @csrf
-                        <input type="hidden" name="siswa_ids" id="resetSiswaIds">
-                        <input type="hidden" name="tahun_ajaran_id" value="{{ optional($selectedYear)->id }}">
-                        <button type="button" class="btn btn-danger fw-bold" id="btnExecReset" data-execute-reset>
-                            <i class="fas fa-trash-restore me-1"></i> Ya, Reset Sekarang
-                        </button>
-                    </form>
-                </div>
+            <div class="hidden overflow-x-auto xl:block">
+                <table class="w-full table-fixed text-left text-sm">
+                    <colgroup><col class="w-12"><col class="w-12"><col><col class="w-36"><col class="w-24"><col class="w-20"><col class="w-32"><col class="w-32"><col class="w-32"><col class="w-24"><col class="w-52"></colgroup>
+                    <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-3 py-3 text-center"><input type="checkbox" :checked="allSelected" @change="toggleAll" class="h-4 w-4 rounded border-slate-300 text-brand-600"></th><th class="px-2 py-3">No</th><th class="px-3 py-3">Siswa</th><th class="px-3 py-3">NISN</th><th class="px-3 py-3">Kelas</th><th class="px-3 py-3">Cabang</th><th class="px-3 py-3 text-right">Total</th><th class="px-3 py-3 text-right">Terbayar</th><th class="px-3 py-3 text-right">Sisa</th><th class="px-3 py-3 text-center">Status</th><th class="py-3 pl-6 pr-3 text-right">Aksi</th></tr></thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach($students as $index => $siswa)
+                            @php
+                                $isPaid = $siswa->sisa_tagihan <= 0 && $siswa->total_tagihan > 0;
+                                $isEmpty = $siswa->total_tagihan == 0;
+                            @endphp
+                            <tr class="hover:bg-slate-50" :class="selected.includes('{{ $siswa->id }}') && 'bg-blue-50/70'">
+                                <td class="px-3 py-4 text-center"><input type="checkbox" value="{{ $siswa->id }}" x-model="selected" class="h-4 w-4 rounded border-slate-300 text-brand-600"></td>
+                                <td class="px-2 py-4 text-xs tabular-nums text-slate-400">{{ $students->firstItem() + $index }}</td>
+                                <td class="px-3 py-4"><strong class="block truncate text-slate-950" title="{{ $siswa->nama_lengkap }}">{{ $siswa->nama_lengkap }}</strong><span class="block text-xs text-slate-500">{{ ($siswa->status ?? '') === 'lulus' ? 'Alumni' : 'Siswa aktif' }}</span></td>
+                                <td class="truncate px-3 py-4 font-semibold text-slate-700" title="{{ $siswa->nisn }}">{{ $siswa->nisn ?: '-' }}</td>
+                                <td class="px-3 py-4"><span class="inline-flex whitespace-nowrap rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">{{ optional($siswa->kelas)->nama_kelas ?? '-' }}</span></td>
+                                <td class="px-3 py-4"><span class="inline-flex whitespace-nowrap rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-700">{{ optional($siswa->cabang)->kode_cabang ?? '-' }}</span></td>
+                                <td class="whitespace-nowrap px-3 py-4 text-right text-xs font-bold tabular-nums text-slate-800">Rp {{ number_format($siswa->total_tagihan, 0, ',', '.') }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-right text-xs font-bold tabular-nums text-emerald-700">Rp {{ number_format($siswa->tagihan_lunas, 0, ',', '.') }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-right text-xs font-extrabold tabular-nums {{ $siswa->sisa_tagihan > 0 ? 'text-red-700' : 'text-emerald-700' }}">Rp {{ number_format($siswa->sisa_tagihan, 0, ',', '.') }}</td>
+                                <td class="px-3 py-4 text-center"><span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-extrabold {{ $isPaid ? 'bg-emerald-50 text-emerald-700' : ($isEmpty ? 'bg-slate-100 text-slate-600' : 'bg-red-50 text-red-700') }}">{{ $isPaid ? 'Lunas' : ($isEmpty ? 'Kosong' : 'Belum lunas') }}</span></td>
+                                <td class="py-4 pl-6 pr-3"><div class="flex justify-end gap-1.5"><x-cleanflow.table-action :href="route('admin.keuangan.tagihan.show', $siswa->id)" tone="view" icon="fas fa-eye" label="Lihat detail tagihan" /><x-cleanflow.table-action :href="route('admin.keuangan.tagihan.edit', $siswa->id)" tone="edit" icon="fas fa-pen" label="Edit tagihan" /><x-cleanflow.table-action :href="route('admin.keuangan.pembayaran.riwayat-siswa', $siswa->id)" tone="success" icon="fas fa-clock-rotate-left" label="Riwayat pembayaran" /><x-cleanflow.table-action :href="route('admin.keuangan.tagihan.cetak', $siswa->id)" tone="neutral" icon="fas fa-print" label="Cetak tagihan" target="_blank" /></div></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-        </div>
-    </div>
-@endsection
 
-@section('scripts')
-    @vite(['resources/js/admin/keuangan/tagihan/index.js'])
+            <footer class="border-t border-slate-200 bg-slate-50 px-4 py-3 sm:px-5">{{ $students->withQueryString()->links() }}</footer>
+        @endif
+    </section>
+
+    <template x-teleport="body">
+        <div x-cloak x-show="selected.length" x-transition class="fixed bottom-14 left-1/2 z-[1040] flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-3 py-3 text-white shadow-2xl min-[769px]:bottom-16 sm:w-auto sm:px-4">
+            <span class="min-w-0 flex-1 whitespace-nowrap text-xs font-bold sm:text-sm"><i class="fas fa-square-check mr-1 text-blue-300"></i><span x-text="selected.length"></span> siswa dipilih</span>
+            <button type="button" @click="selected = []" class="min-h-9 rounded-xl bg-white/10 px-3 text-xs font-bold hover:bg-white/20">Batal</button>
+            <button type="button" @click="resetSelected" class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-red-600 px-3 text-xs font-bold hover:bg-red-500"><i class="fas fa-trash-arrow-up"></i>Reset</button>
+        </div>
+    </template>
+
+    <form x-ref="resetForm" action="{{ route('admin.keuangan.tagihan.reset-tagihan') }}" method="POST" class="hidden">
+        @csrf
+        <input x-ref="resetIds" type="hidden" name="siswa_ids">
+        <input type="hidden" name="tahun_ajaran_id" value="{{ optional($selectedYear)->id }}">
+    </form>
+</div>
 @endsection

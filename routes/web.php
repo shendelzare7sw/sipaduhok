@@ -14,7 +14,6 @@ use App\Http\Controllers\Admin\WaliKelasController as AdminWaliKelasController;
 use App\Http\Controllers\AiChatbotController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Bendahara\BendaharaController;
-use App\Http\Controllers\Bendahara\InfoPembayaranController;
 use App\Http\Controllers\Bendahara\LaporanPembayaranController;
 use App\Http\Controllers\Bendahara\PembayaranController;
 // Ketua PKBM Controllers
@@ -340,6 +339,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('wali-kelas/print', [AdminWaliKelasController::class, 'print'])->name('wali-kelas.print');
         Route::get('wali-kelas/{kelas}', [AdminWaliKelasController::class, 'show'])->name('wali-kelas.show');
         Route::post('wali-kelas/{kelas}/assign', [AdminWaliKelasController::class, 'assign'])->name('wali-kelas.assign');
+        Route::delete('wali-kelas/{kelas}/assignment', [AdminWaliKelasController::class, 'removeAssignment'])->name('wali-kelas.remove-assignment');
         Route::post('wali-kelas/bulk-assign', [AdminWaliKelasController::class, 'bulkAssign'])->name('wali-kelas.bulk-assign');
 
         // Guru Pengajar (Read-Only Dashboard - derived from Jadwal Pelajaran)
@@ -1021,14 +1021,6 @@ Route::middleware(['auth'])->group(function () {
 
             // Cetak kwitansi pembayaran
             Route::get('/{pembayaran}/cetak-kwitansi', [PembayaranController::class, 'cetakKwitansi'])->name('cetak-kwitansi');
-        });
-
-        // Config Pembayaran
-        Route::redirect('info-pembayaran', '/bendahara/config', 301)->name('info-pembayaran.legacy-index');
-        Route::post('info-pembayaran/update', [InfoPembayaranController::class, 'update'])->name('info-pembayaran.legacy-update');
-        Route::prefix('config')->name('info-pembayaran.')->group(function () {
-            Route::get('/', [InfoPembayaranController::class, 'index'])->name('index');
-            Route::post('/update', [InfoPembayaranController::class, 'update'])->name('update');
         });
 
         // Validasi Akses

@@ -1,210 +1,50 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', isset($pengumuman) ? 'Edit Pengumuman' : 'Tambah Pengumuman')
-
 @section('page-title', isset($pengumuman) ? 'Edit Pengumuman' : 'Tambah Pengumuman')
-@section('page-subtitle', 'Kelola pengumuman sekolah')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/akademik/pengumuman/form.css'])
-@endsection
+@section('page-subtitle', isset($pengumuman) ? 'Perbarui informasi tanpa mengubah kalender sumber' : 'Buat informasi baru untuk warga sekolah')
 
 @section('content')
-<div class="admin-announcement-form-page">
-<div class="row">
-    <div class="col-lg-8">
-        <div class="content-card">
-            <form action="{{ isset($pengumuman) ? route('admin.akademik.pengumuman.update', $pengumuman->id) : route('admin.akademik.pengumuman.store') }}" 
-                  method="POST" 
-                  enctype="multipart/form-data">
-                @csrf
-                @if(isset($pengumuman))
-                    @method('PUT')
-                @endif
-                <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.akademik.pengumuman.index')) }}">
+@php
+    $routeBase = request()->routeIs('sekretaris.*') ? 'sekretaris' : 'admin.akademik';
+    $isEdit = isset($pengumuman);
+    $inputClass = 'mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20';
+    $textareaClass = 'mt-1.5 min-h-36 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20';
+@endphp
 
-                <!-- Link ke Kalender (Opsional) -->
-                <div class="form-group">
-                    <label for="kalender_akademik_id" class="form-label">
-                        Link ke Kalender Akademik <small class="text-muted">(Opsional)</small>
-                    </label>
-                    <select class="form-control @error('kalender_akademik_id') is-invalid @enderror" 
-                            id="kalender_akademik_id" 
-                            name="kalender_akademik_id">
-                        <option value="">-- Pilih Kegiatan (Jika Ada) --</option>
-                        @foreach($kalender as $k)
-                            <option value="{{ $k->id }}" {{ old('kalender_akademik_id', $pengumuman->kalender_akademik_id ?? '') == $k->id ? 'selected' : '' }}>
-                                {{ $k->nama_kegiatan }} ({{ $k->tanggal_mulai->format('d M Y') }})
-                            </option>
-                        @endforeach
-                    </select>
-                    <small class="text-muted">Pilih jika pengumuman terkait kegiatan di kalender</small>
-                    @error('kalender_akademik_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+<div class="min-w-0 w-full">
+    <div class="mb-4 flex items-center gap-3"><a href="{{ url()->previous(route($routeBase . '.pengumuman.index')) }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 no-underline hover:bg-slate-200" aria-label="Kembali"><i class="fas fa-arrow-left" aria-hidden="true"></i></a><div class="min-w-0"><h2 class="text-base font-extrabold text-slate-900">{{ $isEdit ? 'Perbarui pengumuman' : 'Pengumuman baru' }}</h2><p class="mt-0.5 text-xs text-slate-500">Kolom bertanda bintang wajib diisi.</p></div></div>
+
+    @if($errors->any())
+        <section class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-800"><p class="font-extrabold"><i class="fas fa-exclamation-circle mr-1.5" aria-hidden="true"></i>Periksa kembali data berikut:</p><ul class="mt-2 list-disc space-y-1 pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></section>
+    @endif
+
+    <form action="{{ $isEdit ? route($routeBase . '.pengumuman.update', $pengumuman->id) : route($routeBase . '.pengumuman.store') }}" method="POST" enctype="multipart/form-data" class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+        @csrf
+        @if($isEdit) @method('PUT') @endif
+        <input type="hidden" name="_return_url" value="{{ url()->previous(route($routeBase . '.pengumuman.index')) }}">
+
+        <section class="min-w-0 rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="border-b border-slate-200 p-4 sm:p-5"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-bullhorn text-brand-600" aria-hidden="true"></i>Isi pengumuman</h3><p class="mt-1 text-xs text-slate-500">Gunakan judul singkat dan isi yang langsung menjelaskan tindakan pengguna.</p></header>
+            <div class="grid gap-5 p-4 sm:p-5">
+                <label class="block text-xs font-bold text-slate-700">Kegiatan kalender <span class="font-normal text-slate-400">(opsional)</span><select name="kalender_akademik_id" class="{{ $inputClass }} @error('kalender_akademik_id') !border-red-400 @enderror"><option value="">Tidak terhubung ke kalender</option>@foreach($kalender as $k)<option value="{{ $k->id }}" {{ (string) old('kalender_akademik_id', $pengumuman->kalender_akademik_id ?? '') === (string) $k->id ? 'selected' : '' }}>{{ $k->nama_kegiatan }} · {{ $k->tanggal_mulai->format('d M Y') }}</option>@endforeach</select><span class="mt-1.5 block text-[11px] font-normal leading-4 text-slate-500">Pilih hanya bila pengumuman berkaitan langsung dengan suatu kegiatan.</span>@error('kalender_akademik_id')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
+
+                <label class="block text-xs font-bold text-slate-700">Judul pengumuman <span class="text-red-500">*</span><input type="text" name="judul" value="{{ old('judul', $pengumuman->judul ?? '') }}" maxlength="255" required placeholder="Contoh: Libur semester dimulai 20 Desember" class="{{ $inputClass }} @error('judul') !border-red-400 @enderror">@error('judul')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
+
+                <label class="block text-xs font-bold text-slate-700">Isi pengumuman <span class="text-red-500">*</span><textarea name="isi_pengumuman" required placeholder="Tuliskan informasi, tanggal, dan hal yang perlu dilakukan penerima..." class="{{ $textareaClass }} @error('isi_pengumuman') !border-red-400 @enderror">{{ old('isi_pengumuman', $pengumuman->isi_pengumuman ?? '') }}</textarea>@error('isi_pengumuman')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
+
+                <div class="grid gap-4 sm:grid-cols-3">
+                    <label class="block text-xs font-bold text-slate-700">Tanggal tayang <span class="text-red-500">*</span><input type="date" name="tanggal_pengumuman" value="{{ old('tanggal_pengumuman', $isEdit ? $pengumuman->tanggal_pengumuman?->format('Y-m-d') : now()->format('Y-m-d')) }}" required class="{{ $inputClass }} @error('tanggal_pengumuman') !border-red-400 @enderror">@error('tanggal_pengumuman')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
+                    <label class="block text-xs font-bold text-slate-700">Prioritas <span class="text-red-500">*</span><select name="prioritas" required class="{{ $inputClass }} @error('prioritas') !border-red-400 @enderror">@foreach(['biasa' => 'Biasa', 'penting' => 'Penting', 'mendesak' => 'Mendesak'] as $value => $label)<option value="{{ $value }}" {{ old('prioritas', $pengumuman->prioritas ?? 'biasa') === $value ? 'selected' : '' }}>{{ $label }}</option>@endforeach</select>@error('prioritas')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
+                    <label class="block text-xs font-bold text-slate-700">Status <span class="text-red-500">*</span><select name="status" required class="{{ $inputClass }} @error('status') !border-red-400 @enderror">@foreach(['aktif' => 'Aktif', 'draft' => 'Draft', 'arsip' => 'Arsip'] as $value => $label)<option value="{{ $value }}" {{ old('status', $pengumuman->status ?? 'aktif') === $value ? 'selected' : '' }}>{{ $label }}</option>@endforeach</select>@error('status')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
                 </div>
 
-                <!-- Judul -->
-                <div class="form-group">
-                    <label for="judul" class="form-label">
-                        Judul Pengumuman <span class="text-danger">*</span>
-                    </label>
-                    <input type="text" 
-                           class="form-control @error('judul') is-invalid @enderror" 
-                           id="judul" 
-                           name="judul" 
-                           value="{{ old('judul', $pengumuman->judul ?? '') }}" 
-                           placeholder="Contoh: Pengumuman Libur Semester"
-                           required>
-                    @error('judul')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Isi Pengumuman -->
-                <div class="form-group">
-                    <label for="isi_pengumuman" class="form-label">
-                        Isi Pengumuman <span class="text-danger">*</span>
-                    </label>
-                    <textarea class="form-control @error('isi_pengumuman') is-invalid @enderror" 
-                              id="isi_pengumuman" 
-                              name="isi_pengumuman" 
-                              rows="5"
-                              required>{{ old('isi_pengumuman', $pengumuman->isi_pengumuman ?? '') }}</textarea>
-                    @error('isi_pengumuman')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Tanggal & Prioritas -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="tanggal_pengumuman" class="form-label">
-                                Tanggal Pengumuman <span class="text-danger">*</span>
-                            </label>
-                            <input type="date" 
-                                   class="form-control @error('tanggal_pengumuman') is-invalid @enderror" 
-                                   id="tanggal_pengumuman" 
-                                   name="tanggal_pengumuman" 
-                                   value="{{ old('tanggal_pengumuman', isset($pengumuman) ? $pengumuman->tanggal_pengumuman->format('Y-m-d') : now()->format('Y-m-d')) }}" 
-                                   required>
-                            @error('tanggal_pengumuman')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="prioritas" class="form-label">
-                                Prioritas <span class="text-danger">*</span>
-                            </label>
-                            <select class="form-control @error('prioritas') is-invalid @enderror" 
-                                    id="prioritas" 
-                                    name="prioritas" 
-                                    required>
-                                <option value="biasa" {{ old('prioritas', $pengumuman->prioritas ?? 'biasa') == 'biasa' ? 'selected' : '' }}>Biasa</option>
-                                <option value="penting" {{ old('prioritas', $pengumuman->prioritas ?? '') == 'penting' ? 'selected' : '' }}>Penting</option>
-                                <option value="mendesak" {{ old('prioritas', $pengumuman->prioritas ?? '') == 'mendesak' ? 'selected' : '' }}>Mendesak</option>
-                            </select>
-                            @error('prioritas')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lampiran -->
-                <div class="form-group">
-                    <label for="lampiran_surat" class="form-label">
-                        Lampiran Surat <small class="text-muted">(PDF, max 5MB)</small>
-                    </label>
-                    
-                    @if(isset($pengumuman) && $pengumuman->lampiran_surat)
-                        <div class="mb-2">
-                            <a href="{{ asset('storage/' . $pengumuman->lampiran_surat) }}" target="_blank" class="btn btn-sm btn-info">
-                                <i class="fas fa-file-pdf me-1"></i>Lihat Lampiran
-                            </a>
-                            <p class="small text-muted mt-2">Upload file baru untuk mengganti</p>
-                        </div>
-                    @endif
-
-                    <input type="file" 
-                           class="form-control @error('lampiran_surat') is-invalid @enderror" 
-                           id="lampiran_surat" 
-                           name="lampiran_surat" 
-                           accept=".pdf">
-                    @error('lampiran_surat')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Status -->
-                <div class="form-group">
-                    <label for="status" class="form-label">
-                        Status <span class="text-danger">*</span>
-                    </label>
-                    <select class="form-control @error('status') is-invalid @enderror" 
-                            id="status" 
-                            name="status" 
-                            required>
-                        <option value="aktif" {{ old('status', $pengumuman->status ?? 'aktif') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                        <option value="draft" {{ old('status', $pengumuman->status ?? '') == 'draft' ? 'selected' : '' }}>Draft</option>
-                        <option value="arsip" {{ old('status', $pengumuman->status ?? '') == 'arsip' ? 'selected' : '' }}>Arsip</option>
-                    </select>
-                    @error('status')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Buttons -->
-                <div class="d-flex justify-content-between announcement-form-actions">
-                    <a href="{{ url()->previous(route('admin.akademik.pengumuman.index')) }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Kembali
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>{{ isset($pengumuman) ? 'Update' : 'Simpan' }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Info Panel -->
-    <div class="col-lg-4">
-        <div class="content-card">
-            <h3 class="announcement-info-title">
-                <i class="fas fa-info-circle me-2 announcement-info-icon"></i>Informasi
-            </h3>
-            
-            <div class="announcement-info-content">
-                <p><strong>Auto-Generate:</strong></p>
-                <p>Pengumuman otomatis dibuat <strong>3 hari sebelum</strong> kegiatan di kalender akademik.</p>
-                
-                <hr>
-                
-                <p><strong>Sinkronisasi:</strong></p>
-                <ul>
-                    <li>Kalender → Pengumuman: <strong>Sinkron</strong></li>
-                    <li>Pengumuman → Kalender: <strong>Tidak sinkron</strong></li>
-                </ul>
-                <p class="small text-muted">Ubah pengumuman tidak mengubah kalender</p>
-                
-                <hr>
-                
-                <p><strong>Prioritas:</strong></p>
-                <ul class="announcement-priority-list">
-                    <li><strong>Biasa:</strong> Info umum</li>
-                    <li><strong>Penting:</strong> Perlu perhatian</li>
-                    <li><strong>Mendesak:</strong> Segera dibaca</li>
-                </ul>
+                <label class="block text-xs font-bold text-slate-700">Lampiran surat <span class="font-normal text-slate-400">(PDF, maks. 5 MB)</span>@if($isEdit && $pengumuman->lampiran_surat)<a href="{{ asset('storage/' . $pengumuman->lampiran_surat) }}" target="_blank" class="mt-2 flex w-fit items-center gap-2 rounded-lg bg-brand-50 px-3 py-2 text-[11px] font-bold text-brand-700 no-underline hover:bg-brand-100"><i class="fas fa-file-pdf" aria-hidden="true"></i>Lihat lampiran saat ini</a>@endif<input type="file" name="lampiran_surat" accept=".pdf,application/pdf" class="mt-2 block w-full rounded-xl border border-slate-200 bg-white text-xs text-slate-600 file:mr-3 file:border-0 file:bg-slate-100 file:px-4 file:py-3 file:text-xs file:font-bold file:text-slate-700 hover:file:bg-slate-200 @error('lampiran_surat') !border-red-400 @enderror">@error('lampiran_surat')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
             </div>
-        </div>
-    </div>
-</div>
+            <footer class="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50/70 p-4 sm:flex-row sm:justify-end"><a href="{{ url()->previous(route($routeBase . '.pengumuman.index')) }}" class="inline-flex h-11 items-center justify-center rounded-xl bg-white px-5 text-xs font-bold text-slate-700 no-underline ring-1 ring-inset ring-slate-200 hover:bg-slate-100">Batal</a><button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-xs font-bold text-white hover:bg-brand-700"><i class="fas fa-save" aria-hidden="true"></i>{{ $isEdit ? 'Simpan perubahan' : 'Terbitkan pengumuman' }}</button></footer>
+        </section>
+
+        <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 xl:sticky xl:top-24"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-lightbulb text-amber-500" aria-hidden="true"></i>Panduan singkat</h3><div class="mt-4 space-y-4 text-xs leading-5 text-slate-600"><div><p class="font-bold text-slate-800">Hubungan kalender</p><p>Perubahan dari kalender dapat memperbarui pengumuman terkait. Perubahan pengumuman tidak mengubah kalender.</p></div><div class="border-t border-slate-100 pt-4"><p class="font-bold text-slate-800">Pilih prioritas</p><ul class="mt-2 space-y-2"><li><span class="mr-1.5 rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">Biasa</span>informasi umum</li><li><span class="mr-1.5 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">Penting</span>perlu perhatian</li><li><span class="mr-1.5 rounded-full bg-red-50 px-2 py-1 text-[10px] font-bold text-red-700">Mendesak</span>harus segera dibaca</li></ul></div><div class="rounded-xl bg-brand-50 p-3 text-brand-800"><i class="fas fa-info-circle mr-1" aria-hidden="true"></i>Pengumuman aktif akan mengirim notifikasi saat pertama kali dibuat.</div></div></aside>
+    </form>
 </div>
 @endsection

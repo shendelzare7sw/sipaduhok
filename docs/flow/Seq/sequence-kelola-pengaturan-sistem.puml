@@ -1,0 +1,79 @@
+@startuml
+title Sequence Diagram - Kelola Pengaturan Sistem
+autonumber
+
+actor "Admin" as Admin
+boundary "UI_PengaturanSistem" as UI
+control "Control_Pengaturan" as Control
+entity "T_Pengaturan" as E_Config
+
+== Skenario: Menampilkan Kategori Pengaturan ==
+Admin -> UI : 1. Mengakses Menu Pengaturan Sistem
+activate UI
+UI --> Admin : 2. Menampilkan Dropdown Menu Pengaturan
+deactivate UI
+
+== Skenario A: Pengaturan LMS ==
+Admin -> UI : 3. Memilih Kategori "Pengaturan LMS"
+activate UI
+UI -> Control : 4. RequestDataConfigLMS()
+activate Control
+Control -> E_Config : 5. AmbilConfigLMS()
+activate E_Config
+E_Config --> Control : 6. ReturnConfigLMS()
+deactivate E_Config
+Control --> UI : 7. TampilkanFormPengaturanLMS()
+deactivate Control
+
+Admin -> UI : 8. Mengubah Konfigurasi (Integrasi GWorkspace, dll)
+Admin -> UI : 9. Klik "Simpan Pengaturan LMS"
+UI -> Control : 10. SubmitConfigLMS(Data)
+activate Control
+
+Control -> Control : 11. Validasi Input Format
+alt Validasi Sukses
+    Control -> E_Config : 12. UpdateConfigLMS()
+    activate E_Config
+    deactivate E_Config
+    note right of E_Config : Konvensi Assumed Success diterapkan
+    Control --> UI : 13. NotifikasiSukses()
+    UI --> Admin : 14. Pesan Sukses (Data Diperbarui)
+else Validasi Gagal (Format Salah/Kosong)
+    Control --> UI : 15. ReturnPesanError("Format input tidak sesuai")
+    UI --> Admin : 16. Menampilkan Pesan Error & Kembali ke Form
+end
+deactivate Control
+deactivate UI
+
+== Skenario B: Pengaturan AI ==
+Admin -> UI : 17. Memilih Kategori "Pengaturan AI"
+activate UI
+UI -> Control : 18. RequestDataConfigAI()
+activate Control
+Control -> E_Config : 19. AmbilConfigAI()
+activate E_Config
+E_Config --> Control : 20. ReturnConfigAI()
+deactivate E_Config
+Control --> UI : 21. TampilkanFormPengaturanAI()
+deactivate Control
+
+Admin -> UI : 22. Mengubah Konfigurasi AI (API Key Groq/Gemini)
+Admin -> UI : 23. Klik "Simpan Pengaturan AI"
+UI -> Control : 24. SubmitConfigAI(Data)
+activate Control
+
+Control -> Control : 25. Validasi Input Format
+alt Validasi Sukses
+    Control -> E_Config : 26. UpdateConfigAI()
+    activate E_Config
+    deactivate E_Config
+    Control --> UI : 27. NotifikasiSukses()
+    UI --> Admin : 28. Pesan Sukses (Data Diperbarui)
+else Validasi Gagal (Format Salah/Kosong)
+    Control --> UI : 29. ReturnPesanError("Format API Key tidak sesuai")
+    UI --> Admin : 30. Menampilkan Pesan Error & Kembali ke Form
+end
+deactivate Control
+deactivate UI
+
+@enduml

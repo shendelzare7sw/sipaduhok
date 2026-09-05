@@ -1,0 +1,102 @@
+@startuml
+title Sequence Diagram - Kelola Mata Pelajaran
+autonumber
+
+actor "Admin" as Admin
+boundary "UI_KelolaMapel" as UI
+control "Control_Mapel" as Control
+entity "T_MataPelajaran" as E_Mapel
+
+== Skenario: Menampilkan Daftar Mata Pelajaran ==
+Admin -> UI : 1. Mengakses Menu Mata Pelajaran
+activate UI
+UI -> Control : 2. RequestDaftarMapel()
+activate Control
+Control -> E_Mapel : 3. AmbilDataMapel()
+activate E_Mapel
+E_Mapel --> Control : 4. ReturnData()
+deactivate E_Mapel
+Control --> UI : 5. TampilkanDaftarData(Data)
+deactivate Control
+UI --> Admin : 6. Daftar Data Mata Pelajaran Terbuka
+deactivate UI
+
+== Skenario A: Tambah Data Mata Pelajaran ==
+Admin -> UI : 7. Memilih Aksi "Tambah"
+activate UI
+UI --> Admin : 8. Menampilkan Form Tambah Mata Pelajaran
+Admin -> UI : 9. Mengisi Form & Klik Simpan
+UI -> Control : 10. SubmitDataMapel(Data)
+activate Control
+Control -> E_Mapel : 11. InsertData(Data)
+activate E_Mapel
+
+alt Proses Berhasil
+    E_Mapel --> Control : 12. StatusSukses
+    Control --> UI : 13. Update Tampilan & Pesan Sukses
+    UI --> Admin : 14. Data Mata Pelajaran Diperbarui
+else Proses Gagal (Validasi / Duplikat)
+    E_Mapel --> Control : 15. StatusGagal
+    deactivate E_Mapel
+    Control --> UI : 16. ReturnPesanError()
+    UI --> Admin : 17. Menampilkan Pesan Error
+end
+deactivate Control
+deactivate UI
+
+== Skenario B: Edit Data Mata Pelajaran ==
+Admin -> UI : 18. Klik ikon Edit pada Data Tertentu
+activate UI
+UI -> Control : 19. RequestDataDetail(ID_Mapel)
+activate Control
+Control --> UI : 20. ReturnDataDetail()
+deactivate Control
+UI --> Admin : 21. Menampilkan Form Edit
+Admin -> UI : 22. Mengubah Data & Klik Simpan
+UI -> Control : 23. SubmitEditData(ID_Mapel, DataBaru)
+activate Control
+Control -> E_Mapel : 24. UpdateData()
+activate E_Mapel
+
+alt Proses Berhasil
+    E_Mapel --> Control : 25. StatusSukses
+    Control --> UI : 26. Update Tampilan & Pesan Sukses
+    UI --> Admin : 27. Data Mata Pelajaran Diperbarui
+else Proses Gagal (Validasi / Duplikat)
+    E_Mapel --> Control : 28. StatusGagal
+    deactivate E_Mapel
+    Control --> UI : 29. ReturnPesanError()
+    UI --> Admin : 30. Menampilkan Pesan Error
+end
+deactivate Control
+deactivate UI
+
+== Skenario C: Hapus Data Mata Pelajaran ==
+Admin -> UI : 31. Klik ikon Hapus pada Data Tertentu
+activate UI
+UI --> Admin : 32. Menampilkan Konfirmasi Hapus
+alt Hapus = Ya
+    Admin -> UI : 33. Mengonfirmasi Penghapusan
+    UI -> Control : 34. ProsesHapusData(ID_Mapel)
+    activate Control
+    Control -> E_Mapel : 35. DeleteData()
+    activate E_Mapel
+
+    alt Proses Berhasil
+        E_Mapel --> Control : 36. StatusSukses
+        Control --> UI : 37. Update Tampilan & Pesan Sukses
+        UI --> Admin : 38. Data Mata Pelajaran Dihapus
+    else Proses Gagal (Data Terikat dengan Kelas/Jadwal)
+        E_Mapel --> Control : 39. StatusGagal
+        deactivate E_Mapel
+        Control --> UI : 40. ReturnPesanError()
+        UI --> Admin : 41. Menampilkan Pesan Error
+    end
+    deactivate Control
+else Batal
+    Admin -> UI : 42. Klik Batal
+    UI --> Admin : 43. Kembali ke Daftar
+end
+deactivate UI
+
+@enduml

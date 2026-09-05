@@ -1,4 +1,4 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Dashboard Alumni')
 @section('page-title', 'Dashboard Alumni')

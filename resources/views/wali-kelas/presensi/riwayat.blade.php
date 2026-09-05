@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Riwayat Presensi Siswa')
 @section('page-title', 'Riwayat Presensi')
 @section('page-subtitle', 'Edit dan koreksi data presensi siswa')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/presensi/riwayat.css', 'resources/js/wali-kelas/presensi/riwayat.js'])

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Ketua;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use App\Models\TahunAjaran;
 use App\Services\NotificationService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class PromotionApprovalController extends Controller
 {
@@ -35,7 +35,7 @@ class PromotionApprovalController extends Controller
             ->get();
 
         return view('ketua.promotion.approval', [
-            'requests' => $requests
+            'requests' => $requests,
         ]);
     }
 
@@ -43,7 +43,7 @@ class PromotionApprovalController extends Controller
     {
         $validated = $request->validate([
             'action' => 'required|in:approve,reject',
-            'catatan' => 'nullable|string'
+            'catatan' => 'nullable|string',
         ]);
 
         $status = $validated['action'] === 'approve' ? 'DISETUJUI' : 'DITOLAK';
@@ -55,14 +55,14 @@ class PromotionApprovalController extends Controller
                 'disetujui_oleh' => auth()->id(),
                 'tanggal_persetujuan' => now(),
                 'catatan_ketua' => $validated['catatan'] ?? null,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
 
         app(NotificationService::class)->notifyPromotionDispensasiKeputusan([$id], $status, auth()->user()->name);
 
         return redirect()
             ->route('ketua.kenaikan-kelas.approval.index')
-            ->with('success', 'Status pengajuan berhasil diperbarui: ' . $status);
+            ->with('success', 'Status pengajuan berhasil diperbarui: '.$status);
     }
 
     public function bulkUpdate(Request $request): RedirectResponse
@@ -100,7 +100,7 @@ class PromotionApprovalController extends Controller
     public function history(Request $request): View
     {
         $activeYear = TahunAjaran::where('is_active', true)->firstOrFail();
-        
+
         // Filter Options
         $cabangs = \App\Models\Cabang::all();
         $kelasList = \App\Models\Kelas::where('tahun_ajaran_id', $activeYear->id)->get();
@@ -126,9 +126,9 @@ class PromotionApprovalController extends Controller
         // Apply Filters
         if ($request->filled('q')) {
             $search = $request->q;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('siswa.nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('siswa.nis', 'like', "%{$search}%");
+                    ->orWhere('siswa.nis', 'like', "%{$search}%");
             });
         }
 
@@ -146,12 +146,12 @@ class PromotionApprovalController extends Controller
 
         $history = $query->orderBy('izin_naik_kelas_khusus.updated_at', 'desc')->get();
 
-        return view('ketua.promotion.history', [
+        return view('admin.keuangan.promotion.history', [
             'history' => $history,
             'tahun' => $activeYear,
             'cabangs' => $cabangs,
             'kelasList' => $kelasList,
-            'filters' => $request->all()
+            'filters' => $request->all(),
         ]);
     }
 
@@ -167,6 +167,6 @@ class PromotionApprovalController extends Controller
             ->where('status', '!=', 'MENUNGGU')
             ->delete();
 
-        return back()->with('success', $count . ' riwayat persetujuan berhasil dihapus permanen.');
+        return back()->with('success', $count.' riwayat persetujuan berhasil dihapus permanen.');
     }
 }

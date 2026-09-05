@@ -1,7 +1,4 @@
-﻿@import 'bootstrap/dist/css/bootstrap.min.css';
-@import '@fortawesome/fontawesome-free/css/all.min.css';
-@import 'bootstrap-icons/font/bootstrap-icons.css';
-
+﻿
 :root {
     --primary: #165fac;
     --primary-dark: #0d3f7a;
@@ -614,4 +611,3 @@ body.sidebar-collapsed .main-content-lms {
 .lms-logout-cancel {
     border: 1px solid #e5e7eb;
 }
-

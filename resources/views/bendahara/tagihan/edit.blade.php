@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Edit Tagihan - ' . $siswa->nama_lengkap)
 @section('page-title', 'Edit Tagihan Siswa')
 @section('page-subtitle', $siswa->nama_lengkap)
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/bendahara/tagihan/edit.css'])

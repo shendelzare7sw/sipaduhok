@@ -1,273 +1,51 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', isset($kalender) ? 'Edit Kegiatan' : 'Tambah Kegiatan')
-
 @section('page-title', isset($kalender) ? 'Edit Kegiatan' : 'Tambah Kegiatan')
-@section('page-subtitle', 'Kalender Akademik')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/akademik/kalender/form.css'])
-@endsection
+@section('page-subtitle', 'Jadwalkan agenda dan informasi kalender akademik')
 
 @section('content')
-<div class="admin-calendar-form-page">
-<div class="row">
-    <div class="col-lg-8">
-        <div class="content-card">
-            <form action="{{ isset($kalender) ? route('admin.akademik.kalender.update', $kalender->id) : route('admin.akademik.kalender.store') }}" 
-                  method="POST" 
-                  enctype="multipart/form-data">
-                @csrf
-                @if(isset($kalender))
-                    @method('PUT')
-                @endif
-                <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.akademik.kalender.index')) }}">
+@php
+    $routeBase = request()->routeIs('sekretaris.*') ? 'sekretaris' : 'admin.akademik';
+    $isEdit = isset($kalender);
+    $types = ['field_trip' => 'Field Trip', 'outing' => 'Outing', 'live_in' => 'Live In', 'hokfest' => 'HOK Fest', 'pts' => 'PTS (Penilaian Tengah Semester)', 'pas' => 'PAS (Penilaian Akhir Semester)', 'libur' => 'Libur', 'ujian' => 'Ujian', 'acara_sekolah' => 'Acara Sekolah'];
+    $storedType = old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '');
+    $selectedType = array_key_exists($storedType, $types) ? $storedType : ($storedType !== '' ? 'lainnya' : '');
+    $customType = old('custom_jenis_kegiatan', $selectedType === 'lainnya' ? $storedType : '');
+    $inputClass = 'mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20';
+@endphp
 
-                <!-- Nama Kegiatan -->
-                <div class="form-group">
-                    <label for="nama_kegiatan" class="form-label">
-                        Nama Kegiatan <span class="text-danger">*</span>
-                    </label>
-                    <input type="text" 
-                           class="form-control @error('nama_kegiatan') is-invalid @enderror" 
-                           id="nama_kegiatan" 
-                           name="nama_kegiatan" 
-                           value="{{ old('nama_kegiatan', $kalender->nama_kegiatan ?? '') }}" 
-                           placeholder="Contoh: Field Trip ke Museum"
-                           required>
-                    @error('nama_kegiatan')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+<div class="min-w-0 w-full">
+    <div class="mb-4 flex items-center gap-3"><a href="{{ url()->previous(route($routeBase . '.kalender.index')) }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 no-underline hover:bg-slate-200" aria-label="Kembali"><i class="fas fa-arrow-left" aria-hidden="true"></i></a><div class="min-w-0"><h2 class="text-base font-extrabold text-slate-900">{{ $isEdit ? 'Perbarui kegiatan' : 'Kegiatan baru' }}</h2><p class="mt-0.5 text-xs text-slate-500">Kolom bertanda bintang wajib diisi.</p></div></div>
 
-                <!-- Jenis Kegiatan -->
-                <div class="form-group">
-                    <label for="jenis_kegiatan" class="form-label">
-                        Jenis Kegiatan <span class="text-danger">*</span>
-                    </label>
-                    <select class="form-control @error('jenis_kegiatan') is-invalid @enderror" 
-                            id="jenis_kegiatan" 
-                            name="jenis_kegiatan" 
-                            required>
-                        <option value="">-- Pilih Jenis --</option>
-                        <option value="field_trip" {{ old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '') == 'field_trip' ? 'selected' : '' }}>Field Trip</option>
-                        <option value="outing" {{ old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '') == 'outing' ? 'selected' : '' }}>Outing</option>
-                        <option value="live_in" {{ old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '') == 'live_in' ? 'selected' : '' }}>Live In</option>
-                        <option value="hokfest" {{ old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '') == 'hokfest' ? 'selected' : '' }}>HOK Fest</option>
-                        <option value="pts" {{ old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '') == 'pts' ? 'selected' : '' }}>PTS (Penilaian Tengah Semester)</option>
-                        <option value="pas" {{ old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '') == 'pas' ? 'selected' : '' }}>PAS (Penilaian Akhir Semester)</option>
-                        <option value="libur" {{ old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '') == 'libur' ? 'selected' : '' }}>Libur</option>
-                        <option value="ujian" {{ old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '') == 'ujian' ? 'selected' : '' }}>Ujian</option>
-                        <option value="acara_sekolah" {{ old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '') == 'acara_sekolah' ? 'selected' : '' }}>Acara Sekolah</option>
-                        <option value="lainnya" {{ old('jenis_kegiatan', $kalender->jenis_kegiatan ?? '') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
-                    </select>
-                    @error('jenis_kegiatan')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+    @if($errors->any())<section class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-800"><p class="font-extrabold"><i class="fas fa-exclamation-circle mr-1.5" aria-hidden="true"></i>Periksa kembali data berikut:</p><ul class="mt-2 list-disc space-y-1 pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></section>@endif
 
-                <!-- Custom Jenis Kegiatan (shown when Lainnya selected) -->
-                <div class="form-group custom-event-group" id="customJenisKegiatanGroup">
-                    <label for="custom_jenis_kegiatan" class="form-label">
-                        Jenis Kegiatan Kustom <span class="text-danger">*</span>
-                    </label>
-                    <input type="text" 
-                           class="form-control @error('custom_jenis_kegiatan') is-invalid @enderror" 
-                           id="custom_jenis_kegiatan" 
-                           name="custom_jenis_kegiatan"
-                           placeholder="Contoh: Seminar Nasional, Workshop, Pelatihan Guru, dll"
-                           value="{{ old('custom_jenis_kegiatan', (isset($kalender) && $kalender->jenis_kegiatan && !in_array($kalender->jenis_kegiatan, ['field_trip', 'outing', 'live_in', 'hokfest', 'pts', 'pas', 'libur', 'ujian', 'acara_sekolah', 'lainnya'])) ? $kalender->jenis_kegiatan : '') }}">
-                    @error('custom_jenis_kegiatan')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    <small class="form-text text-muted">
-                        <i class="fas fa-info-circle"></i> Ketik nama jenis kegiatan sesuai kebutuhan Anda
-                    </small>
-                </div>
+    <form action="{{ $isEdit ? route($routeBase . '.kalender.update', $kalender->id) : route($routeBase . '.kalender.store') }}" method="POST" enctype="multipart/form-data" class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]" x-data="{ type: @js($selectedType) }">
+        @csrf
+        @if($isEdit) @method('PUT') @endif
+        <input type="hidden" name="_return_url" value="{{ url()->previous(route($routeBase . '.kalender.index')) }}">
 
-                <!-- Tanggal -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="tanggal_mulai" class="form-label">
-                                Tanggal Mulai <span class="text-danger">*</span>
-                            </label>
-                            <input type="date" 
-                                   class="form-control @error('tanggal_mulai') is-invalid @enderror" 
-                                   id="tanggal_mulai" 
-                                   name="tanggal_mulai" 
-                                   value="{{ old('tanggal_mulai', isset($kalender) ? $kalender->tanggal_mulai->format('Y-m-d') : (request('tanggal') ?? '')) }}" 
-                                   required>
-                            @error('tanggal_mulai')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="tanggal_selesai" class="form-label">
-                                Tanggal Selesai <small class="text-muted">(Opsional untuk 1 hari)</small>
-                            </label>
-                            <input type="date" 
-                                   class="form-control @error('tanggal_selesai') is-invalid @enderror" 
-                                   id="tanggal_selesai" 
-                                   name="tanggal_selesai" 
-                                   value="{{ old('tanggal_selesai', isset($kalender) && $kalender->tanggal_selesai ? $kalender->tanggal_selesai->format('Y-m-d') : '') }}">
-                            @error('tanggal_selesai')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
+        <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="border-b border-slate-200 p-4 sm:p-5"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-calendar-plus text-brand-600" aria-hidden="true"></i>Informasi kegiatan</h3><p class="mt-1 text-xs text-slate-500">Tanggal dan status menentukan kapan agenda terlihat pada kalender.</p></header>
+            <div class="grid gap-5 p-4 sm:p-5">
+                <label class="block text-xs font-bold text-slate-700">Nama kegiatan <span class="text-red-500">*</span><input type="text" name="nama_kegiatan" value="{{ old('nama_kegiatan', $kalender->nama_kegiatan ?? '') }}" maxlength="255" required placeholder="Contoh: Field Trip ke Museum" class="{{ $inputClass }} @error('nama_kegiatan') !border-red-400 @enderror">@error('nama_kegiatan')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
 
-                <!-- Waktu -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="waktu_mulai" class="form-label">
-                                Waktu Mulai <small class="text-muted">(Opsional)</small>
-                            </label>
-                            <input type="time" 
-                                   class="form-control @error('waktu_mulai') is-invalid @enderror" 
-                                   id="waktu_mulai" 
-                                   name="waktu_mulai" 
-                                   value="{{ old('waktu_mulai', $kalender->waktu_mulai ?? '') }}">
-                            @error('waktu_mulai')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="waktu_selesai" class="form-label">
-                                Waktu Selesai <small class="text-muted">(Opsional)</small>
-                            </label>
-                            <input type="time" 
-                                   class="form-control @error('waktu_selesai') is-invalid @enderror" 
-                                   id="waktu_selesai" 
-                                   name="waktu_selesai" 
-                                   value="{{ old('waktu_selesai', $kalender->waktu_selesai ?? '') }}">
-                            @error('waktu_selesai')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
+                <div class="grid gap-4 sm:grid-cols-2"><label class="block text-xs font-bold text-slate-700">Jenis kegiatan <span class="text-red-500">*</span><select name="jenis_kegiatan" x-model="type" required class="{{ $inputClass }} @error('jenis_kegiatan') !border-red-400 @enderror"><option value="">Pilih jenis kegiatan</option>@foreach($types as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach<option value="lainnya">Lainnya</option></select>@error('jenis_kegiatan')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label><label x-show="type === 'lainnya'" x-cloak class="block text-xs font-bold text-slate-700">Jenis kegiatan kustom <span class="text-red-500">*</span><input type="text" name="custom_jenis_kegiatan" value="{{ $customType }}" maxlength="50" :required="type === 'lainnya'" placeholder="Contoh: Pelatihan Guru" class="{{ $inputClass }} @error('custom_jenis_kegiatan') !border-red-400 @enderror">@error('custom_jenis_kegiatan')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label></div>
 
-                <!-- Keterangan -->
-                <div class="form-group">
-                    <label for="keterangan" class="form-label">
-                        Keterangan <small class="text-muted">(Opsional)</small>
-                    </label>
-                    <textarea class="form-control @error('keterangan') is-invalid @enderror" 
-                              id="keterangan" 
-                              name="keterangan" 
-                              rows="3"
-                              placeholder="Detail kegiatan, lokasi, atau informasi tambahan">{{ old('keterangan', $kalender->keterangan ?? '') }}</textarea>
-                    @error('keterangan')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                <div class="grid gap-4 sm:grid-cols-2"><label class="block text-xs font-bold text-slate-700">Tanggal mulai <span class="text-red-500">*</span><input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai', $isEdit ? $kalender->tanggal_mulai?->format('Y-m-d') : request('tanggal')) }}" required class="{{ $inputClass }} @error('tanggal_mulai') !border-red-400 @enderror">@error('tanggal_mulai')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label><label class="block text-xs font-bold text-slate-700">Tanggal selesai <span class="font-normal text-slate-400">(opsional)</span><input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai', $isEdit ? $kalender->tanggal_selesai?->format('Y-m-d') : '') }}" class="{{ $inputClass }} @error('tanggal_selesai') !border-red-400 @enderror"><span class="mt-1.5 block text-[11px] font-normal text-slate-500">Kosongkan untuk kegiatan satu hari.</span>@error('tanggal_selesai')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label></div>
 
-                <!-- Lampiran Surat -->
-                <div class="form-group">
-                    <label for="lampiran_surat" class="form-label">
-                        Lampiran Surat <small class="text-muted">(PDF, max 5MB)</small>
-                    </label>
-                    
-                    @if(isset($kalender) && $kalender->lampiran_surat)
-                        <div class="mb-2">
-                            <a href="{{ asset('storage/' . $kalender->lampiran_surat) }}" target="_blank" class="btn btn-sm btn-info">
-                                <i class="fas fa-file-pdf me-1"></i>Lihat Lampiran Saat Ini
-                            </a>
-                            <p class="small text-muted mt-2">Upload file baru untuk mengganti</p>
-                        </div>
-                    @endif
+                <div class="grid gap-4 sm:grid-cols-2"><label class="block text-xs font-bold text-slate-700">Waktu mulai <span class="font-normal text-slate-400">(opsional)</span><input type="time" name="waktu_mulai" value="{{ old('waktu_mulai', $kalender->waktu_mulai ?? '') }}" class="{{ $inputClass }} @error('waktu_mulai') !border-red-400 @enderror">@error('waktu_mulai')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label><label class="block text-xs font-bold text-slate-700">Waktu selesai <span class="font-normal text-slate-400">(opsional)</span><input type="time" name="waktu_selesai" value="{{ old('waktu_selesai', $kalender->waktu_selesai ?? '') }}" class="{{ $inputClass }} @error('waktu_selesai') !border-red-400 @enderror">@error('waktu_selesai')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label></div>
 
-                    <input type="file" 
-                           class="form-control @error('lampiran_surat') is-invalid @enderror" 
-                           id="lampiran_surat" 
-                           name="lampiran_surat" 
-                           accept=".pdf">
-                    @error('lampiran_surat')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                <label class="block text-xs font-bold text-slate-700">Keterangan <span class="font-normal text-slate-400">(opsional)</span><textarea name="keterangan" rows="4" placeholder="Lokasi, peserta, atau informasi tambahan..." class="mt-1.5 min-h-28 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 @error('keterangan') !border-red-400 @enderror">{{ old('keterangan', $kalender->keterangan ?? '') }}</textarea>@error('keterangan')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
 
-                <!-- Status -->
-                <div class="form-group">
-                    <label for="status" class="form-label">
-                        Status <span class="text-danger">*</span>
-                    </label>
-                    <select class="form-control @error('status') is-invalid @enderror" 
-                            id="status" 
-                            name="status" 
-                            required>
-                        <option value="aktif" {{ old('status', $kalender->status ?? 'aktif') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                        <option value="draft" {{ old('status', $kalender->status ?? '') == 'draft' ? 'selected' : '' }}>Draft</option>
-                        <option value="selesai" {{ old('status', $kalender->status ?? '') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                    </select>
-                    @error('status')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                <label class="block text-xs font-bold text-slate-700">Lampiran surat <span class="font-normal text-slate-400">(PDF, maks. 5 MB)</span>@if($isEdit && $kalender->lampiran_surat)<a href="{{ asset('storage/' . $kalender->lampiran_surat) }}" target="_blank" class="mt-2 flex w-fit items-center gap-2 rounded-lg bg-brand-50 px-3 py-2 text-[11px] font-bold text-brand-700 no-underline hover:bg-brand-100"><i class="fas fa-file-pdf" aria-hidden="true"></i>Lihat lampiran saat ini</a>@endif<input type="file" name="lampiran_surat" accept=".pdf,application/pdf" class="mt-2 block w-full rounded-xl border border-slate-200 bg-white text-xs text-slate-600 file:mr-3 file:border-0 file:bg-slate-100 file:px-4 file:py-3 file:text-xs file:font-bold file:text-slate-700 hover:file:bg-slate-200 @error('lampiran_surat') !border-red-400 @enderror">@error('lampiran_surat')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
 
-                <!-- Buttons -->
-                <div class="d-flex justify-content-between calendar-form-actions">
-                    <a href="{{ url()->previous(route('admin.akademik.kalender.index')) }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Kembali
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>{{ isset($kalender) ? 'Update' : 'Simpan' }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Info Panel -->
-    <div class="col-lg-4">
-        <div class="content-card">
-            <h3 class="calendar-info-title">
-                <i class="fas fa-info-circle me-2 calendar-info-icon"></i>Informasi
-            </h3>
-            
-            <div class="calendar-info-content">
-                <p><strong>Cara Kerja:</strong></p>
-                <ul>
-                    <li>Kegiatan akan muncul di kalender dashboard</li>
-                    <li>Pengumuman otomatis dibuat <strong>H-3</strong></li>
-                    <li>Lampiran bisa PDF atau link URL</li>
-                </ul>
-                
-                <hr>
-                
-                <p><strong>Jenis Kegiatan:</strong></p>
-                <ul>
-                    <li><strong>Field Trip:</strong> Kunjungan edukatif</li>
-                    <li><strong>Outing:</strong> Kegiatan di luar sekolah</li>
-                    <li><strong>Live In:</strong> Menginap bersama</li>
-                    <li><strong>HOK Fest:</strong> Festival sekolah</li>
-                    <li><strong>PTS/PAS:</strong> Ujian</li>
-                </ul>
-                
-                <hr>
-                
-                <p class="calendar-info-tip">
-                    <i class="fas fa-lightbulb calendar-info-tip-icon"></i>
-                    <strong> Tips:</strong> Isi waktu untuk kegiatan yang punya jam spesifik. Kosongkan untuk kegiatan seharian.
-                </p>
+                <label class="block text-xs font-bold text-slate-700 sm:max-w-xs">Status <span class="text-red-500">*</span><select name="status" required class="{{ $inputClass }} @error('status') !border-red-400 @enderror">@foreach(['aktif' => 'Aktif', 'draft' => 'Draft', 'selesai' => 'Selesai'] as $value => $label)<option value="{{ $value }}" {{ old('status', $kalender->status ?? 'aktif') === $value ? 'selected' : '' }}>{{ $label }}</option>@endforeach</select>@error('status')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
             </div>
-        </div>
-    </div>
-</div>
-</div>
-@endsection
+            <footer class="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50/70 p-4 sm:flex-row sm:justify-end"><a href="{{ url()->previous(route($routeBase . '.kalender.index')) }}" class="inline-flex h-11 items-center justify-center rounded-xl bg-white px-5 text-xs font-bold text-slate-700 no-underline ring-1 ring-inset ring-slate-200 hover:bg-slate-100">Batal</a><button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-xs font-bold text-white hover:bg-brand-700"><i class="fas fa-save" aria-hidden="true"></i>{{ $isEdit ? 'Simpan perubahan' : 'Simpan kegiatan' }}</button></footer>
+        </section>
 
-@section('scripts')
-    @vite(['resources/js/admin/akademik/kalender/form.js'])
+        <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 xl:sticky xl:top-24"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-lightbulb text-amber-500" aria-hidden="true"></i>Alur publikasi</h3><ol class="mt-4 space-y-4 text-xs leading-5 text-slate-600"><li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[10px] font-extrabold text-brand-700">1</span><span>Isi agenda dan pilih Draft bila tanggal belum final.</span></li><li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[10px] font-extrabold text-brand-700">2</span><span>Status Aktif menampilkan kegiatan pada kalender pengguna.</span></li><li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[10px] font-extrabold text-brand-700">3</span><span>Pengumuman pengingat dapat dibuat otomatis tiga hari sebelum kegiatan.</span></li></ol><div class="mt-5 rounded-xl bg-emerald-50 p-3 text-xs leading-5 text-emerald-800"><i class="fas fa-clock mr-1" aria-hidden="true"></i>Kosongkan jam untuk kegiatan sepanjang hari.</div></aside>
+    </form>
+</div>
 @endsection

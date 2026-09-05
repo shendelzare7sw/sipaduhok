@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Monitoring Guru Pengajar')
 @section('page-title', 'Monitoring Data Guru Pengajar')
 @section('page-subtitle', 'Fokus pada guru pengajar di cabang yang Anda kelola')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/monitoring/guru-pengajar.css', 'resources/js/waka/monitoring/guru-pengajar.js'])

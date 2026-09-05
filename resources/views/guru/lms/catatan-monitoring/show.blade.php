@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Detail Catatan Monitoring')
 @section('page-title', 'Detail Catatan Monitoring')
 @section('page-subtitle', 'Catatan dari ' . ($catatan->pengirim->name ?? 'Pimpinan'))
 
-@section('sidebar-menu')
-    @include('guru.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/guru/lms/catatan-monitoring/show.css'])

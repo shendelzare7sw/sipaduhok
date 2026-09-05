@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Request Download Rapor')
 @section('page-title', 'Request Download Rapor')
 @section('page-subtitle', 'Kelola permintaan download rapor dari wali siswa')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 @section('styles')
     @vite(['resources/css/wali-kelas/rapor/request-download.css', 'resources/js/wali-kelas/rapor/request-download.js'])
 @endsection

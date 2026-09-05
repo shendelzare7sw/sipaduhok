@@ -445,22 +445,16 @@
     /**
      * Handle Regenerate
      */
-    function handleRegenerate() {
-        // Show Bootstrap modal instead of native confirm
-        const modal = new bootstrap.Modal(document.getElementById('regenerateConfirmModal'));
-        modal.show();
-    }
+    async function handleRegenerate() {
+        const result = await (window.CleanFlow?.confirmAction
+            ? window.CleanFlow.confirmAction({
+                title: 'Generate ulang soal?',
+                text: 'Semua hasil generate sebelumnya akan digantikan.',
+                confirmText: 'Ya, generate ulang',
+            })
+            : Promise.resolve({ isConfirmed: window.confirm('Generate ulang dan mengganti hasil sebelumnya?') }));
 
-    /**
-     * Handle Confirmed Regenerate (from modal)
-     */
-    function handleConfirmedRegenerate() {
-        // Hide modal
-        const modalEl = document.getElementById('regenerateConfirmModal');
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        if (modal) {
-            modal.hide();
-        }
+        if (!result.isConfirmed) return;
 
         // Clear generated section
         generatedSection.classList.add('d-none');
@@ -469,12 +463,6 @@
 
         // Trigger generate again
         form.querySelector('button[type="submit"]').click();
-    }
-
-    // Attach event listener to confirm button in modal
-    const confirmRegenerateBtn = document.getElementById('confirmRegenerateBtn');
-    if (confirmRegenerateBtn) {
-        confirmRegenerateBtn.addEventListener('click', handleConfirmedRegenerate);
     }
 
     /**

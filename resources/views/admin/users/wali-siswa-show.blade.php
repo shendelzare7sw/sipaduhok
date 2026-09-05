@@ -1,212 +1,121 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
-@section('title')
-Detail Wali Siswa - {{ $orangTua->name ?? 'N/A' }}
-@endsection
-
+@section('title', 'Detail Wali Siswa - ' . ($orangTua->name ?? 'N/A'))
 @section('page-title', 'Detail Wali Siswa')
-
-@section('page-subtitle')
-{{ $orangTua->name ?? 'N/A' }}
-@endsection
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/users/show.css'])
-@endsection
+@section('page-subtitle', $orangTua->name ?? 'N/A')
 
 @section('content')
-<div class="user-show user-show--wali-siswa">
-    <div class="show-shell">
-        <div class="show-header">
-            <div class="show-avatar">
-                <i class="fas fa-user-friends"></i>
-            </div>
-            <h3 class="show-title">{{ $orangTua->name }}</h3>
-            <div class="show-subtitle">{{ $orangTua->username }}</div>
-            <div class="show-badges">
-                <span class="show-pill show-pill--outline">
-                    <i class="fas fa-user-friends"></i>
-                    Wali Siswa
-                </span>
-                <span class="show-pill {{ $orangTua->is_active ? 'show-pill--active-solid' : 'show-pill--inactive-solid' }}">
-                    Status: {{ $orangTua->is_active ? 'Aktif' : 'Nonaktif' }}
-                </span>
+@php
+    $children = $orangTua->studentParents ?? collect();
+    $jenjangList = $children->pluck('siswa.kelas.jenjang')->filter()->unique();
+    $cabangList = $children->pluck('siswa.cabang.nama_cabang')->filter()->unique();
+    $accountDetails = [
+        ['Nama lengkap', $orangTua->name ?: '-'],
+        ['Username', $orangTua->username ?: '-'],
+        ['Email akun', $orangTua->email ?: '-'],
+        ['Email pemulihan', $orangTua->personal_email ?: '-'],
+        ['Terdaftar sejak', $orangTua->created_at?->locale('id')->translatedFormat('d F Y') ?: '-'],
+    ];
+@endphp
+
+<div class="space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <a href="{{ route('admin.users.wali-siswa') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-bold text-slate-700 no-underline transition hover:border-brand-300 hover:text-brand-700"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali</a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('admin.users.edit-wali-siswa', $orangTua->id) }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-bold text-brand-700 no-underline transition hover:bg-brand-100"><i class="fas fa-pen" aria-hidden="true"></i>Edit data</a>
+            <form action="{{ route('admin.users.toggle-wali-siswa-status', $orangTua->id) }}" method="POST" data-confirm data-confirm-title="{{ $orangTua->is_active ? 'Nonaktifkan akun wali?' : 'Aktifkan akun wali?' }}" data-confirm-message="{{ $orangTua->is_active ? 'Wali tidak dapat login sampai akun diaktifkan kembali.' : 'Wali akan dapat login kembali ke aplikasi.' }}" data-confirm-text="{{ $orangTua->is_active ? 'Ya, nonaktifkan' : 'Ya, aktifkan' }}">
+                @csrf
+                <button type="submit" class="inline-flex min-h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold {{ $orangTua->is_active ? 'bg-red-50 text-red-700 hover:bg-red-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}"><i class="fas fa-{{ $orangTua->is_active ? 'ban' : 'check' }}" aria-hidden="true"></i>{{ $orangTua->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
+            </form>
+        </div>
+    </div>
+
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="bg-gradient-to-r from-brand-700 to-brand-500 px-5 py-6 text-white sm:px-6">
+            <div class="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+                <span class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border-2 border-white/30 bg-white/15 text-3xl"><i class="fas fa-user-group" aria-hidden="true"></i></span>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold uppercase tracking-widest text-blue-100">Wali siswa</p>
+                    <h2 class="mt-1 break-words text-2xl font-extrabold !text-white">{{ $orangTua->name }}</h2>
+                    <p class="mt-1 text-sm text-blue-100">{{ '@' . $orangTua->username }}</p>
+                    <div class="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
+                        <span class="rounded-full px-3 py-1 text-xs font-bold {{ $orangTua->is_active ? 'bg-emerald-400/20 text-emerald-50 ring-1 ring-emerald-200/40' : 'bg-red-400/20 text-red-50 ring-1 ring-red-200/40' }}">{{ $orangTua->is_active ? 'Akun aktif' : 'Akun nonaktif' }}</span>
+                        <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-bold ring-1 ring-white/30">{{ $children->count() }} anak terhubung</span>
+                    </div>
+                </div>
             </div>
         </div>
+    </section>
 
-        <div class="show-body">
-            <div class="detail-two-col">
-                <div>
-                    <h5 class="show-section-title">Informasi Akun</h5>
-                    <table class="show-table">
-                        <tr>
-                            <td class="show-label">Nama Lengkap</td>
-                            <td class="show-value">{{ $orangTua->name }}</td>
-                        </tr>
-                        <tr>
-                            <td class="show-label">Username</td>
-                            <td class="show-value show-value--mono">{{ $orangTua->username }}</td>
-                        </tr>
-                        <tr>
-                            <td class="show-label">Email</td>
-                            <td class="show-value">{{ $orangTua->email ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <td class="show-label">Email Pemulihan</td>
-                            <td class="show-value">{{ $orangTua->personal_email ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <td class="show-label">No. Telepon/WA</td>
-                            <td class="show-value">
-                                @if($orangTua->phone)
-                                    <a href="https://wa.me/{{ preg_replace('/^0/', '62', $orangTua->phone) }}" target="_blank" class="show-link--whatsapp">
-                                        <i class="fab fa-whatsapp"></i> {{ $orangTua->phone }}
-                                    </a>
-                                @else
-                                    -
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="show-label">Status Akun</td>
-                            <td>
-                                <span class="show-status {{ $orangTua->is_active ? 'show-status--active' : 'show-status--inactive' }}">
-                                    <i class="fas fa-{{ $orangTua->is_active ? 'check' : 'times' }}"></i>
-                                    {{ $orangTua->is_active ? 'Aktif' : 'Non-Aktif' }}
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="show-label">Terdaftar Sejak</td>
-                            <td class="show-value">{{ \Carbon\Carbon::parse($orangTua->created_at)->locale('id')->translatedFormat('d F Y') }}</td>
-                        </tr>
-                    </table>
-
-                    @if($orangTua->studentParents && $orangTua->studentParents->count() > 0)
-                        <h5 class="show-section-title">Informasi Tambahan</h5>
-                        <table class="show-table">
-                            <tr>
-                                <td class="show-label">Total Anak</td>
-                                <td class="show-value">{{ $orangTua->studentParents->count() }} Siswa</td>
-                            </tr>
-                            @php
-                                $jenjangList = $orangTua->studentParents->pluck('siswa.kelas.jenjang')->filter()->unique();
-                            @endphp
-                            @if($jenjangList->count() > 0)
-                                <tr>
-                                    <td class="show-label">Jenjang Anak</td>
-                                    <td>
-                                        <div class="show-tag-list">
-                                            @foreach($jenjangList as $jenjang)
-                                                <span class="show-tag show-tag--info">{{ $jenjang }}</span>
-                                            @endforeach
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endif
-                            @php
-                                $cabangList = $orangTua->studentParents->pluck('siswa.cabang.nama_cabang')->filter()->unique();
-                            @endphp
-                            @if($cabangList->count() > 0)
-                                <tr>
-                                    <td class="show-label">Cabang</td>
-                                    <td class="show-value">{{ $cabangList->join(', ') }}</td>
-                                </tr>
-                            @endif
-                        </table>
-                    @endif
+    <div class="grid gap-4 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="flex items-center gap-3 border-b border-slate-200 px-4 py-4 sm:px-5">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><i class="fas fa-address-card" aria-hidden="true"></i></span>
+                <h3 class="font-extrabold text-slate-950">Informasi akun</h3>
+            </div>
+            <dl class="divide-y divide-slate-100 px-4 sm:px-5">
+                @foreach($accountDetails as [$label, $value])
+                    <div class="grid gap-1 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
+                        <dt class="text-xs font-bold uppercase tracking-wide text-slate-400">{{ $label }}</dt>
+                        <dd class="min-w-0 break-words text-sm font-semibold text-slate-800">{{ $value }}</dd>
+                    </div>
+                @endforeach
+                <div class="grid gap-1 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
+                    <dt class="text-xs font-bold uppercase tracking-wide text-slate-400">WhatsApp</dt>
+                    <dd class="text-sm font-semibold">
+                        @if($orangTua->phone)
+                            <a href="https://wa.me/{{ preg_replace('/^0/', '62', $orangTua->phone) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-emerald-700 no-underline hover:text-emerald-800"><i class="fab fa-whatsapp" aria-hidden="true"></i>{{ $orangTua->phone }}</a>
+                        @else - @endif
+                    </dd>
                 </div>
+            </dl>
 
-                <div>
-                    <h5 class="show-section-title show-section-title--warning">Data Anak (Siswa)</h5>
+            @if($children->isNotEmpty())
+                <div class="border-t border-slate-200 bg-slate-50 px-4 py-4 sm:px-5">
+                    <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Ringkasan anak</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        @foreach($jenjangList as $jenjang)<span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700">{{ $jenjang }}</span>@endforeach
+                        @foreach($cabangList as $cabang)<span class="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-bold text-violet-700">{{ $cabang }}</span>@endforeach
+                    </div>
+                </div>
+            @endif
+        </section>
 
-                    @if($orangTua->studentParents && $orangTua->studentParents->count() > 0)
-                        <div class="show-card-list">
-                            @foreach($orangTua->studentParents as $sp)
-                                <div class="show-related-card">
-                                    <div class="show-related-header">
-                                        <div>
-                                            <div class="show-related-title">
-                                                <i class="fas fa-user-graduate"></i>
-                                                {{ $sp->siswa->nama_lengkap }}
-                                            </div>
-                                            <div class="show-related-meta">
-                                                <i class="fas fa-id-card"></i>
-                                                NIS: {{ $sp->siswa->nis }} / NISN: {{ $sp->siswa->nisn }}
-                                            </div>
-                                        </div>
-                                        <span class="show-tag show-tag--info">
-                                            {{ ucwords(str_replace('_', ' ', $sp->relationship)) }}
-                                        </span>
-                                    </div>
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-5">
+                <div class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600"><i class="fas fa-user-graduate" aria-hidden="true"></i></span><h3 class="font-extrabold text-slate-950">Data anak</h3></div>
+                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{{ $children->count() }} siswa</span>
+            </div>
 
-                                    <div class="show-tag-list">
-                                        @if($sp->siswa->kelas)
-                                            <span class="show-tag show-tag--success">
-                                                <i class="fas fa-school"></i>
-                                                {{ $sp->siswa->kelas->nama_kelas }}
-                                            </span>
-                                            <span class="show-tag show-tag--info">{{ $sp->siswa->kelas->jenjang }}</span>
-                                        @endif
-                                        @if($sp->siswa->cabang)
-                                            <span class="show-tag show-tag--purple">
-                                                <i class="fas fa-building"></i>
-                                                {{ $sp->siswa->cabang->nama_cabang }}
-                                            </span>
-                                        @endif
-                                    </div>
-
-                                    <div class="show-related-flags">
-                                        @if($sp->is_primary)
-                                            <span class="show-related-flag--success">
-                                                <i class="fas fa-star"></i>
-                                                Kontak Utama
-                                            </span>
-                                        @endif
-                                        @if($sp->can_access_academic)
-                                            <span class="show-related-flag--info">
-                                                <i class="fas fa-check-circle"></i>
-                                                Akses Akademik
-                                            </span>
-                                        @endif
-                                    </div>
+            @if($children->isNotEmpty())
+                <div class="grid gap-3 p-4 sm:p-5">
+                    @foreach($children as $sp)
+                        <article class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <h4 class="break-words text-sm font-extrabold text-slate-900">{{ $sp->siswa->nama_lengkap }}</h4>
+                                    <p class="mt-1 text-xs text-slate-500">NIS {{ $sp->siswa->nis ?: '-' }} · NISN {{ $sp->siswa->nisn ?: '-' }}</p>
                                 </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="show-empty-state">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <div class="show-empty-title">Belum ada anak terdaftar</div>
-                            <small class="show-empty-hint">Hubungkan akun wali siswa ini dengan siswa melalui halaman edit siswa</small>
-                        </div>
-                    @endif
+                                <span class="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-bold text-violet-700">{{ ucwords(str_replace('_', ' ', $sp->relationship)) }}</span>
+                            </div>
+                            <div class="mt-3 flex flex-wrap gap-1.5">
+                                <span class="rounded-md bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">{{ $sp->siswa->kelas->jenjang ?? '-' }}</span>
+                                <span class="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">{{ $sp->siswa->kelas->nama_kelas ?? 'Belum ada kelas' }}</span>
+                                <span class="rounded-md bg-white px-2 py-1 text-[10px] font-semibold text-slate-600 ring-1 ring-slate-200">{{ $sp->siswa->cabang->nama_cabang ?? 'Tanpa cabang' }}</span>
+                                @if($sp->is_primary)<span class="rounded-md bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700"><i class="fas fa-star mr-1" aria-hidden="true"></i>Kontak utama</span>@endif
+                                @if($sp->can_access_academic)<span class="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-700"><i class="fas fa-check mr-1" aria-hidden="true"></i>Akses akademik</span>@endif
+                            </div>
+                        </article>
+                    @endforeach
                 </div>
-            </div>
-        </div>
-
-        <div class="show-footer">
-            <a href="{{ route('admin.users.wali-siswa') }}" class="show-btn show-btn--secondary">
-                <i class="fas fa-arrow-left"></i>
-                Kembali
-            </a>
-            <div class="show-footer-actions">
-                <a href="{{ route('admin.users.edit-wali-siswa', $orangTua->id) }}" class="show-btn show-btn--warning">
-                    <i class="fas fa-edit"></i>
-                    Edit Data
-                </a>
-                <form action="{{ route('admin.users.toggle-wali-siswa-status', $orangTua->id) }}" method="POST" class="inline-form">
-                    @csrf
-                    <button type="submit" class="show-btn {{ $orangTua->is_active ? 'show-btn--danger' : 'show-btn--success' }}">
-                        <i class="fas fa-{{ $orangTua->is_active ? 'ban' : 'check' }}"></i>
-                        {{ $orangTua->is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}
-                    </button>
-                </form>
-            </div>
-        </div>
+            @else
+                <div class="px-5 py-14 text-center">
+                    <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400"><i class="fas fa-link-slash" aria-hidden="true"></i></span>
+                    <h4 class="mt-4 font-extrabold text-slate-800">Belum ada anak terhubung</h4>
+                    <p class="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-slate-500">Hubungkan akun wali melalui halaman edit siswa ketika datanya sudah tersedia.</p>
+                </div>
+            @endif
+        </section>
     </div>
 </div>
 @endsection

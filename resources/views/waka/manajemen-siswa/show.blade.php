@@ -1,13 +1,10 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Detail Siswa - ' . $siswa->nama_lengkap)
 
 @section('page-title', 'Detail Siswa')
 @section('page-subtitle', $siswa->nama_lengkap)
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/manajemen-siswa/show.css'])

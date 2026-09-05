@@ -36,9 +36,9 @@ class CetakLaporanController extends Controller
             'totalCabang' => Cabang::where('is_active', true)->count(),
         ];
 
-        return view('admin.cetak-laporan.index', compact(
+        return view('admin.laporan.index', array_merge(compact(
             'tahunAjarans', 'tahunAjaranAktif', 'cabangs', 'kelasList', 'stats'
-        ));
+        ), ['routePrefix' => 'admin.cetak-laporan', 'supportsAcademic' => true]));
     }
 
     /**
@@ -133,9 +133,9 @@ class CetakLaporanController extends Controller
         $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
         $isHistorical = !$isTaAktif;
 
-        return view('admin.cetak-laporan.print-siswa', compact(
+        return view('admin.laporan.print-siswa', array_merge(compact(
             'siswaList', 'kelas', 'cabang', 'sortBy', 'tahunAjaran', 'isHistorical'
-        ));
+        ), ['backRoute' => 'admin.cetak-laporan.index']));
     }
 
     /**
@@ -168,7 +168,7 @@ class CetakLaporanController extends Controller
         $guruList = $query->get();
         $roleFilter = $request->role;
 
-        return view('admin.cetak-laporan.print-guru', compact('guruList', 'roleFilter', 'sortBy'));
+        return view('admin.laporan.print-guru', array_merge(compact('guruList', 'roleFilter', 'sortBy'), ['backRoute' => 'admin.cetak-laporan.index']));
     }
 
     /**
@@ -197,7 +197,7 @@ class CetakLaporanController extends Controller
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
         $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
 
-        return view('admin.cetak-laporan.print-kelas', compact('kelasList', 'tahunAjaran', 'cabang'));
+        return view('admin.laporan.print-kelas', array_merge(compact('kelasList', 'tahunAjaran', 'cabang'), ['backRoute' => 'admin.cetak-laporan.index']));
     }
 
     /**
@@ -227,7 +227,7 @@ class CetakLaporanController extends Controller
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
         $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
 
-        return view('admin.cetak-laporan.print-wali-kelas', compact('kelasList', 'tahunAjaran', 'cabang'));
+        return view('admin.laporan.print-wali-kelas', array_merge(compact('kelasList', 'tahunAjaran', 'cabang'), ['backRoute' => 'admin.cetak-laporan.index']));
     }
 
     /**
@@ -247,7 +247,7 @@ class CetakLaporanController extends Controller
         $guruList = $query->orderBy('nama_lengkap')->get();
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
 
-        return view('admin.cetak-laporan.print-guru-pengajar', compact('guruList', 'tahunAjaran'));
+        return view('admin.laporan.print-guru-pengajar', array_merge(compact('guruList', 'tahunAjaran'), ['backRoute' => 'admin.cetak-laporan.index']));
     }
 
     /**
@@ -286,7 +286,7 @@ class CetakLaporanController extends Controller
 
         $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
 
-        return view('admin.cetak-laporan.print-rekap-akademik', compact('tahunAjaran', 'byStatus', 'stats', 'cabang'));
+        return view('admin.laporan.print-rekap-akademik', array_merge(compact('tahunAjaran', 'byStatus', 'stats', 'cabang'), ['backRoute' => 'admin.cetak-laporan.index']));
     }
 
     /**
@@ -333,6 +333,6 @@ class CetakLaporanController extends Controller
             'siswa_p' => Siswa::where('status', 'aktif')->where('jenis_kelamin', 'P')->count(),
         ];
 
-        return view('admin.cetak-laporan.print-rekap', compact('cabangs', 'jenjangStats', 'summary', 'tahunAjaran'));
+        return view('admin.laporan.print-rekap', array_merge(compact('cabangs', 'jenjangStats', 'summary', 'tahunAjaran'), ['backRoute' => 'admin.cetak-laporan.index']));
     }
 }

@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Edit Rapor')
 @section('page-title', 'Edit Rapor')
 @section('page-subtitle', 'Edit catatan dan kelengkapan rapor siswa')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/rapor/edit.css', 'resources/js/wali-kelas/rapor/edit.js'])

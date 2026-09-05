@@ -20,6 +20,21 @@ class LaporanPembayaranController extends BendaharaLaporanController
 
         return $response;
     }
+
+    /**
+     * Use the CleanFlow print view for the admin route.
+     */
+    public function cetak(Request $request)
+    {
+        $response = parent::cetak($request);
+
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.keuangan.laporan.cetak', $response->getData());
+        }
+
+        return $response;
+    }
+
     /**
      * Override rekapTagihan method to use admin view
      */
@@ -35,6 +50,21 @@ class LaporanPembayaranController extends BendaharaLaporanController
     }
 
     /**
+     * Use the CleanFlow print view for the admin route.
+     */
+    public function cetakRekapTagihan(Request $request)
+    {
+        $response = parent::cetakRekapTagihan($request);
+
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.keuangan.laporan.cetak-rekap-tagihan', $response->getData());
+        }
+
+        return $response;
+    }
+
+
+    /**
      * Override belumLunas method to use admin view
      */
     public function belumLunas(Request $request)
@@ -43,6 +73,20 @@ class LaporanPembayaranController extends BendaharaLaporanController
 
         if ($response instanceof \Illuminate\View\View) {
             return view('admin.keuangan.laporan.belum-lunas', $response->getData());
+        }
+
+        return $response;
+    }
+
+    /**
+     * Use the CleanFlow print view for the admin route.
+     */
+    public function cetakBelumLunas(Request $request)
+    {
+        $response = parent::cetakBelumLunas($request);
+
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.keuangan.laporan.cetak-belum-lunas', $response->getData());
         }
 
         return $response;

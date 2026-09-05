@@ -1,0 +1,61 @@
+@startuml activity-lihat-laporan-keuangan
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin / Bendahara)|
+start
+:Mengakses Menu Laporan Keuangan;
+
+|Sistem|
+:Menampilkan Sub-Menu Laporan;
+
+|Pengguna (Admin / Bendahara)|
+:Memilih Jenis Laporan\n(Decision);
+
+if (Jenis Laporan?) then (Laporan Pembayaran Masuk)
+    :Memilih Rentang Waktu (Tgl Awal - Akhir)\ndan Status Pembayaran;
+    :Klik "Tampilkan";
+
+    |Sistem|
+    :Menarik Data Riwayat Pembayaran;
+    :Menampilkan Tabel Pembayaran Masuk;
+
+elseif (Jenis Laporan?) then (Rekapitulasi Tagihan)
+    |Pengguna (Admin / Bendahara)|
+    :Memilih Filter (Tahun Ajaran, Kelas);
+    :Klik "Tampilkan";
+
+    |Sistem|
+    :Menarik Data Total Tagihan;
+    :Menampilkan Tabel Rekap Tagihan;
+
+elseif (Jenis Laporan?) then (Data Siswa Belum Lunas)
+    |Pengguna (Admin / Bendahara)|
+    :Memilih Filter (Bulan, Kelas);
+    :Klik "Tampilkan";
+
+    |Sistem|
+    :Mengkalkulasi Selisih Tagihan & Pembayaran;
+    :Menampilkan Daftar Siswa Menunggak;
+endif
+
+|Pengguna (Admin / Bendahara)|
+:Membaca Laporan di Layar;
+
+if (Butuh Dokumen Fisik?) then (Ya (Cetak/Unduh))
+    :Klik Tombol "Ekspor (PDF / Excel)";
+
+    |Sistem|
+    :Men-generate Dokumen sesuai Format;
+    :Memicu Pengunduhan (Download) Otomatis;
+
+    |Pengguna (Admin / Bendahara)|
+    :Menyimpan File Laporan ke Perangkat;
+else (Tidak)
+endif
+
+|Pengguna (Admin / Bendahara)|
+:Selesai Melihat Laporan Keuangan;
+stop
+@enduml

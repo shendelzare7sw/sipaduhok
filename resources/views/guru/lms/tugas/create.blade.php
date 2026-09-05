@@ -8,10 +8,6 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
-@push('styles')
-    @vite(['resources/css/guru/lms/tugas/create.css'])
-@endpush
-
 @section('content')
 <div class="guru-lms-tugas-create-page">
     <div class="mb-3">
@@ -94,9 +90,9 @@
                         </div>
                         <small class="text-muted d-block mb-3">Jika diaktifkan, siswa dapat mengubah jawabannya sebelum deadline.</small>
 
-                        <div id="batasPengulanganContainer" class="repeat-limit-container" data-repeat-container hidden>
+                        <div id="batasPengulanganContainer" class="pl-10" data-repeat-container hidden>
                             <label for="batasPengulangan" class="form-label fw-semibold">Batas Edit (Kali)</label>
-                            <input type="number" class="form-control repeat-limit-input" id="batasPengulangan" name="batas_pengulangan" min="0" placeholder="Kosongkan jika tak terbatas" data-repeat-input>
+                            <input type="number" class="form-control max-w-[200px]" id="batasPengulangan" name="batas_pengulangan" min="0" placeholder="Kosongkan jika tak terbatas" data-repeat-input>
                             <small class="text-muted d-block mt-1">Biarkan kosong agar siswa bisa mengedit tanpa batas (selama belum deadline).</small>
                         </div>
                     </div>

@@ -1,13 +1,10 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Kelola Guru Kelas - ' . $kelas->nama_kelas)
 
 @section('page-title', 'Kelola Guru Pengajar Kelas')
 @section('page-subtitle', 'Kelas ' . $kelas->nama_kelas . ' - ' . $kelas->tahunAjaran->nama_tahun_ajaran)
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite('resources/css/waka/guru-pengajar/manage-kelas.css')

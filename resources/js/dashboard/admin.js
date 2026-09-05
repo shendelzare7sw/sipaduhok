@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const classLabels = dashboardData.kelasLabels || [];
     const classCounts = dashboardData.kelasCounts || [];
 
-    Chart.defaults.font.family = "'Inter', 'Helvetica', 'Arial', sans-serif";
+    Chart.defaults.font.family = "'Plus Jakarta Sans', 'Helvetica', 'Arial', sans-serif";
     Chart.defaults.color = '#64748b';
     Chart.defaults.scale.grid.color = '#e2e8f0';
 

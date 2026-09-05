@@ -1,448 +1,50 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Validasi Akses Rapor')
-@section('page-title', 'Validasi Akses Rapor - Ketua PKBM')
-@section('page-subtitle', 'Tinjau dan setujui rapor yang dikirim wali kelas')
-
-@section('sidebar-menu')
-    @include('ketua.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/ketua/validasi-rapor/index.css'])
-@endsection
+@section('page-title', 'Validasi Akses Rapor')
+@section('page-subtitle', 'Preview, setujui, atau kembalikan rapor kepada wali kelas')
 
 @section('content')
-<div class="container-fluid">
-    <div
-        id="validasiRaporConfig"
-        data-bulk-route="{{ route('ketua.validasi-rapor.bulk-validasi') }}"
-        data-csrf="{{ csrf_token() }}"
-    ></div>
+@php
+    $pendingIds = $siswaList->where('validasi_rapor_ketua', false)->pluck('id')->map(fn ($id) => (string) $id)->values();
+    $filterActive = request()->anyFilled(['cabang_id', 'jenjang', 'kelas_id', 'status_ketua', 'search']);
+@endphp
+<div class="min-w-0 w-full space-y-5"
+    x-data="{
+        selected: [],
+        available: @js($pendingIds),
+        review: { type: 'validate', url: '', name: '' },
+        toggleAll() { this.selected = this.selected.length === this.available.length ? [] : [...this.available]; },
+        openReview(type, url, name) { this.review = { type, url, name }; this.$refs.reviewDialog.showModal(); },
+        openBulk() { if (this.selected.length) this.$refs.bulkDialog.showModal(); }
+    }">
+    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5"><div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-700"><i class="fas fa-route" aria-hidden="true"></i></span><div class="min-w-0"><h2 class="font-extrabold text-blue-950">Alur review rapor</h2><div class="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-bold"><span class="rounded-full bg-white px-2.5 py-1 text-cyan-700">1. Wali mengirim</span><i class="fas fa-arrow-right text-blue-300" aria-hidden="true"></i><span class="rounded-full bg-white px-2.5 py-1 text-amber-700">2. Ketua preview</span><i class="fas fa-arrow-right text-blue-300" aria-hidden="true"></i><span class="rounded-full bg-white px-2.5 py-1 text-emerald-700">3. Validasi / revisi</span><i class="fas fa-arrow-right text-blue-300" aria-hidden="true"></i><span class="rounded-full bg-white px-2.5 py-1 text-brand-700">4. Bendahara</span></div><p class="mt-2 text-xs leading-5 text-blue-800">Buka preview sebelum memberi keputusan. Revisi akan mengembalikan rapor beserta catatan perbaikan kepada wali kelas.</p></div></div></section>
 
-    {{-- ALUR INFO --}}
-    <div class="alert alert-light border border-primary border-opacity-25 shadow-sm mb-4">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <small class="text-muted fw-bold text-uppercase">Alur Review Rapor:</small>
-            <span class="badge bg-info"><i class="fas fa-paper-plane me-1"></i>1. Wali Kirim Rapor</span>
-            <i class="fas fa-arrow-right text-muted small"></i>
-            <span class="badge bg-warning text-white"><i class="fas fa-eye me-1"></i>2. Ketua Preview & Review</span>
-            <i class="fas fa-arrow-right text-muted small"></i>
-            <span class="badge bg-success"><i class="fas fa-check me-1"></i>3. Validasi / Minta Revisi</span>
-            <i class="fas fa-arrow-right text-muted small"></i>
-            <span class="badge bg-primary"><i class="fas fa-money-bill me-1"></i>4. Lanjut ke Bendahara</span>
-        </div>
-        <div class="mt-2 small text-muted">
-            <i class="fas fa-info-circle me-1"></i>
-            Klik <strong>Preview</strong> untuk melihat rapor sebelum menyetujui.
-            Jika ada kesalahan, klik <strong>Revisi</strong> untuk mengembalikan rapor ke Wali Kelas dengan catatan perbaikan.
-            Setelah validasi, rapor diteruskan ke Bendahara untuk verifikasi keuangan.
-        </div>
-    </div>
+    <section class="grid grid-cols-2 gap-3">
+        @foreach([
+            ['Menunggu validasi', $stats['pendingTotal'], 'Rapor sudah dikirim wali kelas', 'fa-clock', 'bg-amber-50 text-amber-700'],
+            ['Divalidasi hari ini', $stats['validatedToday'], 'Keputusan pada hari berjalan', 'fa-circle-check', 'bg-emerald-50 text-emerald-700'],
+        ] as [$label, $value, $description, $icon, $tone])
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><strong class="block text-xl font-extrabold text-slate-950">{{ $value }}</strong><span class="mt-1 block truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $label }}</span></div><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div><p class="mt-3 truncate border-t border-slate-100 pt-3 text-[11px] text-slate-500">{{ $description }}</p></article>
+        @endforeach
+    </section>
 
-    {{-- Stats Cards --}}
-    <div class="row mb-4">
-        <div class="col-xl-6 col-md-6 mb-4">
-            <div class="card border-start border-warning border-4 shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col me-2">
-                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Menunggu Validasi Ketua</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ $stats['pendingTotal'] }}</div>
-                            <small class="text-muted">Rapor yang sudah dikirim wali kelas</small>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-6 col-md-6 mb-4">
-            <div class="card border-start border-success border-4 shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col me-2">
-                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Divalidasi Hari Ini</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ $stats['validatedToday'] }}</div>
-                            <small class="text-muted">Siswa yang divalidasi hari ini</small>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-filter text-brand-600" aria-hidden="true"></i>Filter rapor</h2><form method="GET" action="{{ route('ketua.validasi-rapor.index') }}" class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-[repeat(4,minmax(135px,.75fr))_minmax(220px,1.2fr)_auto_auto]"><select name="cabang_id" @change="$el.form.submit()" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800"><option value="">Semua cabang</option>@foreach($cabangList as $cabang)<option value="{{ $cabang->id }}" @selected((string)request('cabang_id')===(string)$cabang->id)>{{ $cabang->nama_cabang }}</option>@endforeach</select><select name="jenjang" @change="$el.form.submit()" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800"><option value="">Semua jenjang</option>@foreach($jenjangList as $jenjang)<option value="{{ $jenjang }}" @selected(request('jenjang')===$jenjang)>{{ $jenjang }}</option>@endforeach</select><select name="kelas_id" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800"><option value="">Semua kelas</option>@foreach($kelasList as $kelas)<option value="{{ $kelas->id }}" @selected((string)request('kelas_id')===(string)$kelas->id)>{{ $kelas->nama_kelas }} &middot; {{ $kelas->cabang->nama_cabang ?? '-' }}</option>@endforeach</select><select name="status_ketua" class="h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800"><option value="">Semua status</option><option value="pending" @selected(request('status_ketua')==='pending')>Belum divalidasi</option><option value="validated" @selected(request('status_ketua')==='validated')>Sudah divalidasi</option></select><label class="relative sm:col-span-2 xl:col-span-1"><i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400" aria-hidden="true"></i><input type="search" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NIS..." class="h-11 w-full rounded-xl border border-slate-300 bg-white !pl-10 pr-3 text-sm text-slate-900"></label><button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-xs font-bold text-white"><i class="fas fa-filter" aria-hidden="true"></i>Terapkan</button>@if($filterActive)<a href="{{ route('ketua.validasi-rapor.index') }}" class="flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-600 no-underline"><i class="fas fa-rotate-left" aria-hidden="true"></i>Reset</a>@endif</form></header></section>
 
-    {{-- Filter & Search --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-white">
-            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-filter me-2"></i>Filter & Pencarian</h6>
-        </div>
-        <div class="card-body">
-            <form method="GET" action="{{ route('ketua.validasi-rapor.index') }}">
-                <div class="row g-3">
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label small fw-bold">Cabang</label>
-                        <select name="cabang_id" class="form-select" data-auto-submit>
-                            <option value="">Semua Cabang</option>
-                            @foreach($cabangList as $cabang)
-                                <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
-                                    {{ $cabang->nama_cabang }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label small fw-bold">Jenjang</label>
-                        <select name="jenjang" class="form-select" data-auto-submit>
-                            <option value="">Semua Jenjang</option>
-                            @foreach($jenjangList as $jenjang)
-                                <option value="{{ $jenjang }}" {{ request('jenjang') == $jenjang ? 'selected' : '' }}>
-                                    {{ $jenjang }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label small fw-bold">Kelas</label>
-                        <select name="kelas_id" class="form-select">
-                            <option value="">Semua Kelas</option>
-                            @foreach($kelasList as $kelas)
-                                <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
-                                    {{ $kelas->nama_kelas }} - {{ $kelas->cabang->nama_cabang ?? '' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label small fw-bold">Status Validasi Ketua</label>
-                        <select name="status_ketua" class="form-select">
-                            <option value="">Semua Status</option>
-                            <option value="pending" {{ request('status_ketua') == 'pending' ? 'selected' : '' }}>Belum Divalidasi</option>
-                            <option value="validated" {{ request('status_ketua') == 'validated' ? 'selected' : '' }}>Sudah Divalidasi</option>
-                        </select>
-                    </div>
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label small fw-bold">Cari Nama / NIS</label>
-                        <input type="text" name="search" class="form-control" placeholder="Cari..." value="{{ request('search') }}">
-                    </div>
-                </div>
-                <div class="ketua-filter-actions mt-3">
-                    <button type="submit" class="btn btn-primary shadow-sm">
-                        <i class="fas fa-search me-1"></i> Filter
-                    </button>
-                    <a href="{{ route('ketua.validasi-rapor.index') }}" class="btn btn-secondary shadow-sm">
-                        <i class="fas fa-redo me-1"></i> Reset
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
+    <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="flex flex-col gap-4 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"><div><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-list-check text-brand-600" aria-hidden="true"></i>Daftar siswa</h2><p class="mt-1 text-xs text-slate-500">{{ $siswaList->total() }} rapor ditemukan pada filter saat ini.</p></div><div class="grid grid-cols-2 gap-2 sm:flex"><button type="button" @click="openBulk()" :disabled="!selected.length" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-brand-600 px-3 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"><i class="fas fa-check" aria-hidden="true"></i>Terpilih <span x-show="selected.length">(<span x-text="selected.length"></span>)</span></button><button type="button" @click="$refs.allDialog.showModal()" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-xs font-bold text-white"><i class="fas fa-check-double" aria-hidden="true"></i>Validasi semua</button></div></header>
+        @if($pendingIds->isNotEmpty())<div class="border-b border-slate-200 bg-slate-50 px-4 py-3 sm:px-5"><label class="inline-flex cursor-pointer items-center gap-2 text-xs font-bold text-slate-700"><input type="checkbox" @change="toggleAll()" :checked="available.length > 0 && selected.length === available.length" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">Pilih semua rapor pending di halaman ini</label></div>@endif
 
-    {{-- Data Table --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-list me-2"></i>Daftar Siswa</h6>
-            <div class="ketua-bulk-actions">
-                <button type="button" class="btn btn-success btn-sm shadow-sm" id="btnValidasiSemua">
-                    <i class="fas fa-check-double me-1"></i> Validasi Semua
-                </button>
-                <button type="button" class="btn btn-info btn-sm shadow-sm" id="btnValidasiTerpilih">
-                    <i class="fas fa-check me-1"></i> Validasi Terpilih
-                </button>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" id="dataTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th width="40" class="text-center">
-                                <input type="checkbox" id="checkAll" class="form-check-input">
-                            </th>
-                            <th width="50" class="text-center">No</th>
-                            <th>NIS</th>
-                            <th>Nama Lengkap</th>
-                            <th>Kelas</th>
-                            <th width="90" class="text-center">Wali Kelas</th>
-                            <th width="110" class="text-center">Status Ketua</th>
-                            <th width="180" class="text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($siswaList as $siswa)
-                        <tr>
-                            <td class="text-center align-middle" data-label="Pilih">
-                                @if(!$siswa->validasi_rapor_ketua)
-                                    <input type="checkbox" class="siswa-checkbox form-check-input" value="{{ $siswa->id }}">
-                                @endif
-                            </td>
-                            <td class="text-center align-middle fw-bold text-muted" data-label="No">{{ $loop->iteration }}</td>
-                            <td class="align-middle fw-bold" data-label="NIS">{{ $siswa->nis }}</td>
-                            <td class="align-middle" data-label="Nama">
-                                <div class="fw-bold">{{ $siswa->nama_lengkap }}</div>
-                            </td>
-                            <td class="align-middle" data-label="Kelas">{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
-                            <td class="text-center align-middle" data-label="Wali Kelas">
-                                @if($siswa->validasi_rapor_wali)
-                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>Sudah</span>
-                                @else
-                                    <span class="badge bg-secondary"><i class="fas fa-times me-1"></i>Belum</span>
-                                @endif
-                            </td>
-                            <td class="text-center align-middle" data-label="Status Ketua">
-                                @if($siswa->validasi_rapor_ketua)
-                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i> Valid</span>
-                                    <div><small class="text-muted">{{ $siswa->tanggal_validasi_rapor_ketua ? $siswa->tanggal_validasi_rapor_ketua->format('d/m/Y') : '' }}</small></div>
-                                @else
-                                    <span class="badge bg-warning text-white"><i class="fas fa-clock me-1"></i> Pending</span>
-                                @endif
-                            </td>
-                            <td class="text-center align-middle" data-label="Aksi">
-                                <div class="ketua-row-actions">
-                                    <a href="{{ route('ketua.validasi-rapor.preview', $siswa->id) }}" class="btn btn-info btn-sm shadow-sm" target="_blank" title="Preview Rapor">
-                                        <i class="fas fa-eye me-1"></i> Preview
-                                    </a>
-                                    @if($siswa->validasi_rapor_ketua)
-                                        <button type="button" class="btn btn-danger btn-sm shadow-sm"
-                                                data-bs-toggle="modal" data-bs-target="#batalkanModal"
-                                                data-action="{{ route('ketua.validasi-rapor.batalkan', $siswa->id) }}"
-                                                data-name="{{ $siswa->nama_lengkap }}">
-                                            <i class="fas fa-times me-1"></i> Batalkan
-                                        </button>
-                                    @else
-                                        <button type="button" class="btn btn-success btn-sm shadow-sm"
-                                                data-bs-toggle="modal" data-bs-target="#validasiModal"
-                                                data-action="{{ route('ketua.validasi-rapor.validasi', $siswa->id) }}"
-                                                data-name="{{ $siswa->nama_lengkap }}">
-                                            <i class="fas fa-check me-1"></i> Validasi
-                                        </button>
-                                        <button type="button" class="btn btn-warning btn-sm shadow-sm"
-                                                data-bs-toggle="modal" data-bs-target="#revisiModal"
-                                                data-action="{{ route('ketua.validasi-rapor.minta-revisi', $siswa->id) }}"
-                                                data-name="{{ $siswa->nama_lengkap }}">
-                                            <i class="fas fa-edit me-1"></i> Revisi
-                                        </button>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fas fa-inbox fa-3x mb-3 d-block text-gray-300"></i>
-                                Tidak ada data siswa
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            <div class="p-3">
-                {{ $siswaList->links() }}
-            </div>
-        </div>
-    </div>
+        <div class="hidden overflow-x-auto xl:block"><table class="w-full min-w-[64rem] table-fixed text-left text-xs"><colgroup><col class="w-12"><col class="w-16"><col><col class="w-48"><col class="w-32"><col class="w-36"><col class="w-64"></colgroup><thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-4 py-3"></th><th class="px-3 py-3">No</th><th class="px-3 py-3">Siswa</th><th class="px-3 py-3">Kelas & cabang</th><th class="px-3 py-3">Wali kelas</th><th class="px-3 py-3">Status Ketua</th><th class="py-3 pl-6 pr-4 text-right">Aksi</th></tr></thead><tbody class="divide-y divide-slate-100">@forelse($siswaList as $siswa)<tr class="hover:bg-slate-50/70"><td class="px-4 py-4">@unless($siswa->validasi_rapor_ketua)<input type="checkbox" value="{{ $siswa->id }}" x-model="selected" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">@endunless</td><td class="px-3 py-4 text-slate-500">{{ $siswaList->firstItem()+$loop->index }}</td><td class="px-3 py-4"><p class="truncate text-sm font-bold text-slate-900" title="{{ $siswa->nama_lengkap }}">{{ $siswa->nama_lengkap }}</p><p class="mt-0.5 truncate text-[11px] text-slate-500">NIS {{ $siswa->nis ?: '-' }}</p></td><td class="px-3 py-4"><p class="truncate font-bold text-slate-700">{{ $siswa->kelas->nama_kelas ?? '-' }}</p><p class="mt-0.5 truncate text-[11px] text-slate-500" title="{{ $siswa->kelas->cabang->nama_cabang ?? '-' }}">{{ $siswa->kelas->cabang->nama_cabang ?? '-' }}</p></td><td class="px-3 py-4"><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700"><i class="fas fa-check mr-1" aria-hidden="true"></i>Sudah</span></td><td class="px-3 py-4">@if($siswa->validasi_rapor_ketua)<span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">Valid</span>@if($siswa->tanggal_validasi_rapor_ketua)<time class="mt-1 block text-[10px] text-slate-400">{{ $siswa->tanggal_validasi_rapor_ketua->format('d/m/Y') }}</time>@endif @else<span class="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">Pending</span>@endif</td><td class="py-4 pl-6 pr-4"><div class="flex justify-end gap-2"><x-cleanflow.table-action href="{{ route('ketua.validasi-rapor.preview',$siswa->id) }}" tone="view" icon="fas fa-eye" label="Preview rapor" target="_blank" />@if($siswa->validasi_rapor_ketua)<x-cleanflow.table-action type="button" tone="delete" icon="fas fa-rotate-left" label="Batalkan validasi" data-action-url="{{ route('ketua.validasi-rapor.batalkan',$siswa->id) }}" data-student-name="{{ $siswa->nama_lengkap }}" x-on:click="openReview('cancel', $el.dataset.actionUrl, $el.dataset.studentName)" />@else<x-cleanflow.table-action type="button" tone="success" icon="fas fa-check" label="Validasi rapor" data-action-url="{{ route('ketua.validasi-rapor.validasi',$siswa->id) }}" data-student-name="{{ $siswa->nama_lengkap }}" x-on:click="openReview('validate', $el.dataset.actionUrl, $el.dataset.studentName)" /><x-cleanflow.table-action type="button" tone="edit" icon="fas fa-pen" label="Minta revisi" data-action-url="{{ route('ketua.validasi-rapor.minta-revisi',$siswa->id) }}" data-student-name="{{ $siswa->nama_lengkap }}" x-on:click="openReview('revision', $el.dataset.actionUrl, $el.dataset.studentName)" />@endif</div></td></tr>@empty<tr><td colspan="7" class="px-4 py-14 text-center text-sm text-slate-500"><i class="fas fa-inbox mb-3 block text-4xl text-slate-300" aria-hidden="true"></i>Tidak ada rapor yang sesuai.</td></tr>@endforelse</tbody></table></div>
+
+        <div class="divide-y divide-slate-100 xl:hidden">@forelse($siswaList as $siswa)<article class="p-4"><div class="flex min-w-0 items-start gap-3">@unless($siswa->validasi_rapor_ketua)<input type="checkbox" value="{{ $siswa->id }}" x-model="selected" class="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500">@endunless<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-xs font-extrabold text-brand-700">{{ strtoupper(substr($siswa->nama_lengkap,0,1)) }}</span><div class="min-w-0 flex-1"><h3 class="break-words text-sm font-extrabold text-slate-900">{{ $siswa->nama_lengkap }}</h3><p class="mt-0.5 text-[11px] text-slate-500">NIS {{ $siswa->nis ?: '-' }} &middot; {{ $siswa->kelas->nama_kelas ?? '-' }}</p><p class="mt-0.5 break-words text-[10px] text-slate-400">{{ $siswa->kelas->cabang->nama_cabang ?? '-' }}</p></div><span class="shrink-0 rounded-full px-2 py-1 text-[9px] font-bold {{ $siswa->validasi_rapor_ketua?'bg-emerald-50 text-emerald-700':'bg-amber-50 text-amber-700' }}">{{ $siswa->validasi_rapor_ketua?'Valid':'Pending' }}</span></div><div class="mt-3 flex flex-wrap gap-2"><a href="{{ route('ketua.validasi-rapor.preview',$siswa->id) }}" target="_blank" class="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-50 px-3 text-xs font-bold text-blue-700 no-underline"><i class="fas fa-eye" aria-hidden="true"></i>Preview</a>@if($siswa->validasi_rapor_ketua)<button type="button" @click="openReview('cancel', @js(route('ketua.validasi-rapor.batalkan',$siswa->id)), @js($siswa->nama_lengkap))" class="min-h-10 flex-1 rounded-xl bg-red-50 px-3 text-xs font-bold text-red-700">Batalkan</button>@else<button type="button" @click="openReview('validate', @js(route('ketua.validasi-rapor.validasi',$siswa->id)), @js($siswa->nama_lengkap))" class="min-h-10 flex-1 rounded-xl bg-emerald-600 px-3 text-xs font-bold text-white">Validasi</button><button type="button" @click="openReview('revision', @js(route('ketua.validasi-rapor.minta-revisi',$siswa->id)), @js($siswa->nama_lengkap))" class="min-h-10 flex-1 rounded-xl bg-amber-50 px-3 text-xs font-bold text-amber-700">Revisi</button>@endif</div></article>@empty<div class="p-12 text-center text-sm text-slate-500"><i class="fas fa-inbox mb-3 block text-4xl text-slate-300" aria-hidden="true"></i>Tidak ada rapor yang sesuai.</div>@endforelse</div>
+        @if($siswaList->hasPages())<footer class="border-t border-slate-200 p-4 sm:p-5">{{ $siswaList->withQueryString()->links() }}</footer>@endif
+    </section>
+
+    <dialog x-ref="reviewDialog" class="m-auto w-[calc(100%-2rem)] max-w-lg overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/60" @click.self="$el.close()"><form :action="review.url" method="POST">@csrf<header class="flex items-start justify-between gap-4 border-b border-slate-200 p-4 sm:p-5"><div><p class="text-[10px] font-bold uppercase tracking-wide text-brand-700" x-text="review.type==='validate'?'Validasi rapor':(review.type==='cancel'?'Batalkan validasi':'Minta revisi')"></p><h2 class="mt-1 text-base font-extrabold text-slate-950" x-text="review.name"></h2></div><button type="button" @click="$refs.reviewDialog.close()" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500" aria-label="Tutup"><i class="fas fa-xmark" aria-hidden="true"></i></button></header><div class="space-y-4 p-4 sm:p-5"><p class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-700" x-text="review.type==='validate'?'Rapor diteruskan ke Bendahara untuk verifikasi keuangan.':(review.type==='cancel'?'Validasi Ketua dan Bendahara akan direset.':'Rapor dikembalikan kepada wali kelas dan status validasinya direset.')"></p><label x-show="review.type==='revision'" class="block"><span class="text-xs font-bold text-slate-700">Catatan revisi <span class="text-red-600">*</span></span><textarea name="catatan_revisi" rows="4" maxlength="1000" :required="review.type==='revision'" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Tuliskan bagian yang harus diperbaiki..."></textarea></label></div><footer class="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-4 py-3 sm:px-5"><button type="button" @click="$refs.reviewDialog.close()" class="h-10 px-4 text-xs font-bold text-slate-600">Batal</button><button type="submit" class="h-10 rounded-xl px-4 text-xs font-bold text-white" :class="review.type==='validate'?'bg-emerald-600':(review.type==='cancel'?'bg-red-600':'bg-amber-600')" x-text="review.type==='validate'?'Ya, validasi':(review.type==='cancel'?'Ya, batalkan':'Kirim revisi')"></button></footer></form></dialog>
+
+    <dialog x-ref="bulkDialog" class="m-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/60" @click.self="$el.close()"><form action="{{ route('ketua.validasi-rapor.bulk-validasi') }}" method="POST">@csrf<template x-for="id in selected" :key="id"><input type="hidden" name="siswa_ids[]" :value="id"></template><div class="p-5 text-center"><span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700"><i class="fas fa-users-check" aria-hidden="true"></i></span><h2 class="mt-3 text-base font-extrabold text-slate-950">Validasi rapor terpilih?</h2><p class="mt-2 text-xs leading-5 text-slate-500"><strong x-text="selected.length"></strong> rapor akan diteruskan ke Bendahara.</p><div class="mt-5 grid grid-cols-2 gap-2"><button type="button" @click="$refs.bulkDialog.close()" class="h-10 rounded-xl bg-slate-100 text-xs font-bold text-slate-700">Batal</button><button type="submit" class="h-10 rounded-xl bg-brand-600 text-xs font-bold text-white">Ya, validasi</button></div></div></form></dialog>
+
+    <dialog x-ref="allDialog" class="m-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/60" @click.self="$el.close()"><form action="{{ route('ketua.validasi-rapor.validasi-semua') }}" method="POST">@csrf<div class="p-5 text-center"><span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span><h2 class="mt-3 text-base font-extrabold text-slate-950">Validasi semua rapor pending?</h2><p class="mt-2 text-xs leading-5 text-slate-500">Tindakan berlaku pada seluruh rapor yang memenuhi syarat, bukan hanya halaman ini. Pastikan semua rapor telah ditinjau.</p><div class="mt-5 grid grid-cols-2 gap-2"><button type="button" @click="$refs.allDialog.close()" class="h-10 rounded-xl bg-slate-100 text-xs font-bold text-slate-700">Batal</button><button type="submit" class="h-10 rounded-xl bg-emerald-600 text-xs font-bold text-white">Ya, validasi semua</button></div></div></form></dialog>
 </div>
-
-{{-- ======================== MODALS ======================== --}}
-
-{{-- Modal: Validasi per siswa --}}
-<div class="modal fade" id="validasiModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-bold text-white">
-                    <i class="fas fa-check-circle me-2"></i>Konfirmasi Validasi Rapor
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body py-4 text-center">
-                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                <h6 class="fw-bold mb-1">Validasi rapor untuk:</h6>
-                <p class="text-primary fw-bold mb-3" id="validasiNamaSiswa">-</p>
-                <div class="alert alert-success bg-light border-success text-start small mb-0">
-                    <ul class="mb-0">
-                        <li>Status validasi Ketua PKBM akan menjadi <strong>Disetujui</strong></li>
-                        <li>Rapor akan diteruskan ke Bendahara untuk diproses</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Batal
-                </button>
-                <form id="validasiForm" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-check me-1"></i> Ya, Validasi
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Modal: Batalkan validasi per siswa --}}
-<div class="modal fade" id="batalkanModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title fw-bold text-white">
-                    <i class="fas fa-times-circle me-2"></i>Batalkan Validasi Rapor
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body py-4 text-center">
-                <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
-                <h6 class="fw-bold mb-1">Batalkan validasi rapor untuk:</h6>
-                <p class="text-danger fw-bold mb-3" id="batalkanNamaSiswa">-</p>
-                <div class="alert alert-danger bg-light border-danger text-start small mb-0">
-                    <ul class="mb-0">
-                        <li>Status validasi Ketua PKBM akan <strong>direset</strong></li>
-                        <li>Validasi Bendahara (jika sudah ada) juga ikut direset</li>
-                        <li>Wali kelas perlu mengirim ulang rapor</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Batal
-                </button>
-                <form id="batalkanForm" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-times me-1"></i> Ya, Batalkan
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Modal: Validasi Terpilih --}}
-<div class="modal fade" id="validasiTerpilihModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title fw-bold text-white">
-                    <i class="fas fa-check me-2"></i>Validasi Siswa Terpilih
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body py-4 text-center">
-                <i class="fas fa-users fa-3x text-info mb-3"></i>
-                <h6 class="fw-bold mb-1">Validasi <span id="jumlahTerpilih" class="text-info">0</span> siswa yang dipilih?</h6>
-                <p class="text-muted small mb-3">Semua siswa yang dicentang akan langsung divalidasi oleh Ketua PKBM.</p>
-                <div class="alert alert-info bg-light border-info text-start small mb-0">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Rapor yang divalidasi akan diteruskan ke Bendahara untuk verifikasi keuangan.
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Batal
-                </button>
-                <button type="button" class="btn btn-info" id="btnKonfirmasiTerpilih">
-                    <i class="fas fa-check me-1"></i> Ya, Validasi Terpilih
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Modal: Validasi Semua --}}
-<div class="modal fade" id="validasiSemuaModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-bold text-white">
-                    <i class="fas fa-check-double me-2"></i>Validasi Semua Rapor Pending
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body py-4 text-center">
-                <i class="fas fa-check-double fa-3x text-success mb-3"></i>
-                <h6 class="fw-bold mb-2">Validasi semua siswa yang masih pending?</h6>
-                <p class="text-muted small mb-3">Seluruh rapor yang sudah dikirim wali kelas dan belum divalidasi akan langsung disetujui.</p>
-                <div class="alert alert-warning bg-light border-warning text-start small mb-0">
-                    <i class="fas fa-exclamation-triangle me-1"></i>
-                    Pastikan Anda sudah meninjau semua rapor sebelum melakukan validasi massal.
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Batal
-                </button>
-                <form action="{{ route('ketua.validasi-rapor.validasi-semua') }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-check-double me-1"></i> Ya, Validasi Semua
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Modal: Peringatan tidak ada yang dipilih --}}
-<div class="modal fade" id="peringatanModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-warning text-white">
-                <h5 class="modal-title fw-bold text-white">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Perhatian
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <i class="fas fa-mouse-pointer fa-3x text-warning mb-3"></i>
-                <p class="fw-bold mb-0">Pilih minimal 1 siswa terlebih dahulu.</p>
-            </div>
-            <div class="modal-footer bg-light justify-content-center">
-                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Mengerti</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Modal: Minta Revisi --}}
-<div class="modal fade" id="revisiModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <form id="revisiForm" method="POST">
-                @csrf
-                <div class="modal-header bg-warning text-white">
-                    <h5 class="modal-title fw-bold text-white">
-                        <i class="fas fa-edit me-2"></i>Minta Revisi Rapor
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body py-4">
-                    <p class="mb-2">Kirim catatan revisi ke wali kelas untuk: <strong id="revisiNamaSiswa">-</strong></p>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Catatan Revisi</label>
-                        <textarea name="catatan_revisi" class="form-control" rows="4" required placeholder="Tuliskan apa yang perlu diperbaiki oleh wali kelas..."></textarea>
-                    </div>
-                    <div class="alert alert-warning bg-light border-warning text-start small mb-0">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        Rapor akan dikembalikan ke wali kelas. Status validasi wali & ketua akan direset.
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-warning fw-bold"><i class="fas fa-paper-plane me-1"></i> Kirim Revisi</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/ketua/validasi-rapor/index.js'])
 @endsection

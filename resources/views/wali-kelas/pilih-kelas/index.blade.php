@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Pilih Kelas')
 @section('page-title', 'Pilih Kelas')
 @section('page-subtitle', 'Pilih kelas yang ingin Anda kelola')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/pilih-kelas/index.css', 'resources/js/wali-kelas/pilih-kelas/index.js'])

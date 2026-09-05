@@ -1,319 +1,43 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Manajemen Tiket Pemulihan Akun')
-@section('page-title', 'Manajemen Tiket Pemulihan')
-@section('page-subtitle', 'Kelola antrean permohonan pemulihan akses akun')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/recovery-tickets/index.css'])
-@endsection
+@section('page-title', 'Tiket Pemulihan Akun')
+@section('page-subtitle', 'Tangani pengguna yang tidak dapat memulihkan akun secara mandiri')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+@php
+    $ticketIds=$tickets->pluck('id')->map(fn($id)=>(string)$id)->values();
+    $typeLabels=['lupa_username'=>'Lupa Username','lupa_password'=>'Lupa Password','lupa_keduanya'=>'Lupa Keduanya'];
+    $typeStyles=['lupa_username'=>'bg-slate-100 text-slate-700','lupa_password'=>'bg-amber-50 text-amber-700','lupa_keduanya'=>'bg-red-50 text-red-700'];
+    $statusLabels=['sent'=>'Email terkirim','processing'=>'Sedang diproses','pending_admin'=>'Butuh bantuan','failed'=>'Email gagal'];
+    $statusStyles=['sent'=>'bg-emerald-50 text-emerald-700','processing'=>'bg-blue-50 text-blue-700','pending_admin'=>'bg-red-50 text-red-700','failed'=>'bg-amber-50 text-amber-700'];
+@endphp
+<div x-data="{ selected: [], allIds: @js($ticketIds) }" class="min-w-0 w-full space-y-4">
+    <header class="flex flex-wrap items-start justify-between gap-3"><div><p class="text-xs font-bold uppercase tracking-wide text-brand-600">Bantuan akses</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Antrean pemulihan akun</h2><p class="mt-1 text-sm text-slate-500">Prioritaskan tiket berstatus butuh bantuan atau email gagal.</p></div><nav class="flex rounded-xl bg-slate-100 p-1"><a href="{{ route('admin.recovery-tickets.index') }}" class="rounded-lg bg-white px-3 py-2 text-xs font-bold text-brand-700 no-underline shadow-sm">Antrean @if($tickets->total())<span class="ml-1 rounded-full bg-red-100 px-1.5 py-0.5 text-red-700">{{ $tickets->total() }}</span>@endif</a><a href="{{ route('admin.recovery-tickets.history') }}" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-600 no-underline">Riwayat</a></nav></header>
 
-    {{-- Tab Navigation --}}
-    <ul class="nav nav-pills mb-3" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link active" href="{{ route('admin.recovery-tickets.index') }}">
-                <i class="bx bx-list-ul me-1"></i> Antrean
-                @if($tickets->total() > 0)
-                    <span class="badge bg-danger ms-1">{{ $tickets->total() }}</span>
-                @endif
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('admin.recovery-tickets.history') }}">
-                <i class="bx bx-history me-1"></i> Riwayat
-            </a>
-        </li>
-    </ul>
+    <section class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm sm:p-5"><div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-600 shadow-sm"><i class="fab fa-whatsapp"></i></span><div class="min-w-0 flex-1"><h3 class="font-extrabold text-emerald-950">WhatsApp bantuan login</h3><p class="mt-1 text-xs text-emerald-700">Ditampilkan ketika pengguna tidak mempunyai email atau telepon pemulihan yang valid.</p><form action="{{ route('admin.recovery-tickets.update-admin-wa') }}" method="POST" class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">@csrf<label class="flex min-w-0 flex-1"><span class="flex h-11 items-center rounded-l-xl border border-r-0 border-emerald-300 bg-white px-3 text-sm font-bold text-emerald-700">+62</span><input name="admin_wa_number" inputmode="numeric" value="{{ preg_replace('/^62/','',$adminWa) }}" required placeholder="8123456789" class="h-11 min-w-0 flex-1 rounded-r-xl border border-emerald-300 bg-white px-3 text-sm outline-none focus:border-emerald-500"></label><button class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white"><i class="fas fa-save"></i>Simpan nomor</button></form></div></div></section>
 
-    <!-- Admin WA Configuration -->
-    <div class="card mb-4 border-0 shadow-sm">
-        <div class="card-body p-4">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 admin-wa-icon">
-                    <i class="bx bxl-whatsapp fs-3"></i>
-                </div>
-                <div>
-                    <h5 class="mb-1 fw-bold">Nomor WhatsApp Bantuan</h5>
-                    <p class="mb-0 text-muted">Nomor ini ditampilkan di halaman Login sebagai kontak bantuan bagi user yang tidak bisa recovery mandiri (misal: email & telepon belum terdaftar).</p>
-                </div>
-            </div>
-            <form action="{{ route('admin.recovery-tickets.update-admin-wa') }}" method="POST">
-                @csrf
-                <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
-                    <label class="fw-semibold text-nowrap mb-0">Nomor Admin:</label>
-                    <div class="input-group admin-wa-input-group">
-                        <span class="input-group-text fw-semibold bg-light">+62</span>
-                        <input type="text" name="admin_wa_number" class="form-control form-control-lg admin-wa-input" placeholder="8123456789" value="{{ ltrim($adminWa, '620') }}" required>
-                    </div>
-                    <button class="btn btn-primary px-4" type="submit">
-                        <i class="bx bx-save me-1"></i> Simpan
-                    </button>
-                </div>
-            </form>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-5"><div><h3 class="font-extrabold text-slate-950"><i class="fas fa-life-ring mr-2 text-brand-600"></i>Permintaan aktif</h3><p class="mt-1 text-xs text-slate-500">{{ $tickets->total() }} tiket menunggu penanganan atau konfirmasi.</p></div><label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" :checked="allIds.length > 0 && selected.length === allIds.length" @change="selected=$event.target.checked?[...allIds]:[]" class="h-4 w-4 rounded border-slate-300 text-brand-600">Pilih halaman ini</label></header>
+        <div x-cloak x-show="selected.length" class="flex flex-wrap items-center justify-between gap-3 border-b border-brand-100 bg-brand-50 px-4 py-3 sm:px-5"><strong class="text-xs text-brand-700"><span x-text="selected.length"></span> tiket dipilih</strong><div class="flex gap-2"><form action="{{ route('admin.recovery-tickets.bulk-resolve') }}" method="POST" data-confirm data-confirm-title="Selesaikan tiket terpilih?" data-confirm-message="Tiket akan ditutup dan pengguna akan mendapat notifikasi." data-confirm-text="Ya, selesaikan">@csrf<template x-for="id in selected" :key="id"><input type="hidden" name="ids[]" :value="id"></template><button class="min-h-9 rounded-xl bg-brand-600 px-3 text-xs font-bold text-white"><i class="fas fa-check mr-1"></i>Selesaikan</button></form><form action="{{ route('admin.recovery-tickets.bulk-reject') }}" method="POST" data-confirm data-confirm-title="Tolak tiket terpilih?" data-confirm-message="Permintaan yang dipilih akan ditandai ditolak." data-confirm-text="Ya, tolak">@csrf<template x-for="id in selected" :key="id"><input type="hidden" name="ids[]" :value="id"></template><button class="min-h-9 rounded-xl bg-red-600 px-3 text-xs font-bold text-white"><i class="fas fa-times mr-1"></i>Tolak</button></form></div></div>
+
+        <div class="divide-y divide-slate-100 xl:hidden">
+            @forelse($tickets as $ticket)
+                @php
+                    $user=$ticket->user;
+                    $roleName=ucwords(str_replace('_',' ',$user->roleRelation->name??$user->role??'User'));
+                    $phoneRaw=$user->phone ?: $user->siswa?->telepon_orangtua;
+                    $waPhone=$phoneRaw?preg_replace('/[^0-9]/','',$phoneRaw):'';
+                    if($waPhone&&str_starts_with($waPhone,'0'))$waPhone='62'.substr($waPhone,1); elseif($waPhone&&!str_starts_with($waPhone,'62'))$waPhone='62'.$waPhone;
+                    $resetUrl=$ticket->token_reset?route('password.reset.ticket',['token'=>$ticket->token_reset]):null;
+                    $waMessage=$ticket->tipe_recovery==='lupa_username'?"Halo {$user->name}, username SIPADUHOK Anda: {$user->username}":"Halo {$user->name}, gunakan link berikut untuk memulihkan akun SIPADUHOK: ".($resetUrl??'Hubungi admin.');
+                @endphp
+                <article class="p-4"><div class="flex items-start gap-3"><input type="checkbox" value="{{ $ticket->id }}" x-model="selected" class="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-xs font-extrabold text-brand-700">{{ strtoupper(substr($user->name,0,1)) }}</span><div class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-950">{{ $user->name }}</strong><span class="block truncate text-xs text-slate-500">{{ $roleName }} &middot; {{ $ticket->created_at->format('d M Y H:i') }}</span></div><span class="rounded-full px-2 py-1 text-[10px] font-bold {{ $statusStyles[$ticket->status]??'bg-slate-100 text-slate-600' }}">{{ $statusLabels[$ticket->status]??ucfirst($ticket->status) }}</span></div><div class="mt-3 grid gap-2 rounded-xl bg-slate-50 p-3 text-xs sm:grid-cols-2"><div><span class="block text-[9px] font-bold uppercase tracking-wide text-slate-400">Kendala</span><strong class="text-slate-700">{{ $typeLabels[$ticket->tipe_recovery]??$ticket->tipe_recovery }}</strong></div><div class="min-w-0"><span class="block text-[9px] font-bold uppercase tracking-wide text-slate-400">Email pemulihan</span><span class="block truncate text-slate-600">{{ $user->personal_email?:'Belum tersedia' }}</span></div></div><div class="mt-3 flex flex-wrap justify-end gap-2">@if($waPhone)<a href="https://wa.me/{{ $waPhone }}?text={{ urlencode($waMessage) }}" target="_blank" class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 no-underline" aria-label="Kirim WhatsApp"><i class="fab fa-whatsapp"></i></a>@endif @if($resetUrl)<button type="button" @click="navigator.clipboard.writeText(@js($resetUrl)); Swal.fire({icon:'success',title:'Link disalin',timer:1400,showConfirmButton:false})" class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700" aria-label="Salin link reset"><i class="fas fa-copy"></i></button>@endif @if($user->personal_email)<form action="{{ route('admin.recovery-tickets.resend',$ticket) }}" method="POST" data-confirm data-confirm-title="Kirim ulang email?" data-confirm-message="Link pemulihan baru akan dikirim ke {{ $user->personal_email }}." data-confirm-text="Ya, kirim">@csrf<button class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-50 px-3 text-xs font-bold text-blue-700"><i class="fas fa-paper-plane"></i>Kirim ulang</button></form>@endif<form action="{{ route('admin.recovery-tickets.resolve',$ticket) }}" method="POST" data-confirm data-confirm-title="Tutup tiket?" data-confirm-message="Tiket {{ $user->name }} akan ditandai selesai." data-confirm-text="Ya, tutup">@csrf<button class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-slate-100 px-3 text-xs font-bold text-slate-700"><i class="fas fa-check"></i>Tutup</button></form><form action="{{ route('admin.recovery-tickets.reject',$ticket) }}" method="POST" data-confirm data-confirm-title="Tolak permintaan?" data-confirm-message="Tiket {{ $user->name }} akan ditandai ditolak." data-confirm-text="Ya, tolak">@csrf<x-cleanflow.table-action type="submit" tone="delete" icon="fas fa-times" label="Tolak tiket" /></form></div></article>
+            @empty<div class="p-12 text-center"><i class="fas fa-circle-check text-4xl text-emerald-500"></i><h4 class="mt-3 font-extrabold text-slate-900">Semua tiket sudah ditangani</h4><p class="mt-1 text-sm text-slate-500">Tidak ada permintaan aktif saat ini.</p></div>@endforelse
         </div>
-    </div>
 
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h5 class="mb-0">Daftar Antrean Permintaan</h5>
-            <small class="text-muted">Tiket Lupa Username/Password User Biasa</small>
-        </div>
-        
-        <div class="card-body">
-
-            {{-- Bulk Toolbar --}}
-            <div class="bulk-toolbar d-none mb-3 p-2 rounded d-flex align-items-center flex-wrap gap-2" id="bulkToolbar">
-                <span class="fw-semibold text-primary small" id="bulkCount">0 dipilih</span>
-                <div class="ms-auto d-flex gap-2 flex-wrap">
-                    <button type="button" class="btn btn-sm btn-secondary" data-bulk-action="resolve">
-                        <i class="bx bx-archive-in me-1"></i> Arsipkan/Tutup Terpilih
-                    </button>
-                </div>
-            </div>
-
-            <div class="d-md-none mobile-select-all-bar">
-                <input type="checkbox" id="selectAllMobile" class="form-check-input" data-select-all>
-                <label for="selectAllMobile" class="mobile-select-all-label">Pilih Semua</label>
-            </div>
-
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover table-card-mobile">
-                    <thead>
-                        <tr>
-                            <th class="ticket-checkbox-col">
-                                <input type="checkbox" class="form-check-input" id="selectAllCb" data-select-all>
-                            </th>
-                            <th>No</th>
-                            <th>Tanggal</th>
-                            <th>User Peminta</th>
-                            <th>Kendala</th>
-                            <th>Email</th>
-                            <th>Status API</th>
-                            <th>Aksi Admin</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                        @forelse($tickets as $key => $ticket)
-                        <tr>
-                            <td class="mobile-card-checkbox">
-                                <input type="checkbox" class="form-check-input ticket-check" data-id="{{ $ticket->id }}">
-                            </td>
-                            <td class="mobile-hide">{{ $tickets->firstItem() + $key }}</td>
-                            <td class="desktop-only-cell">{{ $ticket->created_at->format('d M Y H:i') }}</td>
-                            <td class="desktop-only-cell">
-                                <strong>{{ $ticket->user->name }}</strong><br>
-                                <span class="badge bg-label-info">{{ ucwords(str_replace('_', ' ', $ticket->user->roleRelation->name ?? $ticket->user->role)) }}</span>
-                            </td>
-                            <td class="mobile-only-cell mobile-card-head">
-                                <strong>{{ $ticket->user->name }}</strong>
-                                <span class="badge bg-label-info ms-1">{{ ucwords(str_replace('_', ' ', $ticket->user->roleRelation->name ?? $ticket->user->role)) }}</span>
-                                <br><small class="text-muted"><i class="bx bx-time-five"></i> {{ $ticket->created_at->format('d M Y H:i') }}</small>
-                            </td>
-                            <td data-label="Kendala">
-                                @if($ticket->tipe_recovery == 'lupa_username')
-                                    <span class="badge bg-label-secondary"><i class="bx bx-user me-1"></i> Lupa Username</span>
-                                @elseif($ticket->tipe_recovery == 'lupa_password')
-                                    <span class="badge bg-label-warning"><i class="bx bx-key me-1"></i> Lupa Password</span>
-                                @else
-                                    <span class="badge bg-label-danger"><i class="bx bx-error-circle me-1"></i> Lupa Keduanya</span>
-                                @endif
-                            </td>
-                            <td data-label="Email">
-                                @if($ticket->user->personal_email)
-                                    <a href="mailto:{{ $ticket->user->personal_email }}" class="text-primary"><i class="bx bx-envelope"></i> {{ $ticket->user->personal_email }}</a>
-                                @else
-                                    <span class="text-danger small"><i class="bx bx-x"></i> Belum diisi</span>
-                                @endif
-                            </td>
-                            <td data-label="Status">
-                                @if($ticket->status == 'sent')
-                                    <span class="badge bg-success">Terkirim Otomatis</span>
-                                @elseif($ticket->status == 'processing')
-                                    <span class="badge bg-primary">Sedang Proses</span>
-                                @elseif($ticket->status == 'pending_admin')
-                                    <span class="badge bg-danger pulse-warning">Butuh Bantuan Anda</span>
-                                @elseif($ticket->status == 'failed')
-                                    <span class="badge bg-danger">Gagal Email</span>
-                                @endif
-                            </td>
-                            <td class="mobile-card-actions">
-                                @php
-                                    $waPhoneRaw = $ticket->user->phone;
-                                    if (empty($waPhoneRaw) && $ticket->user->siswa && !empty($ticket->user->siswa->telepon_orangtua)) {
-                                        $waPhoneRaw = $ticket->user->siswa->telepon_orangtua;
-                                    }
-
-                                    $waPhone = '';
-                                    if ($waPhoneRaw) {
-                                        $waPhone = preg_replace('/[^0-9]/', '', $waPhoneRaw);
-                                        if (str_starts_with($waPhone, '0')) {
-                                            $waPhone = '62' . substr($waPhone, 1);
-                                        } elseif (!str_starts_with($waPhone, '62')) {
-                                            $waPhone = '62' . $waPhone;
-                                        }
-                                    }
-
-                                    $rawRole = $ticket->user->roleRelation->name ?? $ticket->user->role ?? 'User';
-                                    $roleName = ucwords(str_replace('_', ' ', $rawRole));
-                                    
-                                    $waMessage = "";
-                                    if ($ticket->tipe_recovery === 'lupa_username') {
-                                        $waMessage = "LAYANAN IT OTOMATIS PKBM HOUSE OF KNOWLEDGE\n\nHalo,\nKami menerima permintaan pemulihan Username Anda.\n\nNama: {$ticket->user->name}\nTipe Akun (Role): {$roleName}\nUsername Anda: {$ticket->user->username}\n\nSilakan kembali ke aplikasi dan login menggunakan username tersebut.";
-                                    } elseif (in_array($ticket->tipe_recovery, ['lupa_password', 'lupa_keduanya'])) {
-                                        $resetUrl = $ticket->token_reset ? route('password.reset.ticket', ['token' => $ticket->token_reset]) : 'Token belum tersedia';
-                                        
-                                        $waMessage = "LAYANAN IT OTOMATIS PKBM HOUSE OF KNOWLEDGE\n\nHalo,\nKami menerima permintaan reset Password Anda.\n\nNama: {$ticket->user->name}\nTipe Akun (Role): {$roleName}\n";
-                                        
-                                        if ($ticket->tipe_recovery === 'lupa_keduanya') {
-                                            $waMessage .= "Username Anda: {$ticket->user->username}\nEmail Login Anda: {$ticket->user->email}\n";
-                                        }
-                                        
-                                        $waMessage .= "\nKlik link aman di bawah ini untuk membuat Password Baru:\n{$resetUrl}\n\n(Link ini berlaku maksimal 24 jam sejak dikirim)";
-                                    }
-                                    
-                                    $waLink = $waPhone ? "https://wa.me/{$waPhone}?text=" . urlencode($waMessage) : '#';
-                                @endphp
-                                <div class="d-flex flex-wrap gap-2">
-                                    @if($waPhone)
-                                        <a href="{{ $waLink }}" target="_blank" class="btn btn-sm btn-icon btn-outline-success" title="Kirim Pesan via WhatsApp">
-                                            <i class="bx bxl-whatsapp fs-5"></i>
-                                        </a>
-                                    @endif
-
-                                    @if($ticket->user->personal_email)
-                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resendModal{{ $ticket->id }}">
-                                            <i class="bx bx-refresh"></i> Kirim Ulang
-                                        </button>
-                                    @endif
-                                    
-                                    <form action="{{ route('admin.recovery-tickets.resolve', $ticket) }}" method="POST" class="d-inline m-0 p-0">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
-                                            <i class="bx bx-archive-in"></i> Tutup Tiket
-                                        </button>
-                                    </form>
-                                    
-                                    @if($ticket->token_reset)
-                                        <button type="button" class="btn btn-sm btn-icon btn-outline-info" title="Copy Link Reset" data-copy-link="{{ route('password.reset.ticket', $ticket->token_reset) }}">
-                                            <i class="bx bx-copy"></i>
-                                        </button>
-                                    @endif
-                                </div>
-
-                                <!-- Modal Resend -->
-                                @if($ticket->user->personal_email)
-                                <div class="modal fade" id="resendModal{{ $ticket->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered modal-sm mx-auto recovery-resend-dialog" role="document">
-                                        <div class="modal-content border-0 shadow-lg recovery-modal-content">
-                                            <form action="{{ route('admin.recovery-tickets.resend', $ticket) }}" method="POST">
-                                                @csrf
-                                                <div class="modal-header border-0 pb-0 pt-4 px-4">
-                                                    <h5 class="modal-title fw-bold">
-                                                        <i class="bx bx-send text-primary me-2"></i>Kirim Ulang Email
-                                                    </h5>
-                                                    <button type="button" class="btn-close recovery-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body pt-3 px-4 pb-2">
-                                                    <p class="text-wrap text-break mb-3 recovery-modal-text">
-                                                        Email pemulihan akan dikirim ulang ke:<br>
-                                                        <strong class="recovery-modal-email">{{ $ticket->user->personal_email }}</strong>
-                                                    </p>
-                                                    <div class="alert alert-info text-wrap d-flex align-items-start gap-2 mb-0 recovery-info-alert">
-                                                        <i class="bx bx-info-circle fs-5 flex-shrink-0 recovery-info-icon"></i>
-                                                        <span>Link reset password baru akan dikirim. Link lama yang belum kedaluwarsa tetap valid.</span>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer border-0 pb-4 px-4 d-flex justify-content-end gap-2 pt-2">
-                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-primary"><i class="bx bx-send me-1"></i> Kirim Email</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endif
-
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="10" class="text-center py-5">
-                                <i class="bx bx-check-circle text-success mb-3 empty-ticket-icon"></i>
-                                <h6 class="text-muted">Semua tiket sudah ditangani. Tidak ada antrean baru.</h6>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="mt-4">
-                {{ $tickets->links() }}
-            </div>
-        </div>
-    </div>
+        <div class="hidden overflow-x-auto xl:block"><table class="w-full table-fixed text-left text-sm"><colgroup><col class="w-12"><col class="w-12"><col class="w-36"><col class="w-[19%]"><col class="w-[14%]"><col><col class="w-[13%]"><col class="w-64"></colgroup><thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500"><tr><th class="px-3 py-3"></th><th class="px-2 py-3">No</th><th class="px-3 py-3">Tanggal</th><th class="px-3 py-3">Pengguna</th><th class="px-3 py-3">Kendala</th><th class="px-3 py-3">Email</th><th class="px-3 py-3">Status</th><th class="px-5 py-3 text-right">Aksi</th></tr></thead><tbody class="divide-y divide-slate-100">@forelse($tickets as $ticket)@php $user=$ticket->user;$roleName=ucwords(str_replace('_',' ',$user->roleRelation->name??$user->role??'User'));$resetUrl=$ticket->token_reset?route('password.reset.ticket',['token'=>$ticket->token_reset]):null; @endphp<tr><td class="px-3 py-3 text-center"><input type="checkbox" value="{{ $ticket->id }}" x-model="selected" class="h-4 w-4 rounded border-slate-300 text-brand-600"></td><td class="px-2 py-3 text-xs text-slate-400">{{ $tickets->firstItem()+$loop->index }}</td><td class="whitespace-nowrap px-3 py-3 text-xs text-slate-500">{{ $ticket->created_at->format('d M Y H:i') }}</td><td class="px-3 py-3"><strong class="block truncate text-slate-950">{{ $user->name }}</strong><span class="block truncate text-xs text-slate-500">{{ $roleName }}</span></td><td class="px-3 py-3"><span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold {{ $typeStyles[$ticket->tipe_recovery]??'bg-slate-100 text-slate-600' }}">{{ $typeLabels[$ticket->tipe_recovery]??$ticket->tipe_recovery }}</span></td><td class="px-3 py-3"><span class="block truncate text-xs {{ $user->personal_email?'text-slate-600':'text-red-600' }}" title="{{ $user->personal_email }}">{{ $user->personal_email?:'Belum diisi' }}</span></td><td class="px-3 py-3"><span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold {{ $statusStyles[$ticket->status]??'bg-slate-100 text-slate-600' }}">{{ $statusLabels[$ticket->status]??ucfirst($ticket->status) }}</span></td><td class="px-5 py-3"><div class="flex justify-end gap-2">@if($resetUrl)<x-cleanflow.table-action type="button" tone="info" icon="fas fa-copy" label="Salin link reset" data-copy-value="{{ $resetUrl }}" x-on:click="navigator.clipboard.writeText($el.dataset.copyValue); Swal.fire({icon:'success',title:'Link disalin',timer:1400,showConfirmButton:false})" />@endif @if($user->personal_email)<form action="{{ route('admin.recovery-tickets.resend',$ticket) }}" method="POST" data-confirm data-confirm-title="Kirim ulang email?" data-confirm-message="Link baru dikirim ke {{ $user->personal_email }}." data-confirm-text="Ya, kirim">@csrf<x-cleanflow.table-action type="submit" tone="view" icon="fas fa-paper-plane" label="Kirim ulang email" /></form>@endif<form action="{{ route('admin.recovery-tickets.resolve',$ticket) }}" method="POST" data-confirm data-confirm-title="Tutup tiket?" data-confirm-message="Tiket {{ $user->name }} akan ditandai selesai." data-confirm-text="Ya, tutup">@csrf<x-cleanflow.table-action type="submit" tone="success" icon="fas fa-check" label="Tutup tiket" /></form><form action="{{ route('admin.recovery-tickets.reject',$ticket) }}" method="POST" data-confirm data-confirm-title="Tolak tiket?" data-confirm-message="Tiket {{ $user->name }} akan ditolak." data-confirm-text="Ya, tolak">@csrf<x-cleanflow.table-action type="submit" tone="delete" icon="fas fa-times" label="Tolak tiket" /></form></div></td></tr>@empty<tr><td colspan="8" class="p-12 text-center text-sm text-slate-500">Semua tiket sudah ditangani.</td></tr>@endforelse</tbody></table></div>
+        @if($tickets->hasPages())<footer class="border-t border-slate-200 p-4">{{ $tickets->links() }}</footer>@endif
+    </section>
 </div>
-
-<!-- Dynamic Action Modal (single ticket) -->
-<div class="modal fade" id="actionTicketModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm mx-auto recovery-modal-dialog">
-        <div class="modal-content border-0 shadow-lg recovery-modal-content">
-            <div class="modal-header border-0 pb-0 pt-4 px-4">
-                <h5 class="modal-title fw-bold" id="actionTicketTitle">Konfirmasi</h5>
-                <button type="button" class="btn-close recovery-modal-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body pt-3 px-4 pb-2">
-                <p class="mb-0 text-muted recovery-modal-text" id="actionTicketBody"></p>
-            </div>
-            <div class="modal-footer border-0 pb-4 px-4 d-flex justify-content-end gap-2 pt-2">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    Batal
-                </button>
-                <form id="actionTicketForm" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-primary" id="confirmActionBtn">
-                        Ya, Lanjutkan
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Bulk Action Modal -->
-<div class="modal fade" id="bulkActionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm mx-auto recovery-modal-dialog">
-        <div class="modal-content border-0 shadow-lg recovery-modal-content">
-            <div class="modal-header border-0 pb-0 pt-4 px-4">
-                <h5 class="modal-title fw-bold" id="bulkModalTitle">Konfirmasi</h5>
-                <button type="button" class="btn-close recovery-modal-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body pt-3 px-4 pb-2">
-                <p class="mb-0 text-muted recovery-modal-text" id="bulkModalBody"></p>
-            </div>
-            <div class="modal-footer border-0 pb-4 px-4 d-flex justify-content-end gap-2 pt-2">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" id="confirmBulkBtn">Ya, Lanjutkan</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Hidden bulk form -->
-<form id="bulkForm" method="POST" class="hidden-bulk-form" data-resolve-url="{{ route('admin.recovery-tickets.bulk-resolve') }}" data-reject-url="{{ route('admin.recovery-tickets.bulk-reject') }}">
-    @csrf
-    <div id="bulkIdsContainer"></div>
-</form>
-
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/recovery-tickets/index.js'])
 @endsection

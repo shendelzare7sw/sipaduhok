@@ -1,11 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Edit Nilai Siswa')
 @section('page-title', 'Edit Nilai Siswa')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 @section('styles')
     @vite(['resources/css/wali-kelas/nilai/edit.css', 'resources/js/wali-kelas/nilai/edit.js'])
 @endsection

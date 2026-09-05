@@ -1,0 +1,36 @@
+@startuml activity-kelola-landing-page
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Admin|
+start
+:Mengakses Menu\nKelola Landing Page;
+
+|Sistem|
+:Menampilkan Halaman\nManajemen Landing Page;
+
+|Admin|
+:Memilih Bagian Konten\n(Profil, Kontak, Fasilitas, dll);
+:Mengubah Data/Mengunggah Gambar;
+:Klik Tombol "Simpan Perubahan";
+
+|Sistem|
+if (Proses Simpan Berhasil?) then (Ya)
+    |Sistem|
+    :Menyimpan Pembaruan Data;
+
+    |Sistem|
+    :Menampilkan Pesan\n"Pembaruan Berhasil";
+else (Tidak)
+    |Sistem|
+    :Menampilkan Pesan Error\n(File Terlalu Besar / Format Salah);
+    |Admin|
+    :Memperbaiki Input Data;
+    note right: Kembali Mengubah Data
+endif
+
+|Admin|
+:Melihat Perubahan\ndi Landing Page (Preview);
+stop
+@enduml

@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Arsip Kelas: ' . $kelas->nama_kelas)
 @section('page-title', 'Arsip Kelas: ' . $kelas->nama_kelas)
 @section('page-subtitle', 'TA ' . ($kelas->tahunAjaran->nama_tahun_ajaran ?? '-') . ' · ' . ($kelas->cabang->nama_cabang ?? '-'))
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/arsip/show.css', 'resources/js/wali-kelas/arsip/show.js'])

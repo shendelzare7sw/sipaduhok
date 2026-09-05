@@ -1,11 +1,8 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Tagihan & Pembayaran - ' . $siswa->nama_lengkap)
 @section('page-title', 'Tagihan & Pembayaran')
 
-@section('sidebar-menu')
-    @include('wali-siswa.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-siswa/tagihan/index.css'])

@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Input Pembayaran Tunai')
 @section('page-title', 'Input Pembayaran Tunai')
 @section('page-subtitle', 'Input pembayaran tunai di loket sekolah')
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/bendahara/pembayaran/create.css'])

@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Rekap Tagihan per Kelas')
 @section('page-title', 'Rekap Tagihan per Kelas')
 @section('page-subtitle', 'Rekap total tagihan dan pembayaran setiap kelas')
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
 <style>

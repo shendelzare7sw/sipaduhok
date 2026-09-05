@@ -1,4 +1,4 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @php
     $kontenLabel = match($kontenType) {
@@ -13,9 +13,6 @@
 @section('page-title', 'Salin Konten Arsip')
 @section('page-subtitle', 'Pilih kelas + mata pelajaran tujuan di TA aktif')
 
-@section('sidebar-menu')
-    @include('guru.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/guru/lms/arsip/form-salin.css'])

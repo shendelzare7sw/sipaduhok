@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Buat Tagihan Massal')
 @section('page-title', 'Buat Tagihan Massal')
 @section('page-subtitle', 'Buat tagihan untuk seluruh siswa dalam satu atau lebih kelas')
 
-@section('sidebar-menu')
-    @include('bendahara.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/bendahara/tagihan/bulk-create.css'])

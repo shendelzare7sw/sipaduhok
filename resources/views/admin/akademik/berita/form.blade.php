@@ -1,206 +1,47 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', isset($berita) ? 'Edit Berita' : 'Tambah Berita')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/admin/akademik/berita/form.css'])
-@endsection
+@section('page-title', isset($berita) ? 'Edit Berita' : 'Tambah Berita')
+@section('page-subtitle', 'Siapkan ringkasan dan tautan berita untuk kanal publik')
 
 @section('content')
-<div class="admin-news-form-page">
-<div class="admin-news-form-inner">
-    <div class="row-custom">
-        
-        {{-- KOLOM KIRI: FORM --}}
-        <div class="col-main">
-            <div class="card">
-                <div class="card-header">
-                    <h5>
-                        <i class="fas {{ isset($berita) ? 'fa-edit' : 'fa-plus-circle' }} icon-primary"></i>
-                        {{ isset($berita) ? 'Edit Data Berita' : 'Tambah Berita Baru' }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form action="{{ isset($berita) ? route('admin.akademik.berita.update', $berita->id) : route('admin.akademik.berita.store') }}" 
-                          method="POST" 
-                          enctype="multipart/form-data">
-                        @csrf
-                        @if(isset($berita))
-                            @method('PUT')
-                        @endif
-                        <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.akademik.berita.index')) }}">
+@php
+    $routeBase = request()->routeIs('sekretaris.*') ? 'sekretaris' : 'admin.akademik';
+    $isEdit = isset($berita);
+    $inputClass = 'mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20';
+    $textareaClass = 'mt-1.5 min-h-28 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20';
+    $currentImage = $isEdit && $berita->gambar_thumbnail ? $berita->gambar_url : null;
+@endphp
 
-                        <div class="form-group">
-                            <label class="form-label">Judul Berita <span class="required">*</span></label>
-                            <input type="text" 
-                                   name="judul" 
-                                   class="form-control @error('judul') is-invalid @enderror" 
-                                   value="{{ old('judul', $berita->judul ?? '') }}" 
-                                   placeholder="Masukkan judul berita..."
-                                   required>
-                            @error('judul') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
+<div class="min-w-0 w-full">
+    <div class="mb-4 flex items-center gap-3"><a href="{{ url()->previous(route($routeBase . '.berita.index')) }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 no-underline hover:bg-slate-200" aria-label="Kembali"><i class="fas fa-arrow-left" aria-hidden="true"></i></a><div class="min-w-0"><h2 class="text-base font-extrabold text-slate-900">{{ $isEdit ? 'Perbarui berita' : 'Berita baru' }}</h2><p class="mt-0.5 text-xs text-slate-500">Kolom bertanda bintang wajib diisi.</p></div></div>
 
-                        <div class="row-custom compact">
-                            <div class="form-row-field">
-                                <div class="form-group">
-                                    <label class="form-label">Kategori <span class="required">*</span></label>
-                                    <select name="kategori" class="form-control @error('kategori') is-invalid @enderror" required>
-                                        <option value="">-- Pilih --</option>
-                                        @foreach(['Kegiatan', 'Prestasi', 'Pengumuman', 'Artikel', 'Ujian'] as $cat)
-                                            <option value="{{ strtolower($cat) }}" {{ (old('kategori', $berita->kategori ?? '') == strtolower($cat)) ? 'selected' : '' }}>
-                                                {{ $cat }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('kategori') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-                            <div class="form-row-field">
-                                <div class="form-group">
-                                    <label class="form-label">Tanggal Berita <span class="required">*</span></label>
-                                    <input type="date" 
-                                           name="tanggal_berita" 
-                                           class="form-control @error('tanggal_berita') is-invalid @enderror"
-                                           value="{{ old('tanggal_berita', isset($berita) ? $berita->tanggal_berita->format('Y-m-d') : date('Y-m-d')) }}" 
-                                           required>
-                                    @error('tanggal_berita') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-                        </div>
+    @if($errors->any())<section class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-800"><p class="font-extrabold"><i class="fas fa-exclamation-circle mr-1.5" aria-hidden="true"></i>Periksa kembali data berikut:</p><ul class="mt-2 list-disc space-y-1 pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></section>@endif
 
-                        <div class="form-group">
-                            <label class="form-label">Deskripsi Singkat (Preview) <span class="required">*</span></label>
-                            <textarea name="deskripsi_singkat" 
-                                      rows="3" 
-                                      class="form-control @error('deskripsi_singkat') is-invalid @enderror" 
-                                      required>{{ old('deskripsi_singkat', $berita->deskripsi_singkat ?? '') }}</textarea>
-                            <div class="form-text">Ringkasan yang akan muncul di kartu berita halaman depan.</div>
-                            @error('deskripsi_singkat') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
+    <form action="{{ $isEdit ? route($routeBase . '.berita.update', $berita->id) : route($routeBase . '.berita.store') }}" method="POST" enctype="multipart/form-data" class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]" x-data="{ preview: @js($currentImage) }">
+        @csrf
+        @if($isEdit) @method('PUT') @endif
+        <input type="hidden" name="_return_url" value="{{ url()->previous(route($routeBase . '.berita.index')) }}">
 
-                        <div class="form-group">
-                            <label class="form-label">URL Berita Lengkap <span class="required">*</span></label>
-                            <div class="url-input-wrap">
-                                <i class="fas fa-link url-input-icon"></i>
-                                <input type="url" 
-                                       name="url_berita" 
-                                       class="form-control url-input @error('url_berita') is-invalid @enderror"
-                                       value="{{ old('url_berita', $berita->url_berita ?? '') }}" 
-                                       placeholder="https://website-luar.com/berita/..."
-                                       required>
-                            </div>
-                            @error('url_berita') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
+        <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="border-b border-slate-200 p-4 sm:p-5"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-newspaper text-brand-600" aria-hidden="true"></i>Konten berita</h3><p class="mt-1 text-xs text-slate-500">Berita ini berupa kartu ringkas yang mengarah ke artikel lengkap.</p></header>
+            <div class="grid gap-5 p-4 sm:p-5">
+                <label class="block text-xs font-bold text-slate-700">Judul berita <span class="text-red-500">*</span><input type="text" name="judul" value="{{ old('judul', $berita->judul ?? '') }}" maxlength="255" required placeholder="Masukkan judul berita" class="{{ $inputClass }} @error('judul') !border-red-400 @enderror">@error('judul')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
 
-                        <div class="form-group">
-                            <label class="form-label">Gambar Thumbnail <span class="required">*</span></label>
-                            
-                            {{-- Area Klik untuk Upload --}}
-                            <div class="image-upload-container" data-upload-trigger role="button" tabindex="0">
-                                
-                                {{-- ID fileInput dipanggil oleh Javascript di bawah --}}
-                                <input type="file" 
-                                       name="gambar_thumbnail" 
-                                       id="fileInput"
-                                       accept="image/*"
-                                       class="news-file-input">
-                                
-                                {{-- Placeholder --}}
-                                <div id="uploadPlaceholder" class="{{ (isset($berita) && $berita->gambar_thumbnail) ? 'is-hidden' : '' }}">
-                                    <i class="fas fa-cloud-upload-alt upload-placeholder-icon"></i>
-                                    <p class="upload-title">Klik untuk upload gambar</p>
-                                    <p class="upload-hint">Format: JPG, PNG (Max: 2MB)</p>
-                                </div>
+                <div class="grid gap-4 sm:grid-cols-2"><label class="block text-xs font-bold text-slate-700">Kategori <span class="text-red-500">*</span><select name="kategori" required class="{{ $inputClass }} @error('kategori') !border-red-400 @enderror"><option value="">Pilih kategori</option>@foreach(($kategoriOptions ?? ['kegiatan' => 'Kegiatan', 'prestasi' => 'Prestasi', 'pengumuman' => 'Pengumuman', 'artikel' => 'Artikel', 'ujian' => 'Ujian']) as $value => $label)<option value="{{ $value }}" {{ old('kategori', $berita->kategori ?? '') === $value ? 'selected' : '' }}>{{ $label }}</option>@endforeach</select>@error('kategori')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label><label class="block text-xs font-bold text-slate-700">Tanggal berita <span class="text-red-500">*</span><input type="date" name="tanggal_berita" value="{{ old('tanggal_berita', $isEdit ? $berita->tanggal_berita?->format('Y-m-d') : now()->format('Y-m-d')) }}" required class="{{ $inputClass }} @error('tanggal_berita') !border-red-400 @enderror">@error('tanggal_berita')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label></div>
 
-                                {{-- Preview Image Box --}}
-                                <div id="imagePreviewBox" class="preview-box {{ (isset($berita) && $berita->gambar_thumbnail) ? 'is-visible' : '' }}">
-                                    <img id="previewImg" 
-                                         src="{{ (isset($berita) && $berita->gambar_thumbnail) ? $berita->gambar_url : '#' }}" 
-                                         alt="Preview">
-                                </div>
-                            </div>
-                            @if(isset($berita))
-                                <div class="form-text text-center mt-2">Biarkan kosong jika tidak ingin mengubah gambar.</div>
-                            @endif
-                            @error('gambar_thumbnail') <div class="invalid-feedback invalid-feedback-visible">{{ $message }}</div> @enderror
-                        </div>
+                <label class="block text-xs font-bold text-slate-700">Deskripsi singkat <span class="text-red-500">*</span><textarea name="deskripsi_singkat" maxlength="500" required placeholder="Ringkas isi berita dalam satu atau dua kalimat..." class="{{ $textareaClass }} @error('deskripsi_singkat') !border-red-400 @enderror">{{ old('deskripsi_singkat', $berita->deskripsi_singkat ?? '') }}</textarea><span class="mt-1.5 block text-[11px] font-normal text-slate-500">Ditampilkan sebagai cuplikan pada kartu berita.</span>@error('deskripsi_singkat')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
 
-                        <div class="form-group news-options-panel">
-                            <div class="row-custom compact">
-                                <div class="form-row-field">
-                                    <label class="form-label">Status Publikasi</label>
-                                    <select name="status" class="form-control">
-                                        <option value="draft" {{ old('status', $berita->status ?? '') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                        <option value="aktif" {{ old('status', $berita->status ?? 'aktif') == 'aktif' ? 'selected' : '' }}>Aktif (Tayang)</option>
-                                        <option value="arsip" {{ old('status', $berita->status ?? '') == 'arsip' ? 'selected' : '' }}>Arsip</option>
-                                    </select>
-                                </div>
-                                <div class="form-row-field">
-                                    <label class="form-label">Urutan Tampil</label>
-                                    <input type="number" name="urutan_tampil" class="form-control" value="{{ old('urutan_tampil', $berita->urutan_tampil ?? 999) }}">
-                                </div>
-                            </div>
-                            <div class="featured-toggle-wrap">
-                                <label class="featured-toggle-label">
-                                    <input type="checkbox" name="is_featured" value="1" class="featured-toggle"
-                                           {{ old('is_featured', $berita->is_featured ?? false) ? 'checked' : '' }}>
-                                    <span class="featured-toggle-text">Jadikan Berita Utama (Unggulan)</span>
-                                </label>
-                            </div>
-                        </div>
+                <label class="block text-xs font-bold text-slate-700">URL berita lengkap <span class="text-red-500">*</span><span class="relative mt-1.5 block"><i class="fas fa-link pointer-events-none absolute left-3 top-3.5 text-xs text-slate-400" aria-hidden="true"></i><input type="url" name="url_berita" value="{{ old('url_berita', $berita->url_berita ?? '') }}" maxlength="500" required placeholder="https://..." class="h-11 w-full rounded-xl border border-slate-200 bg-white !pl-10 pr-3 text-sm text-slate-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 @error('url_berita') !border-red-400 @enderror"></span>@error('url_berita')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</label>
 
-                        <div class="form-footer-actions">
-                            <a href="{{ url()->previous(route('admin.akademik.berita.index')) }}" class="btn btn-secondary">Batal</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ isset($berita) ? 'Update Perubahan' : 'Simpan Berita' }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                <div><p class="text-xs font-bold text-slate-700">Gambar thumbnail <span class="text-red-500">*</span></p><label class="mt-1.5 block cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition hover:border-brand-400 hover:bg-brand-50/30"><input type="file" name="gambar_thumbnail" accept="image/jpeg,image/png" class="sr-only" {{ $isEdit ? '' : 'required' }} @change="const file = $event.target.files[0]; if (file) preview = URL.createObjectURL(file)"><div x-show="!preview" class="flex min-h-48 flex-col items-center justify-center p-6 text-center"><span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><i class="fas fa-cloud-arrow-up text-lg" aria-hidden="true"></i></span><p class="mt-3 text-sm font-extrabold text-slate-800">Pilih gambar</p><p class="mt-1 text-[11px] text-slate-500">JPG atau PNG, maksimal 2 MB</p></div><img x-show="preview" :src="preview" alt="Pratinjau thumbnail" class="aspect-[16/7] w-full object-cover"></label>@if($isEdit)<p class="mt-1.5 text-[11px] text-slate-500">Biarkan kosong untuk mempertahankan gambar saat ini.</p>@endif @error('gambar_thumbnail')<span class="mt-1 block text-[11px] font-semibold text-red-600">{{ $message }}</span>@enderror</div>
+
+                <div class="grid gap-4 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2"><label class="block text-xs font-bold text-slate-700">Status publikasi<select name="status" required class="{{ $inputClass }}">@foreach(($statusOptions ?? ['draft' => 'Draft', 'aktif' => 'Aktif', 'arsip' => 'Arsip']) as $value => $label)<option value="{{ $value }}" {{ old('status', $berita->status ?? 'aktif') === $value ? 'selected' : '' }}>{{ $label }}</option>@endforeach</select></label><label class="block text-xs font-bold text-slate-700">Urutan tampil<input type="number" name="urutan_tampil" min="1" max="999" value="{{ old('urutan_tampil', $berita->urutan_tampil ?? 999) }}" required class="{{ $inputClass }}"></label><label class="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 sm:col-span-2"><input type="checkbox" name="is_featured" value="1" class="mt-0.5 h-4 w-4 rounded border-amber-300 text-brand-600 focus:ring-brand-500" {{ old('is_featured', $berita->is_featured ?? false) ? 'checked' : '' }}><span><span class="block text-xs font-extrabold text-amber-900">Jadikan berita unggulan</span><span class="mt-0.5 block text-[11px] leading-4 text-amber-700">Berita memperoleh penempatan utama pada kanal publik.</span></span></label></div>
             </div>
-        </div>
+            <footer class="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50/70 p-4 sm:flex-row sm:justify-end"><a href="{{ url()->previous(route($routeBase . '.berita.index')) }}" class="inline-flex h-11 items-center justify-center rounded-xl bg-white px-5 text-xs font-bold text-slate-700 no-underline ring-1 ring-inset ring-slate-200 hover:bg-slate-100">Batal</a><button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-xs font-bold text-white hover:bg-brand-700"><i class="fas fa-save" aria-hidden="true"></i>{{ $isEdit ? 'Simpan perubahan' : 'Simpan berita' }}</button></footer>
+        </section>
 
-        {{-- KOLOM KANAN: INFO PANEL --}}
-        <div class="col-side">
-            <div class="card">
-                <div class="card-header guide-card-header">
-                    <h5 class="guide-card-title">
-                        <i class="fas fa-info-circle"></i> Panduan
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="guide-intro">Cara mengisi berita:</p>
-                    <ol class="guide-list">
-                        <li><strong>Judul:</strong> Gunakan judul yang singkat dan menarik.</li>
-                        <li><strong>Kategori:</strong> Pilih kelompok berita yang sesuai agar mudah dicari.</li>
-                        <li><strong>Deskripsi Singkat:</strong> Tulis 1-2 kalimat teaser untuk menarik pembaca.</li>
-                        <li><strong>URL:</strong> Masukkan link lengkap ke website sumber berita.</li>
-                        <li><strong>Gambar:</strong> Upload gambar landscape (mendatar) agar tampilan rapi.</li>
-                    </ol>
-
-                    <div class="guide-divider"></div>
-
-                    <p class="guide-intro">Status:</p>
-                    <ul class="guide-list guide-list-disc">
-                        <li><strong>Draft:</strong> Disimpan tapi belum muncul di web.</li>
-                        <li><strong>Aktif:</strong> Langsung muncul di website.</li>
-                        <li><strong>Unggulan:</strong> Muncul di slider/bagian atas halaman depan.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-    </div>
+        <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 xl:sticky xl:top-24"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-lightbulb text-amber-500" aria-hidden="true"></i>Sebelum menerbitkan</h3><ol class="mt-4 space-y-4 text-xs leading-5 text-slate-600"><li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[10px] font-extrabold text-brand-700">1</span><span>Pastikan judul dan ringkasan mudah dipahami tanpa membuka tautan.</span></li><li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[10px] font-extrabold text-brand-700">2</span><span>Gunakan gambar mendatar agar kartu tidak terpotong pada ponsel.</span></li><li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[10px] font-extrabold text-brand-700">3</span><span>Uji URL sumber dan pilih Draft jika konten belum siap tayang.</span></li></ol><div class="mt-5 rounded-xl bg-emerald-50 p-3 text-xs leading-5 text-emerald-800"><i class="fas fa-circle-check mr-1" aria-hidden="true"></i>Berita aktif dan unggulan dapat memicu notifikasi bagi pengguna.</div></aside>
+    </form>
 </div>
-</div>
-
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/akademik/berita/form.js'])
 @endsection

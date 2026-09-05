@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Manajemen Siswa')
 @section('page-title', 'Manajemen Siswa')
 @section('page-subtitle', 'Kelola data dan penempatan kelas siswa di cabang Anda')
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/waka/manajemen-siswa/index.css'])

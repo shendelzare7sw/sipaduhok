@@ -1,0 +1,49 @@
+@startuml activity-validasi-rapor-tingkat-akhir
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Ketua PKBM)|
+start
+:Mengakses Menu\n"Validasi Rapor Tingkat Akhir";
+
+|Sistem|
+:Menarik Data Siswa yang Telah Lulus\nValidasi dari Wali Kelas (Tahap 1);
+:Menampilkan Daftar Siswa\n(Info Kelas, Status Validasi);
+
+|Pengguna (Ketua PKBM)|
+:Memilih Filter Tampilan (Opsional)\n(Misal: Berdasarkan Cabang, Kelas, atau Jenjang);
+:Membuka Pratinjau (Preview) Rapor Siswa\nuntuk Mengevaluasi Nilai Akhir;
+
+:Memilih Metode Validasi\n(Decision);
+
+if (Metode?) then (Validasi Individual)
+    :Klik Tombol "Validasi" pada baris Siswa Tertentu;
+
+    |Sistem|
+    :Memperbarui Kolom "validasi_rapor_ketua"\nmenjadi True;
+    :Mengirim Notifikasi Persetujuan\nke Wali Kelas & Bendahara;
+
+elseif (Metode?) then (Validasi Massal / Bulk)
+    |Pengguna (Ketua PKBM)|
+    :Mencentang Banyak Siswa sekaligus\natau Klik "Validasi Semua";
+
+    |Sistem|
+    :Mengeksekusi Pembaruan Status\nsecara Massal (Looping);
+    :Mengirim Notifikasi Kolektif;
+
+elseif (Metode?) then (Batalkan Validasi)
+    |Pengguna (Ketua PKBM)|
+    :Klik Tombol "Batalkan"\npada Siswa yang sudah tervalidasi;
+
+    |Sistem|
+    :Mereset Status Validasi Ketua;
+    :Mereset (Cascade) Status Validasi Bendahara;
+    :Mengirim Notifikasi Pembatalan\nke Wali Kelas;
+endif
+
+|Pengguna (Ketua PKBM)|
+:Menerima Pesan Konfirmasi (Sukses);\nSistem merekam Nama & Waktu Validasi;
+:Selesai Mengeksekusi Validasi Rapor;
+stop
+@enduml

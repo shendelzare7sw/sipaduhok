@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Dashboard Wali Kelas')
 @section('page-title', 'Dashboard Wali Kelas')
 @section('page-subtitle', 'Kelola kelas dan siswa Anda')
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/dashboard.css', 'resources/js/wali-kelas/dashboard.js'])

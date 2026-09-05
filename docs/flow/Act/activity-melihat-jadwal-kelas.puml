@@ -1,0 +1,38 @@
+@startuml activity-melihat-jadwal-kelas
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Siswa / Guru / Wali Kelas)|
+start
+:Mengakses Menu\n"Jadwal Kelas / Jadwal Mengajar";
+
+|Sistem|
+:Mengidentifikasi Peran (Role) Pengguna\nyang Sedang Mengakses Sistem;
+
+if (Role Pengguna?) then (Siswa)
+    :Menarik Data Jadwal Pelajaran\nberdasarkan ID Kelas milik Siswa;
+elseif (Role Pengguna?) then (Guru Pengajar)
+    :Menarik Data Jadwal Mengajar\nberdasarkan ID Guru (Lintas Kelas);
+elseif (Role Pengguna?) then (Wali Kelas)
+    :Menarik Data Jadwal Pelajaran\nberdasarkan Kelas yang Diampunya;
+endif
+
+:Menyusun Data ke dalam Format Tabel\natau Kalender (Senin - Minggu);
+:Menampilkan Halaman Jadwal Pelajaran;
+
+|Pengguna (Siswa / Guru / Wali Kelas)|
+:Membaca Jadwal Pelajaran\n(Mata Pelajaran, Jam, Ruangan, Nama Guru);
+
+if (Terdapat Opsi Cetak/Filter?) then (Ya)
+    :Memilih Filter Hari atau Klik "Cetak";
+
+    |Sistem|
+    :Memperbarui Tampilan (On-Memory)\natau Meng-generate Dokumen Cetak;
+else (Tidak)
+endif
+
+|Pengguna (Siswa / Guru / Wali Kelas)|
+:Selesai Melihat Jadwal Kelas;
+stop
+@enduml

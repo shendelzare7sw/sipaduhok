@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Detail Presensi Harian')
 @section('page-title', 'Detail Presensi Harian')
 @section('page-subtitle', 'Laporan presensi tanggal ' . \Carbon\Carbon::parse($tanggal)->translatedFormat('d F Y'))
 
-@section('sidebar-menu')
-    @include('wali-kelas.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/wali-kelas/presensi/show-harian.css', 'resources/js/wali-kelas/presensi/show-harian.js'])

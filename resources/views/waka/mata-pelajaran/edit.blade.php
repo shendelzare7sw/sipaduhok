@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Edit Mata Pelajaran')
 @section('page-title', 'Edit Mata Pelajaran')
 @section('page-subtitle', $mataPelajaran->nama_mapel)
 
-@section('sidebar-menu')
-    @include('waka.partials.sneat-sidebar-menu')
-@endsection
 
 @section('content')
 <div class="row justify-content-center">

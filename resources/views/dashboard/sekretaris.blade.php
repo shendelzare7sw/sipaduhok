@@ -1,225 +1,110 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Dashboard Sekretaris')
-
 @section('page-title', 'Dashboard Sekretaris')
-@section('page-subtitle', 'Kelola Kalender Akademik, Pengumuman, dan Flyer')
-
-@section('sidebar-menu')
-    @include('sekretaris.partials.sneat-sidebar-menu')
-@endsection
-
-@section('styles')
-    @vite(['resources/css/dashboard/sekretaris.css'])
-@endsection
+@section('page-subtitle', 'Kelola agenda dan publikasi sekolah')
 
 @section('content')
-<div class="sekretaris-dashboard-page"
-     data-fullcalendar-src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"
-     data-calendar-monthly-url="{{ route('sekretaris.kalender.bulanan') }}"
-     data-calendar-edit-base-url="{{ url('sekretaris/kalender') }}">
+@php
+    $workflows = [
+        ['route' => 'sekretaris.kalender.index', 'icon' => 'fa-calendar-days', 'title' => 'Kalender Akademik', 'description' => 'Susun agenda utama dan atur visibilitasnya.', 'tone' => 'bg-blue-50 text-blue-700'],
+        ['route' => 'sekretaris.pengumuman.index', 'icon' => 'fa-bullhorn', 'title' => 'Pengumuman', 'description' => 'Sampaikan informasi penting kepada warga sekolah.', 'tone' => 'bg-cyan-50 text-cyan-700'],
+        ['route' => 'sekretaris.flyer.index', 'icon' => 'fa-images', 'title' => 'Flyer / Iklan', 'description' => 'Atur materi visual beserta periode tayangnya.', 'tone' => 'bg-amber-50 text-amber-700'],
+        ['route' => 'sekretaris.berita.index', 'icon' => 'fa-newspaper', 'title' => 'Berita', 'description' => 'Kelola tautan berita dan konten unggulan.', 'tone' => 'bg-emerald-50 text-emerald-700'],
+    ];
+    $statCards = [
+        ['label' => 'Total agenda', 'value' => $stats['totalKalender'] ?? 0, 'icon' => 'fa-calendar', 'tone' => 'bg-blue-50 text-blue-600'],
+        ['label' => 'Agenda aktif', 'value' => $stats['kegiatanAktif'] ?? 0, 'icon' => 'fa-circle-check', 'tone' => 'bg-emerald-50 text-emerald-600'],
+        ['label' => 'Pengumuman aktif', 'value' => $stats['pengumumanAktif'] ?? 0, 'icon' => 'fa-bullhorn', 'tone' => 'bg-cyan-50 text-cyan-600'],
+        ['label' => 'Flyer & berita', 'value' => ($stats['flyerAktif'] ?? 0) + ($stats['beritaAktif'] ?? 0), 'icon' => 'fa-photo-film', 'tone' => 'bg-violet-50 text-violet-600'],
+    ];
+@endphp
 
-    <!-- Top Header & Date -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center align-items-start gap-3 mb-4">
-        <h5 class="mb-0 fw-bold text-dark dashboard-section-title">
-            <i class="fas fa-clipboard-list me-2 text-primary"></i> Ringkasan Sekretariat
-        </h5>
-        
-        <div class="d-flex flex-wrap gap-2">
-            @if(isset($tahunAjaranAktif) && $tahunAjaranAktif)
-                <span class="badge bg-white text-dark px-3 py-2 fs-6 rounded-pill shadow-sm border dashboard-date-badge">
-                    <i class="fas fa-flag-checkered me-2 text-primary"></i> TA: {{ $tahunAjaranAktif->nama_tahun_ajaran }}
-                </span>
-            @endif
-            <span class="badge bg-white text-primary px-3 py-2 fs-6 rounded-pill shadow-sm border dashboard-date-badge">
-                <i class="fas fa-calendar-alt me-2"></i> {{ now()->translatedFormat('d F Y') }}
-            </span>
+<div class="min-w-0 w-full space-y-5">
+    <section class="overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-blue-600 to-cyan-500 text-white shadow-lg shadow-brand-900/15">
+        <div class="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+            <div class="min-w-0">
+                <p class="text-xs font-bold text-blue-100">Selamat datang, {{ auth()->user()->name }}</p>
+                <h2 class="mt-1 text-xl font-extrabold !text-white sm:text-2xl">Apa yang perlu dipublikasikan hari ini?</h2>
+                <p class="mt-2 max-w-2xl text-xs leading-5 text-blue-50/90 sm:text-sm">Mulai dari agenda sekolah, lalu teruskan informasi penting melalui pengumuman, flyer, atau berita.</p>
+                <div class="mt-4 flex flex-wrap gap-2 text-[10px] font-bold">
+                    <span class="rounded-full bg-white/15 px-3 py-1.5 ring-1 ring-inset ring-white/20"><i class="fas fa-graduation-cap mr-1.5" aria-hidden="true"></i>{{ $tahunAjaranAktif->nama_tahun_ajaran ?? 'Belum ada tahun ajaran aktif' }}</span>
+                    <span class="rounded-full bg-white/15 px-3 py-1.5 ring-1 ring-inset ring-white/20"><i class="fas fa-calendar-day mr-1.5" aria-hidden="true"></i>{{ now()->translatedFormat('d F Y') }}</span>
+                </div>
+            </div>
+            <a href="{{ route('sekretaris.kalender.create') }}" class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-extrabold text-brand-700 no-underline shadow-sm transition hover:bg-blue-50">
+                <i class="fas fa-plus" aria-hidden="true"></i>Tambah agenda
+            </a>
         </div>
-    </div>
+    </section>
 
-    <!-- Quick Stats -->
-    <div class="row g-4 mb-4">
-        <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-card border-0 shadow-sm">
-                <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-label-primary">
-                        <i class="fas fa-calendar"></i>
+    <section class="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
+        @foreach($statCards as $stat)
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-xl font-extrabold text-slate-900 sm:text-2xl">{{ number_format($stat['value']) }}</p>
+                        <p class="mt-1 text-[10px] font-bold uppercase leading-4 tracking-wide text-slate-500">{{ $stat['label'] }}</p>
                     </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $stats['totalKalender'] }}</div>
-                        <div class="stat-label">Total Kegiatan</div>
-                    </div>
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $stat['tone'] }}"><i class="fas {{ $stat['icon'] }}" aria-hidden="true"></i></span>
                 </div>
-            </div>
-        </div>
+            </article>
+        @endforeach
+    </section>
 
-        <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-card border-0 shadow-sm">
-                <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-label-success">
-                        <i class="fas fa-play-circle"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $stats['kegiatanAktif'] }}</div>
-                        <div class="stat-label">Kegiatan Aktif</div>
-                    </div>
+    <div class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 sm:p-5">
+                <div class="min-w-0">
+                    <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fas fa-clock text-brand-600" aria-hidden="true"></i>Kegiatan hari ini</h2>
+                    <p class="mt-1 text-xs text-slate-500">Agenda aktif yang perlu dipantau sekarang.</p>
                 </div>
-            </div>
-        </div>
+                <a href="{{ route('sekretaris.kalender.index') }}" class="shrink-0 text-xs font-bold text-brand-700 no-underline hover:text-brand-800">Lihat kalender</a>
+            </header>
 
-        <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-card border-0 shadow-sm">
-                <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-label-info">
-                        <i class="fas fa-bullhorn"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $stats['pengumumanAktif'] }}</div>
-                        <div class="stat-label">Pengumuman</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-card border-0 shadow-sm">
-                <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-label-warning">
-                        <i class="fas fa-newspaper"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $stats['flyerAktif'] + $stats['beritaAktif'] }}</div>
-                        <div class="stat-label">Flyer & Berita</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Layout -->
-    <div class="row g-4 mb-4">
-        <!-- Calendar Section -->
-        <div class="col-lg-8">
-            <div class="dashboard-card h-100 flex-column d-flex">
-                <div class="card-header-clean">
-                    <h5 class="card-title-clean">
-                        <i class="fas fa-calendar-alt text-primary card-title-icon"></i> Kalender Akademik Utama
-                    </h5>
-                    <a href="{{ route('sekretaris.kalender.create') }}" class="btn btn-sm btn-primary shadow-sm btn-action">
-                        <i class="fas fa-plus mr-1"></i> Tambah
-                    </a>
-                </div>
-                <div class="card-body p-0 flex-grow-1">
-                    <div id="calendar"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Info & Activities -->
-        <div class="col-lg-4 d-flex flex-column gap-4">
-            <!-- Info Sistem Alert -->
-            <div class="alert alert-primary d-flex align-items-center rounded-3 shadow-none border-0 m-0 system-info-alert" role="alert">
-                <i class="fas fa-robot fs-4 me-3 text-primary"></i>
-                <div class="system-info-text">
-                    <strong>Info Sistem:</strong> Kegiatan kalender otomatis menjadi <strong class="text-primary">Pengumuman</strong> jika waktu pengerjaan kurang dari 3 hari.
-                </div>
-            </div>
-
-            <!-- Akses Modul Utama -->
-            <div class="dashboard-card border-0 shadow-sm">
-                <div class="card-header-clean border-bottom">
-                    <h5 class="card-title-clean">
-                        <i class="fas fa-bolt text-warning card-title-icon"></i> Akses Modul Utama
-                    </h5>
-                </div>
-                <div class="card-body p-3">
-                    <div class="quick-links-grid">
-                        <a href="{{ route('sekretaris.kalender.index') }}" class="quick-link-item">
-                            <i class="fas fa-calendar-alt text-primary"></i>
-                            <span class="quick-link-text">Kelola<br>Kalender</span>
-                        </a>
-                        <a href="{{ route('sekretaris.pengumuman.index') }}" class="quick-link-item">
-                            <i class="fas fa-bullhorn text-info"></i>
-                            <span class="quick-link-text">Kelola<br>Pengumuman</span>
-                        </a>
-                        <a href="{{ route('sekretaris.flyer.index') }}" class="quick-link-item">
-                            <i class="fas fa-image text-warning"></i>
-                            <span class="quick-link-text">Publikasi<br>Flyer</span>
-                        </a>
-                        <a href="{{ route('sekretaris.berita.index') }}" class="quick-link-item">
-                            <i class="fas fa-newspaper text-success"></i>
-                            <span class="quick-link-text">Portal<br>Berita</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kegiatan Hari Ini -->
-            <div class="dashboard-card flex-grow-1 d-flex flex-column">
-                <div class="card-header-clean border-bottom">
-                    <h5 class="card-title-clean">
-                        <i class="fas fa-clock text-success card-title-icon"></i> Kegiatan Hari Ini
-                    </h5>
-                </div>
-                <div class="card-body p-0 flex-grow-1 table-fixed-height">
-                    @if($kegiatanHariIni->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-sm table-hover mb-0">
-                                <tbody>
-                                    @foreach($kegiatanHariIni as $kegiatan)
-                                    <tr>
-                                        <td class="ps-4 py-3 border-0 border-bottom">
-                                            <div class="fw-bold text-dark">{{ $kegiatan->nama_kegiatan }}</div>
-                                            <div class="small text-muted mt-1"><i class="far fa-clock me-1"></i>{{ $kegiatan->waktu_mulai ?? 'Seharian' }}</div>
-                                        </td>
-                                        <td class="text-end pe-4 py-3 align-middle border-0 border-bottom">
-                                            <a href="{{ route('sekretaris.kalender.edit', $kegiatan->id) }}" class="btn btn-sm btn-outline-warning shadow-sm">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+            <div class="divide-y divide-slate-100">
+                @forelse($kegiatanHariIni as $kegiatan)
+                    <article class="flex items-center gap-3 p-4 sm:px-5">
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-brand-600"><i class="fas fa-calendar-check" aria-hidden="true"></i></span>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="truncate text-sm font-extrabold text-slate-900" title="{{ $kegiatan->nama_kegiatan }}">{{ $kegiatan->nama_kegiatan }}</h3>
+                            <p class="mt-1 text-[11px] text-slate-500"><i class="far fa-clock mr-1" aria-hidden="true"></i>{{ $kegiatan->waktu_mulai ? IlluminateSupportStr::substr($kegiatan->waktu_mulai, 0, 5) : 'Seharian' }}</p>
                         </div>
-                    @else
-                        <div class="text-center py-5 d-flex flex-column align-items-center justify-content-center h-100">
-                            <div class="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mb-3 empty-calendar-icon">
-                                <i class="fas fa-calendar-day fa-2x text-secondary"></i>
-                            </div>
-                            <p class="text-muted small mb-0 fw-medium">Tidak ada kegiatan hari ini</p>
-                        </div>
-                    @endif
-                </div>
+                        <a href="{{ route('sekretaris.kalender.edit', $kegiatan->id) }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 no-underline hover:bg-amber-100" aria-label="Edit {{ $kegiatan->nama_kegiatan }}"><i class="fas fa-edit" aria-hidden="true"></i></a>
+                    </article>
+                @empty
+                    <div class="px-5 py-12 text-center">
+                        <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400"><i class="fas fa-calendar-day" aria-hidden="true"></i></span>
+                        <h3 class="mt-4 text-sm font-extrabold text-slate-800">Tidak ada kegiatan hari ini</h3>
+                        <p class="mt-1 text-xs text-slate-500">Anda dapat menyiapkan agenda untuk hari berikutnya.</p>
+                    </div>
+                @endforelse
             </div>
-        </div>
-    </div>
-    <!-- Event Details Modal -->
-    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-light border-0">
-                    <h5 class="modal-title fw-bold text-primary" id="eventTitle">
-                        <i class="fas fa-calendar-check me-2"></i>Detail Kegiatan
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4" id="eventDetails">
-                    <!-- Event Details will be injected here -->
-                </div>
-                <div class="modal-footer bg-light border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <a href="#" id="editEventBtn" class="btn btn-warning">
-                        <i class="fas fa-edit me-1"></i> Edit
+        </section>
+
+        <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="border-b border-slate-200 p-4 sm:p-5">
+                <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fas fa-bolt text-amber-500" aria-hidden="true"></i>Pekerjaan utama</h2>
+                <p class="mt-1 text-xs text-slate-500">Pilih sesuai informasi yang ingin dikelola.</p>
+            </header>
+            <div class="grid gap-2 p-3 sm:grid-cols-2 xl:grid-cols-1">
+                @foreach($workflows as $item)
+                    <a href="{{ route($item['route']) }}" class="group flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 p-3 no-underline transition hover:border-brand-200 hover:bg-brand-50/40">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $item['tone'] }}"><i class="fas {{ $item['icon'] }}" aria-hidden="true"></i></span>
+                        <span class="min-w-0 flex-1">
+                            <span class="block text-xs font-extrabold text-slate-900">{{ $item['title'] }}</span>
+                            <span class="mt-0.5 block truncate text-[10px] text-slate-500" title="{{ $item['description'] }}">{{ $item['description'] }}</span>
+                        </span>
+                        <i class="fas fa-chevron-right text-[10px] text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-brand-500" aria-hidden="true"></i>
                     </a>
-                </div>
+                @endforeach
             </div>
-        </div>
+        </section>
     </div>
+
+    <section class="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-800">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 shadow-sm"><i class="fas fa-circle-info" aria-hidden="true"></i></span>
+        <p><strong>Alur yang disarankan:</strong> catat kegiatan pada Kalender Akademik terlebih dahulu. Jika informasi perlu menjangkau warga sekolah, lanjutkan ke Pengumuman atau materi publikasi yang sesuai.</p>
+    </section>
 </div>
-
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/dashboard/sekretaris.js'])
 @endsection

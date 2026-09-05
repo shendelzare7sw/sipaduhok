@@ -1,0 +1,68 @@
+@startuml activity-kelola-data-pengguna
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin)|
+start
+:Mengakses Menu Kelola\nData Pengguna;
+
+|Sistem|
+:Menampilkan Daftar\nData Pengguna;
+
+|Pengguna (Admin)|
+if (Pilih Aksi?) then (Tambah)
+    |Sistem|
+    :Menampilkan Form\nTambah Data Pengguna;
+    |Pengguna (Admin)|
+    :Isi Form Data Pengguna;
+    :Klik Tombol Simpan;
+    |Sistem|
+    if (Proses?) then (Berhasil)
+        :Memperbarui Data Pengguna;
+    else (Gagal)
+        :Menampilkan Pesan Error;
+        stop
+    endif
+
+elseif (Pilih Aksi?) then (Edit)
+    |Pengguna (Admin)|
+    :Klik ikon Edit pada\nData Pengguna;
+    |Sistem|
+    :Menampilkan Form\nEdit Data Pengguna;
+    |Pengguna (Admin)|
+    :Mengubah Data Pengguna;
+    :Klik Tombol Simpan;
+    |Sistem|
+    if (Proses?) then (Berhasil)
+        :Memperbarui Data Pengguna;
+    else (Gagal)
+        :Menampilkan Pesan Error;
+        stop
+    endif
+
+else (Hapus)
+    |Pengguna (Admin)|
+    :Klik ikon Hapus pada\nData Pengguna;
+    |Sistem|
+    :Menampilkan\nKonfirmasi Hapus;
+    |Pengguna (Admin)|
+    if (Hapus atau Batal?) then (Hapus)
+        |Sistem|
+        :Menghapus Data;
+        if (Proses?) then (Berhasil)
+            :Memperbarui Data Pengguna;
+        else (Gagal)
+            :Menampilkan Pesan Error;
+            stop
+        endif
+    else (Batal)
+        :Kembali ke Daftar\nData Pengguna;
+        stop
+    endif
+endif
+
+|Pengguna (Admin)|
+:Selesai;
+stop
+@enduml

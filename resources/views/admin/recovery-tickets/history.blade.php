@@ -1,201 +1,43 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Riwayat Tiket Pemulihan')
-@section('page-title', 'Manajemen Tiket Pemulihan')
-@section('page-subtitle', 'Riwayat tiket pemulihan akses akun')
-
-@section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
-@endsection
-@section('styles')
-    @vite(['resources/css/admin/recovery-tickets/history.css'])
-@endsection
+@section('page-title', 'Riwayat Pemulihan Akun')
+@section('page-subtitle', 'Audit permintaan yang telah selesai atau ditolak')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+@php
+    $ticketIds = $tickets->pluck('id')->map(fn ($id) => (string) $id)->values();
+    $typeLabels = ['lupa_username' => 'Lupa Username', 'lupa_password' => 'Lupa Password', 'lupa_keduanya' => 'Lupa Keduanya'];
+    $typeStyles = ['lupa_username' => 'bg-slate-100 text-slate-700', 'lupa_password' => 'bg-amber-50 text-amber-700', 'lupa_keduanya' => 'bg-red-50 text-red-700'];
+@endphp
 
-    {{-- Tab Navigation --}}
-    <ul class="nav nav-pills mb-3" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('admin.recovery-tickets.index') }}">
-                <i class="bx bx-list-ul me-1"></i> Antrean
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link active" href="{{ route('admin.recovery-tickets.history') }}">
-                <i class="bx bx-history me-1"></i> Riwayat
-                @if($tickets->total() > 0)
-                    <span class="badge bg-secondary ms-1">{{ $tickets->total() }}</span>
-                @endif
-            </a>
-        </li>
-    </ul>
+<div x-data="{ selected: [], allIds: @js($ticketIds) }" class="min-w-0 w-full space-y-4">
+    <header class="flex flex-wrap items-start justify-between gap-3">
+        <div><p class="text-xs font-bold uppercase tracking-wide text-brand-600">Audit bantuan akses</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Riwayat pemulihan akun</h2><p class="mt-1 text-sm text-slate-500">Tiket selesai disimpan sebagai jejak penanganan dan dapat dibersihkan bila tidak diperlukan.</p></div>
+        <nav class="flex rounded-xl bg-slate-100 p-1" aria-label="Navigasi tiket pemulihan"><a href="{{ route('admin.recovery-tickets.index') }}" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-600 no-underline">Antrean</a><a href="{{ route('admin.recovery-tickets.history') }}" class="rounded-lg bg-white px-3 py-2 text-xs font-bold text-brand-700 no-underline shadow-sm">Riwayat <span class="ml-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-slate-600">{{ $tickets->total() }}</span></a></nav>
+    </header>
 
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h5 class="mb-0">Riwayat Tiket Pemulihan</h5>
-            <small class="text-muted">Tiket yang sudah diselesaikan atau ditolak</small>
+    <form action="{{ route('admin.recovery-tickets.history.bulk-delete') }}" method="POST" data-confirm data-confirm-title="Hapus riwayat terpilih?" data-confirm-message="Riwayat yang dipilih akan dihapus permanen dan tidak dapat dipulihkan." data-confirm-text="Ya, hapus permanen" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        @csrf
+        <template x-for="id in selected" :key="id"><input type="hidden" name="ids[]" :value="id"></template>
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-5"><div><h3 class="font-extrabold text-slate-950">Tiket yang telah ditutup</h3><p class="mt-0.5 text-xs text-slate-500">{{ $tickets->total() }} riwayat ditemukan.</p></div><div class="flex items-center gap-2">@if($tickets->isNotEmpty())<label class="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-3 text-xs font-bold text-slate-600"><input type="checkbox" class="h-4 w-4 rounded border-slate-300 text-brand-600" :checked="allIds.length > 0 && selected.length === allIds.length" @change="selected = $event.target.checked ? [...allIds] : []">Semua halaman ini</label>@endif<button type="submit" :disabled="selected.length === 0" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-red-600 px-3 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"><i class="fas fa-trash"></i><span>Hapus (<span x-text="selected.length">0</span>)</span></button></div></div>
+
+        <div class="divide-y divide-slate-100 lg:hidden">
+            @forelse($tickets as $ticket)
+                @php $user = $ticket->user; $roleName = ucwords(str_replace('_', ' ', $user?->roleRelation?->name ?? $user?->role ?? 'User tidak tersedia')); @endphp
+                <article class="p-4"><div class="flex items-start gap-3"><input type="checkbox" value="{{ $ticket->id }}" x-model="selected" class="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-extrabold text-slate-700">{{ strtoupper(substr($user?->name ?? '?', 0, 1)) }}</span><div class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-950">{{ $user?->name ?? 'Pengguna telah dihapus' }}</strong><span class="block truncate text-xs text-slate-500">{{ $roleName }} &middot; {{ $ticket->created_at->format('d M Y H:i') }}</span></div><span class="whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold {{ $ticket->status === 'resolved' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">{{ $ticket->status === 'resolved' ? 'Selesai' : 'Ditolak' }}</span></div><dl class="mt-3 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 text-xs"><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Kendala</dt><dd class="mt-1 font-bold text-slate-700">{{ $typeLabels[$ticket->tipe_recovery] ?? $ticket->tipe_recovery }}</dd></div><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Ditutup</dt><dd class="mt-1 whitespace-nowrap text-slate-600">{{ $ticket->updated_at->format('d M Y H:i') }}</dd></div><div class="col-span-2 min-w-0"><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Pemulihan melalui</dt><dd class="mt-1 truncate text-slate-600">{{ $user?->personal_email ?: ($ticket->target_phone ?: 'Tidak tercatat') }}</dd></div></dl></article>
+            @empty
+                <div class="p-12 text-center"><i class="fas fa-history text-4xl text-slate-300"></i><h4 class="mt-3 font-extrabold text-slate-900">Belum ada riwayat</h4><p class="mt-1 text-sm text-slate-500">Tiket yang selesai atau ditolak akan muncul di sini.</p></div>
+            @endforelse
         </div>
-        
-        <div class="card-body">
-            <form id="bulkDeleteForm" method="POST" action="{{ route('admin.recovery-tickets.history.bulk-delete') }}">
-                @csrf
-                <div class="mb-3 d-flex justify-content-between align-items-center">
-                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmBulkDelete()" id="btnBulkDelete" disabled>
-                        <i class="bx bx-trash me-1"></i> Hapus Terpilih
-                    </button>
-                    
-                    <div class="form-check d-md-none">
-                        <input class="form-check-input" type="checkbox" id="checkAllMobile">
-                        <label class="form-check-label" for="checkAllMobile">
-                            Pilih Semua
-                        </label>
-                    </div>
-                </div>
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover table-card-mobile">
-                    <thead>
-                        <tr>
-                            <th style="width: 40px;"><input class="form-check-input" type="checkbox" id="checkAll"></th>
-                            <th>No</th>
-                            <th>Tanggal Permintaan</th>
-                            <th>User</th>
-                            <th>Kendala</th>
-                            <th>Pemulihan Via</th>
-                            <th>Status</th>
-                            <th>Waktu Tutup</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                        @forelse($tickets as $key => $ticket)
-                        <tr>
-                            <td class="mobile-hide text-center"><input class="form-check-input ticket-checkbox" type="checkbox" name="ids[]" value="{{ $ticket->id }}"></td>
-                            <td class="mobile-hide">{{ $tickets->firstItem() + $key }}</td>
-                            <td class="desktop-only-cell">{{ $ticket->created_at->format('d M Y H:i') }}</td>
-                            <td class="desktop-only-cell">
-                                <strong>{{ $ticket->user->name ?? '-' }}</strong><br>
-                                <span class="badge bg-label-info">{{ ucwords(str_replace('_', ' ', $ticket->user->roleRelation->name ?? $ticket->user->role ?? '-')) }}</span>
-                            </td>
-                            <td class="mobile-only-cell mobile-card-head">
-                                <div class="d-flex justify-content-between align-items-center w-100">
-                                    <div>
-                                        <strong>{{ $ticket->user->name ?? '-' }}</strong>
-                                        <span class="badge bg-label-info ms-1">{{ ucwords(str_replace('_', ' ', $ticket->user->roleRelation->name ?? $ticket->user->role ?? '-')) }}</span>
-                                        <br><small class="text-muted"><i class="bx bx-time-five"></i> {{ $ticket->created_at->format('d M Y H:i') }}</small>
-                                    </div>
-                                    <div class="form-check form-check-inline m-0">
-                                        <input class="form-check-input ticket-checkbox" type="checkbox" name="ids[]" value="{{ $ticket->id }}" style="transform: scale(1.2);">
-                                    </div>
-                                </div>
-                            </td>
-                            <td data-label="Kendala">
-                                @if($ticket->tipe_recovery == 'lupa_username')
-                                    <span class="badge bg-label-secondary"><i class="bx bx-user me-1"></i> Lupa Username</span>
-                                @elseif($ticket->tipe_recovery == 'lupa_password')
-                                    <span class="badge bg-label-warning"><i class="bx bx-key me-1"></i> Lupa Password</span>
-                                @else
-                                    <span class="badge bg-label-danger"><i class="bx bx-error-circle me-1"></i> Lupa Keduanya</span>
-                                @endif
-                            </td>
-                            <td data-label="Pemulihan Via">
-                                @if($ticket->user->personal_email)
-                                    <span class="text-muted"><i class="bx bx-envelope text-primary"></i> {{ $ticket->user->personal_email }}</span>
-                                @elseif($ticket->target_phone)
-                                    <span class="text-muted"><i class="bx bxl-whatsapp text-success"></i> {{ $ticket->target_phone }}</span>
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
-                            </td>
-                            <td data-label="Status">
-                                @if($ticket->status == 'resolved')
-                                    <span class="badge bg-success"><i class="bx bx-check-double me-1"></i> Selesai/Ditutup</span>
-                                @elseif($ticket->status == 'rejected')
-                                    <span class="badge bg-secondary"><i class="bx bx-x me-1"></i> Ditolak</span>
-                                @endif
-                            </td>
-                            <td data-label="Waktu Tutup">
-                                <span class="text-muted small">{{ $ticket->updated_at->format('d M Y H:i') }}</span>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="9" class="text-center py-5">
-                                <i class="bx bx-history text-muted mb-3 empty-history-icon"></i>
-                                <h6 class="text-muted">Belum ada riwayat tiket pemulihan.</h6>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="mt-4">
-                {{ $tickets->links() }}
-            </div>
-            </form>
-        </div>
-    </div>
+
+        <div class="hidden overflow-x-auto lg:block"><table class="w-full table-fixed text-left text-sm"><colgroup><col class="w-12"><col class="w-14"><col class="w-40"><col class="w-[22%]"><col class="w-40"><col><col class="w-28"><col class="w-40"></colgroup><thead class="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500"><tr><th class="px-3 py-3"></th><th class="px-2 py-3">No</th><th class="px-3 py-3">Diminta</th><th class="px-3 py-3">Pengguna</th><th class="px-3 py-3">Kendala</th><th class="px-3 py-3">Pemulihan melalui</th><th class="px-3 py-3">Status</th><th class="px-3 py-3">Ditutup</th></tr></thead><tbody class="divide-y divide-slate-100">
+            @forelse($tickets as $ticket)
+                @php $user = $ticket->user; $roleName = ucwords(str_replace('_', ' ', $user?->roleRelation?->name ?? $user?->role ?? 'User tidak tersedia')); @endphp
+                <tr><td class="px-3 py-3 text-center"><input type="checkbox" value="{{ $ticket->id }}" x-model="selected" class="h-4 w-4 rounded border-slate-300 text-brand-600"></td><td class="px-2 py-3 text-xs text-slate-400">{{ $tickets->firstItem() + $loop->index }}</td><td class="whitespace-nowrap px-3 py-3 text-xs text-slate-500">{{ $ticket->created_at->format('d M Y H:i') }}</td><td class="px-3 py-3"><strong class="block truncate text-slate-950" title="{{ $user?->name }}">{{ $user?->name ?? 'Pengguna telah dihapus' }}</strong><span class="block truncate text-xs text-slate-500">{{ $roleName }}</span></td><td class="px-3 py-3"><span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold {{ $typeStyles[$ticket->tipe_recovery] ?? 'bg-slate-100 text-slate-600' }}">{{ $typeLabels[$ticket->tipe_recovery] ?? $ticket->tipe_recovery }}</span></td><td class="px-3 py-3"><span class="block truncate text-xs text-slate-600" title="{{ $user?->personal_email ?: $ticket->target_phone }}">{{ $user?->personal_email ?: ($ticket->target_phone ?: 'Tidak tercatat') }}</span></td><td class="px-3 py-3"><span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold {{ $ticket->status === 'resolved' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">{{ $ticket->status === 'resolved' ? 'Selesai' : 'Ditolak' }}</span></td><td class="whitespace-nowrap px-3 py-3 text-xs text-slate-500">{{ $ticket->updated_at->format('d M Y H:i') }}</td></tr>
+            @empty<tr><td colspan="8" class="p-12 text-center text-sm text-slate-500">Belum ada riwayat tiket pemulihan.</td></tr>@endforelse
+        </tbody></table></div>
+        @if($tickets->hasPages())<footer class="border-t border-slate-200 p-4">{{ $tickets->links() }}</footer>@endif
+    </form>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const checkAll = document.getElementById('checkAll');
-        const checkAllMobile = document.getElementById('checkAllMobile');
-        const checkboxes = document.querySelectorAll('.ticket-checkbox');
-        const btnBulkDelete = document.getElementById('btnBulkDelete');
-
-        function updateButtonState() {
-            const checkedCount = document.querySelectorAll('.ticket-checkbox:checked').length;
-            if(btnBulkDelete) {
-                btnBulkDelete.disabled = checkedCount === 0;
-            }
-            const allChecked = checkedCount === checkboxes.length && checkboxes.length > 0;
-            if (checkAll) {
-                checkAll.checked = allChecked;
-            }
-            if (checkAllMobile) {
-                checkAllMobile.checked = allChecked;
-            }
-        }
-
-        function toggleAll(checked) {
-            checkboxes.forEach(cb => cb.checked = checked);
-            updateButtonState();
-        }
-
-        if (checkAll) {
-            checkAll.addEventListener('change', function() {
-                toggleAll(this.checked);
-            });
-        }
-        
-        if (checkAllMobile) {
-            checkAllMobile.addEventListener('change', function() {
-                toggleAll(this.checked);
-            });
-        }
-
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', updateButtonState);
-        });
-    });
-
-    function confirmBulkDelete() {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Riwayat tiket yang dipilih akan dihapus permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#8592a3',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('bulkDeleteForm').submit();
-            }
-        });
-    }
-</script>
 @endsection

@@ -1,12 +1,9 @@
-@extends('layouts.sneat')
+@extends('layouts.app')
 
 @section('title', 'Dashboard Guru')
 @section('page-title', 'Dashboard Guru')
 @section('page-subtitle', 'Ringkasan aktivitas mengajar hari ini')
 
-@section('sidebar-menu')
-    @include('guru.partials.sneat-sidebar-menu')
-@endsection
 
 @section('styles')
     @vite(['resources/css/dashboard/guru.css'])

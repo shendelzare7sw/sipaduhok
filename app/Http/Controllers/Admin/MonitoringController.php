@@ -53,38 +53,44 @@ class MonitoringController extends KetuaController
     public function index()
     {
         $response = parent::index();
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.laporan.index', array_merge($response->getData(), [
+                'routePrefix' => 'admin.laporan',
+                'supportsAcademic' => false,
+            ]));
+        }
 
-        return $this->wrapView($response, 'laporan.index');
+        return $response;
     }
 
     public function siswa(Request $request)
     {
-        return parent::siswa($request);
+        return $this->wrapReportView(parent::siswa($request), 'print-siswa');
     }
 
     public function tenagaPendidik(Request $request)
     {
-        return parent::tenagaPendidik($request);
+        return $this->wrapReportView(parent::tenagaPendidik($request), 'print-guru');
     }
 
     public function kelas(Request $request)
     {
-        return parent::kelas($request);
+        return $this->wrapReportView(parent::kelas($request), 'print-kelas');
     }
 
     public function waliKelas(Request $request)
     {
-        return parent::waliKelas($request);
+        return $this->wrapReportView(parent::waliKelas($request), 'print-wali-kelas');
     }
 
     public function guruPengajar(Request $request)
     {
-        return parent::guruPengajar($request);
+        return $this->wrapReportView(parent::guruPengajar($request), 'print-guru-pengajar');
     }
 
     public function rekap(Request $request)
     {
-        return parent::rekap($request);
+        return $this->wrapReportView(parent::rekap($request), 'print-rekap');
     }
 
     // Catatan
@@ -176,13 +182,24 @@ class MonitoringController extends KetuaController
         return $response;
     }
 
+    private function wrapReportView($response, string $view)
+    {
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.laporan.'.$view, array_merge($response->getData(), [
+                'backRoute' => 'admin.laporan.index',
+            ]));
+        }
+
+        return $response;
+    }
+
     /**
      * Override LMS view context for admin namespace.
      */
     protected function lmsViewContext(): array
     {
         return [
-            'rolePartial' => 'admin.partials.sneat-sidebar-menu',
+            'rolePartial' => 'admin.partials.cleanflow-sidebar',
             'baseRoute' => 'admin.monitoring.lms',
             'cabangScope' => null,
         ];
