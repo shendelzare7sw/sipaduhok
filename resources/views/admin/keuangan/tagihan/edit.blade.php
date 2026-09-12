@@ -5,6 +5,7 @@
 @section('page-subtitle', $siswa->nama_lengkap)
 
 @section('content')
+@php $tagihanRoute = request()->routeIs('admin.*') ? 'admin.keuangan.tagihan' : 'bendahara.tagihan'; @endphp
 <div data-tagihan-edit class="min-w-0 w-full space-y-5" x-data="{
     formatCurrency(event) { const digits = event.target.value.replace(/\D/g, ''); event.target.value = digits ? new Intl.NumberFormat('id-ID').format(Number(digits)) : '0'; },
     async save(event) { const result = await Swal.fire({ icon: 'question', title: 'Simpan perubahan tagihan?', text: 'Nominal dan jatuh tempo yang dapat diedit akan diperbarui.', showCancelButton: true, confirmButtonText: 'Ya, simpan', cancelButtonText: 'Periksa lagi', confirmButtonColor: '#285dcc', reverseButtons: true }); if (result.isConfirmed) event.target.submit(); },
@@ -23,13 +24,13 @@
     <section class="overflow-hidden rounded-2xl bg-gradient-to-r from-brand-800 to-brand-600 p-5 text-white shadow-sm sm:p-6">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex min-w-0 items-center gap-4"><span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-xl font-black ring-1 ring-white/20">{{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}</span><div class="min-w-0"><p class="text-[10px] font-extrabold uppercase tracking-[0.16em] text-blue-100">Atur tagihan siswa</p><h1 class="truncate text-xl font-black !text-white">{{ $siswa->nama_lengkap }}</h1><p class="mt-1 truncate text-xs text-blue-100">NISN {{ $siswa->nisn ?: '-' }} · {{ $siswa->kelas->nama_kelas ?? 'Belum ada kelas' }} · {{ $siswa->cabang->nama_cabang ?? 'Cabang belum diatur' }}</p></div></div>
-            <a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}" class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-bold text-white no-underline hover:bg-white/20"><i class="fas fa-arrow-left"></i>Kembali ke detail</a>
+            <a href="{{ route($tagihanRoute.'.show', $siswa->id) }}" class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-bold text-white no-underline hover:bg-white/20"><i class="fas fa-arrow-left"></i>Kembali ke detail</a>
         </div>
     </section>
 
-    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p class="text-sm leading-6 text-blue-900">SPP bulanan sebaiknya dibuat melalui <a href="{{ route('admin.keuangan.tagihan.generate-spp') }}" class="font-extrabold text-blue-800 underline">Generate SPP</a> agar 12 bulan dan jatuh temponya tersusun otomatis.</p></div></section>
+    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p class="text-sm leading-6 text-blue-900">SPP bulanan sebaiknya dibuat melalui <a href="{{ route($tagihanRoute.'.generate-spp') }}" class="font-extrabold text-blue-800 underline">Generate SPP</a> agar 12 bulan dan jatuh temponya tersusun otomatis.</p></div></section>
 
-    <form action="{{ route('admin.keuangan.tagihan.update', $siswa->id) }}" method="POST" @submit.prevent="save($event)" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <form action="{{ route($tagihanRoute.'.update', $siswa->id) }}" method="POST" @submit.prevent="save($event)" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         @csrf
         @method('PUT')
         <header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-lg font-extrabold text-slate-950"><i class="fas fa-pen-to-square text-amber-600"></i>Nominal dan jatuh tempo</h2><p class="mt-1 text-sm text-slate-500">Isi Rp 0 bila siswa tidak memiliki kewajiban pada jenis tersebut.</p></header>
@@ -67,7 +68,7 @@
 
                         <div class="flex justify-end md:pt-1">
                             @if($canDelete && $tagihanRecord)
-                                <x-cleanflow.table-action type="button" tone="delete" icon="fas fa-trash" label="Hapus {{ $label }}" data-delete-url="{{ route('admin.keuangan.tagihan.destroy-item', $tagihanRecord->id) }}" data-delete-label="{{ $label }}" x-on:click="deleteItem($el.dataset.deleteUrl, $el.dataset.deleteLabel)" />
+                                <x-cleanflow.table-action type="button" tone="delete" icon="fas fa-trash" label="Hapus {{ $label }}" data-delete-url="{{ route($tagihanRoute.'.destroy-item', $tagihanRecord->id) }}" data-delete-label="{{ $label }}" x-on:click="deleteItem($el.dataset.deleteUrl, $el.dataset.deleteLabel)" />
                             @else
                                 <span class="hidden h-9 w-9 md:block"></span>
                             @endif
@@ -77,7 +78,7 @@
             @endforeach
         </div>
 
-        <footer class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs leading-5 text-slate-600"><i class="fas fa-shield-halved mr-1 text-emerald-600"></i>Tagihan yang sudah dibayar dikunci untuk menjaga integritas transaksi.</p><div class="flex gap-2"><a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-white">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-save"></i>Simpan</button></div></footer>
+        <footer class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs leading-5 text-slate-600"><i class="fas fa-shield-halved mr-1 text-emerald-600"></i>Tagihan yang sudah dibayar dikunci untuk menjaga integritas transaksi.</p><div class="flex gap-2"><a href="{{ route($tagihanRoute.'.show', $siswa->id) }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-white">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-save"></i>Simpan</button></div></footer>
     </form>
 
     <section class="rounded-2xl border border-amber-200 bg-amber-50 p-4"><div class="flex items-start gap-3"><i class="fas fa-triangle-exclamation mt-1 text-amber-700"></i><div class="text-sm leading-6 text-amber-900"><strong>Perlu diperhatikan</strong><ul class="mt-1 list-disc space-y-1 pl-5"><li>Tagihan yang telah dibayar wali tidak dapat diedit atau dihapus.</li><li>Nominal Rp 0 tetap dapat diubah selama belum memiliki pembayaran.</li><li>Perubahan nominal dapat memengaruhi status pembayaran siswa.</li><li>Periode aktif saat ini: <strong>{{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong>.</li></ul></div></div></section>

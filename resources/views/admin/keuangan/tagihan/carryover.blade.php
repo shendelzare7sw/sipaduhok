@@ -6,7 +6,7 @@
 
 @section('content')
 @php
-    $baseRouteName = 'admin.keuangan.tagihan';
+    $baseRouteName = request()->routeIs('admin.*') ? 'admin.keuangan.tagihan' : 'bendahara.tagihan';
     $detailData = [];
 
     foreach ($kandidat as $row) {

@@ -6,6 +6,7 @@
 
 @section('content')
 @php
+    $laporanRoute = request()->routeIs('bendahara.*') ? 'bendahara.laporan' : 'admin.keuangan.laporan';
     $paidPercent = $grandTotal['tagihan'] > 0 ? round(($grandTotal['bayar'] / $grandTotal['tagihan']) * 100, 1) : 0;
     $byLevel = $kelasList->groupBy('jenjang')->map(fn ($items) => [
         'classes' => $items->count(),
@@ -19,7 +20,7 @@
 <div data-finance-class-recap class="min-w-0 w-full space-y-5">
     <section class="flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-brand-700 to-blue-500 p-5 text-white shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div><span class="text-xs font-bold uppercase tracking-wider text-blue-100">Periode aktif</span><h2 class="mt-1 text-xl font-extrabold">Tahun Ajaran {{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}</h2><p class="mt-1 text-sm text-blue-100">{{ $tahunAjaran ? $tahunAjaran->tanggal_mulai->format('d/m/Y') . ' – ' . $tahunAjaran->tanggal_selesai->format('d/m/Y') : 'Periode belum tersedia' }}</p></div>
-        <a href="{{ route('admin.keuangan.laporan.cetak-rekap-tagihan') }}" target="_blank" class="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-xl bg-white px-4 text-sm font-bold text-brand-700 no-underline hover:bg-blue-50"><i class="fas fa-print"></i>Cetak rekap</a>
+        <a href="{{ route($laporanRoute.'.cetak-rekap-tagihan') }}" target="_blank" class="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-xl bg-white px-4 text-sm font-bold text-brand-700 no-underline hover:bg-blue-50"><i class="fas fa-print"></i>Cetak rekap</a>
     </section>
 
     <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">

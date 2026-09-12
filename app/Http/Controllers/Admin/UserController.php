@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Cabang;
 use App\Models\Kelas;
+use App\Models\Role;
 use App\Models\Siswa;
 use App\Models\StudentParent;
 use App\Models\TenagaPendidik;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -236,6 +238,7 @@ class UserController extends Controller
             'username' => $validated['username'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
+            'role_id' => Role::where('name', $validated['role'])->value('id'),
             'cabang_id' => $validated['cabang_id'],
             'phone' => $validated['telepon'],
             'is_active' => true,
@@ -335,6 +338,7 @@ class UserController extends Controller
             'personal_email' => $validated['personal_email'] ?? null,
             'username' => $validated['username'],
             'role' => $validated['role'],
+            'role_id' => Role::where('name', $validated['role'])->value('id'),
             'cabang_id' => $validated['cabang_id'],
             'is_active' => $validated['is_active'],
             'phone' => $validated['telepon'],
@@ -347,6 +351,17 @@ class UserController extends Controller
         // Update User
         // If we only have a fresh TenagaPendidik model, getting ->user might be tricky if not set
         $user = User::findOrFail($userId);
+
+        if ($user->isGuruPengajar() && $validated['role'] !== 'guru_pengajar' && $tenagaPendidik->exists) {
+            $blockers = $this->tenagaPendidikBlockers($tenagaPendidik->id);
+
+            if ($blockers !== []) {
+                return back()->withInput()->withErrors([
+                    'role' => 'Role Guru Pengajar belum dapat diubah karena masih terhubung ke '.implode(', ', $blockers).'. Pindahkan atau kosongkan tanggung jawab tersebut terlebih dahulu.',
+                ]);
+            }
+        }
+
         $user->update($userData);
 
         // Update or Create TenagaPendidik
@@ -409,6 +424,9 @@ class UserController extends Controller
         if (($n = \App\Models\GuruPengajarKelas::where('tenaga_pendidik_id', $tid)->count()) > 0) {
             $b[] = "{$n} penugasan mengajar";
         }
+        if (($n = \App\Models\JadwalPelajaran::where('guru_id', $tid)->count()) > 0) {
+            $b[] = "{$n} jadwal mengajar";
+        }
         if (($n = \App\Models\WaliKelasAssignment::where('tenaga_pendidik_id', $tid)->count()) > 0) {
             $b[] = "{$n} penugasan wali kelas";
         }
@@ -420,8 +438,10 @@ class UserController extends Controller
         if (($n = \App\Models\LmsMeeting::where('guru_id', $tid)->count()) > 0) {
             $b[] = "{$n} kelas virtual";
         }
-        if (($n = \Illuminate\Support\Facades\DB::table('pertemuans')->where('guru_id', $tid)->count()) > 0) {
-            $b[] = "{$n} pertemuan";
+        if (Schema::hasTable('pertemuans')) {
+            if (($n = \Illuminate\Support\Facades\DB::table('pertemuans')->where('guru_id', $tid)->count()) > 0) {
+                $b[] = "{$n} pertemuan";
+            }
         }
         if (($n = \Illuminate\Support\Facades\DB::table('catatan_monitoring')->where('guru_id', $tid)->count()) > 0) {
             $b[] = "{$n} catatan monitoring";

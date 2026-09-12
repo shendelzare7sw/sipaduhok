@@ -1,8 +1,8 @@
 # CleanFlow — Ringkasan Konteks, Aturan, dan Prompt Multi-Agent
 
-Pembaruan terakhir: 5 September 2026
+Pembaruan terakhir: 11 September 2026
 Branch kerja: `cleanflow`
-Fokus aktif: role Sekretaris dan Ketua PKBM selesai dimigrasikan end-to-end; role Bendahara sedang berjalan dan alur dispensasi kenaikan kelas serta Validasi Akses telah selesai.
+Fokus aktif: Admin, fondasi global, Sekretaris, Ketua PKBM, dan Bendahara selesai dimigrasikan. Waka sudah dimulai pada sidebar dan toolbar index Jadwal, tetapi role ini belum selesai; batch berikutnya menuntaskan seluruh alur Waka lalu Wali Kelas, kemudian Guru/Siswa/Wali Siswa.
 
 ## 1. Tujuan utama
 
@@ -232,7 +232,15 @@ Catatan validasi terakhir:
 - Role Sekretaris selesai: dashboard dan sidebar baru, Berita/Flyer/Kalender/Pengumuman memakai sembilan view Tailwind bersama dengan Admin, 17 aset role + 2 aset dashboard serta sembilan view duplikat dihapus. Empat feature test dengan 97 assertion dan audit live 22 kombinasi route/viewport lulus; feed kalender serta dua PDF tetap aktif.
 - Audit regresi lintas Admin, Waka shared, Sekretaris, dan komponen global menormalkan 22 benturan shorthand/sumbu spacing. Dropdown Buat Tagihan, Aksi Jadwal, dan Ekspor Jadwal sekarang memakai panel mobile selebar container; pengukuran live 390x844 menunjukkan overflow kiri, kanan, dan dokumen 0 px. Guard spacing/panel permanen, build produksi, Blade cache, serta 41 tes dengan 973 assertion lulus.
 - Role Ketua PKBM selesai: dashboard/sidebar dan halaman keputusan khusus memakai Tailwind + Alpine/native dialog; Monitoring, Laporan/cetak, Catatan, dan Riwayat Dispensasi memakai view bersama yang sadar namespace route. Lima belas view duplikat, 19 aset CSS/JS role, dan stylesheet dashboard dihapus. Audit live 16 kombinasi route/viewport menunjukkan HTTP 200 dan overflow 0 px tanpa error console; 13 tes terfokus lulus dengan 169 assertion.
-- Batch Bendahara berjalan: validasi dispensasi, riwayat, dan Validasi Akses memakai view Tailwind + Alpine bersama melalui `routePrefix` yang sadar konteks. Tiga view duplikat dan lima aset role dihapus. Config Pembayaran ditegaskan khusus Admin; route/sidebar/controller Bendahara dibuang dan URL langsung kini 404. Audit live desktop/mobile tidak menemukan overflow, Bootstrap, atau kebocoran endpoint; regresi mencapai 29 tes dengan 607 assertion.
+- Role Bendahara selesai: dashboard/sidebar, validasi dispensasi, Validasi Akses, lima halaman Pembayaran, sepuluh halaman Tagihan, dan enam Laporan/cetak memakai Tailwind + Alpine. Dua puluh empat view duplikat dan 31 aset role telah dihapus; folder Pembayaran, Tagihan, dan Laporan yang kosong turut dibersihkan. Dashboard memakai Alpine langsung tanpa CSS/JS halaman. Config Pembayaran tetap khusus Admin. Pengujian juga menemukan lalu memperbaiki agregasi laporan `DAY()` agar kompatibel MySQL, PostgreSQL, dan SQLite.
+- Role Waka berjalan: sidebar sudah mengikuti CleanFlow dan toolbar Jadwal responsif sudah memakai Alpine, tetapi 51 view/55 aset awal Waka belum diaudit serta dimigrasikan end-to-end. View Jadwal index/create/edit/show/import dan asetnya masih aktif; status toolbar yang baik tidak boleh dipakai untuk menyatakan modul Jadwal atau role Waka selesai.
+- Audit final Bendahara: 11 feature test/181 assertion lulus. Dashboard dan index Tagihan diuji live pada 1440x900 serta 390x844 dengan overflow 0 px, tanpa marker Bootstrap atau error console; dropdown Buat Tagihan tetap di viewport dan HTML Bendahara tidak memuat endpoint Import/Reset Admin. Audit lanjutan kemudian mengunci semua item tingkat utama—termasuk pemicu dropdown—ke border 0 px; hanya submenu yang boleh 1 px.
+- Guard penugasan Guru diperketat end-to-end. Kandidat UI, request Admin/Waka (biasa, multi-jenjang, ganti, dan massal), import, rebuild tabel turunan, statistik, serta pengirim notifikasi kini memakai scope kelayakan tunggal: akun aktif dengan role legacy dan `role_id` yang konsisten sebagai `guru_pengajar`. Perubahan role Guru ditolak selama tanggung jawab akademik masih ada. Database dibersihkan secara transaksional: 7 jadwal invalid dikosongkan dengan audit history, 18 penugasan turunan dan 2 notifikasi salah sasaran dihapus; audit ulang menghasilkan nol temuan.
+- Penyesuaian indeks pencarian menu per role dicatat sebagai backlog global berikutnya. Hasil pencarian harus berasal dari capability/navigation role aktif, bukan katalog Admin yang sekadar disaring di sisi tampilan.
+- Sidebar Admin, Waka, Sekretaris, Ketua, dan Bendahara memakai hierarki visual yang sama: seluruh item tingkat utama—baik tautan langsung maupun pemicu dropdown—tanpa border/ring dan diberi variasi tone biru yang halus; hanya item submenu yang memakai border. Area akun bawah memakai gradien penuh pada footer sidebar, bukan kartu gradien kecil di atas bidang gelap. Guard source mencegah border pemicu utama muncul kembali.
+- Toolbar Jadwal Pelajaran Admin dan Waka memakai grid empat kolom pada mobile sehingga Tambah, Istirahat, Aksi, dan Ekspor berada dalam satu baris; desktop kembali ke flex dengan tinggi 44 px, font 14 px, dan padding horizontal 16–20 px. Bootstrap memberi `!important` pada utility spacing, sehingga breakpoint desktop juga memakai `sm:!px-*`/`lg:!px-*`; tanpa itu tombol tampak gepeng walau class responsif ada di sumber. Item dropdown selalu satu baris dan panel mobile mengikuti lebar container tanpa overflow. Sidebar memakai gradien biru tua yang sedikit lebih muda dengan empat tone menu berkontras nyata. Audit browser Admin/Waka pada 1440x900, 1024x844, dan 390x844 bebas error console/overflow.
+
+- Gerbang pre-push 12 September 2026 lulus: Blade cache, build produksi, `git diff --check`, serta 30 test/426 assertion yang mencakup penugasan dan notifikasi role, Jadwal Admin/Waka, seluruh flow Bendahara, filter Tagihan, dan komponen global.
 
 ## 12. Prompt siap pakai untuk multi-agent
 
@@ -252,16 +260,21 @@ Tujuan:
 - Buat UI profesional, minimalis, mobile-first, fleksibel saat browser di-zoom, serta UX yang menjelaskan urutan kerja.
 - Hapus Bootstrap/modal lama; gunakan dialog Alpine/HTML native untuk flow berform dan SweetAlert global untuk konfirmasi sederhana.
 - Setelah satu modul benar-benar selesai, hapus CSS/JS halaman terpisah yang sudah tidak digunakan.
-- Fondasi global Notification, Profile, Account Settings, scroll-up, UI AI Assistant, serta seluruh role Sekretaris dan Ketua PKBM sudah selesai. Alur dispensasi kenaikan kelas dan Validasi Akses Bendahara juga sudah memakai view bersama. Config/Pengaturan Pembayaran tetap eksklusif Admin dan tidak boleh diperkenalkan kembali ke route, controller, sidebar, maupun knowledge base Bendahara. Pertahankan contract dan polanya; jangan membuat ulang aset lokal atau view duplikat untuk fitur-fitur ini.
+- Admin, fondasi global Notification/Profile/Account Settings/scroll-up/UI AI Assistant, serta seluruh role Sekretaris, Ketua PKBM, dan Bendahara sudah selesai. Config/Pengaturan Pembayaran tetap eksklusif Admin dan tidak boleh diperkenalkan kembali ke route, controller, sidebar, maupun knowledge base Bendahara. Waka baru selesai pada sidebar dan perbaikan toolbar Jadwal; jangan menyatakan Waka atau modul Jadwal Waka selesai sebelum index/create/edit/show/import/print/dialog dan aset lokalnya dituntaskan. Pertahankan contract dan pola modul yang sudah selesai; jangan membuat ulang aset lokal atau view duplikat.
 
 Aturan wajib:
 - Jangan menambah `<style>`, style inline, CSS halaman, atau JS halaman baru.
 - Gunakan Alpine langsung di Blade untuk interaksi ringan.
 - JS AI Assistant adalah pengecualian global yang disengaja karena memuat API async, model, upload, riwayat, lightbox, dan drag. Jangan pecah atau salin modul ini per role; styling-nya tetap murni utility Tailwind tanpa CSS komponen.
 - Jangan memecah halaman menjadi banyak partial satu-pemakai.
+- Pada sidebar, seluruh item tingkat utama—tautan langsung maupun pemicu dropdown—tidak memakai border/ring. Bedakan menu dengan variasi tone latar yang halus dan gunakan state aktif berkontras lebih kuat; border hanya untuk item submenu. Warnai seluruh footer akun agar terpisah jelas dari navigasi, jangan menumpuk kartu berwarna di dalam footer gelap.
 - Bila dua role memiliki field dan flow publikasi yang identik, gunakan satu view bersama yang menerima konteks route; jangan mempertahankan salinan Blade per role. Uji URL create/edit/toggle/destruktif pada kedua namespace agar reuse tidak mengarahkan role ke middleware role lain.
 - Bila flow identik dipakai tiga role atau lebih, hitung satu `routePrefix` berdasarkan namespace route di awal view dan bangun seluruh endpoint dari sana. Hindari kondisi role tersebar pada setiap kontrol; render-test setiap konteks wajib memastikan endpoint role lain tidak bocor ke HTML.
 - Sebelum menyimpulkan dua role dapat memakai flow yang sama, buat matriks capability. Fitur sensitif yang eksklusif Admin harus tidak memiliki route dan link sidebar pada role lain; menyembunyikan elemen secara visual saja tidak cukup. Tambahkan tes `Route::has(...)` dan URL langsung untuk membuktikan batas otoritas.
+- Pada view bersama, audit juga HTML hasil render untuk role terbatas. Checkbox, toolbar massal, handler Alpine, form tersembunyi, dan endpoint API khusus Admin tidak boleh ikut terkirim jika capability itu tidak tersedia.
+- Filter pilihan pada UI bukan batas keamanan. Setiap ID relasi yang menentukan capability (misalnya `guru_id`) wajib divalidasi ulang di server pada create, update, aksi satuan/massal, import, sinkronisasi/rebuild, dan pengiriman notifikasi melalui satu scope/model rule bersama.
+- Satu orang boleh memiliki beberapa akun dengan role berbeda, tetapi relasi pekerjaan dan notifikasi harus menunjuk ke akun yang memiliki capability tersebut. Jangan menganggap kesamaan nama/profil tenaga pendidik sebagai izin lintas-role.
+- Pencarian menu global wajib membangun indeks dari konfigurasi navigasi role aktif dan tetap menghormati permission route. Jangan menampilkan hasil yang berakhir 403 hanya karena label tersebut tersedia pada role lain.
 - Untuk flow keputusan satuan dan massal, gunakan satu dialog Alpine yang menerima URL aksi, nama record, tipe keputusan, dan array ID melalui state/data attribute. Jangan membuat satu modal per baris.
 - Create/edit dengan field sama memakai satu `form.blade.php`.
 - Desktop table memakai `table-fixed` + `colgroup`; mobile memakai kartu.
@@ -269,7 +282,9 @@ Aturan wajib:
 - Perhitungan kolom aksi wajib menambahkan padding kiri/kanan. Setelah render, ukur jarak badge status ke tombol pertama dan pastikan kelompok tombol tidak meluber ke kolom sebelumnya.
 - Semua input dengan ikon di dalamnya wajib memiliki padding kiri aman (`!pl-10` selama CSS compatibility masih dimuat), kemudian audit posisi ikon terhadap placeholder dan teks aktual pada mobile serta desktop.
 - Jangan mencampur shorthand spacing dan utility sumbu/sisi yang bertumpang tindih pada elemen yang sama, termasuk lintas breakpoint. Gunakan `px-* py-*`, `pl-* pr-*`, atau `mx-* my-*` secara eksplisit dan jalankan guard spacing sebelum menyatakan selesai.
-- Semua dropdown/popover wajib diuji dalam keadaan terbuka pada viewport mobile. Gunakan container aksi `relative` selebar baris dan panel `absolute inset-x-0 w-auto` di mobile; lebar tetap serta anchor kanan hanya boleh mulai breakpoint `sm:`. Verifikasi bounding box panel tidak melewati kedua sisi viewport.
+- Semua dropdown/popover wajib diuji dalam keadaan terbuka pada viewport mobile. Gunakan container aksi `relative` selebar baris dan panel `absolute inset-x-0` tanpa width eksplisit di mobile; lebar tetap serta anchor kanan hanya boleh mulai breakpoint `sm:` dan gunakan important bila bridge Bootstrap masih aktif. Label aksi pendek wajib `whitespace-nowrap`. Verifikasi bounding box panel tidak melewati kedua sisi viewport dan setiap label tetap satu baris.
+- Toolbar berisi empat aksi pendek yang semuanya penting boleh memakai `grid-cols-4` pada mobile dengan `text-[10px]`, gap/padding ringkas, dan tinggi sentuh tetap 40 px; kembalikan ukuran normal mulai `sm:`. Jangan mengorbankan label dengan pemenggalan bila seluruhnya masih dapat dimuat satu baris.
+- Selama Bootstrap compatibility masih dimuat, utility spacing seperti `.px-1` membawa `!important` dan dapat mengalahkan `sm:px-*`/`lg:px-*`. Gunakan responsive important (`sm:!px-*`, `lg:!px-*`) pada elemen campuran dan ukur `padding`, lebar, tinggi, serta font aktual di DOM; keberadaan class responsif di Blade belum membuktikan hasil akhirnya.
 - Stat card mobile tidak boleh dipaksa tiga kolom jika ikon dan label berhimpitan; gunakan kartu ringkasan utama selebar dua kolom dengan dua kartu status di bawahnya.
 - Tiga aksi filter mobile harus tetap satu baris memakai grid tiga kolom. Gunakan label adaptif bila lebar kurang, tanpa menghilangkan arti tindakan.
 - Editor panjang memakai navigasi sticky dengan tinggi maksimum viewport pada desktop serta select bagian sticky pada mobile. Gunakan `overflow-x-clip` pada ancestor, `scroll-margin` pada target, dan sinkronkan section aktif melalui IntersectionObserver.
@@ -286,15 +301,17 @@ Aturan wajib:
 - Semua state normal/hover/focus/disabled/loading harus terbaca.
 - Pilihan kelas menampilkan `nama · jenjang · cabang` dan value ID.
 - Jangan menghapus fitur atau mengubah logika untuk mempermudah migrasi.
+- Query agregasi laporan tidak boleh mengasumsikan satu driver database. Fungsi tanggal/raw SQL seperti `DAY()`, `DATE_FORMAT()`, dan `strftime()` wajib dipetakan per driver atau diganti API query yang portabel; jalankan route test pada SQLite selain audit live MySQL.
 - Jangan menghapus file sampai `rg` membuktikan tidak ada referensi dan validasi runtime lulus.
 - Untuk view bercabang berdasarkan jenis data (misalnya preview materi/tugas/ujian), test harus merender setiap cabang memakai fixture nyata; Blade cache saja tidak menjalankan seluruh PHP hasil kompilasi dan tidak cukup menangkap parse/runtime error cabang tertentu.
 - Worktree dipakai bersama dan mungkin kotor; jangan reset/revert perubahan agent atau pengguna lain.
 
 Pembagian agent harus berdasarkan kepemilikan folder yang tidak tumpang tindih. Rekomendasi:
 - Agent Koordinator: audit route/controller, integrasi akhir, tracker, build, test, live test, dan file shared; jangan mengambil view yang sedang dikerjakan agent lain.
-- Agent Role Bendahara: kerjakan satu alur keuangan secara end-to-end, termasuk daftar, detail, form, keputusan, riwayat, dan cetak miliknya.
-- Agent Role Waka/Wali Kelas: kerjakan alur akademik role tersebut tanpa menyentuh view shared yang sudah dimiliki koordinator.
-- Agent Role Guru/Siswa/Wali Siswa/Bendahara: bagi berdasarkan folder role dan alur lengkap, bukan per halaman index.
+- Agent Waka Data Akademik: miliki satu alur lengkap yang disepakati dari Tahun Ajaran, Kelas, Mata Pelajaran, atau Pengaturan Istirahat; jangan menyentuh controller/view shared tanpa koordinasi.
+- Agent Waka Penugasan: miliki satu alur lengkap yang disepakati dari Jadwal Pelajaran, Guru Pengajar, Wali Kelas, atau Manajemen Siswa. Untuk Jadwal, toolbar baru hanyalah baseline; lanjutkan index/create/edit/show/import/print/dialog dan hapus asetnya hanya setelah seluruh route lulus.
+- Agent Role Wali Kelas: kerjakan satu alur lengkap per batch (dashboard/pemilihan kelas, presensi, nilai/rapor, promosi, atau arsip) dan hindari file Waka/shared yang sedang dimiliki agent lain.
+- Agent Role Guru/Siswa/Wali Siswa: baru dimulai setelah ownership Waka/Wali Kelas stabil; bagi berdasarkan alur lengkap, bukan per halaman index.
 - Agent Audit Clean Code: cari Bootstrap/Sneat, aset yatim, view duplikat, dan referensi mati hanya pada role yang sudah selesai; jangan menghapus aset yang masih direferensikan role lain.
 
 Setiap agent sebelum edit harus mengirim ke koordinator:
@@ -320,7 +337,8 @@ Migrasi admin dan fondasi global sudah selesai. Urutan kerja berikutnya:
 
 1. Sekretaris — selesai; publikasi Admin/Sekretaris kini memakai view bersama.
 2. Ketua PKBM — selesai; dashboard, keputusan, monitoring, laporan/cetak, dan catatan bersih dari aset UI lokal.
-3. Bendahara — berjalan; dispensasi dan Validasi Akses selesai, berikutnya transaksi Tagihan/Pembayaran, laporan/cetak, dashboard, dan sidebar. Config Pembayaran tetap eksklusif Admin.
-4. Waka dan Wali Kelas untuk alur akademik yang saling berkaitan.
-5. Guru, Siswa, dan Wali Siswa setelah pola LMS serta kartu mobile dikunci.
-6. Setelah setiap role selesai, audit lintas-role dan baru kurangi Bootstrap/Sneat dari bridge global ketika tidak ada consumer tersisa.
+3. Bendahara — selesai; seluruh dashboard, keuangan, validasi, Tagihan, Pembayaran, dan Laporan/cetak bersih dari aset UI role lokal. Config Pembayaran tetap eksklusif Admin.
+4. Waka — berjalan; sidebar selesai dan toolbar Jadwal sudah responsif, tetapi 51 view/55 aset baseline belum dituntaskan. Selesaikan per alur penuh sebelum berpindah ke Wali Kelas.
+5. Wali Kelas — belum; kerjakan setelah ownership/shared contract Waka stabil.
+6. Guru, Siswa, dan Wali Siswa setelah pola LMS serta kartu mobile dikunci.
+7. Setelah setiap role selesai, audit lintas-role dan baru kurangi Bootstrap/Sneat dari bridge global ketika tidak ada consumer tersisa.

@@ -1,7 +1,9 @@
 @extends('layouts.print')
 
+@php $tagihanRoute = request()->routeIs('admin.*') ? 'admin.keuangan.tagihan' : 'bendahara.tagihan'; @endphp
+
 @section('title', 'Laporan Rekap Tagihan')
-@section('back-url', route('admin.keuangan.tagihan.index', array_filter($filters ?? [])))
+@section('back-url', route($tagihanRoute.'.index', array_filter($filters ?? [])))
 @section('document-width', 'min-w-[1080px]')
 @section('report-title', 'Laporan Rekap Tagihan Siswa')
 

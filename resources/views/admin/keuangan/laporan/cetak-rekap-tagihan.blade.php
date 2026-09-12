@@ -1,7 +1,7 @@
 @extends('layouts.print')
 
 @section('title', 'Rekap Tagihan per Kelas')
-@section('back-url', route('admin.keuangan.laporan.rekap-tagihan'))
+@section('back-url', route(request()->routeIs('bendahara.*') ? 'bendahara.laporan.rekap-tagihan' : 'admin.keuangan.laporan.rekap-tagihan'))
 @section('document-width', 'min-w-[940px]')
 @section('report-title', 'Rekap Tagihan per Kelas')
 

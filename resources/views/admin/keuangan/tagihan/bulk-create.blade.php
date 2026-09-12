@@ -6,6 +6,7 @@
 
 @section('content')
 @php
+    $tagihanRoute = request()->routeIs('admin.*') ? 'admin.keuangan.tagihan' : 'bendahara.tagihan';
     $classOptions = $kelasList->map(fn ($kelas) => [
         'id' => (string) $kelas->id,
         'name' => $kelas->nama_kelas,
@@ -55,13 +56,13 @@
     }"
 >
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <a href="{{ route('admin.keuangan.tagihan.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-arrow-left"></i>Kembali ke tagihan</a>
-        <a href="{{ route('admin.keuangan.tagihan.generate-spp') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-violet-50 px-4 text-sm font-bold text-violet-700 no-underline hover:bg-violet-100"><i class="fas fa-calendar-days"></i>Butuh SPP bulanan?</a>
+        <a href="{{ route($tagihanRoute.'.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-arrow-left"></i>Kembali ke tagihan</a>
+        <a href="{{ route($tagihanRoute.'.generate-spp') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-violet-50 px-4 text-sm font-bold text-violet-700 no-underline hover:bg-violet-100"><i class="fas fa-calendar-days"></i>Butuh SPP bulanan?</a>
     </div>
 
     <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3 text-sm leading-6 text-blue-900"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p><strong>Alur kerja:</strong> pilih kelas penerima, isi nominal yang diperlukan, periksa jatuh tempo, lalu simpan. Tagihan dibuat hanya untuk siswa aktif; data sejenis yang sudah ada tidak dibuat ulang.</p></div></section>
 
-    <form method="POST" action="{{ route('admin.keuangan.tagihan.bulk-create') }}" class="space-y-5" @submit.prevent="submitForm($event)">
+    <form method="POST" action="{{ route($tagihanRoute.'.bulk-create') }}" class="space-y-5" @submit.prevent="submitForm($event)">
         @csrf
 
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -102,7 +103,7 @@
 
         <section class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900"><div class="flex items-start gap-3"><i class="fas fa-triangle-exclamation mt-1 text-amber-700"></i><div><strong>Periksa sebelum menyimpan</strong><ul class="mt-1 list-disc space-y-1 pl-5"><li>Tagihan akan dibuat untuk seluruh siswa aktif dalam kelas terpilih.</li><li>Data masuk ke tahun ajaran {{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}.</li><li>Gunakan Generate SPP untuk tagihan bulanan agar periode tidak terlewat.</li></ul></div></div></section>
 
-        <footer class="flex flex-col-reverse gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs text-slate-500"><strong x-text="selected.length"></strong> kelas penerima dipilih.</p><div class="flex gap-2"><a href="{{ route('admin.keuangan.tagihan.index') }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-check"></i>Buat tagihan</button></div></footer>
+        <footer class="flex flex-col-reverse gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs text-slate-500"><strong x-text="selected.length"></strong> kelas penerima dipilih.</p><div class="flex gap-2"><a href="{{ route($tagihanRoute.'.index') }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-check"></i>Buat tagihan</button></div></footer>
     </form>
 </div>
 @endsection

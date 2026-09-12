@@ -1,7 +1,7 @@
 @extends('layouts.print')
 
 @section('title', 'Kwitansi Pembayaran - '.$pembayaran->kode_pembayaran)
-@section('back-url', route('admin.keuangan.pembayaran.show', $pembayaran))
+@section('back-url', route(request()->routeIs('bendahara.*') ? 'bendahara.pembayaran.show' : 'admin.keuangan.pembayaran.show', $pembayaran))
 @section('document-width', 'max-w-4xl mx-auto')
 @section('report-title', 'Kwitansi Pembayaran')
 

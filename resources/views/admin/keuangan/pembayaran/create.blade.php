@@ -6,6 +6,9 @@
 
 @section('content')
 @php
+    $isBendahara = request()->routeIs('bendahara.*');
+    $pembayaranRoute = $isBendahara ? 'bendahara.pembayaran' : 'admin.keuangan.pembayaran';
+    $tagihanRoute = $isBendahara ? 'bendahara.tagihan' : 'admin.keuangan.tagihan';
     $paymentItems = $tagihanBelumLunas->mapWithKeys(fn ($tagihan) => [(string) $tagihan->id => [
         'selected' => false,
         'amount' => (int) $tagihan->sisa_per_item,
@@ -42,14 +45,14 @@
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
             <div class="flex min-w-0 items-center gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-sm font-extrabold text-brand-700">{{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}</span><div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-wide text-brand-600">Pembayaran loket</p><h2 class="truncate text-lg font-extrabold text-slate-950" title="{{ $siswa->nama_lengkap }}">{{ $siswa->nama_lengkap }}</h2><p class="mt-0.5 truncate text-xs text-slate-500">{{ $siswa->nisn ?: 'NISN belum tersedia' }}</p></div></div>
-            <a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali ke tagihan</a>
+            <a href="{{ route($tagihanRoute.'.show', $siswa->id) }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali ke tagihan</a>
         </div>
         <dl class="grid border-t border-slate-200 text-xs sm:grid-cols-3"><div class="border-slate-200 p-4 sm:border-r"><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Kelas</dt><dd class="mt-1 font-extrabold text-slate-800">{{ $siswa->kelas->nama_kelas ?? '-' }} <span class="font-semibold text-slate-500">{{ $siswa->kelas->jenjang ?? '' }}</span></dd></div><div class="border-slate-200 p-4 sm:border-r"><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Cabang</dt><dd class="mt-1 break-words font-extrabold text-slate-800">{{ $siswa->cabang->nama_cabang ?? '-' }}</dd></div><div class="p-4"><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Sisa tagihan</dt><dd class="mt-1 whitespace-nowrap text-base font-extrabold text-red-700">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</dd></div></dl>
     </section>
 
     <section class="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-800"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600"><i class="fas fa-circle-info" aria-hidden="true"></i></span><div><h2 class="font-extrabold text-blue-900">Khusus pembayaran tunai di loket</h2><p class="mt-1">Pembayaran digital dan Direct Transfer tercatat otomatis dari sistem wali siswa. Aktifkan validasi langsung hanya setelah uang tunai benar-benar diterima.</p></div></section>
 
-    <form action="{{ route('admin.keuangan.pembayaran.store', $siswa->id) }}" method="POST" enctype="multipart/form-data" @submit.prevent="submitPayment($el)" class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">@csrf<input type="hidden" name="metode_pembayaran" value="tunai"><input type="hidden" name="jumlah_bayar" :value="total()">
+    <form action="{{ route($pembayaranRoute.'.store', $siswa->id) }}" method="POST" enctype="multipart/form-data" @submit.prevent="submitPayment($el)" class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">@csrf<input type="hidden" name="metode_pembayaran" value="tunai"><input type="hidden" name="jumlah_bayar" :value="total()">
         <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-base font-extrabold text-slate-950"><i class="fas fa-file-invoice-dollar text-brand-600" aria-hidden="true"></i>1. Pilih tagihan yang dibayar</h2><p class="mt-1 text-xs text-slate-500">Centang tagihan lalu sesuaikan nominalnya. SPP harus dibayar penuh.</p></header>
             @forelse($tagihanBelumLunas as $tagihan)

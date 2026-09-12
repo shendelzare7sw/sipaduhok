@@ -2,126 +2,34 @@
 
 namespace App\Http\Controllers\Admin\Keuangan;
 
+use App\Exports\Templates\TagihanTemplate;
 use App\Http\Controllers\Bendahara\TagihanController as BendaharaTagihanController;
+use App\Imports\TagihanImport;
+use App\Models\Pembayaran;
+use App\Models\Tagihan;
+use App\Models\TahunAjaran;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class TagihanController extends BendaharaTagihanController
 {
-    /**
-     * Override getRoutePrefix for admin redirects
-     */
-    protected function getRoutePrefix()
+    protected function getRoutePrefix(): string
     {
         return 'admin.keuangan.tagihan';
     }
 
-    /**
-     * Override carryover view to use admin layout
-     */
-    protected function carryoverViewName(): string
+    public function importForm(): View
     {
-        return 'admin.keuangan.tagihan.carryover';
-    }
-
-    /**
-     * Override index method to use admin view
-     */
-    public function index(Request $request)
-    {
-        // Call parent method to get data
-        $response = parent::index($request);
-
-        // If response is a view, change the view path
-        if ($response instanceof \Illuminate\View\View) {
-            return view('admin.keuangan.tagihan.index', $response->getData());
-        }
-
-        return $response;
-    }
-
-    /**
-     * Override show method to use admin view
-     */
-    public function show($siswa)
-    {
-        $response = parent::show($siswa);
-
-        if ($response instanceof \Illuminate\View\View) {
-            return view('admin.keuangan.tagihan.show', $response->getData());
-        }
-
-        return $response;
-    }
-
-    /**
-     * Override edit method to use admin view
-     */
-    public function edit($siswa)
-    {
-        $response = parent::edit($siswa);
-
-        if ($response instanceof \Illuminate\View\View) {
-            return view('admin.keuangan.tagihan.edit', $response->getData());
-        }
-
-        return $response;
-    }
-
-    /**
-     * Override bulkCreate method to use admin view
-     */
-    public function bulkCreate(Request $request)
-    {
-        $response = parent::bulkCreate($request);
-
-        if ($response instanceof \Illuminate\View\View) {
-            return view('admin.keuangan.tagihan.bulk-create', $response->getData());
-        }
-
-        return $response;
-    }
-
-    /**
-     * Use the CleanFlow print view for the admin route.
-     */
-    public function cetak($siswa)
-    {
-        $response = parent::cetak($siswa);
-
-        if ($response instanceof \Illuminate\View\View) {
-            return view('admin.keuangan.tagihan.cetak', $response->getData());
-        }
-
-        return $response;
-    }
-
-    /**
-     * Override cetakLaporan to use admin-specific view
-     */
-    public function cetakLaporan(\Illuminate\Http\Request $request)
-    {
-        $response = parent::cetakLaporan($request);
-        if ($response instanceof \Illuminate\View\View) {
-            return view('admin.keuangan.tagihan.cetak-laporan', $response->getData());
-        }
-
-        return $response;
-    }
-
-    /**
-     * Show import form.
-     */
-    public function importForm()
-    {
-        $tahunAjarans = \App\Models\TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
+        $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
 
         return view('admin.keuangan.tagihan.import', compact('tahunAjarans'));
     }
 
-    /**
-     * Process import from Excel.
-     */
-    public function import(Request $request)
+    public function import(Request $request): RedirectResponse
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,xls|max:5120',
@@ -129,8 +37,8 @@ class TagihanController extends BendaharaTagihanController
         ]);
 
         try {
-            $import = new \App\Imports\TagihanImport($request->tahun_ajaran_id);
-            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
+            $import = new TagihanImport($request->integer('tahun_ajaran_id'));
+            Excel::import($import, $request->file('file'));
 
             $imported = $import->getImportedCount();
             $skipped = $import->getSkippedCount();
@@ -142,126 +50,63 @@ class TagihanController extends BendaharaTagihanController
                 $message .= " {$skipped} data dilewati.";
             }
 
-            // Build warning message
-            $warningMessage = '';
-            if (! empty($warnings)) {
-                $warningMessage .= implode(' | ', $warnings);
-            } elseif (! empty($missingSiswa)) {
-                $warningMessage .= 'Siswa tidak ditemukan: '.implode(', ', $missingSiswa).'.';
-            }
+            $warningMessage = ! empty($warnings)
+                ? implode(' | ', $warnings)
+                : (! empty($missingSiswa) ? 'Siswa tidak ditemukan: '.implode(', ', $missingSiswa).'.' : '');
 
-            if (! empty($warningMessage)) {
-                return redirect()->route('admin.keuangan.tagihan.index')
-                    ->with('success', $message)
-                    ->with('warning', $warningMessage);
-            }
+            $redirect = redirect()->route($this->getRoutePrefix().'.index')->with('success', $message);
 
-            return redirect()->route('admin.keuangan.tagihan.index')
-                ->with('success', $message);
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengimport: '.$e->getMessage());
+            return $warningMessage !== ''
+                ? $redirect->with('warning', $warningMessage)
+                : $redirect;
+        } catch (\Throwable $exception) {
+            return back()->with('error', 'Gagal mengimport: '.$exception->getMessage());
         }
     }
 
-    /**
-     * Download import template.
-     */
-    public function downloadTemplate()
+    public function downloadTemplate(): BinaryFileResponse
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\Templates\TagihanTemplate,
-            'template_tagihan.xlsx'
-        );
+        return Excel::download(new TagihanTemplate, 'template_tagihan.xlsx');
     }
 
     /**
-     * Override createCustom method to use admin view
+     * Fitur pemulihan khusus Admin selama masa percobaan sistem.
      */
-    public function createCustom()
+    public function resetTagihan(Request $request): RedirectResponse
     {
-        $response = parent::createCustom();
-
-        if ($response instanceof \Illuminate\View\View) {
-            return view('admin.keuangan.tagihan.create-custom', $response->getData());
-        }
-
-        return $response;
-    }
-
-    /**
-     * Override generateSppForm method to use admin view
-     */
-    public function generateSppForm()
-    {
-        $response = parent::generateSppForm();
-
-        if ($response instanceof \Illuminate\View\View) {
-            return view('admin.keuangan.tagihan.generate-spp', $response->getData());
-        }
-
-        return $response;
-    }
-
-    /**
-     * Override duplicateForm method to use admin view
-     */
-    public function duplicateForm()
-    {
-        $response = parent::duplicateForm();
-
-        if ($response instanceof \Illuminate\View\View) {
-            return view('admin.keuangan.tagihan.duplicate', $response->getData());
-        }
-
-        return $response;
-    }
-
-    /**
-     * Reset tagihan siswa terpilih ke kondisi awal (KOSONG / Rp 0)
-     * HANYA untuk admin, digunakan selama masa percobaan sistem.
-     * Menghapus semua tagihan DAN pembayaran terkait untuk siswa terpilih.
-     */
-    public function resetTagihan(Request $request)
-    {
-        $request->validate([
+        $validated = $request->validate([
             'siswa_ids' => 'required|string',
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
         ]);
 
-        $siswaIds = json_decode($request->siswa_ids, true);
-
+        $siswaIds = json_decode($validated['siswa_ids'], true);
         if (empty($siswaIds) || ! is_array($siswaIds)) {
-            return redirect()->back()->with('error', 'Tidak ada siswa yang dipilih.');
+            return back()->with('error', 'Tidak ada siswa yang dipilih.');
         }
 
-        $tahunAjaranId = $request->tahun_ajaran_id;
-
-        \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-            // Find all tagihan for selected students in the selected academic year
-            $tagihanIds = \App\Models\Tagihan::whereIn('siswa_id', $siswaIds)
-                ->where('tahun_ajaran_id', $tahunAjaranId)
-                ->pluck('id');
+            [$deletedTagihan, $deletedPembayaran] = DB::transaction(function () use ($siswaIds, $validated) {
+                $tagihanIds = Tagihan::whereIn('siswa_id', $siswaIds)
+                    ->where('tahun_ajaran_id', $validated['tahun_ajaran_id'])
+                    ->pluck('id');
 
-            // Delete all pembayaran associated with these tagihan
-            $deletedPembayaran = \App\Models\Pembayaran::whereIn('tagihan_id', $tagihanIds)->count();
-            \App\Models\Pembayaran::whereIn('tagihan_id', $tagihanIds)->delete();
+                $deletedPembayaran = Pembayaran::whereIn('tagihan_id', $tagihanIds)->count();
+                Pembayaran::whereIn('tagihan_id', $tagihanIds)->delete();
 
-            // Delete all tagihan for selected students
-            $deletedTagihan = \App\Models\Tagihan::whereIn('siswa_id', $siswaIds)
-                ->where('tahun_ajaran_id', $tahunAjaranId)
-                ->delete();
+                $deletedTagihan = Tagihan::whereIn('siswa_id', $siswaIds)
+                    ->where('tahun_ajaran_id', $validated['tahun_ajaran_id'])
+                    ->delete();
 
-            \Illuminate\Support\Facades\DB::commit();
+                return [$deletedTagihan, $deletedPembayaran];
+            });
 
             $siswaCount = count($siswaIds);
 
-            return redirect()->route('admin.keuangan.tagihan.index', ['tahun_ajaran_id' => $tahunAjaranId])
-                ->with('success', "Reset berhasil! {$deletedTagihan} tagihan dan {$deletedPembayaran} pembayaran dari {$siswaCount} siswa telah dihapus. Status kembali ke \"KOSONG\".");
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
-
-            return redirect()->back()->with('error', 'Gagal mereset tagihan: '.$e->getMessage());
+            return redirect()->route($this->getRoutePrefix().'.index', [
+                'tahun_ajaran_id' => $validated['tahun_ajaran_id'],
+            ])->with('success', "Reset berhasil! {$deletedTagihan} tagihan dan {$deletedPembayaran} pembayaran dari {$siswaCount} siswa telah dihapus. Status kembali ke \"KOSONG\".");
+        } catch (\Throwable $exception) {
+            return back()->with('error', 'Gagal mereset tagihan: '.$exception->getMessage());
         }
     }
 }

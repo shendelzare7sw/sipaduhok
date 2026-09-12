@@ -45,7 +45,7 @@
 
     <div id="admin-sidebar-overlay" class="fixed inset-0 z-40 hidden bg-slate-950/60 backdrop-blur-sm lg:hidden" aria-hidden="true"></div>
 
-    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#1261a6] bg-gradient-to-b from-[#183d68] via-[#145b94] to-[#0b426f] text-white shadow-2xl transition-transform duration-200 lg:translate-x-0">
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#17699f] bg-gradient-to-b from-[#245f91] via-[#176fa8] to-[#0f5688] text-white shadow-2xl transition-transform duration-200 lg:translate-x-0">
         <div class="relative flex h-20 shrink-0 items-center border-b border-white/15 px-4">
             <a href="{{ route($dashboardRoute) }}" class="flex min-w-0 flex-1 items-center gap-2.5 pr-11 no-underline lg:pr-0">
                 <img src="{{ asset('img/logo.png') }}" alt="SIPADUHOK" class="h-12 w-12 shrink-0 object-contain">
@@ -69,9 +69,9 @@
             </ul>
         </nav>
 
-        <div class="shrink-0 border-t border-white/15 bg-slate-950/25 p-3 backdrop-blur-xl">
-            <a href="{{ route('profile.index') }}" class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2.5 text-sm text-white no-underline shadow-sm transition hover:border-white/20 hover:bg-white/10">
-                <span class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-sky-400/25 font-bold text-white ring-1 ring-sky-100/20">
+        <div class="shrink-0 border-t border-white/20 bg-gradient-to-r from-blue-700 via-sky-600 to-cyan-500 p-3 shadow-[0_-8px_24px_rgba(8,47,73,0.2)]">
+            <a href="{{ route('profile.index') }}" class="flex items-center gap-3 rounded-xl bg-transparent px-3 py-2.5 text-sm text-white no-underline transition hover:bg-white/10">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-950/20 font-bold text-white ring-1 ring-white/25">
                     @if(auth()->user()->foto_profil)
                         <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="" class="h-full w-full object-cover">
                     @else
@@ -82,7 +82,7 @@
                     <span class="block truncate font-bold text-white">{{ auth()->user()->name }}</span>
                     <span class="block truncate text-[11px] font-medium text-sky-100/85">{{ auth()->user()->role_label }}</span>
                 </span>
-                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.07] text-sky-100/80"><i class="fa-solid fa-gear text-xs"></i></span>
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-950/15 text-white/90"><i class="fa-solid fa-gear text-xs"></i></span>
             </a>
         </div>
     </aside>

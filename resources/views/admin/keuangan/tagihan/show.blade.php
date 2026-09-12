@@ -5,6 +5,11 @@
 @section('page-subtitle', $siswa->nama_lengkap)
 
 @section('content')
+@php
+    $isAdminContext = request()->routeIs('admin.*');
+    $tagihanRoute = $isAdminContext ? 'admin.keuangan.tagihan' : 'bendahara.tagihan';
+    $pembayaranRoute = $isAdminContext ? 'admin.keuangan.pembayaran' : 'bendahara.pembayaran';
+@endphp
 <div data-tagihan-detail class="min-w-0 w-full space-y-5">
     <section class="overflow-hidden rounded-2xl bg-gradient-to-r from-brand-800 to-brand-600 p-5 text-white shadow-lg sm:p-6">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -16,7 +21,7 @@
                     <p class="mt-1 truncate text-xs text-blue-100 sm:text-sm">NISN {{ $siswa->nisn ?: '-' }} · {{ $siswa->kelas->nama_kelas ?? 'Belum ada kelas' }} · {{ $siswa->cabang->nama_cabang ?? 'Cabang belum diatur' }}</p>
                 </div>
             </div>
-            <a href="{{ route('admin.keuangan.tagihan.index') }}" class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-bold text-white no-underline hover:bg-white/20"><i class="fas fa-arrow-left"></i>Kembali ke daftar</a>
+            <a href="{{ route($tagihanRoute.'.index') }}" class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-bold text-white no-underline hover:bg-white/20"><i class="fas fa-arrow-left"></i>Kembali ke daftar</a>
         </div>
     </section>
 
@@ -27,17 +32,17 @@
     </section>
 
     <section class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-        <a href="{{ route('admin.keuangan.tagihan.edit', $siswa->id) }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-50 px-4 text-xs font-bold text-amber-700 no-underline hover:bg-amber-100 sm:text-sm"><i class="fas fa-pen"></i>Edit tagihan</a>
-        <a href="{{ route('admin.keuangan.pembayaran.create', $siswa->id) }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white no-underline hover:bg-emerald-700 sm:text-sm"><i class="fas fa-plus"></i>Input pembayaran</a>
-        <a href="{{ route('admin.keuangan.pembayaran.riwayat-siswa', $siswa->id) }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-cyan-50 px-4 text-xs font-bold text-cyan-700 no-underline hover:bg-cyan-100 sm:text-sm"><i class="fas fa-clock-rotate-left"></i>Riwayat bayar</a>
-        <a href="{{ route('admin.keuangan.tagihan.cetak', $siswa->id) }}" target="_blank" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200 sm:text-sm"><i class="fas fa-print"></i>Cetak tagihan</a>
+        <a href="{{ route($tagihanRoute.'.edit', $siswa->id) }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-50 px-4 text-xs font-bold text-amber-700 no-underline hover:bg-amber-100 sm:text-sm"><i class="fas fa-pen"></i>Edit tagihan</a>
+        <a href="{{ route($pembayaranRoute.'.create', $siswa->id) }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white no-underline hover:bg-emerald-700 sm:text-sm"><i class="fas fa-plus"></i>Input pembayaran</a>
+        <a href="{{ route($pembayaranRoute.'.riwayat-siswa', $siswa->id) }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-cyan-50 px-4 text-xs font-bold text-cyan-700 no-underline hover:bg-cyan-100 sm:text-sm"><i class="fas fa-clock-rotate-left"></i>Riwayat bayar</a>
+        <a href="{{ route($tagihanRoute.'.cetak', $siswa->id) }}" target="_blank" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200 sm:text-sm"><i class="fas fa-print"></i>Cetak tagihan</a>
     </section>
 
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <header class="border-b border-slate-200 p-4 sm:p-5"><h2 class="flex items-center gap-2 text-lg font-extrabold text-slate-950"><i class="fas fa-receipt text-amber-600"></i>Rincian tagihan</h2><p class="mt-1 text-sm text-slate-500">Kewajiban, jatuh tempo, dan status pembayaran siswa.</p></header>
 
         @if($tagihan->isEmpty())
-            <div class="px-5 py-14 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400"><i class="fas fa-inbox"></i></span><h3 class="mt-4 font-extrabold text-slate-900">Belum ada tagihan</h3><p class="mt-1 text-sm text-slate-500">Tambahkan kewajiban pertama untuk siswa ini.</p><a href="{{ route('admin.keuangan.tagihan.edit', $siswa->id) }}" class="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white no-underline"><i class="fas fa-plus"></i>Tambah tagihan</a></div>
+            <div class="px-5 py-14 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400"><i class="fas fa-inbox"></i></span><h3 class="mt-4 font-extrabold text-slate-900">Belum ada tagihan</h3><p class="mt-1 text-sm text-slate-500">Tambahkan kewajiban pertama untuk siswa ini.</p><a href="{{ route($tagihanRoute.'.edit', $siswa->id) }}" class="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white no-underline"><i class="fas fa-plus"></i>Tambah tagihan</a></div>
         @else
             <div class="divide-y divide-slate-100 md:hidden">
                 @foreach($tagihan as $item)

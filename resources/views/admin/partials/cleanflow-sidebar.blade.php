@@ -18,16 +18,18 @@
                     $isActive = count($patterns) > 0 && request()->routeIs(...$patterns);
                     $hasChildren = !empty($item['children']);
                     $targetId = 'admin-menu-' . $loop->parent->index . '-' . $loop->index;
-                    $baseClasses = 'group flex min-h-11 w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-sm font-semibold transition';
+                    $baseClasses = 'group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition';
+                    $toneClasses = ['!bg-white/[0.07]', '!bg-sky-300/[0.15]', '!bg-cyan-200/[0.12]', '!bg-indigo-200/[0.13]'];
+                    $toneClass = $toneClasses[($loop->parent->index + $loop->index) % count($toneClasses)];
                     $stateClasses = $isActive
-                        ? 'border-white/30 bg-white/20 text-white shadow-lg shadow-slate-950/15'
-                        : 'border-white/10 bg-white/[0.03] text-blue-50/90 hover:border-white/20 hover:bg-white/10 hover:text-white';
+                        ? '!border-0 !ring-0 !bg-white/25 text-white shadow-lg shadow-slate-950/15'
+                        : "!border-0 !ring-0 {$toneClass} text-blue-50/90 hover:!bg-white/15 hover:text-white";
                 @endphp
 
                 <li class="menu-item {{ $isActive ? 'active open' : '' }}">
                     @if($hasChildren)
                         <button type="button"
-                            class="menu-link menu-toggle border-0 bg-transparent {{ $baseClasses }} {{ $stateClasses }}"
+                            class="menu-link menu-toggle bg-transparent {{ $baseClasses }} {{ $stateClasses }}"
                             data-menu-toggle
                             aria-controls="{{ $targetId }}"
                             aria-expanded="{{ $isActive ? 'true' : 'false' }}">

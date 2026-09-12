@@ -29,9 +29,13 @@
         </div>
         <ul class="space-y-1">
             @foreach($section['items'] as $item)
-                @php($active = request()->routeIs(...$item['patterns']))
+                @php
+                    $active = request()->routeIs(...$item['patterns']);
+                    $toneClasses = ['!bg-white/[0.07]', '!bg-sky-300/[0.15]', '!bg-cyan-200/[0.12]', '!bg-indigo-200/[0.13]'];
+                    $toneClass = $toneClasses[($loop->parent->index + $loop->index) % count($toneClasses)];
+                @endphp
                 <li>
-                    <a href="{{ route($item['route']) }}" class="group flex min-h-11 w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-semibold no-underline transition {{ $active ? 'border-white/30 bg-white/20 text-white shadow-lg shadow-slate-950/15' : 'border-white/10 bg-white/[0.03] text-blue-50/90 hover:border-white/20 hover:bg-white/10 hover:text-white' }}">
+                    <a href="{{ route($item['route']) }}" class="group flex min-h-11 w-full items-center gap-3 rounded-xl !border-0 !ring-0 px-3 py-2.5 text-sm font-semibold no-underline transition {{ $active ? '!bg-white/25 text-white shadow-lg shadow-slate-950/15' : $toneClass.' text-blue-50/90 hover:!bg-white/20 hover:text-white' }}">
                         <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
                         <span class="min-w-0 flex-1">
                             <span class="block truncate">{{ $item['label'] }}</span>

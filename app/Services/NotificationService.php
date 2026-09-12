@@ -971,7 +971,7 @@ class NotificationService
         $byGuru = collect($assignments)->groupBy('tenaga_pendidik_id');
 
         foreach ($byGuru as $tenagaPendidikId => $items) {
-            $tp = TenagaPendidik::with('user')->find($tenagaPendidikId);
+            $tp = TenagaPendidik::eligibleToTeach()->with('user')->find($tenagaPendidikId);
             if (! $tp || ! $tp->user_id) {
                 continue;
             }

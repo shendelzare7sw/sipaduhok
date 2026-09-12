@@ -272,4 +272,52 @@ JSON;
         $this->assertSame('/admin/keuangan/tagihan', $structured['button']['url']);
         $this->assertSame('/admin/keuangan/laporan', $structured['related'][0]['url']);
     }
+
+    public function test_cleanflow_sidebars_reserve_borders_for_submenus_only(): void
+    {
+        $sidebarSources = collect([
+            resource_path('views/admin/partials/cleanflow-sidebar.blade.php'),
+            resource_path('views/sekretaris/partials/sidebar.blade.php'),
+            resource_path('views/ketua/partials/sidebar.blade.php'),
+            resource_path('views/bendahara/partials/sidebar.blade.php'),
+            resource_path('views/waka/partials/sidebar.blade.php'),
+        ])->mapWithKeys(fn (string $path) => [$path => File::get($path)]);
+
+        foreach ($sidebarSources as $path => $source) {
+            $this->assertStringNotContainsString(
+                'rounded-xl border px-3 py-2.5',
+                $source,
+                "Item tunggal masih memakai border di {$path}",
+            );
+            $this->assertStringContainsString(
+                '!border-0 !ring-0',
+                $source,
+                "Item utama belum melawan border compatibility global di {$path}",
+            );
+            $this->assertStringNotContainsString(
+                'border border-white/30',
+                $source,
+                "Pemicu dropdown utama masih memakai border di {$path}",
+            );
+            $this->assertStringContainsString(
+                '!bg-sky-300/[0.15]',
+                $source,
+                "Tone menu belum mengalahkan specificity bridge di {$path}",
+            );
+        }
+
+        foreach ($sidebarSources->except(resource_path('views/sekretaris/partials/sidebar.blade.php')) as $source) {
+            $this->assertStringContainsString('rounded-lg border px-3', $source);
+        }
+
+        foreach ([
+            resource_path('views/layouts/app.blade.php'),
+            resource_path('views/layouts/partials/cleanflow-lms-shell.blade.php'),
+        ] as $layout) {
+            $source = File::get($layout);
+            $this->assertStringContainsString('from-[#245f91] via-[#176fa8] to-[#0f5688]', $source);
+            $this->assertStringContainsString('from-blue-700 via-sky-600 to-cyan-500', $source);
+            $this->assertStringContainsString('rounded-xl bg-transparent', $source);
+        }
+    }
 }

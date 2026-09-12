@@ -2,12 +2,12 @@
 
 namespace App\Imports;
 
+use App\Models\GuruPengajarKelas;
 use App\Models\JadwalPelajaran;
-use App\Models\TahunAjaran;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
+use App\Models\TahunAjaran;
 use App\Models\TenagaPendidik;
-use App\Models\GuruPengajarKelas;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -16,17 +16,26 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 class JadwalPelajaranImport implements ToCollection, WithHeadingRow
 {
     private $skippedCount = 0;
+
     private $importedCount = 0;
+
     private $kelasList;
+
     private $mapelList;
+
     private $mapelModels;
+
     private $guruList;
+
     private $tahunAjaranId;
 
     // Tracking missing entities
     private $missingKelas = [];
+
     private $missingMapel = [];
+
     private $missingGuru = [];
+
     private $warnings = [];
 
     public function __construct($tahunAjaranId = null)
@@ -40,17 +49,19 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
         $this->kelasList = Kelas::with('cabang')
             ->when($this->tahunAjaranId, fn ($q) => $q->where('tahun_ajaran_id', $this->tahunAjaranId))
             ->get()->map(function ($kelas) {
-            return [
-                'id' => $kelas->id,
-                'nama_kelas' => strtolower(trim($kelas->nama_kelas)),
-                'nama_cabang' => strtolower(trim($kelas->cabang->nama_cabang ?? '')),
-                'jenjang' => $kelas->jenjang,
-            ];
-        });
+                return [
+                    'id' => $kelas->id,
+                    'nama_kelas' => strtolower(trim($kelas->nama_kelas)),
+                    'nama_cabang' => strtolower(trim($kelas->cabang->nama_cabang ?? '')),
+                    'jenjang' => $kelas->jenjang,
+                ];
+            });
 
         $this->mapelList = MataPelajaran::pluck('id', 'nama_mapel')->toArray();
         $this->mapelModels = MataPelajaran::all()->keyBy('id');
-        $this->guruList = TenagaPendidik::pluck('id', 'nama_lengkap')->toArray();
+        $this->guruList = TenagaPendidik::eligibleToTeach()
+            ->pluck('id', 'nama_lengkap')
+            ->toArray();
     }
 
     public function collection(Collection $rows)
@@ -68,9 +79,10 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
 
             // Validate hari
             $hari = ucfirst(strtolower(trim($row['hari'])));
-            if (!in_array($hari, ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'])) {
+            if (! in_array($hari, ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'])) {
                 $this->warnings[] = "Baris {$rowNumber}: Hari '{$row['hari']}' tidak valid";
                 $this->skippedCount++;
+
                 continue;
             }
 
@@ -91,31 +103,33 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            if (!empty($missingClassesInRow)) {
-                $cabangInfo = $namaCabang ? " (Cabang: {$namaCabang})" : "";
+            if (! empty($missingClassesInRow)) {
+                $cabangInfo = $namaCabang ? " (Cabang: {$namaCabang})" : '';
                 foreach ($missingClassesInRow as $missing) {
-                    $fullName = $missing . $cabangInfo;
-                    if (!in_array($fullName, $this->missingKelas)) {
+                    $fullName = $missing.$cabangInfo;
+                    if (! in_array($fullName, $this->missingKelas)) {
                         $this->missingKelas[] = $fullName;
                     }
                 }
-                $this->warnings[] = "Baris {$rowNumber}: Kelas tidak ditemukan: " . implode(', ', $missingClassesInRow) . $cabangInfo;
+                $this->warnings[] = "Baris {$rowNumber}: Kelas tidak ditemukan: ".implode(', ', $missingClassesInRow).$cabangInfo;
                 $this->skippedCount++;
+
                 continue;
             }
 
             if (empty($kelasIds)) {
                 $this->skippedCount++;
+
                 continue;
             }
 
             // Lookup guru (optional - jadwal tetap dibuat dengan status kosong)
             $guruId = null;
-            if (!empty($row['nama_guru'])) {
+            if (! empty($row['nama_guru'])) {
                 $guruId = $this->findGuru($row['nama_guru']);
-                if (!$guruId) {
+                if (! $guruId) {
                     $guruName = trim($row['nama_guru']);
-                    if (!in_array($guruName, $this->missingGuru)) {
+                    if (! in_array($guruName, $this->missingGuru)) {
                         $this->missingGuru[] = $guruName;
                     }
                     $this->warnings[] = "Baris {$rowNumber}: Guru '{$guruName}' tidak ditemukan, jadwal dibuat dengan status kosong";
@@ -130,14 +144,15 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
 
                 // Find appropriate mapel for this jenjang group
                 $mapelId = $this->findMapelForJenjang($row['nama_mapel'], $jenjang);
-                if (!$mapelId) {
+                if (! $mapelId) {
                     $mapelName = trim($row['nama_mapel']);
-                    if (!in_array($mapelName, $this->missingMapel)) {
+                    if (! in_array($mapelName, $this->missingMapel)) {
                         $this->missingMapel[] = $mapelName;
                     }
-                    $this->warnings[] = "Baris {$rowNumber}: Mata Pelajaran '{$mapelName}' tidak ditemukan" .
-                        (count($kelasGrouped) > 1 ? " untuk jenjang {$jenjang}" : "");
+                    $this->warnings[] = "Baris {$rowNumber}: Mata Pelajaran '{$mapelName}' tidak ditemukan".
+                        (count($kelasGrouped) > 1 ? " untuk jenjang {$jenjang}" : '');
                     $this->skippedCount++;
+
                     continue;
                 }
 
@@ -153,8 +168,9 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
 
                 if ($exists) {
                     $this->skippedCount++;
-                    $kelasNames = $kelasGroup->pluck('nama_kelas')->map(fn($n) => ucfirst($n))->join(', ');
+                    $kelasNames = $kelasGroup->pluck('nama_kelas')->map(fn ($n) => ucfirst($n))->join(', ');
                     $this->warnings[] = "Baris {$rowNumber}: Jadwal duplikat untuk kelas {$kelasNames} pada waktu tersebut.";
+
                     continue;
                 }
 
@@ -189,7 +205,7 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
                     $this->importedCount++;
                 } catch (\Exception $e) {
                     $this->skippedCount++;
-                    $this->warnings[] = "Baris {$rowNumber}: Error - " . $e->getMessage();
+                    $this->warnings[] = "Baris {$rowNumber}: Error - ".$e->getMessage();
                 }
             }
         }
@@ -212,7 +228,7 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
             if (strtolower(trim($mapel->nama_mapel)) === $nameLower) {
                 $anyMatch = $mapel->id;
 
-                if (!$mapel->jenjang) {
+                if (! $mapel->jenjang) {
                     $universalMatch = $mapel->id;
                 } elseif (strcasecmp($mapel->jenjang, $jenjang) === 0) {
                     $exactJenjangMatch = $mapel->id;
@@ -239,6 +255,7 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
                 }
             }
         }
+
         return null;
     }
 
@@ -253,6 +270,7 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
                 return $id;
             }
         }
+
         return null;
     }
 
@@ -260,22 +278,27 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
     {
         return $this->skippedCount;
     }
+
     public function getImportedCount(): int
     {
         return $this->importedCount;
     }
+
     public function getMissingKelas(): array
     {
         return $this->missingKelas;
     }
+
     public function getMissingMapel(): array
     {
         return $this->missingMapel;
     }
+
     public function getMissingGuru(): array
     {
         return $this->missingGuru;
     }
+
     public function getWarnings(): array
     {
         return $this->warnings;

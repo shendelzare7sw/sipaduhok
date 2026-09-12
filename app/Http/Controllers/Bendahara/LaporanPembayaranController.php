@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Bendahara;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Cabang;
+use App\Models\Kelas;
+use App\Models\Pembayaran;
 use App\Models\Siswa;
 use App\Models\Tagihan;
-use App\Models\Pembayaran;
-use App\Models\Kelas;
-use App\Models\Cabang;
 use App\Models\TahunAjaran;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LaporanPembayaranController extends Controller
 {
@@ -35,7 +36,7 @@ class LaporanPembayaranController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $cabangList = Cabang::where('is_active', true)->orderBy('nama_cabang')->get();
-        $kelasList = Kelas::when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+        $kelasList = Kelas::when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
@@ -54,18 +55,18 @@ class LaporanPembayaranController extends Controller
             ->whereYear('tanggal_bayar', $tahun);
 
         if ($kelasId) {
-            $query->whereHas('siswa', function($q) use ($kelasId) {
+            $query->whereHas('siswa', function ($q) use ($kelasId) {
                 $q->where('kelas_id', $kelasId);
             });
         } elseif ($jenjang) {
-            $query->whereHas('siswa.kelas', function($q) use ($jenjang, $cabangId) {
+            $query->whereHas('siswa.kelas', function ($q) use ($jenjang, $cabangId) {
                 $q->where('jenjang', $jenjang);
                 if ($cabangId) {
                     $q->where('cabang_id', $cabangId);
                 }
             });
         } elseif ($cabangId) {
-            $query->whereHas('siswa.kelas', function($q) use ($cabangId) {
+            $query->whereHas('siswa.kelas', function ($q) use ($cabangId) {
                 $q->where('cabang_id', $cabangId);
             });
         }
@@ -77,41 +78,45 @@ class LaporanPembayaranController extends Controller
         $pembayaran = $query->orderBy('tanggal_bayar', 'desc')->paginate(20)->appends($request->query());
 
         // Reusable closure for location-based filtering (cabang → jenjang → kelas)
-        $applyLocationFilter = function($q) use ($kelasId, $jenjang, $cabangId) {
+        $applyLocationFilter = function ($q) use ($kelasId, $jenjang, $cabangId) {
             if ($kelasId) {
-                $q->whereHas('siswa', function($q2) use ($kelasId) {
+                $q->whereHas('siswa', function ($q2) use ($kelasId) {
                     $q2->where('kelas_id', $kelasId);
                 });
             } elseif ($jenjang) {
-                $q->whereHas('siswa.kelas', function($q2) use ($jenjang, $cabangId) {
+                $q->whereHas('siswa.kelas', function ($q2) use ($jenjang, $cabangId) {
                     $q2->where('jenjang', $jenjang);
-                    if ($cabangId) $q2->where('cabang_id', $cabangId);
+                    if ($cabangId) {
+                        $q2->where('cabang_id', $cabangId);
+                    }
                 });
             } elseif ($cabangId) {
-                $q->whereHas('siswa.kelas', function($q2) use ($cabangId) {
+                $q->whereHas('siswa.kelas', function ($q2) use ($cabangId) {
                     $q2->where('cabang_id', $cabangId);
                 });
             }
+
             return $q;
         };
 
         // Base query builder for approved payments in selected period
-        $baseQuery = function() use ($bulan, $tahun, $applyLocationFilter) {
+        $baseQuery = function () use ($bulan, $tahun, $applyLocationFilter) {
             $q = Pembayaran::where('status_validasi', 'disetujui')
                 ->whereMonth('tanggal_bayar', $bulan)
                 ->whereYear('tanggal_bayar', $tahun);
+
             return $applyLocationFilter($q);
         };
 
         // Statistik bulanan
         $totalPembayaran = (clone $baseQuery())
-            ->when($metode, fn($q) => $q->where('metode_pembayaran', $metode))
+            ->when($metode, fn ($q) => $q->where('metode_pembayaran', $metode))
             ->sum('jumlah_bayar');
-        
+
         $jumlahTransaksi = (clone $baseQuery())
-            ->when($metode, fn($q) => $q->where('metode_pembayaran', $metode))
+            ->when($metode, fn ($q) => $q->where('metode_pembayaran', $metode))
             ->count();
-        
+
         // Per metode pembayaran
         $totalTunai = (clone $baseQuery())->where('metode_pembayaran', 'tunai')->sum('jumlah_bayar');
         $jumlahTunai = (clone $baseQuery())->where('metode_pembayaran', 'tunai')->count();
@@ -126,17 +131,23 @@ class LaporanPembayaranController extends Controller
         // Pembayaran per hari (untuk grafik) - Faster Grouped Query
         $pembayaranPerHari = collect();
         $daysInMonth = Carbon::create($tahun, $bulan, 1)->daysInMonth;
-        
+
         // Inisialisasi semua hari dengan 0
         for ($day = 1; $day <= $daysInMonth; $day++) {
             $pembayaranPerHari->put($day, 0);
         }
 
+        $dayExpression = match (DB::connection()->getDriverName()) {
+            'sqlite' => "CAST(strftime('%d', tanggal_bayar) AS INTEGER)",
+            'pgsql' => 'EXTRACT(DAY FROM tanggal_bayar)',
+            default => 'DAY(tanggal_bayar)',
+        };
+
         // Ambil data dalam satu query
         $dailyData = (clone $baseQuery())
-            ->when($metode, fn($q) => $q->where('metode_pembayaran', $metode))
-            ->selectRaw('DAY(tanggal_bayar) as day, SUM(jumlah_bayar) as total')
-            ->groupBy('day')
+            ->when($metode, fn ($q) => $q->where('metode_pembayaran', $metode))
+            ->selectRaw("{$dayExpression} as day, SUM(jumlah_bayar) as total")
+            ->groupByRaw($dayExpression)
             ->get();
 
         foreach ($dailyData as $data) {
@@ -147,20 +158,20 @@ class LaporanPembayaranController extends Controller
         $bulanList = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
         ];
 
         // Daftar jenjang unik untuk filter
         $jenjangList = $kelasList->pluck('jenjang')->unique()->sort()->values();
 
-        return view('bendahara.laporan.index', [
+        return view('admin.keuangan.laporan.index', [
             'pembayaran' => $pembayaran,
             'kelasList' => $kelasList,
             'cabangList' => $cabangList,
             'jenjangList' => $jenjangList,
             'bulanList' => $bulanList,
-            'bulan' => (int)$bulan,
-            'tahun' => (int)$tahun,
+            'bulan' => (int) $bulan,
+            'tahun' => (int) $tahun,
             'totalPembayaran' => $totalPembayaran,
             'jumlahTransaksi' => $jumlahTransaksi,
             'totalTunai' => $totalTunai,
@@ -192,7 +203,7 @@ class LaporanPembayaranController extends Controller
             ->whereYear('tanggal_bayar', $tahun);
 
         if ($kelasId) {
-            $query->whereHas('siswa', function($q) use ($kelasId) {
+            $query->whereHas('siswa', function ($q) use ($kelasId) {
                 $q->where('kelas_id', $kelasId);
             });
             $kelas = Kelas::find($kelasId);
@@ -205,7 +216,7 @@ class LaporanPembayaranController extends Controller
 
         $namaBulan = Carbon::create(null, $bulan, 1)->translatedFormat('F');
 
-        return view('bendahara.laporan.cetak', [
+        return view('admin.keuangan.laporan.cetak', [
             'pembayaranList' => $pembayaranList,
             'totalBulanIni' => $totalBulanIni,
             'namaBulan' => $namaBulan,
@@ -220,32 +231,32 @@ class LaporanPembayaranController extends Controller
     public function rekapTagihan(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
-        $kelasList = Kelas::when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+
+        $kelasList = Kelas::when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })
-        ->withCount(['siswa as total_siswa' => function($q) {
-            $q->where('status', 'aktif');
-        }])
-        ->orderBy('jenjang')
-        ->orderBy('nama_kelas')
-        ->get();
+            ->withCount(['siswa as total_siswa' => function ($q) {
+                $q->where('status', 'aktif');
+            }])
+            ->orderBy('jenjang')
+            ->orderBy('nama_kelas')
+            ->get();
 
         // Hitung total tagihan dan pembayaran per kelas
-        $kelasList->transform(function($kelas) use ($tahunAjaranAktif) {
+        $kelasList->transform(function ($kelas) use ($tahunAjaranAktif) {
             $siswaIds = Siswa::where('kelas_id', $kelas->id)
                 ->where('status', 'aktif')
                 ->pluck('id');
 
             $totalTagihan = Tagihan::whereIn('siswa_id', $siswaIds)
-                ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 })
                 ->sum('jumlah');
 
             // Hitung total pembayaran yang sudah disetujui (actual payments)
             $tagihanIds = Tagihan::whereIn('siswa_id', $siswaIds)
-                ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 })
                 ->pluck('id');
@@ -273,7 +284,7 @@ class LaporanPembayaranController extends Controller
             'sisa' => $kelasList->sum('sisa_tagihan'),
         ];
 
-        return view('bendahara.laporan.rekap-tagihan', [
+        return view('admin.keuangan.laporan.rekap-tagihan', [
             'kelasList' => $kelasList,
             'grandTotal' => $grandTotal,
             'tahunAjaran' => $tahunAjaranAktif,
@@ -286,31 +297,31 @@ class LaporanPembayaranController extends Controller
     public function cetakRekapTagihan(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
-        $kelasList = Kelas::when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+
+        $kelasList = Kelas::when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })
-        ->withCount(['siswa as total_siswa' => function($q) {
-            $q->where('status', 'aktif');
-        }])
-        ->orderBy('jenjang')
-        ->orderBy('nama_kelas')
-        ->get();
+            ->withCount(['siswa as total_siswa' => function ($q) {
+                $q->where('status', 'aktif');
+            }])
+            ->orderBy('jenjang')
+            ->orderBy('nama_kelas')
+            ->get();
 
-        $kelasList->transform(function($kelas) use ($tahunAjaranAktif) {
+        $kelasList->transform(function ($kelas) use ($tahunAjaranAktif) {
             $siswaIds = Siswa::where('kelas_id', $kelas->id)
                 ->where('status', 'aktif')
                 ->pluck('id');
 
             $totalTagihan = Tagihan::whereIn('siswa_id', $siswaIds)
-                ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 })
                 ->sum('jumlah');
 
             // Hitung total pembayaran yang sudah disetujui (actual payments)
             $tagihanIds = Tagihan::whereIn('siswa_id', $siswaIds)
-                ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 })
                 ->pluck('id');
@@ -337,7 +348,7 @@ class LaporanPembayaranController extends Controller
             'sisa' => $kelasList->sum('sisa_tagihan'),
         ];
 
-        return view('bendahara.laporan.cetak-rekap-tagihan', [
+        return view('admin.keuangan.laporan.cetak-rekap-tagihan', [
             'kelasList' => $kelasList,
             'grandTotal' => $grandTotal,
             'tahunAjaran' => $tahunAjaranAktif,
@@ -350,7 +361,7 @@ class LaporanPembayaranController extends Controller
     public function belumLunas(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        $kelasList = Kelas::when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+        $kelasList = Kelas::when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
@@ -366,9 +377,9 @@ class LaporanPembayaranController extends Controller
         )->orderBy('nama_lengkap')->get();
 
         // Filter hanya siswa yang belum lunas
-        $siswaList = $siswaList->filter(function($siswa) use ($tahunAjaranAktif) {
+        $siswaList = $siswaList->filter(function ($siswa) use ($tahunAjaranAktif) {
             $tagihanQuery = Tagihan::where('siswa_id', $siswa->id)
-                ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 });
 
@@ -389,7 +400,7 @@ class LaporanPembayaranController extends Controller
             return $sisaTagihan > 0;
         })->values();
 
-        return view('bendahara.laporan.belum-lunas', [
+        return view('admin.keuangan.laporan.belum-lunas', [
             'siswaList' => $siswaList,
             'kelasList' => $kelasList,
             'tahunAjaran' => $tahunAjaranAktif,
@@ -403,7 +414,7 @@ class LaporanPembayaranController extends Controller
     public function cetakBelumLunas(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
+
         $query = Siswa::with(['kelas', 'cabang'])
             ->where('status', 'aktif');
 
@@ -418,9 +429,9 @@ class LaporanPembayaranController extends Controller
             Kelas::select('jenjang')->whereColumn('kelas.id', 'siswa.kelas_id')
         )->orderBy('nama_lengkap')->get();
 
-        $siswaList = $siswaList->filter(function($siswa) use ($tahunAjaranAktif) {
+        $siswaList = $siswaList->filter(function ($siswa) use ($tahunAjaranAktif) {
             $tagihanQuery = Tagihan::where('siswa_id', $siswa->id)
-                ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 });
 
@@ -441,7 +452,7 @@ class LaporanPembayaranController extends Controller
             return $sisaTagihan > 0;
         })->values();
 
-        return view('bendahara.laporan.cetak-belum-lunas', [
+        return view('admin.keuangan.laporan.cetak-belum-lunas', [
             'siswaList' => $siswaList,
             'kelas' => $kelas,
             'tahunAjaran' => $tahunAjaranAktif,

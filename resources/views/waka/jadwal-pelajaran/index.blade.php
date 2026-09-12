@@ -58,48 +58,41 @@
 
     {{-- Main Card --}}
     <div class="jp-card">
-        <div class="jp-card-header">
+        <div class="jp-card-header" x-data="{ toolsOpen: false, exportOpen: false }">
             <div>
                 <h5 class="jp-card-title">
                     <i class="fas fa-calendar-week jp-title-icon"></i> Daftar Jadwal Pelajaran
                 </h5>
                 <div class="jp-card-subtitle">Kelola dan atur jadwal mengajar untuk setiap kelas</div>
             </div>
-            <div class="btn-scroll-mobile">
-                <a href="{{ route('waka.jadwal-pelajaran.create', request()->query()) }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus me-1"></i> Tambah
+            <div class="btn-scroll-mobile relative !grid w-full grid-cols-4 gap-2 sm:!flex sm:w-auto">
+                <a href="{{ route('waka.jadwal-pelajaran.create', request()->query()) }}" class="inline-flex min-h-10 min-w-0 items-center justify-center gap-0.5 rounded-xl bg-brand-600 px-1 text-[10px] font-bold text-white no-underline hover:bg-brand-700 sm:gap-2 sm:!px-4 sm:text-xs lg:min-h-11 lg:!px-5 lg:text-sm">
+                    <i class="fas fa-plus"></i><span class="whitespace-nowrap">Tambah</span>
                 </a>
-                <a href="{{ route('waka.pengaturan-istirahat.index') }}" class="btn btn-warning btn-sm text-white">
-                    <i class="fas fa-coffee me-1"></i> Istirahat
+                <a href="{{ route('waka.pengaturan-istirahat.index') }}" class="inline-flex min-h-10 min-w-0 items-center justify-center gap-0.5 rounded-xl bg-amber-50 px-1 text-[10px] font-bold text-amber-700 no-underline hover:bg-amber-100 sm:gap-2 sm:!px-3 sm:text-xs lg:min-h-11 lg:!px-4 lg:text-sm">
+                    <i class="fas fa-coffee"></i><span class="whitespace-nowrap">Istirahat</span>
                 </a>
                 
-                <div class="dropdown d-inline-block">
-                    <button class="btn btn-info btn-sm text-white dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-tools me-1"></i> Aksi
+                <div class="static min-w-0 sm:relative" @click.outside="toolsOpen = false">
+                    <button type="button" @click="toolsOpen = !toolsOpen" :aria-expanded="toolsOpen" class="inline-flex min-h-10 w-full min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-xl bg-cyan-50 px-1 text-[10px] font-bold text-cyan-700 hover:bg-cyan-100 sm:w-auto sm:gap-2 sm:!px-3 sm:text-xs lg:min-h-11 lg:!px-4 lg:text-sm">
+                        <i class="fas fa-tools"></i>Aksi<i class="fas fa-chevron-down text-[8px] lg:text-[9px]"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                        <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#duplicateModal">
-                            <i class="fas fa-copy me-2 text-info"></i> Duplikasi Jadwal</button></li>
-                        <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#bulkReplaceModal">
-                            <i class="fas fa-random me-2 text-secondary"></i> Ganti Semua Guru</button></li>
-                        <li><a class="dropdown-item" href="{{ route('waka.jadwal-pelajaran.import') }}">
-                            <i class="fas fa-file-import me-2 text-success"></i> Import Excel</a></li>
-                    </ul>
+                    <div x-cloak x-show="toolsOpen" class="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl sm:!left-auto sm:!right-0 sm:!w-64">
+                        <button type="button" data-bs-toggle="modal" data-bs-target="#duplicateModal" @click="toolsOpen = false" class="flex w-full items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"><i class="fas fa-copy w-4 text-emerald-600"></i>Duplikasi periode</button>
+                        <button type="button" data-bs-toggle="modal" data-bs-target="#bulkReplaceModal" @click="toolsOpen = false" class="flex w-full items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"><i class="fas fa-random w-4 text-violet-600"></i>Ganti semua guru</button>
+                        <a href="{{ route('waka.jadwal-pelajaran.import') }}" class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-xs font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-file-import w-4 text-brand-600"></i>Import Excel</a>
+                    </div>
                 </div>
 
-                <div class="dropdown d-inline-block">
-                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-print me-1"></i> Cetak/Export
+                <div class="static min-w-0 sm:relative" @click.outside="exportOpen = false">
+                    <button type="button" @click="exportOpen = !exportOpen" :aria-expanded="exportOpen" class="inline-flex min-h-10 w-full min-w-0 items-center justify-center gap-0.5 whitespace-nowrap rounded-xl bg-slate-100 px-1 text-[10px] font-bold text-slate-700 hover:bg-slate-200 sm:w-auto sm:gap-2 sm:!px-3 sm:text-xs lg:min-h-11 lg:!px-4 lg:text-sm">
+                        <i class="fas fa-download"></i>Ekspor<i class="fas fa-chevron-down text-[8px] lg:text-[9px]"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                        <li><a class="dropdown-item" href="{{ route('waka.jadwal-pelajaran.export-pdf', request()->query()) }}" target="_blank">
-                            <i class="fas fa-file-pdf me-2 text-danger"></i> Export PDF (Semua)</a></li>
-                        <li><a class="dropdown-item" href="{{ route('waka.jadwal-pelajaran.export-excel', request()->query()) }}">
-                            <i class="fas fa-file-excel me-2 text-success"></i> Export Excel (Semua)</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#cetakKelasModal">
-                            <i class="fas fa-id-card me-2 text-dark"></i> Cetak Per Kelas</button></li>
-                    </ul>
+                    <div x-cloak x-show="exportOpen" class="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl sm:!left-auto sm:!right-0 sm:!w-64">
+                        <a href="{{ route('waka.jadwal-pelajaran.export-pdf', request()->query()) }}" target="_blank" class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-xs font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-file-pdf w-4 text-red-600"></i>PDF semua jadwal</a>
+                        <a href="{{ route('waka.jadwal-pelajaran.export-excel', request()->query()) }}" class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-xs font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-file-excel w-4 text-emerald-600"></i>Excel semua jadwal</a>
+                        <button type="button" data-bs-toggle="modal" data-bs-target="#cetakKelasModal" @click="exportOpen = false" class="flex w-full items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"><i class="fas fa-school w-4 text-slate-600"></i>Ekspor per kelas</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -680,4 +673,3 @@
 @section('scripts')
     @vite(['resources/js/waka/jadwal-pelajaran/index.js'])
 @endsection
-

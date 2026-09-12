@@ -77,7 +77,7 @@ class PembayaranController extends Controller
             'ditolak' => Pembayaran::where('status_validasi', 'ditolak')->count(),
         ];
 
-        return view('bendahara.pembayaran.index', [
+        return view('admin.keuangan.pembayaran.index', [
             'pembayaranList' => $pembayaranList,
             'kelasList' => $kelasList,
             'tahunAjaran' => $tahunAjaranAktif,
@@ -135,7 +135,7 @@ class PembayaranController extends Controller
             'lainnya' => 'Lainnya',
         ]);
 
-        return view('bendahara.pembayaran.riwayat-siswa', [
+        return view('admin.keuangan.pembayaran.riwayat-siswa', [
             'siswa' => $siswa,
             'pembayaran' => $pembayaranList,
             'totalTagihan' => $totalTagihan,
@@ -155,7 +155,7 @@ class PembayaranController extends Controller
         $pembayaran = Pembayaran::with(['siswa', 'siswa.kelas', 'siswa.cabang', 'tagihan', 'validator'])
             ->findOrFail($id);
 
-        return view('bendahara.pembayaran.show', [
+        return view('admin.keuangan.pembayaran.show', [
             'pembayaran' => $pembayaran,
         ]);
     }
@@ -360,7 +360,7 @@ class PembayaranController extends Controller
             'lainnya' => 'Lainnya',
         ]);
 
-        return view('bendahara.pembayaran.create', [
+        return view('admin.keuangan.pembayaran.create', [
             'siswa' => $siswa,
             'tagihanBelumLunas' => $tagihanBelumLunas,
             'tahunAjaran' => $tahunAjaranAktif,
@@ -681,7 +681,7 @@ class PembayaranController extends Controller
             'lainnya' => 'Lainnya',
         ]);
 
-        return view('bendahara.pembayaran.cetak-kwitansi', [
+        return view('admin.keuangan.pembayaran.cetak-kwitansi', [
             'pembayaran' => $pembayaran,
             'relatedPayments' => $relatedPayments,
             'totalBayar' => $totalBayar,

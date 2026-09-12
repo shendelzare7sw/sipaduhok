@@ -1,7 +1,7 @@
 @extends('layouts.print')
 
 @section('title', 'Laporan Pembayaran '.$namaBulan.' '.$tahun)
-@section('back-url', route('admin.keuangan.laporan.index', request()->query()))
+@section('back-url', route(request()->routeIs('bendahara.*') ? 'bendahara.laporan.index' : 'admin.keuangan.laporan.index', request()->query()))
 @section('document-width', 'min-w-[980px]')
 @section('report-title', 'Laporan Pembayaran Bulanan')
 

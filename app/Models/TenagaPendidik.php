@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -33,6 +34,48 @@ class TenagaPendidik extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Batasi kandidat pengajar ke akun Guru Pengajar yang aktif.
+     *
+     * Kolom role lama tetap dipakai selama migrasi role_id. Jika role_id sudah
+     * terisi, keduanya wajib konsisten agar role lama yang stale tidak membuka
+     * kembali akses mengajar.
+     */
+    public function scopeWithTeachingRole(Builder $query): Builder
+    {
+        return $query->whereHas('user', function (Builder $userQuery): void {
+            $userQuery
+                ->where('role', 'guru_pengajar')
+                ->where(function (Builder $roleQuery): void {
+                    $roleQuery
+                        ->whereNull('role_id')
+                        ->orWhereHas('roleRelation', fn (Builder $relationQuery) => $relationQuery->where('name', 'guru_pengajar'));
+                });
+        });
+    }
+
+    public function scopeEligibleToTeach(Builder $query): Builder
+    {
+        return $query
+            ->withTeachingRole()
+            ->whereHas('user', fn (Builder $userQuery) => $userQuery->where('is_active', true));
+    }
+
+    public function isEligibleToTeach(): bool
+    {
+        if (! $this->relationLoaded('user')) {
+            $this->load('user.roleRelation');
+        } elseif ($this->user && ! $this->user->relationLoaded('roleRelation')) {
+            $this->user->load('roleRelation');
+        }
+
+        if (! $this->user || ! $this->user->is_active || $this->user->role !== 'guru_pengajar') {
+            return false;
+        }
+
+        return ! $this->user->role_id || $this->user->roleRelation?->name === 'guru_pengajar';
     }
 
     public function kelasWali()

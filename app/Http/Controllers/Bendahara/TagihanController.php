@@ -23,6 +23,15 @@ class TagihanController extends Controller
     }
 
     /**
+     * Tagihan Admin dan Bendahara memakai satu sumber view CleanFlow.
+     * Endpoint dan otoritas tetap ditentukan oleh route prefix masing-masing.
+     */
+    protected function viewName(string $view): string
+    {
+        return 'admin.keuangan.tagihan.'.$view;
+    }
+
+    /**
      * Jenis-jenis tagihan yang tersedia
      * Note: SPP dihapus karena sudah ada fitur "Generate SPP Bulanan" yang lebih akurat
      */
@@ -196,7 +205,7 @@ class TagihanController extends Controller
             }
         }
 
-        return view('bendahara.tagihan.index', [
+        return view($this->viewName('index'), [
             'siswaList' => $siswaList ?? collect(),
             'kelasList' => $kelasList ?? collect(),
             'tahunAjaran' => $tahunAjaranAktif,
@@ -293,7 +302,7 @@ class TagihanController extends Controller
             $item->sisa_tagihan = $item->jumlah - $paid;
         }
 
-        return view('bendahara.tagihan.show', [
+        return view($this->viewName('show'), [
             'siswa' => $siswa,
             'tagihan' => $tagihan,
             'totalTagihan' => $totalTagihan,
@@ -339,7 +348,7 @@ class TagihanController extends Controller
 
         $allYears = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
 
-        return view('bendahara.tagihan.edit', [
+        return view($this->viewName('edit'), [
             'siswa' => $siswa,
             'tagihanExist' => $tagihanExist,
             'allTagihan' => $allTagihan,
@@ -462,7 +471,7 @@ class TagihanController extends Controller
         $totalTagihan = $tagihan->sum('jumlah');
         $tagihanLunas = $tagihan->where('status', 'sudah_bayar')->sum('jumlah');
 
-        return view('bendahara.tagihan.cetak', [
+        return view($this->viewName('cetak'), [
             'siswa' => $siswa,
             'tagihan' => $tagihan,
             'totalTagihan' => $totalTagihan,
@@ -523,7 +532,7 @@ class TagihanController extends Controller
             return $siswa;
         });
 
-        return view('bendahara.tagihan.cetak-laporan', [
+        return view($this->viewName('cetak-laporan'), [
             'siswaList' => $siswaList,
             'selectedYear' => $selectedYear,
             'selectedKelas' => $selectedKelas,
@@ -699,7 +708,7 @@ class TagihanController extends Controller
             }
         }
 
-        return view('bendahara.tagihan.bulk-create', [
+        return view($this->viewName('bulk-create'), [
             'kelasList' => $kelasList,
             'tahunAjaran' => $tahunAjaranAktif,
             'jenisTagihan' => $this->jenisTagihan,
@@ -733,7 +742,7 @@ class TagihanController extends Controller
 
         $cabangList = \App\Models\Cabang::orderBy('nama_cabang')->get();
 
-        return view('bendahara.tagihan.create-custom', [
+        return view($this->viewName('create-custom'), [
             'siswaList' => $siswaList,
             'kelasList' => $kelasList,
             'cabangList' => $cabangList,
@@ -901,7 +910,7 @@ class TagihanController extends Controller
             ->orderBy('nama_lengkap')
             ->get();
 
-        return view('bendahara.tagihan.generate-spp', [
+        return view($this->viewName('generate-spp'), [
             'kelasList' => $kelasList,
             'siswaList' => $siswaList,
             'tahunAjaran' => $tahunAjaranAktif,
@@ -1117,7 +1126,7 @@ class TagihanController extends Controller
             ->orderBy('nama_lengkap')
             ->get();
 
-        return view('bendahara.tagihan.duplicate', [
+        return view($this->viewName('duplicate'), [
             'kelasList' => $kelasList,
             'siswaList' => $siswaList,
             'tahunAjaran' => $tahunAjaranAktif,
@@ -1253,7 +1262,7 @@ class TagihanController extends Controller
      */
     protected function carryoverViewName(): string
     {
-        return 'bendahara.tagihan.carryover';
+        return $this->viewName('carryover');
     }
 
     /**

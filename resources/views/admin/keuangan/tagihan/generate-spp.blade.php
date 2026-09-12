@@ -6,6 +6,7 @@
 
 @section('content')
 @php
+    $tagihanRoute = request()->routeIs('admin.*') ? 'admin.keuangan.tagihan' : 'bendahara.tagihan';
     $classOptions = $kelasList->map(fn ($kelas) => [
         'id' => (string) $kelas->id,
         'name' => $kelas->nama_kelas,
@@ -75,11 +76,11 @@
     }"
     x-init="normalizeRange()"
 >
-    <div class="flex flex-wrap items-center justify-between gap-3"><a href="{{ route('admin.keuangan.tagihan.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-arrow-left"></i>Kembali ke tagihan</a><span class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-emerald-50 px-3 text-xs font-bold text-emerald-700"><i class="fas fa-calendar-check"></i>{{ $tahunAjaran->nama_tahun_ajaran }}</span></div>
+    <div class="flex flex-wrap items-center justify-between gap-3"><a href="{{ route($tagihanRoute.'.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-arrow-left"></i>Kembali ke tagihan</a><span class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-emerald-50 px-3 text-xs font-bold text-emerald-700"><i class="fas fa-calendar-check"></i>{{ $tahunAjaran->nama_tahun_ajaran }}</span></div>
 
     <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3 text-sm leading-6 text-blue-900"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p><strong>Alur kerja:</strong> tentukan penerima berdasarkan kelas atau siswa, pilih rentang bulan, lalu isi nominal SPP. Sistem memakai urutan bulan resmi tahun ajaran agar tidak melewati periode.</p></div></section>
 
-    <form method="POST" action="{{ route('admin.keuangan.tagihan.generate-spp.store') }}" class="space-y-5" @submit.prevent="submitForm($event)">
+    <form method="POST" action="{{ route($tagihanRoute.'.generate-spp.store') }}" class="space-y-5" @submit.prevent="submitForm($event)">
         @csrf
 
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -115,7 +116,7 @@
 
         <section class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900"><div class="flex items-start gap-3"><i class="fas fa-triangle-exclamation mt-1 text-amber-700"></i><div><strong>Periksa sebelum generate</strong><ul class="mt-1 list-disc space-y-1 pl-5"><li>Proses massal melewati SPP yang sudah ada agar riwayat pembayaran aman.</li><li>Untuk satu siswa, data bulan yang sudah ada dapat diperbarui oleh sistem.</li><li>Jatuh tempo disesuaikan otomatis bila bulan tidak memiliki tanggal yang dipilih.</li></ul></div></div></section>
 
-        <footer class="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs leading-5 text-slate-500">Tujuan tahun ajaran <strong class="text-slate-800">{{ $tahunAjaran->nama_tahun_ajaran }}</strong>.</p><div class="flex gap-2"><a href="{{ route('admin.keuangan.tagihan.index') }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-calendar-check"></i>Generate SPP</button></div></footer>
+        <footer class="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs leading-5 text-slate-500">Tujuan tahun ajaran <strong class="text-slate-800">{{ $tahunAjaran->nama_tahun_ajaran }}</strong>.</p><div class="flex gap-2"><a href="{{ route($tagihanRoute.'.index') }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-calendar-check"></i>Generate SPP</button></div></footer>
     </form>
 </div>
 @endsection

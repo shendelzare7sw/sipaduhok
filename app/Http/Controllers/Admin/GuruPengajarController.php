@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Kelas;
-use App\Models\TenagaPendidik;
-use App\Models\TahunAjaran;
-use App\Models\MataPelajaran;
 use App\Models\GuruPengajarKelas;
 use App\Models\JadwalPelajaran;
+use App\Models\Kelas;
+use App\Models\MataPelajaran;
+use App\Models\TahunAjaran;
+use App\Models\TenagaPendidik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -23,16 +23,14 @@ class GuruPengajarController extends Controller
         $tahunAjaranId = $request->tahun_ajaran_id;
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranId && $tahunAjaranAktif) {
+        if (! $tahunAjaranId && $tahunAjaranAktif) {
             $tahunAjaranId = $tahunAjaranAktif->id;
         }
 
         // Get guru pengajar (tenaga pendidik dengan role guru_pengajar SAJA, tidak termasuk wali_kelas)
-        $query = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('role', 'guru_pengajar');
-        })->with(['user', 'guruKelas' => function($q) use ($tahunAjaranId) {
+        $query = TenagaPendidik::withTeachingRole()->with(['user', 'guruKelas' => function ($q) use ($tahunAjaranId) {
             if ($tahunAjaranId) {
-                $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
+                $q->whereHas('kelas', fn ($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
             }
             $q->with(['kelas.cabang', 'mataPelajaran']);
         }]);
@@ -40,21 +38,21 @@ class GuruPengajarController extends Controller
         // Filter by status
         if ($request->filled('status')) {
             if ($request->status == 'active') {
-                $query->whereHas('user', fn($q) => $q->where('is_active', true));
+                $query->whereHas('user', fn ($q) => $q->where('is_active', true));
             } else {
-                $query->whereHas('user', fn($q) => $q->where('is_active', false));
+                $query->whereHas('user', fn ($q) => $q->where('is_active', false));
             }
         } else {
-            $query->whereHas('user', fn($q) => $q->where('is_active', true));
+            $query->whereHas('user', fn ($q) => $q->where('is_active', true));
         }
 
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nip', 'like', "%{$search}%")
-                  ->orWhereHas('user', fn($u) => $u->where('email', 'like', "%{$search}%"));
+                    ->orWhere('nip', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$search}%"));
             });
         }
 
@@ -65,20 +63,16 @@ class GuruPengajarController extends Controller
         $currentTahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
 
         // Statistics
-        $totalGuru = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->where('role', 'guru_pengajar');
-        })->count();
+        $totalGuru = TenagaPendidik::eligibleToTeach()->count();
 
-        $guruWithAssignment = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->where('role', 'guru_pengajar');
-        })->whereHas('guruKelas', function($q) use ($tahunAjaranId) {
+        $guruWithAssignment = TenagaPendidik::eligibleToTeach()->whereHas('guruKelas', function ($q) use ($tahunAjaranId) {
             if ($tahunAjaranId) {
-                $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
+                $q->whereHas('kelas', fn ($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
             }
         })->count();
 
-        $totalPenugasan = GuruPengajarKelas::when($tahunAjaranId, function($q) use ($tahunAjaranId) {
-            $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
+        $totalPenugasan = GuruPengajarKelas::when($tahunAjaranId, function ($q) use ($tahunAjaranId) {
+            $q->whereHas('kelas', fn ($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
         })->count();
 
         $totalMataPelajaran = MataPelajaran::where('is_active', true)->count();
@@ -98,13 +92,13 @@ class GuruPengajarController extends Controller
         $tahunAjaranId = $request->tahun_ajaran_id;
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranId && $tahunAjaranAktif) {
+        if (! $tahunAjaranId && $tahunAjaranAktif) {
             $tahunAjaranId = $tahunAjaranAktif->id;
         }
 
-        $guruPengajar->load(['user', 'guruKelas' => function($q) use ($tahunAjaranId) {
+        $guruPengajar->load(['user', 'guruKelas' => function ($q) use ($tahunAjaranId) {
             if ($tahunAjaranId) {
-                $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
+                $q->whereHas('kelas', fn ($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
             }
             $q->with(['kelas.cabang', 'kelas.tahunAjaran', 'mataPelajaran']);
         }]);
@@ -114,7 +108,7 @@ class GuruPengajarController extends Controller
 
         // Get jadwal terkait guru ini untuk info tambahan
         $jadwalList = JadwalPelajaran::where('guru_id', $guruPengajar->id)
-            ->when($tahunAjaranId, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranId))
+            ->when($tahunAjaranId, fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId))
             ->with(['kelas', 'mataPelajaran'])
             ->orderBy('hari')
             ->orderBy('jam_mulai')
@@ -141,7 +135,7 @@ class GuruPengajarController extends Controller
         $kelas->load(['cabang', 'tahunAjaran', 'guruPengajar.tenagaPendidik', 'guruPengajar.mataPelajaran']);
 
         // Get jadwal terkait kelas ini
-        $jadwalList = JadwalPelajaran::whereHas('kelas', fn($q) => $q->where('kelas.id', $kelas->id))
+        $jadwalList = JadwalPelajaran::whereHas('kelas', fn ($q) => $q->where('kelas.id', $kelas->id))
             ->with(['guru', 'mataPelajaran'])
             ->orderBy('hari')
             ->orderBy('jam_mulai')
@@ -157,17 +151,18 @@ class GuruPengajarController extends Controller
     public function rebuildFromJadwal(Request $request)
     {
         $tahunAjaranId = $request->tahun_ajaran_id;
-        if (!$tahunAjaranId) {
+        if (! $tahunAjaranId) {
             $tahunAjaranId = TahunAjaran::where('is_active', true)->first()?->id;
         }
 
-        if (!$tahunAjaranId) {
+        if (! $tahunAjaranId) {
             return back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
         // Get all jadwal with guru for this tahun ajaran
         $jadwalList = JadwalPelajaran::where('tahun_ajaran_id', $tahunAjaranId)
             ->whereNotNull('guru_id')
+            ->whereHas('guru', fn ($query) => $query->eligibleToTeach())
             ->with('kelas')
             ->get();
 
@@ -180,8 +175,8 @@ class GuruPengajarController extends Controller
                 : \App\Models\Kelas::where('id', $jadwal->kelas_id)->get();
 
             foreach ($kelasList as $kelas) {
-                $key = $jadwal->guru_id . '-' . $kelas->id . '-' . $jadwal->mata_pelajaran_id;
-                if (!$fromJadwal->has($key)) {
+                $key = $jadwal->guru_id.'-'.$kelas->id.'-'.$jadwal->mata_pelajaran_id;
+                if (! $fromJadwal->has($key)) {
                     $fromJadwal->put($key, [
                         'tenaga_pendidik_id' => $jadwal->guru_id,
                         'kelas_id' => $kelas->id,
@@ -199,7 +194,7 @@ class GuruPengajarController extends Controller
             // Catat pasangan lama agar hanya penugasan BARU yang dinotifikasi (hindari spam).
             $existingKeys = GuruPengajarKelas::whereIn('kelas_id', $kelasIds)
                 ->get(['tenaga_pendidik_id', 'kelas_id', 'mata_pelajaran_id'])
-                ->map(fn($g) => $g->tenaga_pendidik_id . '-' . $g->kelas_id . '-' . $g->mata_pelajaran_id)
+                ->map(fn ($g) => $g->tenaga_pendidik_id.'-'.$g->kelas_id.'-'.$g->mata_pelajaran_id)
                 ->flip();
 
             GuruPengajarKelas::whereIn('kelas_id', $kelasIds)->delete();
@@ -213,7 +208,7 @@ class GuruPengajarController extends Controller
             DB::commit();
 
             // Notif guru hanya untuk penugasan yang benar-benar baru.
-            $newAssignments = $fromJadwal->reject(fn($e, $key) => $existingKeys->has($key))->values();
+            $newAssignments = $fromJadwal->reject(fn ($e, $key) => $existingKeys->has($key))->values();
             if ($newAssignments->isNotEmpty()) {
                 app(\App\Services\NotificationService::class)->notifyGuruPengajarAssignments($newAssignments);
             }
@@ -221,7 +216,8 @@ class GuruPengajarController extends Controller
             return back()->with('success', "Berhasil menyinkronkan {$fromJadwal->count()} penugasan dari jadwal pelajaran.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal menyinkronkan: ' . $e->getMessage());
+
+            return back()->with('error', 'Gagal menyinkronkan: '.$e->getMessage());
         }
     }
 
@@ -233,15 +229,13 @@ class GuruPengajarController extends Controller
         $tahunAjaranId = $request->tahun_ajaran_id;
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranId && $tahunAjaranAktif) {
+        if (! $tahunAjaranId && $tahunAjaranAktif) {
             $tahunAjaranId = $tahunAjaranAktif->id;
         }
 
-        $guruList = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->where('role', 'guru_pengajar');
-        })->with(['user', 'guruKelas' => function($q) use ($tahunAjaranId) {
+        $guruList = TenagaPendidik::eligibleToTeach()->with(['user', 'guruKelas' => function ($q) use ($tahunAjaranId) {
             if ($tahunAjaranId) {
-                $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
+                $q->whereHas('kelas', fn ($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
             }
             $q->with(['kelas', 'mataPelajaran']);
         }])->orderBy('nama_lengkap')->get();

@@ -1,104 +1,102 @@
-{{--
-    Navigasi CleanFlow untuk Bendahara.
-    Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
---}}
-
 @php
-    $currentRoute = Route::currentRouteName();
+    $sections = [
+        [
+            'label' => 'Mulai',
+            'items' => [
+                ['label' => 'Dashboard', 'description' => 'Ringkasan keuangan hari ini', 'icon' => 'fa-house', 'route' => 'bendahara.dashboard', 'patterns' => ['bendahara.dashboard']],
+            ],
+        ],
+        [
+            'label' => 'Keuangan',
+            'hint' => 'Kelola kewajiban dan transaksi siswa.',
+            'items' => [[
+                'label' => 'Tagihan & pembayaran', 'description' => 'Tagihan, tunggakan, dan validasi', 'icon' => 'fa-file-invoice-dollar', 'patterns' => ['bendahara.tagihan.*', 'bendahara.pembayaran.*'],
+                'children' => [
+                    ['label' => 'Kelola tagihan', 'route' => 'bendahara.tagihan.index', 'patterns' => ['bendahara.tagihan.*'], 'exclude' => ['bendahara.tagihan.carryover*']],
+                    ['label' => 'Tarik tunggakan', 'route' => 'bendahara.tagihan.carryover', 'patterns' => ['bendahara.tagihan.carryover*']],
+                    ['label' => 'Kelola pembayaran', 'route' => 'bendahara.pembayaran.index', 'patterns' => ['bendahara.pembayaran.*']],
+                ],
+            ]],
+        ],
+        [
+            'label' => 'Validasi & dispensasi',
+            'items' => [
+                ['label' => 'Validasi ujian & rapor', 'description' => 'Periksa kelayakan akses siswa', 'icon' => 'fa-circle-check', 'route' => 'bendahara.validasi-akses.index', 'patterns' => ['bendahara.validasi-akses.*']],
+                ['label' => 'Validasi dispensasi', 'description' => 'Keputusan kenaikan kelas', 'icon' => 'fa-hand-holding-dollar', 'route' => 'bendahara.kenaikan-kelas.validation.index', 'patterns' => ['bendahara.kenaikan-kelas.validation.*']],
+            ],
+        ],
+        [
+            'label' => 'Laporan',
+            'items' => [[
+                'label' => 'Laporan keuangan', 'description' => 'Rekap pembayaran dan tunggakan', 'icon' => 'fa-chart-column', 'patterns' => ['bendahara.laporan.*'],
+                'children' => [
+                    ['label' => 'Laporan pembayaran', 'route' => 'bendahara.laporan.index', 'patterns' => ['bendahara.laporan.index', 'bendahara.laporan.cetak']],
+                    ['label' => 'Rekap tagihan', 'route' => 'bendahara.laporan.rekap-tagihan', 'patterns' => ['bendahara.laporan.rekap-tagihan', 'bendahara.laporan.cetak-rekap-tagihan']],
+                    ['label' => 'Siswa belum lunas', 'route' => 'bendahara.laporan.belum-lunas', 'patterns' => ['bendahara.laporan.belum-lunas', 'bendahara.laporan.cetak-belum-lunas']],
+                ],
+            ]],
+        ],
+    ];
 @endphp
 
-{{-- Dashboard --}}
-<li class="menu-item {{ $currentRoute == 'bendahara.dashboard' ? 'active' : '' }}">
-    <a href="{{ route('bendahara.dashboard') }}" class="menu-link">
-        <i class="menu-icon fas fa-home"></i>
-        <div>Dashboard</div>
-    </a>
-</li>
+@foreach($sections as $section)
+    <li class="mb-5">
+        <div class="mb-2 px-3">
+            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-blue-100/90">{{ $section['label'] }}</p>
+            @isset($section['hint'])
+                <p class="mt-1 text-[10px] leading-4 text-sky-100/75">{{ $section['hint'] }}</p>
+            @endisset
+        </div>
 
-{{-- ============================================ --}}
-{{-- UC11: Kelola Tagihan & Pembayaran            --}}
-{{-- (Tagihan, Tunggakan, Pembayaran, Config)     --}}
-{{-- ============================================ --}}
-<li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Keuangan</span>
-</li>
+        <ul class="space-y-1">
+            @foreach($section['items'] as $item)
+                @php
+                    $isActive = request()->routeIs(...($item['patterns'] ?? []));
+                    $hasChildren = ! empty($item['children']);
+                    $targetId = 'bendahara-menu-'.$loop->parent->index.'-'.$loop->index;
+                    $baseClasses = 'group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition';
+                    $toneClasses = ['!bg-white/[0.07]', '!bg-sky-300/[0.15]', '!bg-cyan-200/[0.12]', '!bg-indigo-200/[0.13]'];
+                    $toneClass = $toneClasses[($loop->parent->index + $loop->index) % count($toneClasses)];
+                    $stateClasses = $isActive
+                        ? '!border-0 !ring-0 !bg-white/25 text-white shadow-lg shadow-slate-950/15'
+                        : "!border-0 !ring-0 {$toneClass} text-blue-50/90 hover:!bg-white/15 hover:text-white";
+                @endphp
 
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.tagihan') || Str::startsWith($currentRoute, 'bendahara.pembayaran') ? 'active open' : '' }}">
-    <a href="#" class="menu-link menu-toggle">
-        <i class="menu-icon fas fa-file-invoice-dollar"></i>
-        <div>Tagihan & Pembayaran</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.tagihan') && !Str::contains($currentRoute, 'carryover') ? 'active' : '' }}">
-            <a href="{{ route('bendahara.tagihan.index') }}" class="menu-link">
-                <div>Kelola Tagihan</div>
-            </a>
-        </li>
-        <li class="menu-item {{ Str::contains($currentRoute, 'bendahara.tagihan.carryover') ? 'active' : '' }}">
-            <a href="{{ route('bendahara.tagihan.carryover') }}" class="menu-link">
-                <div>Tarik Tunggakan</div>
-            </a>
-        </li>
-        <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.pembayaran') ? 'active' : '' }}">
-            <a href="{{ route('bendahara.pembayaran.index') }}" class="menu-link">
-                <div>Kelola Pembayaran</div>
-            </a>
-        </li>
-    </ul>
-</li>
+                <li class="menu-item {{ $isActive ? 'active open' : '' }}">
+                    @if($hasChildren)
+                        <button type="button" class="menu-link menu-toggle bg-transparent {{ $baseClasses }} {{ $stateClasses }}" data-menu-toggle aria-controls="{{ $targetId }}" aria-expanded="{{ $isActive ? 'true' : 'false' }}">
+                            <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate">{{ $item['label'] }}</span>
+                                <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}">{{ $item['description'] }}</span>
+                            </span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform {{ $isActive ? 'rotate-180' : '' }}" data-menu-chevron aria-hidden="true"></i>
+                        </button>
 
-{{-- ============================================ --}}
-{{-- UC14: Validasi Akses Ujian dan Rapor         --}}
-{{-- UC16: Memproses Dispensasi Kenaikan Kelas    --}}
-{{-- ============================================ --}}
-<li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Validasi & Dispensasi</span>
-</li>
-
-{{-- UC14: Validasi Akses Ujian dan Rapor --}}
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.validasi-akses') ? 'active' : '' }}">
-    <a href="{{ route('bendahara.validasi-akses.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-check-circle"></i>
-        <div>Validasi Ujian & Rapor</div>
-    </a>
-</li>
-
-{{-- UC16: Memproses Dispensasi Kenaikan Kelas --}}
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.kenaikan-kelas.validation') ? 'active' : '' }}">
-    <a href="{{ route('bendahara.kenaikan-kelas.validation.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-hand-holding-usd"></i>
-        <div>Validasi Dispensasi</div>
-    </a>
-</li>
-
-{{-- ============================================ --}}
-{{-- UC12: Lihat Laporan Keuangan                 --}}
-{{-- (Laporan Pembayaran, Rekap, Belum Lunas)     --}}
-{{-- ============================================ --}}
-<li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Laporan</span>
-</li>
-
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.laporan') ? 'active open' : '' }}">
-    <a href="#" class="menu-link menu-toggle">
-        <i class="menu-icon fas fa-chart-bar"></i>
-        <div>Laporan Keuangan</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item {{ $currentRoute == 'bendahara.laporan.index' || $currentRoute == 'bendahara.laporan.cetak' ? 'active' : '' }}">
-            <a href="{{ route('bendahara.laporan.index') }}" class="menu-link">
-                <div>Laporan Pembayaran</div>
-            </a>
-        </li>
-        <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.laporan.rekap-tagihan') ? 'active' : '' }}">
-            <a href="{{ route('bendahara.laporan.rekap-tagihan') }}" class="menu-link">
-                <div>Rekap Tagihan</div>
-            </a>
-        </li>
-        <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.laporan.belum-lunas') ? 'active' : '' }}">
-            <a href="{{ route('bendahara.laporan.belum-lunas') }}" class="menu-link">
-                <div>Siswa Belum Lunas</div>
-            </a>
-        </li>
-    </ul>
-</li>
+                        <ul id="{{ $targetId }}" class="menu-sub mt-1 space-y-1 pl-8 {{ $isActive ? '' : 'hidden' }}">
+                            @foreach($item['children'] as $child)
+                                @php
+                                    $childActive = request()->routeIs(...($child['patterns'] ?? []))
+                                        && (empty($child['exclude']) || ! request()->routeIs(...$child['exclude']));
+                                @endphp
+                                <li class="menu-item {{ $childActive ? 'active' : '' }}">
+                                    <a href="{{ route($child['route']) }}" class="menu-link flex min-h-10 items-center rounded-lg border px-3 py-2 text-sm transition {{ $childActive ? 'border-white/30 bg-white/20 font-semibold text-white' : 'border-white/10 bg-white/[0.03] text-blue-100/80 hover:border-white/20 hover:bg-white/10 hover:text-white' }}">
+                                        {{ $child['label'] }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <a href="{{ route($item['route']) }}" class="menu-link {{ $baseClasses }} {{ $stateClasses }}">
+                            <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate">{{ $item['label'] }}</span>
+                                <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}">{{ $item['description'] }}</span>
+                            </span>
+                        </a>
+                    @endif
+                </li>
+            @endforeach
+        </ul>
+    </li>
+@endforeach

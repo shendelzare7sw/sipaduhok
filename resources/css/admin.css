@@ -27,17 +27,17 @@
     }
 
     .cleanflow-nav .menu-link {
-        @apply flex min-h-11 w-full items-center gap-3 rounded-xl border border-white/10 bg-slate-950/10 px-3 py-2.5 text-left text-sm font-semibold no-underline backdrop-blur-sm transition;
+        @apply flex min-h-11 w-full items-center gap-3 rounded-xl border-0 bg-slate-950/10 px-3 py-2.5 text-left text-sm font-semibold no-underline backdrop-blur-sm transition;
         color: rgb(248 250 252 / 0.96) !important;
     }
 
     .cleanflow-nav .menu-link:hover {
-        @apply border-sky-100/30 bg-white/[0.12];
+        @apply bg-white/[0.12];
         color: white !important;
     }
 
     .cleanflow-nav .menu-item.active > .menu-link {
-        @apply border-sky-100/50 bg-white/[0.18] shadow-lg shadow-slate-950/20;
+        @apply bg-white/[0.18] shadow-lg shadow-slate-950/20;
         color: white !important;
     }
 
@@ -68,7 +68,7 @@
     }
 
     .cleanflow-nav .menu-sub .menu-link {
-        @apply min-h-9 border-white/10 bg-slate-950/[0.07] py-2 text-xs font-medium;
+        @apply min-h-9 border border-white/15 bg-slate-950/[0.07] py-2 text-xs font-medium;
         color: rgb(224 242 254 / 0.9) !important;
     }
 

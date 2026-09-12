@@ -7,9 +7,11 @@ use App\Models\JadwalPelajaran;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\PengaturanIstirahat;
+use App\Models\TenagaPendidik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 trait JadwalPelajaranTrait
 {
@@ -34,13 +36,15 @@ trait JadwalPelajaranTrait
             'siswa_ids.*' => 'exists:siswa,id',
         ]);
 
+        $this->ensureEligibleTeacher($validated['guru_id'] ?? null);
+
         // Group kelas by jenjang
         $kelasList = Kelas::whereIn('id', $validated['kelas_ids'])->get();
         $kelasGrouped = $kelasList->groupBy('jenjang');
 
         // Validate each jenjang group has a mapel assigned
         foreach ($kelasGrouped as $jenjang => $kelasGroup) {
-            if (!isset($validated['mapel_per_jenjang'][$jenjang])) {
+            if (! isset($validated['mapel_per_jenjang'][$jenjang])) {
                 return back()->withInput()->with('error', "Mata pelajaran untuk jenjang {$jenjang} belum dipilih.");
             }
 
@@ -69,7 +73,7 @@ trait JadwalPelajaranTrait
             );
 
             if ($conflicts['hasConflict']) {
-                return back()->withInput()->with('error', "[{$jenjang}] " . $conflicts['message']);
+                return back()->withInput()->with('error', "[{$jenjang}] ".$conflicts['message']);
             }
         }
 
@@ -111,12 +115,14 @@ trait JadwalPelajaranTrait
             DB::commit();
 
             $jenjangStr = implode(', ', $jenjangNames);
+
             return redirect()
                 ->route("{$routePrefix}.jadwal-pelajaran.index", ['tahun_ajaran_id' => $validated['tahun_ajaran_id']])
                 ->with('success', "Berhasil membuat {$createdCount} jadwal untuk jenjang: {$jenjangStr}");
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -141,13 +147,15 @@ trait JadwalPelajaranTrait
             'siswa_ids.*' => 'exists:siswa,id',
         ]);
 
+        $this->ensureEligibleTeacher($validated['guru_id'] ?? null);
+
         // Group kelas by jenjang
         $kelasList = Kelas::whereIn('id', $validated['kelas_ids'])->get();
         $kelasGrouped = $kelasList->groupBy('jenjang');
 
         // Validate each jenjang group has a mapel assigned
         foreach ($kelasGrouped as $jenjang => $kelasGroup) {
-            if (!isset($validated['mapel_per_jenjang'][$jenjang])) {
+            if (! isset($validated['mapel_per_jenjang'][$jenjang])) {
                 return back()->withInput()->with('error', "Mata pelajaran untuk jenjang {$jenjang} belum dipilih.");
             }
 
@@ -176,7 +184,7 @@ trait JadwalPelajaranTrait
             );
 
             if ($conflicts['hasConflict']) {
-                return back()->withInput()->with('error', "[{$jenjang}] " . $conflicts['message']);
+                return back()->withInput()->with('error', "[{$jenjang}] ".$conflicts['message']);
             }
         }
 
@@ -237,7 +245,8 @@ trait JadwalPelajaranTrait
                 ->with('success', 'Jadwal pelajaran berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -256,7 +265,7 @@ trait JadwalPelajaranTrait
         }
 
         // Convert to array if single value
-        if (!is_array($kelasIds)) {
+        if (! is_array($kelasIds)) {
             $kelasIds = [$kelasIds];
         }
 
@@ -267,7 +276,9 @@ trait JadwalPelajaranTrait
         // 1. Conflict Check: Classes
         foreach ($kelasIds as $kelasId) {
             $kelas = Kelas::find($kelasId);
-            if (!$kelas) continue;
+            if (! $kelas) {
+                continue;
+            }
 
             // Istirahat Conflict Check
             $istirahatConflict = PengaturanIstirahat::jenjang($kelas->jenjang)
@@ -275,13 +286,13 @@ trait JadwalPelajaranTrait
                 ->untukHari($hari)
                 ->get()
                 ->first(function ($istirahat) use ($jamMulai, $jamSelesai) {
-                    return !($jamSelesai <= $istirahat->jam_mulai || $jamMulai >= $istirahat->jam_selesai);
+                    return ! ($jamSelesai <= $istirahat->jam_mulai || $jamMulai >= $istirahat->jam_selesai);
                 });
 
             if ($istirahatConflict) {
                 return [
                     'hasConflict' => true,
-                    'message' => "Kelas {$kelas->nama_kelas} bentrok dengan istirahat '{$istirahatConflict->nama_istirahat}' ({$istirahatConflict->jam_mulai}-{$istirahatConflict->jam_selesai})"
+                    'message' => "Kelas {$kelas->nama_kelas} bentrok dengan istirahat '{$istirahatConflict->nama_istirahat}' ({$istirahatConflict->jam_mulai}-{$istirahatConflict->jam_selesai})",
                 ];
             }
 
@@ -298,7 +309,7 @@ trait JadwalPelajaranTrait
                                 ->where('jam_selesai', '>=', $jamSelesai);
                         });
                 })
-                ->when(!empty($allExcludes), fn($q) => $q->whereNotIn('id', $allExcludes));
+                ->when(! empty($allExcludes), fn ($q) => $q->whereNotIn('id', $allExcludes));
 
             // Agama Exception Logic: different agama subjects may share the same slot.
             if ($isAgama) {
@@ -316,7 +327,7 @@ trait JadwalPelajaranTrait
             if ($kelasConflict) {
                 return [
                     'hasConflict' => true,
-                    'message' => "Kelas {$kelas->nama_kelas} sudah ada jadwal ({$kelasConflict->mataPelajaran->nama_mapel}) pada jam tersebut"
+                    'message' => "Kelas {$kelas->nama_kelas} sudah ada jadwal ({$kelasConflict->mataPelajaran->nama_mapel}) pada jam tersebut",
                 ];
             }
         }
@@ -334,7 +345,7 @@ trait JadwalPelajaranTrait
                                 ->where('jam_selesai', '>=', $jamSelesai);
                         });
                 })
-                ->when(!empty($allExcludes), fn($q) => $q->whereNotIn('id', $allExcludes))
+                ->when(! empty($allExcludes), fn ($q) => $q->whereNotIn('id', $allExcludes))
                 ->with(['kelas.cabang', 'mataPelajaran'])
                 ->first();
 
@@ -348,7 +359,7 @@ trait JadwalPelajaranTrait
 
                 // Allow: same teacher teaches different religion denominations at same time
                 // (students are physically in separate groups)
-                if ($isAgama && $existingIsAgama && $existingAgamaFilter !== $targetAgamaFilter && !$sameSubject) {
+                if ($isAgama && $existingIsAgama && $existingAgamaFilter !== $targetAgamaFilter && ! $sameSubject) {
                     // Different agama subjects: skip guru conflict
                 } else {
                     $newBranchIds = Kelas::whereIn('id', $kelasIds)->pluck('cabang_id')->unique()->filter();
@@ -371,9 +382,10 @@ trait JadwalPelajaranTrait
                         $conflictKelasNames = $guruConflict->kelas->isNotEmpty()
                             ? $guruConflict->kelas->pluck('nama_kelas')->join(', ')
                             : ($fallbackKelas ? $fallbackKelas->nama_kelas : 'kelas lain');
+
                         return [
                             'hasConflict' => true,
-                            'message' => "Guru sedang mengajar di kelas {$conflictKelasNames} pada jam tersebut"
+                            'message' => "Guru sedang mengajar di kelas {$conflictKelasNames} pada jam tersebut",
                         ];
                     }
                 }
@@ -391,7 +403,7 @@ trait JadwalPelajaranTrait
         $mapel = MataPelajaran::findOrFail($mataPelajaranId);
 
         // Skip validation if mapel has no specific jenjang
-        if (!$mapel->jenjang) {
+        if (! $mapel->jenjang) {
             return ['valid' => true];
         }
 
@@ -401,7 +413,7 @@ trait JadwalPelajaranTrait
             if (strcasecmp($kelas->jenjang, $mapel->jenjang) !== 0) {
                 return [
                     'valid' => false,
-                    'message' => "Jenjang Mata Pelajaran '{$mapel->nama_mapel}' ({$mapel->jenjang}) tidak sesuai dengan Jenjang Kelas '{$kelas->nama_kelas}' ({$kelas->jenjang})."
+                    'message' => "Jenjang Mata Pelajaran '{$mapel->nama_mapel}' ({$mapel->jenjang}) tidak sesuai dengan Jenjang Kelas '{$kelas->nama_kelas}' ({$kelas->jenjang}).",
                 ];
             }
         }
@@ -415,7 +427,7 @@ trait JadwalPelajaranTrait
     protected function getFilteredSiswaIds($kelasId, $mataPelajaranId)
     {
         $mapel = MataPelajaran::find($mataPelajaranId);
-        if (!$mapel || empty($mapel->filter_agama)) {
+        if (! $mapel || empty($mapel->filter_agama)) {
             return null;
         }
 
@@ -425,15 +437,18 @@ trait JadwalPelajaranTrait
             ->pluck('id')
             ->toArray();
     }
+
     /**
      * Auto-sync guru_pengajar_kelas table.
      * Adds entries that don't exist yet (does NOT remove old entries).
      */
     protected function syncGuruPengajar($guruId, $kelasIds, $mapelId)
     {
-        if (!$guruId || !$mapelId) {
+        if (! $guruId || ! $mapelId) {
             return;
         }
+
+        $this->ensureEligibleTeacher($guruId);
 
         foreach ($kelasIds as $kelasId) {
             GuruPengajarKelas::firstOrCreate([
@@ -445,22 +460,41 @@ trait JadwalPelajaranTrait
     }
 
     /**
+     * Pertahanan server-side: ID tenaga pendidik saja belum membuktikan bahwa
+     * akun tersebut berwenang mengajar.
+     */
+    protected function ensureEligibleTeacher($guruId, string $attribute = 'guru_id'): void
+    {
+        if (blank($guruId)) {
+            return;
+        }
+
+        $eligible = TenagaPendidik::eligibleToTeach()->whereKey($guruId)->exists();
+
+        if (! $eligible) {
+            throw ValidationException::withMessages([
+                $attribute => 'Guru yang dipilih harus memakai akun Guru Pengajar yang aktif.',
+            ]);
+        }
+    }
+
+    /**
      * Cleanup guru_pengajar_kelas entries that are no longer referenced by any jadwal.
      * Only deletes if no other jadwal references the same guru-kelas-mapel combination.
      */
     protected function cleanupGuruPengajar($guruId, $kelasIds, $mapelId)
     {
-        if (!$guruId || !$mapelId) {
+        if (! $guruId || ! $mapelId) {
             return;
         }
 
         foreach ($kelasIds as $kelasId) {
             $otherJadwalExists = JadwalPelajaran::where('guru_id', $guruId)
                 ->where('mata_pelajaran_id', $mapelId)
-                ->whereHas('kelas', fn($q) => $q->where('kelas.id', $kelasId))
+                ->whereHas('kelas', fn ($q) => $q->where('kelas.id', $kelasId))
                 ->exists();
 
-            if (!$otherJadwalExists) {
+            if (! $otherJadwalExists) {
                 GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
                     ->where('kelas_id', $kelasId)
                     ->where('mata_pelajaran_id', $mapelId)

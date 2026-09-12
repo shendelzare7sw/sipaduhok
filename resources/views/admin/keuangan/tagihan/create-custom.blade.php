@@ -6,6 +6,7 @@
 
 @section('content')
 @php
+    $tagihanRoute = request()->routeIs('admin.*') ? 'admin.keuangan.tagihan' : 'bendahara.tagihan';
     $studentOptions = $siswaList->map(fn ($siswa) => [
         'id' => (string) $siswa->id,
         'name' => $siswa->nama_lengkap,
@@ -57,13 +58,13 @@
     }"
 >
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <a href="{{ route('admin.keuangan.tagihan.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-arrow-left"></i>Kembali ke tagihan</a>
+        <a href="{{ route($tagihanRoute.'.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-arrow-left"></i>Kembali ke tagihan</a>
         <span class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-emerald-50 px-3 text-xs font-bold text-emerald-700"><i class="fas fa-calendar-check"></i>{{ $tahunAjaran->nama_tahun_ajaran }}</span>
     </div>
 
     <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3 text-sm leading-6 text-blue-900"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p><strong>Alur kerja:</strong> isi detail tagihan satu kali, lalu pilih siswa penerima. Gunakan filter cabang dan kelas agar target mudah diperiksa sebelum disimpan.</p></div></section>
 
-    <form method="POST" action="{{ route('admin.keuangan.tagihan.store-custom') }}" class="space-y-5" @submit.prevent="submitForm($event)">
+    <form method="POST" action="{{ route($tagihanRoute.'.store-custom') }}" class="space-y-5" @submit.prevent="submitForm($event)">
         @csrf
 
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -96,7 +97,7 @@
             @error('siswa_ids.*')<div class="border-t border-red-100 bg-red-50 px-5 py-3 text-xs font-semibold text-red-700">{{ $message }}</div>@enderror
         </section>
 
-        <footer class="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs leading-5 text-slate-500">Tagihan dibuat untuk <strong class="text-slate-800" x-text="selected.length"></strong> siswa pada periode {{ $tahunAjaran->nama_tahun_ajaran }}.</p><div class="flex gap-2"><a href="{{ route('admin.keuangan.tagihan.index') }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-check"></i>Simpan tagihan</button></div></footer>
+        <footer class="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs leading-5 text-slate-500">Tagihan dibuat untuk <strong class="text-slate-800" x-text="selected.length"></strong> siswa pada periode {{ $tahunAjaran->nama_tahun_ajaran }}.</p><div class="flex gap-2"><a href="{{ route($tagihanRoute.'.index') }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-check"></i>Simpan tagihan</button></div></footer>
     </form>
 </div>
 @endsection

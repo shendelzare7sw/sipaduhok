@@ -6,6 +6,7 @@
 
 @section('content')
 @php
+    $tagihanRoute = request()->routeIs('admin.*') ? 'admin.keuangan.tagihan' : 'bendahara.tagihan';
     $students = $siswaList->map(fn ($siswa) => [
         'id' => (string) $siswa->id,
         'name' => $siswa->nama_lengkap,
@@ -19,7 +20,7 @@
 
 <div
     data-tagihan-duplicate
-    data-preview-url="{{ route('admin.keuangan.tagihan.api.tagihan-preview', ':siswa') }}"
+    data-preview-url="{{ route($tagihanRoute.'.api.tagihan-preview', ':siswa') }}"
     class="min-w-0 w-full space-y-5"
     x-data="{
         students: @js($students),
@@ -53,13 +54,13 @@
     x-init="source && loadPreview()"
 >
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <a href="{{ route('admin.keuangan.tagihan.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-arrow-left"></i>Kembali ke tagihan</a>
+        <a href="{{ route($tagihanRoute.'.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-arrow-left"></i>Kembali ke tagihan</a>
         <span class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-blue-50 px-3 text-xs font-bold text-blue-700"><i class="fas fa-calendar-check"></i>Tahun ajaran {{ $tahunAjaran->nama_tahun_ajaran }}</span>
     </div>
 
     <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p class="text-sm leading-6 text-blue-900"><strong>Alur kerja:</strong> pilih satu siswa sumber, periksa susunan tagihannya, lalu pilih siswa target. Sumber tidak dapat dipilih sebagai target.</p></div></section>
 
-    <form action="{{ route('admin.keuangan.tagihan.duplicate.store') }}" method="POST" class="space-y-5" @submit.prevent="submitDuplicate($event)">
+    <form action="{{ route($tagihanRoute.'.duplicate.store') }}" method="POST" class="space-y-5" @submit.prevent="submitDuplicate($event)">
         @csrf
 
         <div class="grid gap-5 xl:grid-cols-[minmax(18rem,.8fr)_minmax(0,1.2fr)]">
@@ -108,7 +109,7 @@
 
         <section class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900"><div class="flex items-start gap-3"><i class="fas fa-triangle-exclamation mt-1 text-amber-700"></i><div><strong>Periksa sebelum melanjutkan</strong><ul class="mt-1 list-disc space-y-1 pl-5"><li>Seluruh jenis tagihan sumber akan diproses.</li><li>Tagihan baru dimulai dengan status belum bayar.</li><li>Pilihan Perbarui tidak menghapus riwayat pembayaran yang sudah ada.</li></ul></div></div></section>
 
-        <footer class="flex flex-col-reverse gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs text-slate-500">Periode tujuan: <strong class="text-slate-800">{{ $tahunAjaran->nama_tahun_ajaran }}</strong></p><div class="flex gap-2"><a href="{{ route('admin.keuangan.tagihan.index') }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-copy"></i>Duplikasi</button></div></footer>
+        <footer class="flex flex-col-reverse gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"><p class="text-xs text-slate-500">Periode tujuan: <strong class="text-slate-800">{{ $tahunAjaran->nama_tahun_ajaran }}</strong></p><div class="flex gap-2"><a href="{{ route($tagihanRoute.'.index') }}" class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-copy"></i>Duplikasi</button></div></footer>
     </form>
 </div>
 @endsection
