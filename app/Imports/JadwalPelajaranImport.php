@@ -38,7 +38,7 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
 
     private $warnings = [];
 
-    public function __construct($tahunAjaranId = null)
+    public function __construct($tahunAjaranId = null, $cabangId = null)
     {
         $this->tahunAjaranId = $tahunAjaranId ?? TahunAjaran::where('is_active', true)->first()?->id;
 
@@ -48,6 +48,7 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
         // kebetulan namanya sama (id beda meski nama & cabang sama).
         $this->kelasList = Kelas::with('cabang')
             ->when($this->tahunAjaranId, fn ($q) => $q->where('tahun_ajaran_id', $this->tahunAjaranId))
+            ->when($cabangId, fn ($q) => $q->where('cabang_id', $cabangId))
             ->get()->map(function ($kelas) {
                 return [
                     'id' => $kelas->id,

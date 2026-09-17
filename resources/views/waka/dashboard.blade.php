@@ -1,335 +1,93 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard Wakil Kepala Sekolah')
-
-@section('page-title', 'Dashboard Wakil Kepala Sekolah')
-@section('page-subtitle', 'Manajemen akademik dan monitoring kegiatan pendidikan')
-
-
-@section('styles')
-    @vite(['resources/css/waka/dashboard.css'])
-@endsection
+@section('page-title', 'Ringkasan Akademik')
+@section('page-subtitle', 'Pantau kesiapan akademik dan tindak lanjut cabang Anda')
 
 @section('content')
+@php
+    $statItems = [
+        ['value' => number_format($stats['totalSiswa']), 'label' => 'Siswa aktif', 'meta' => 'Terdaftar di cabang Anda', 'icon' => 'fa-user-graduate', 'tone' => 'bg-blue-50 text-blue-600'],
+        ['value' => number_format($stats['totalGuru']), 'label' => 'Tenaga pendidik', 'meta' => 'Akun aktif di cabang', 'icon' => 'fa-chalkboard-teacher', 'tone' => 'bg-emerald-50 text-emerald-600'],
+        ['value' => number_format($stats['totalKelas']), 'label' => 'Kelas aktif', 'meta' => $tahunAjaranAktif?->nama_tahun_ajaran ?? 'Belum ada periode aktif', 'icon' => 'fa-school', 'tone' => 'bg-cyan-50 text-cyan-600'],
+        ['value' => number_format($stats['totalMapel']), 'label' => 'Mata pelajaran', 'meta' => 'Master akademik tersedia', 'icon' => 'fa-book', 'tone' => 'bg-violet-50 text-violet-600'],
+        ['value' => number_format($stats['kelasWithWali']), 'label' => 'Sudah ada wali', 'meta' => 'Penugasan telah terisi', 'icon' => 'fa-user-check', 'tone' => 'bg-teal-50 text-teal-600'],
+        ['value' => number_format($stats['kelasWithoutWali']), 'label' => 'Belum ada wali', 'meta' => 'Perlu ditindaklanjuti', 'icon' => 'fa-user-clock', 'tone' => 'bg-amber-50 text-amber-600'],
+    ];
+    $moduleGroups = [
+        'akademik' => [
+            ['label' => 'Data Kelas', 'description' => 'Kelola kelas cabang', 'route' => 'waka.kelas.index', 'icon' => 'fa-school', 'tone' => 'bg-blue-50 text-blue-600'],
+            ['label' => 'Jadwal Pelajaran', 'description' => 'Susun jadwal belajar', 'route' => 'waka.jadwal-pelajaran.index', 'icon' => 'fa-calendar-week', 'tone' => 'bg-violet-50 text-violet-600'],
+            ['label' => 'Penugasan Wali', 'description' => 'Lengkapi wali kelas', 'route' => 'waka.wali-kelas.index', 'icon' => 'fa-user-check', 'tone' => 'bg-emerald-50 text-emerald-600'],
+            ['label' => 'Guru Pengajar', 'description' => 'Pantau penugasan guru', 'route' => 'waka.guru-pengajar.index', 'icon' => 'fa-user-tie', 'tone' => 'bg-cyan-50 text-cyan-600'],
+            ['label' => 'Manajemen Siswa', 'description' => 'Kelola siswa cabang', 'route' => 'waka.manajemen-siswa.index', 'icon' => 'fa-users', 'tone' => 'bg-amber-50 text-amber-600'],
+        ],
+        'monitoring' => [
+            ['label' => 'Monitor Siswa', 'description' => 'Pantau data peserta didik', 'route' => 'waka.monitoring.siswa', 'icon' => 'fa-user-graduate', 'tone' => 'bg-blue-50 text-blue-600'],
+            ['label' => 'Monitor Guru', 'description' => 'Pantau beban pengajar', 'route' => 'waka.monitoring.guru-pengajar', 'icon' => 'fa-user-tie', 'tone' => 'bg-emerald-50 text-emerald-600'],
+            ['label' => 'Monitor Wali', 'description' => 'Pantau wali kelas', 'route' => 'waka.monitoring.wali-kelas', 'icon' => 'fa-chalkboard-teacher', 'tone' => 'bg-violet-50 text-violet-600'],
+            ['label' => 'Catatan', 'description' => 'Kirim arahan akademik', 'route' => 'waka.catatan.index', 'icon' => 'fa-clipboard', 'tone' => 'bg-amber-50 text-amber-600'],
+        ],
+    ];
+@endphp
 
-    <!-- Top Header & Date -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center align-items-start gap-3 mb-4">
-        <h5 class="mb-0 fw-bold text-dark dashboard-heading-title">
-            <i class="fas fa-chart-pie me-2 text-primary"></i> Ringkasan Akademik
-        </h5>
-        
-        <div class="d-flex flex-wrap gap-2">
-            @if($tahunAjaranAktif)
-                <span class="badge bg-white text-dark px-3 py-2 fs-6 rounded-pill shadow-sm border dashboard-pill">
-                    <i class="fas fa-flag-checkered me-2 text-primary"></i> TA: {{ $tahunAjaranAktif->nama_tahun_ajaran }}
-                </span>
-            @endif
-            <span class="badge bg-white text-primary px-3 py-2 fs-6 rounded-pill shadow-sm border dashboard-pill">
-                <i class="fas fa-calendar-alt me-2"></i> {{ now()->translatedFormat('d F Y') }}
-            </span>
-        </div>
-    </div>
-
-    <!-- Main Layout -->
-    <div class="row g-4 mb-4">
-        
-        <!-- Left Column: Tasks / Information / Tables -->
-        <div class="col-lg-8 d-flex flex-column gap-4">
-
-            <!-- Information Alert -->
-            <div class="alert alert-primary d-flex align-items-center rounded-3 shadow-none border-0 m-0 dashboard-info-alert" role="alert">
-                <i class="fas fa-info-circle fs-4 me-3 text-primary"></i>
-                <div class="dashboard-alert-text">
-                    <strong>Pusat Pengawasan Akademik:</strong> Anda bertanggung jawab mengontrol kegiatan akademik. Gunakan pintasan di sebelah kanan untuk akses cepat.
-                </div>
+<div class="min-w-0 w-full space-y-5">
+    <section class="overflow-hidden rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-700 via-brand-600 to-sky-500 text-white shadow-lg shadow-brand-900/10">
+        <div class="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex min-w-0 items-start gap-3">
+                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-xl ring-1 ring-white/20"><i class="fas fa-chart-pie" aria-hidden="true"></i></span>
+                <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-sky-100">Pusat pengawasan akademik</p><h2 class="mt-1 text-xl font-extrabold !text-white sm:text-2xl">Kesiapan cabang dalam satu layar</h2><p class="mt-1 max-w-3xl text-sm leading-6 text-sky-50">Pantau kelas, guru, siswa, jadwal, dan tindak lanjut akademik tanpa berpindah konteks.</p></div>
             </div>
-
-            <!-- Stats Grid within Main Column -->
-            <div class="row g-3">
-                <div class="col-md-4 col-sm-6">
-                    <div class="dashboard-card border-0 shadow-sm h-100">
-                        <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-label-primary text-primary">
-                                <i class="fas fa-user-graduate"></i>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value">{{ number_format($stats['totalSiswa']) }}</div>
-                                <div class="stat-label">Siswa Aktif</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-4 col-sm-6">
-                    <div class="dashboard-card border-0 shadow-sm h-100">
-                        <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-label-success text-success">
-                                <i class="fas fa-chalkboard-teacher"></i>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value">{{ number_format($stats['totalGuru']) }}</div>
-                                <div class="stat-label">Total Guru</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="dashboard-card border-0 shadow-sm h-100">
-                        <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-label-info text-info">
-                                <i class="fas fa-school"></i>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value">{{ number_format($stats['totalKelas']) }}</div>
-                                <div class="stat-label">Total Kelas</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="dashboard-card border-0 shadow-sm h-100">
-                        <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-label-secondary text-secondary">
-                                <i class="fas fa-book"></i>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value">{{ number_format($stats['totalMapel']) }}</div>
-                                <div class="stat-label">Mata Pelajaran</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="dashboard-card border-0 shadow-sm h-100">
-                        <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-label-success text-success">
-                                <i class="fas fa-user-check"></i>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value">{{ number_format($stats['kelasWithWali']) }}</div>
-                                <div class="stat-label">Punya Wali Kelas</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="dashboard-card border-0 shadow-sm h-100 {{ $stats['kelasWithoutWali'] > 0 ? 'border border-danger border-2' : '' }}">
-                        <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper {{ $stats['kelasWithoutWali'] > 0 ? 'bg-label-danger text-danger' : 'bg-label-secondary text-secondary' }}">
-                                <i class="fas fa-user-times"></i>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value {{ $stats['kelasWithoutWali'] > 0 ? 'text-danger' : '' }}">{{ number_format($stats['kelasWithoutWali']) }}</div>
-                                <div class="stat-label">Tanpa Wali Kelas</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tables Section Moved Inside Left Column -->
-            <div class="row g-3 flex-grow-1">
-                <!-- Kelas Tanpa Wali -->
-                @if($kelasWithoutWali->count() > 0)
-                <div class="col-md-6">
-                    <div class="dashboard-card h-100 d-flex flex-column border-danger border-opacity-50">
-                        <div class="card-header-clean d-flex justify-content-between align-items-center bg-label-danger border-bottom-0">
-                            <h5 class="card-title-clean text-danger dashboard-title-sm">
-                                <i class="fas fa-exclamation-triangle card-title-icon text-danger"></i> Kelas Tanpa Wali
-                            </h5>
-                            <a href="{{ route('waka.wali-kelas.index') }}" class="btn btn-sm btn-danger shadow-sm dashboard-action-sm">Kelola</a>
-                        </div>
-                        <div class="card-body p-0 flex-grow-1">
-                            <div class="table-responsive table-scroll">
-                                <table class="table table-sm table-hover mb-0 dashboard-table-sm">
-                                    <thead class="table-light position-sticky top-0 dashboard-sticky-head">
-                                        <tr>
-                                            <th class="ps-3">Kelas</th>
-                                            <th>Cabang</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($kelasWithoutWali as $kelas)
-                                        <tr>
-                                            <td class="fw-bold ps-3">
-                                                {{ $kelas->nama_kelas }}<br>
-                                                <span class="badge bg-label-info dashboard-badge-xs">{{ $kelas->jenjang }}</span>
-                                            </td>
-                                            <td class="align-middle">{{ Str::limit($kelas->cabang->nama_cabang ?? '-', 20) }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                <!-- Recent Students -->
-                <div class="{{ $kelasWithoutWali->count() > 0 ? 'col-md-6' : 'col-12' }}">
-                    <div class="dashboard-card h-100 d-flex flex-column">
-                        <div class="card-header-clean d-flex justify-content-between align-items-center pb-2 border-bottom">
-                            <h5 class="card-title-clean dashboard-title-sm">
-                                <i class="fas fa-user-graduate card-title-icon text-primary"></i> Siswa Pendaftar
-                            </h5>
-                            <a href="{{ route('waka.manajemen-siswa.index') }}" class="btn btn-sm btn-outline-primary shadow-sm dashboard-action-sm">Lihat Semua</a>
-                        </div>
-                        <div class="card-body p-0 flex-grow-1">
-                            <div class="table-responsive table-scroll">
-                                <table class="table table-sm table-hover mb-0 dashboard-table-sm">
-                                    <thead class="table-light position-sticky top-0 dashboard-sticky-head">
-                                        <tr>
-                                            <th class="ps-3">Siswa</th>
-                                            <th>Status / Kelas</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($recentSiswa as $siswa)
-                                        <tr>
-                                            <td class="ps-3">
-                                                <span class="fw-bold text-dark">{{ $siswa->nama_lengkap }}</span><br>
-                                                <small class="text-muted">{{ $siswa->nis ?? '-' }}</small>
-                                            </td>
-                                            <td class="align-middle">
-                                                <span class="badge bg-label-{{ $siswa->status == 'aktif' ? 'success' : 'secondary' }} d-block mb-1 dashboard-status-badge">
-                                                    {{ ucfirst($siswa->status) }}
-                                                </span>
-                                                <span class="fw-medium">{{ $siswa->kelas->nama_kelas ?? '-' }}</span>
-                                            </td>
-                                        </tr>
-                                        @empty
-                                        <tr>
-                                            <td colspan="2" class="text-center text-muted py-4">Belum ada data.</td>
-                                        </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        
-        <!-- Right Column: Quick Links -->
-        <div class="col-lg-4">
-            <div class="dashboard-card h-100 d-flex flex-column">
-                <div class="card-header-clean border-bottom-0 pb-2">
-                    <h5 class="card-title-clean">
-                        <i class="fas fa-th-large card-title-icon"></i> Akses Modul Utama
-                    </h5>
-                </div>
-                
-                <!-- Custom Tabs Fixed -->
-                <div class="px-2 pb-2 border-bottom dashboard-border-muted">
-                    <ul class="nav nav-pills nav-justified custom-nav-pills flex-column flex-sm-row" role="tablist">
-                        <li class="nav-item">
-                            <button type="button" class="nav-link active py-2 px-1" role="tab" data-bs-toggle="tab" data-bs-target="#tab-akademik" aria-selected="true">Akademik</button>
-                        </li>
-                        <li class="nav-item">
-                            <button type="button" class="nav-link py-2 px-1" role="tab" data-bs-toggle="tab" data-bs-target="#tab-nilai" aria-selected="false">Kenaikan</button>
-                        </li>
-                        <li class="nav-item">
-                            <button type="button" class="nav-link py-2 px-1" role="tab" data-bs-toggle="tab" data-bs-target="#tab-monitor" aria-selected="false">Monitoring</button>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="tab-content p-0 flex-grow-1 dashboard-tab-content">
-                    
-                    <!-- Akademik Tab -->
-                    <div class="tab-pane fade show active h-100" id="tab-akademik" role="tabpanel">
-                        <div class="quick-links-grid align-content-start pb-4">
-                            <a href="{{ route('waka.kelas.index') }}" class="quick-link-item">
-                                <i class="fas fa-school text-primary"></i>
-                                <span class="quick-link-text">Data Kelas</span>
-                            </a>
-                            <a href="{{ route('waka.mata-pelajaran.index') }}" class="quick-link-item">
-                                <i class="fas fa-book text-info"></i>
-                                <span class="quick-link-text">Mata Pelajaran</span>
-                            </a>
-                            <a href="{{ route('waka.jadwal-pelajaran.index') }}" class="quick-link-item">
-                                <i class="fas fa-clipboard-list text-warning"></i>
-                                <span class="quick-link-text">Jadwal Belajar</span>
-                            </a>
-                            <a href="{{ route('waka.wali-kelas.index') }}" class="quick-link-item">
-                                <i class="fas fa-user-check text-success"></i>
-                                <span class="quick-link-text">Penugasan Wali</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Kenaikan & Nilai Tab -->
-                    <div class="tab-pane fade h-100" id="tab-nilai" role="tabpanel">
-                        <div class="quick-links-grid align-content-start pb-4">
-                            <a href="{{ route('waka.kenaikan-kelas.kkm.index') }}" class="quick-link-item">
-                                <i class="fas fa-chart-line text-success"></i>
-                                <span class="quick-link-text">Pengaturan KKM</span>
-                            </a>
-                            <a href="{{ route('waka.kenaikan-kelas.settings.index') }}" class="quick-link-item">
-                                <i class="fas fa-cogs text-secondary"></i>
-                                <span class="quick-link-text">Setting Naik Kelas</span>
-                            </a>
-                            <a href="{{ route('waka.kenaikan-kelas.report') }}" class="quick-link-item quick-link-wide">
-                                <i class="fas fa-file-signature text-primary"></i>
-                                <span class="quick-link-text">Proses & Rekap Kenaikan</span>
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Monitoring Tab -->
-                    <div class="tab-pane fade h-100" id="tab-monitor" role="tabpanel">
-                        <div class="quick-links-grid align-content-start pb-4">
-                            <a href="{{ route('waka.monitoring.siswa') }}" class="quick-link-item">
-                                <i class="fas fa-user-graduate text-primary"></i>
-                                <span class="quick-link-text">Monitor Siswa</span>
-                            </a>
-                            <a href="{{ route('waka.monitoring.guru-pengajar') }}" class="quick-link-item">
-                                <i class="fas fa-user-tie text-success"></i>
-                                <span class="quick-link-text">Monitor Guru</span>
-                            </a>
-                            <a href="{{ route('waka.monitoring.wali-kelas') }}" class="quick-link-item">
-                                <i class="fas fa-chalkboard-teacher text-info"></i>
-                                <span class="quick-link-text">Monitor Wali</span>
-                            </a>
-                            <a href="{{ route('waka.catatan.index') }}" class="quick-link-item">
-                                <i class="fas fa-sticky-note text-warning"></i>
-                                <span class="quick-link-text">Kirim Catatan</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Kontak Developer Warning -->
-                <div class="p-3 mx-2 mb-3 mt-auto rounded dashboard-bug-card">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="fas fa-laptop-code text-info me-2"></i>
-                        <span class="fw-bold text-info dashboard-bug-title">Menemukan Bug?</span>
-                    </div>
-                    <a href="https://wa.me/6282113100791?text=Halo%20Developer,%20saya%20menemukan%20kendala/bug%20pada%20sistem" target="_blank" class="btn btn-sm btn-info text-white w-100 fw-medium">
-                        <i class="fab fa-whatsapp me-1"></i> Hubungi Developer
-                    </a>
-                </div>
-                <script>
-                    // Info kontak developer hanya tampil 5 detik lalu menghilang (tidak permanen).
-                    (function () {
-                        setTimeout(function () {
-                            document.querySelectorAll('.dashboard-bug-card').forEach(function (el) {
-                                el.style.transition = 'opacity .5s ease';
-                                el.style.opacity = '0';
-                                setTimeout(function () { el.style.display = 'none'; }, 500);
-                            });
-                        }, 5000);
-                    })();
-                </script>
-                
+            <div class="grid shrink-0 grid-cols-2 gap-2 text-center lg:min-w-72">
+                <div class="rounded-xl bg-white/10 px-3 py-2 ring-1 ring-white/15"><span class="block text-[10px] font-bold uppercase text-sky-100">Tahun ajaran</span><strong class="mt-1 block whitespace-nowrap text-sm">{{ $tahunAjaranAktif?->nama_tahun_ajaran ?? 'Belum aktif' }}</strong></div>
+                <div class="rounded-xl bg-white/10 px-3 py-2 ring-1 ring-white/15"><span class="block text-[10px] font-bold uppercase text-sky-100">Hari ini</span><strong class="mt-1 block whitespace-nowrap text-sm">{{ now()->translatedFormat('d M Y') }}</strong></div>
             </div>
         </div>
-    </div>
+    </section>
+
+    <x-cleanflow.stat-grid :items="$statItems" desktop-columns="6" />
+
+    <section class="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
+        <div class="grid min-w-0 gap-4 lg:grid-cols-2">
+            <article class="min-w-0 overflow-hidden rounded-2xl border {{ $kelasWithoutWali->isNotEmpty() ? 'border-amber-200' : 'border-slate-200' }} bg-white shadow-sm">
+                <header class="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-5"><div class="min-w-0"><h3 class="truncate font-extrabold text-slate-950"><i class="fas fa-triangle-exclamation mr-2 text-amber-500" aria-hidden="true"></i>Kelas belum memiliki wali</h3><p class="mt-1 text-xs text-slate-500">Prioritas penugasan pada periode aktif.</p></div><a href="{{ route('waka.wali-kelas.index') }}" class="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 px-3 text-xs font-bold text-amber-700 no-underline hover:bg-amber-100">Kelola</a></header>
+                <div class="divide-y divide-slate-100">
+                    @forelse($kelasWithoutWali as $kelas)
+                        <a href="{{ route('waka.kelas.show', $kelas) }}" class="flex min-w-0 items-center gap-3 p-4 text-slate-700 no-underline hover:bg-slate-50"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-xs font-extrabold text-amber-700">{{ $kelas->jenjang }}</span><span class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-900">{{ $kelas->nama_kelas }}</strong><span class="mt-0.5 block truncate text-[11px] text-slate-500">{{ $kelas->cabang->nama_cabang ?? 'Tanpa cabang' }}</span></span><i class="fas fa-chevron-right text-[10px] text-slate-300" aria-hidden="true"></i></a>
+                    @empty
+                        <div class="px-5 py-12 text-center"><span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600"><i class="fas fa-circle-check" aria-hidden="true"></i></span><p class="mt-3 text-sm font-extrabold text-slate-800">Semua kelas sudah memiliki wali</p><p class="mt-1 text-xs text-slate-500">Tidak ada tindak lanjut penugasan saat ini.</p></div>
+                    @endforelse
+                </div>
+            </article>
+
+            <article class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <header class="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-5"><div class="min-w-0"><h3 class="truncate font-extrabold text-slate-950"><i class="fas fa-user-graduate mr-2 text-brand-600" aria-hidden="true"></i>Siswa terbaru</h3><p class="mt-1 text-xs text-slate-500">Pendaftar aktif di cabang Anda.</p></div><a href="{{ route('waka.manajemen-siswa.index') }}" class="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 px-3 text-xs font-bold text-brand-700 no-underline hover:bg-brand-100">Lihat semua</a></header>
+                <div class="max-h-[25rem] divide-y divide-slate-100 overflow-y-auto">
+                    @forelse($recentSiswa as $siswa)
+                        <a href="{{ route('waka.manajemen-siswa.show', $siswa) }}" class="flex min-w-0 items-center gap-3 p-4 text-slate-700 no-underline hover:bg-slate-50"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-sm font-extrabold text-brand-700">{{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}</span><span class="min-w-0 flex-1"><strong class="block truncate text-sm text-slate-900">{{ $siswa->nama_lengkap }}</strong><span class="mt-0.5 block truncate text-[11px] text-slate-500">{{ $siswa->nis ?? 'NIS belum tersedia' }} &middot; {{ $siswa->kelas->nama_kelas ?? 'Belum ditempatkan' }}</span></span><span class="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">Aktif</span></a>
+                    @empty
+                        <div class="px-5 py-12 text-center"><span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400"><i class="fas fa-users" aria-hidden="true"></i></span><p class="mt-3 text-sm font-extrabold text-slate-800">Belum ada siswa aktif</p></div>
+                    @endforelse
+                </div>
+            </article>
+        </div>
+
+        <article class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" x-data="{ tab: 'akademik' }">
+            <header class="border-b border-slate-200 px-4 py-4 sm:px-5"><h3 class="font-extrabold text-slate-950"><i class="fas fa-th-large mr-2 text-brand-600" aria-hidden="true"></i>Akses modul utama</h3><p class="mt-1 text-xs text-slate-500">Pilih kelompok kerja yang ingin dibuka.</p></header>
+            <div class="grid grid-cols-2 gap-1 border-b border-slate-200 bg-slate-50 p-2" role="tablist" aria-label="Kelompok modul">
+                @foreach(['akademik' => 'Akademik Cabang', 'monitoring' => 'Monitoring'] as $key => $label)
+                    <button type="button" @click="tab = '{{ $key }}'" :class="tab === '{{ $key }}' ? 'bg-white text-brand-700 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-800'" class="h-9 rounded-lg px-2 text-[11px] font-bold" role="tab" :aria-selected="tab === '{{ $key }}'">{{ $label }}</button>
+                @endforeach
+            </div>
+            @foreach($moduleGroups as $key => $modules)
+                <div x-cloak x-show="tab === '{{ $key }}'" class="grid gap-2 p-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                    @foreach($modules as $module)
+                        <a href="{{ route($module['route']) }}" class="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 p-3 text-slate-700 no-underline transition hover:border-brand-200 hover:bg-brand-50/40"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $module['tone'] }}"><i class="fas {{ $module['icon'] }}" aria-hidden="true"></i></span><span class="min-w-0"><strong class="block truncate text-sm text-slate-900">{{ $module['label'] }}</strong><span class="mt-0.5 block truncate text-[11px] text-slate-500">{{ $module['description'] }}</span></span></a>
+                    @endforeach
+                </div>
+            @endforeach
+            <aside x-data="{ visible: true }" x-init="setTimeout(() => visible = false, 5000)" x-show="visible" x-transition class="mx-4 mb-4 rounded-xl border border-cyan-200 bg-cyan-50 p-3 text-cyan-900"><div class="flex items-center justify-between gap-3"><div class="min-w-0"><p class="text-xs font-extrabold"><i class="fas fa-laptop-code mr-1.5 text-cyan-600" aria-hidden="true"></i>Menemukan kendala?</p><p class="mt-1 text-[11px] text-cyan-700">Laporkan masalah agar dapat ditindaklanjuti.</p></div><a href="https://wa.me/6282113100791?text=Halo%20Developer,%20saya%20menemukan%20kendala/bug%20pada%20sistem" target="_blank" rel="noopener noreferrer" class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-cyan-600 px-3 text-[11px] font-bold text-white no-underline hover:bg-cyan-700"><i class="fab fa-whatsapp" aria-hidden="true"></i>Hubungi</a></div></aside>
+        </article>
+    </section>
+</div>
 @endsection

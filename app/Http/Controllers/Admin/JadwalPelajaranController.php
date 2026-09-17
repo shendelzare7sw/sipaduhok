@@ -1172,26 +1172,29 @@ class JadwalPelajaranController extends Controller
             $skipped = 0;
 
             foreach ($jadwalLama as $jadwal) {
-                // Find corresponding kelas in new year
                 $kelasLama = $jadwal->kelas;
-                $kelasBaru = Kelas::where('tahun_ajaran_id', $validated['tahun_ajaran_id_baru'])
-                    ->where('nama_kelas', $kelasLama->nama_kelas)
-                    ->where('jenjang', $kelasLama->jenjang)
-                    ->where('cabang_id', $kelasLama->cabang_id)
-                    ->first();
+                $kelasBaru = $kelasLama->map(fn (Kelas $kelas) => Kelas::where(
+                    'tahun_ajaran_id',
+                    $validated['tahun_ajaran_id_baru']
+                )->where('nama_kelas', $kelas->nama_kelas)
+                    ->where('jenjang', $kelas->jenjang)
+                    ->where('cabang_id', $kelas->cabang_id)
+                    ->first());
 
-                if (! $kelasBaru) {
+                if ($kelasLama->isEmpty() || $kelasBaru->contains(null)) {
                     $skipped++;
 
                     continue;
                 }
 
+                $kelasBaruIds = $kelasBaru->pluck('id')->unique()->values();
+
                 // Check if jadwal already exists
                 $exists = JadwalPelajaran::where('tahun_ajaran_id', $validated['tahun_ajaran_id_baru'])
-                    ->where('kelas_id', $kelasBaru->id)
                     ->where('mata_pelajaran_id', $jadwal->mata_pelajaran_id)
                     ->where('hari', $jadwal->hari)
                     ->where('jam_mulai', $jadwal->jam_mulai)
+                    ->whereHas('kelas', fn ($q) => $q->whereIn('kelas.id', $kelasBaruIds))
                     ->exists();
 
                 if ($exists) {
@@ -1201,9 +1204,9 @@ class JadwalPelajaranController extends Controller
                 }
 
                 // Create duplicate
-                JadwalPelajaran::create([
+                $jadwalBaru = JadwalPelajaran::create([
                     'tahun_ajaran_id' => $validated['tahun_ajaran_id_baru'],
-                    'kelas_id' => $kelasBaru->id,
+                    'kelas_id' => $kelasBaruIds->first(),
                     'mata_pelajaran_id' => $jadwal->mata_pelajaran_id,
                     'guru_id' => $jadwal->guru_id,
                     'hari' => $jadwal->hari,
@@ -1213,6 +1216,7 @@ class JadwalPelajaranController extends Controller
                     'keterangan' => 'Duplikasi dari '.$tahunAjaranLama->nama_tahun_ajaran,
                     'updated_by' => Auth::id(),
                 ]);
+                $jadwalBaru->kelas()->sync($kelasBaruIds);
 
                 $duplicated++;
             }

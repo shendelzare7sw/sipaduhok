@@ -1,6 +1,7 @@
 @extends('layouts.print')
+@php($routePrefix = request()->routeIs('waka.*') ? 'waka' : 'admin')
 @section('title', 'Daftar Wali Kelas')
-@section('back-url', route('admin.wali-kelas.index',request()->query()))
+@section('back-url', route($routePrefix.'.wali-kelas.index',request()->query()))
 @section('report-title', 'Daftar Wali Kelas')
 @section('report-meta')<p class="mt-1 text-xs text-slate-600 print:text-[8pt]">Tahun ajaran {{ $tahunAjaran?->nama_tahun_ajaran ?? 'periode aktif' }} · {{ $kelasList->count() }} kelas</p>@endsection
 @section('report-content')

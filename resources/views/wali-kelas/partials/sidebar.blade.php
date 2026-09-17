@@ -1,195 +1,121 @@
-{{--
-    Navigasi CleanFlow untuk Wali Kelas.
-    Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
---}}
-
 @php
-    $currentRoute = Route::currentRouteName();
-
-    // Kelas yang sah untuk wali ini HANYA yang assignment-nya di TA AKTIF - sama
-    // seperti WaliKelasHelper::getKelasWali(). Tanpa scoping ini, kartu "Kelas Aktif"
-    // bisa nampilin kelas TA lama yang sudah tidak valid (mis. session belum ke-reset
-    // setelah TA baru diaktifkan & wali belum ditugaskan ulang), padahal halaman lain
-    // (rapor, presensi, dst) sudah benar menganggap wali ini "belum ditugaskan".
-    $tenagaPendidik = \App\Models\TenagaPendidik::where('user_id', auth()->id())->first();
+    $tenagaPendidik = \App\Models\TenagaPendidik::query()->where('user_id', auth()->id())->first();
     $kelasAktifWaliIds = collect();
 
     if ($tenagaPendidik) {
-        $taAktifId = \App\Models\TahunAjaran::where('is_active', true)->value('id');
-        $kelasAktifWaliIds = \App\Models\Kelas::whereHas('waliKelasAssignments', function ($q) use ($tenagaPendidik) {
-                $q->where('tenaga_pendidik_id', $tenagaPendidik->id);
-            })
-            ->when($taAktifId, fn ($q) => $q->where('tahun_ajaran_id', $taAktifId))
+        $tahunAjaranAktifId = \App\Models\TahunAjaran::query()->where('is_active', true)->value('id');
+        $kelasAktifWaliIds = \App\Models\Kelas::query()
+            ->whereHas('waliKelasAssignments', fn ($query) => $query->where('tenaga_pendidik_id', $tenagaPendidik->id))
+            ->when($tahunAjaranAktifId, fn ($query) => $query->where('tahun_ajaran_id', $tahunAjaranAktifId))
             ->pluck('id');
     }
 
     $hasMultipleKelas = $kelasAktifWaliIds->count() > 1;
-
-    // Get selected kelas from session, tapi cuma valid kalau masih ada di daftar TA aktif
     $selectedKelasId = session('wali_kelas_selected');
-    $selectedKelas = null;
+    $selectedKelas = $selectedKelasId && $kelasAktifWaliIds->contains($selectedKelasId)
+        ? \App\Models\Kelas::with('cabang')->find($selectedKelasId)
+        : null;
 
-    if ($selectedKelasId && $kelasAktifWaliIds->contains($selectedKelasId)) {
-        $selectedKelas = \App\Models\Kelas::with('cabang')->find($selectedKelasId);
-    }
+    $navigation = [
+        ['label' => 'Utama', 'items' => [
+            ['label' => 'Dashboard', 'route' => 'wali.dashboard', 'patterns' => ['wali.dashboard'], 'icon' => 'fa-home'],
+            ...($hasMultipleKelas ? [[
+                'label' => 'Pilih Kelas', 'route' => 'wali.pilih-kelas', 'patterns' => ['wali.pilih-kelas', 'wali.pilih-kelas.select'], 'icon' => 'fa-right-left',
+            ]] : []),
+        ]],
+        ['label' => 'Akademik', 'items' => [
+            ['label' => 'Jadwal Pelajaran', 'route' => 'wali.jadwal.index', 'patterns' => ['wali.jadwal.*', 'wali.jadwal-pelajaran'], 'icon' => 'fa-calendar-week'],
+            [
+                'label' => 'Kelola Presensi',
+                'patterns' => ['wali.presensi.*'],
+                'icon' => 'fa-clipboard-check',
+                'children' => [
+                    ['label' => 'Input Harian', 'route' => 'wali.presensi.index', 'patterns' => ['wali.presensi.index']],
+                    ['label' => 'Validasi Izin', 'route' => 'wali.presensi.validasi-izin', 'patterns' => ['wali.presensi.validasi-izin', 'wali.presensi.preview-bukti', 'wali.presensi.proses-validasi-izin']],
+                    ['label' => 'Rekap Harian', 'route' => 'wali.presensi.rekap-harian', 'patterns' => ['wali.presensi.rekap-harian', 'wali.presensi.show-harian', 'wali.presensi.print-rekap']],
+                    ['label' => 'Riwayat & Edit', 'route' => 'wali.presensi.riwayat', 'patterns' => ['wali.presensi.riwayat', 'wali.presensi.riwayat.update']],
+                ],
+            ],
+            [
+                'label' => 'Kelola Rapor',
+                'patterns' => ['wali.nilai.*', 'wali.rapor.*', 'wali.rapor-pending', 'wali.arsip.*', 'wali.template-capaian.*'],
+                'icon' => 'fa-file-lines',
+                'children' => [
+                    ['label' => 'Nilai Siswa', 'route' => 'wali.nilai.index', 'patterns' => ['wali.nilai.*']],
+                    ['label' => 'Rapor Kelas', 'route' => 'wali.rapor.index', 'patterns' => ['wali.rapor.index', 'wali.rapor.edit', 'wali.rapor.preview', 'wali.rapor.print']],
+                    ['label' => 'Rapor Tertunda', 'route' => 'wali.rapor-pending', 'patterns' => ['wali.rapor-pending']],
+                    ['label' => 'Permintaan Unduh', 'route' => 'wali.rapor.request-download.index', 'patterns' => ['wali.rapor.request-download.*']],
+                    ['label' => 'Template Capaian', 'route' => 'wali.template-capaian.index', 'patterns' => ['wali.template-capaian.*']],
+                    ['label' => 'Arsip Kelas', 'route' => 'wali.arsip.index', 'patterns' => ['wali.arsip.*']],
+                ],
+            ],
+        ]],
+        ['label' => 'Tindak Lanjut', 'items' => [
+            ['label' => 'Prediksi Kenaikan', 'route' => 'wali.kenaikan-kelas.prediction', 'patterns' => ['wali.kenaikan-kelas.prediction'], 'icon' => 'fa-chart-column'],
+            ['label' => 'Validasi Akses', 'route' => 'wali.validasi-akses.index', 'patterns' => ['wali.validasi-akses.*'], 'icon' => 'fa-user-check'],
+        ]],
+    ];
 @endphp
 
 @if($selectedKelas && $hasMultipleKelas)
-{{-- Current Class Indicator --}}
-<li class="menu-item">
-    <div class="wali-active-class-card">
-        <div class="wali-active-class-label">
-            <i class="fas fa-school me-1"></i> Kelas Aktif
+    <li class="mb-4 px-1">
+        <div class="rounded-2xl bg-cyan-300/15 p-3 ring-1 ring-inset ring-white/15">
+            <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-100">
+                <i class="fas fa-school" aria-hidden="true"></i>
+                Kelas aktif
+            </div>
+            <p class="mt-2 truncate text-base font-extrabold text-white">{{ $selectedKelas->nama_kelas }}</p>
+            <p class="mt-0.5 truncate text-xs text-blue-100/80">{{ $selectedKelas->cabang->nama_cabang ?? 'Cabang belum diatur' }} · {{ strtoupper($selectedKelas->jenjang) }}</p>
+            <a href="{{ route('wali.pilih-kelas') }}" class="mt-3 inline-flex min-h-9 w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 text-xs font-bold text-white transition hover:bg-white/20">
+                <i class="fas fa-right-left" aria-hidden="true"></i>
+                Ganti kelas
+            </a>
         </div>
-        <div class="wali-active-class-title">
-            {{ $selectedKelas->nama_kelas }}
-        </div>
-        <div class="wali-active-class-meta">
-            {{ $selectedKelas->cabang->nama_cabang ?? '' }} - {{ $selectedKelas->jenjang }}
-        </div>
-        <a href="{{ route('wali.pilih-kelas') }}" 
-           class="wali-active-class-switch">
-            <i class="fas fa-exchange-alt"></i> Ganti Kelas
-        </a>
-    </div>
-</li>
+    </li>
 @endif
 
-{{-- Dashboard --}}
-<li class="menu-item {{ $currentRoute == 'wali.dashboard' ? 'active' : '' }}">
-    <a href="{{ route('wali.dashboard') }}" class="menu-link">
-        <i class="menu-icon fas fa-home"></i>
-        <div>Dashboard</div>
-    </a>
-</li>
-
-@if($hasMultipleKelas)
-{{-- Pilih Kelas --}}
-<li class="menu-item {{ $currentRoute == 'wali.pilih-kelas' ? 'active' : '' }}">
-    <a href="{{ route('wali.pilih-kelas') }}" class="menu-link">
-        <i class="menu-icon fas fa-exchange-alt"></i>
-        <div>Pilih Kelas</div>
-    </a>
-</li>
-@endif
-
-{{-- ============================================ --}}
-{{-- UC38: Melihat Informasi Akademik             --}}
-{{-- ============================================ --}}
-<li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Akademik</span>
-</li>
-
-<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.jadwal') ? 'active' : '' }}">
-    <a href="{{ route('wali.jadwal.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-calendar-week"></i>
-        <div>Jadwal Pelajaran</div>
-    </a>
-</li>
-
-{{-- ============================================ --}}
-{{-- UC19: Kelola Presensi Siswa                  --}}
-{{-- (Input Harian, Validasi Izin, Rekap, Edit)   --}}
-{{-- ============================================ --}}
-<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.presensi') ? 'active open' : '' }}">
-    <a href="#" class="menu-link menu-toggle">
-        <i class="menu-icon fas fa-clipboard-check"></i>
-        <div>Kelola Presensi</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item {{ $currentRoute == 'wali.presensi.index' ? 'active' : '' }}">
-            <a href="{{ route('wali.presensi.index') }}" class="menu-link">
-                <i class="fas fa-edit me-2 fa-xs"></i>
-                <div>Input Harian</div>
-            </a>
-        </li>
-        <li class="menu-item {{ $currentRoute == 'wali.presensi.validasi-izin' ? 'active' : '' }}">
-            <a href="{{ route('wali.presensi.validasi-izin') }}" class="menu-link">
-                <i class="fas fa-check-circle me-2 fa-xs"></i>
-                <div>Validasi Izin</div>
-            </a>
-        </li>
-        <li class="menu-item {{ $currentRoute == 'wali.presensi.rekap-harian' || $currentRoute == 'wali.presensi.show-harian' ? 'active' : '' }}">
-            <a href="{{ route('wali.presensi.rekap-harian') }}" class="menu-link">
-                <i class="fas fa-calendar-day me-2 fa-xs"></i>
-                <div>Rekap Harian</div>
-            </a>
-        </li>
-        <li class="menu-item {{ $currentRoute == 'wali.presensi.riwayat' ? 'active' : '' }}">
-            <a href="{{ route('wali.presensi.riwayat') }}" class="menu-link">
-                <i class="fas fa-history me-2 fa-xs"></i>
-                <div>Riwayat & Edit</div>
-            </a>
-        </li>
-    </ul>
-</li>
-
-{{-- ============================================ --}}
-{{-- UC20: Kelola Rapor Siswa                     --}}
-{{-- (Nilai, Rapor, Arsip dalam satu dropdown)    --}}
-{{-- UC22: Mengelola Permintaan Unduh Rapor       --}}
-{{-- ============================================ --}}
-<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.nilai') || Str::startsWith($currentRoute, 'wali.rapor') || Str::startsWith($currentRoute, 'wali.arsip') ? 'active open' : '' }}">
-    <a href="#" class="menu-link menu-toggle">
-        <i class="menu-icon fas fa-file-alt"></i>
-        <div>Kelola Rapor</div>
-    </a>
-    <ul class="menu-sub">
-        <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.nilai') ? 'active' : '' }}">
-            <a href="{{ route('wali.nilai.index') }}" class="menu-link">
-                <i class="fas fa-chart-line me-2 fa-xs"></i>
-                <div>Nilai Siswa</div>
-            </a>
-        </li>
-        <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.rapor.') && $currentRoute != 'wali.rapor.request-download.index' ? 'active' : '' }}">
-            <a href="{{ route('wali.rapor.index') }}" class="menu-link">
-                <i class="fas fa-file-alt me-2 fa-xs"></i>
-                <div>Kelola Rapor</div>
-            </a>
-        </li>
-        <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.arsip') ? 'active' : '' }}">
-            <a href="{{ route('wali.arsip.index') }}" class="menu-link">
-                <i class="fas fa-archive me-2 fa-xs"></i>
-                <div>Arsip Kelas Saya</div>
-            </a>
-        </li>
-        <li class="menu-item {{ $currentRoute == 'wali.rapor.request-download.index' ? 'active' : '' }}">
-            <a href="{{ route('wali.rapor.request-download.index') }}" class="menu-link">
-                <i class="fas fa-download me-2 fa-xs"></i>
-                <div>Permintaan Unduh</div>
-                @php $pendingDownload = \App\Models\RequestDownloadRapor::where('status', 'menunggu')->whereHas('siswa', fn($q) => $q->where('kelas_id', session('selected_kelas_id')))->count(); @endphp
-                @if($pendingDownload > 0)
-                    <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingDownload }}</span>
-                @endif
-            </a>
-        </li>
-    </ul>
-</li>
-
-{{-- ============================================ --}}
-{{-- UC24: Melihat Prediksi Kenaikan Kelas        --}}
-{{-- ============================================ --}}
-<li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Kenaikan Kelas</span>
-</li>
-
-<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.kenaikan-kelas.prediction') ? 'active' : '' }}">
-    <a href="{{ route('wali.kenaikan-kelas.prediction') }}" class="menu-link">
-        <i class="menu-icon fas fa-chart-bar"></i>
-        <div>Prediksi Kenaikan</div>
-    </a>
-</li>
-
-{{-- ============================================ --}}
-{{-- UC14: Validasi Akses Ujian dan Rapor          --}}
-{{-- ============================================ --}}
-<li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Validasi</span>
-</li>
-
-<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.validasi-akses') ? 'active' : '' }}">
-    <a href="{{ route('wali.validasi-akses.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-check-double"></i>
-        <div>Validasi Akses</div>
-    </a>
-</li>
+@foreach($navigation as $section)
+    <li class="mb-4">
+        <div class="menu-header mb-1.5 px-3">
+            <p class="menu-header-text text-[11px] font-bold uppercase tracking-[0.16em] text-blue-100/90">{{ $section['label'] }}</p>
+        </div>
+        <ul class="space-y-1">
+            @foreach($section['items'] as $item)
+                @php
+                    $isActive = request()->routeIs(...($item['patterns'] ?? []));
+                    $hasChildren = ! empty($item['children']);
+                    $targetId = 'wali-menu-'.$loop->parent->index.'-'.$loop->index;
+                    $toneClasses = ['!bg-white/[0.07]', '!bg-cyan-200/[0.12]', '!bg-sky-300/[0.14]', '!bg-indigo-200/[0.12]'];
+                    $toneClass = $toneClasses[($loop->parent->index + $loop->index) % count($toneClasses)];
+                    $stateClasses = $isActive
+                        ? '!border-0 !ring-0 !bg-white/25 text-white shadow-lg shadow-slate-950/15'
+                        : "!border-0 !ring-0 {$toneClass} text-blue-50/90 hover:!bg-white/15 hover:text-white";
+                @endphp
+                <li class="menu-item {{ $isActive ? 'active open' : '' }}">
+                    @if($hasChildren)
+                        <button type="button" class="menu-link menu-toggle group flex min-h-11 w-full items-center gap-3 rounded-xl bg-transparent px-3 py-2.5 text-left text-sm font-semibold transition {{ $stateClasses }}" data-menu-toggle aria-controls="{{ $targetId }}" aria-expanded="{{ $isActive ? 'true' : 'false' }}">
+                            <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
+                            <span class="min-w-0 flex-1 truncate">{{ $item['label'] }}</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform {{ $isActive ? 'rotate-180' : '' }}" data-menu-chevron aria-hidden="true"></i>
+                        </button>
+                        <ul id="{{ $targetId }}" class="menu-sub mt-1 space-y-1 pl-8 {{ $isActive ? '' : 'hidden' }}">
+                            @foreach($item['children'] as $child)
+                                @php($childActive = request()->routeIs(...($child['patterns'] ?? [])))
+                                <li class="menu-item {{ $childActive ? 'active' : '' }}">
+                                    <a href="{{ route($child['route']) }}" class="menu-link flex min-h-10 items-center rounded-lg border px-3 py-2 text-sm transition {{ $childActive ? 'border-white/30 bg-white/20 font-semibold text-white' : 'border-white/10 bg-white/[0.03] text-blue-100/80 hover:border-white/20 hover:bg-white/10 hover:text-white' }}">
+                                        {{ $child['label'] }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <a href="{{ route($item['route']) }}" class="menu-link group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition {{ $stateClasses }}" @if($isActive) aria-current="page" @endif>
+                            <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
+                            <span class="min-w-0 flex-1 truncate">{{ $item['label'] }}</span>
+                        </a>
+                    @endif
+                </li>
+            @endforeach
+        </ul>
+    </li>
+@endforeach

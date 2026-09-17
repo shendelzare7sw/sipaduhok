@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\WakilKepalaSekolah;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cabang;
 use App\Models\Catatan;
 use App\Models\CatatanMonitoring;
-use App\Models\GuruPengajarKelas;
 use App\Models\Kelas;
 use App\Models\LmsMeeting;
 use App\Models\MataPelajaran;
@@ -23,7 +21,6 @@ use App\Models\UjianSiswa;
 use App\Models\User;
 use App\Services\LmsMonitoringService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class WakilKepalaSekolahController extends Controller
 {
@@ -74,241 +71,6 @@ class WakilKepalaSekolahController extends Controller
             'kelasWithoutWali',
             'recentSiswa'
         ));
-    }
-
-    // ============================================
-    // TAHUN AJARAN
-    // ============================================
-
-    public function tahunAjaranIndex(Request $request)
-    {
-        $query = TahunAjaran::query();
-
-        if ($request->filled('status')) {
-            $query->where('is_active', $request->status);
-        }
-
-        $tahunAjarans = $query->orderBy('tanggal_mulai', 'desc')->paginate(10);
-
-        return view('waka.tahun-ajaran.index', compact('tahunAjarans'));
-    }
-
-    public function tahunAjaranToggleActive($id)
-    {
-        DB::beginTransaction();
-        try {
-            // Deactivate all
-            TahunAjaran::where('is_active', true)->update(['is_active' => false]);
-
-            // Activate selected
-            $tahunAjaran = TahunAjaran::findOrFail($id);
-            $tahunAjaran->is_active = true;
-            $tahunAjaran->save();
-
-            DB::commit();
-
-            return redirect()->route('waka.tahun-ajaran.index')
-                ->with('success', 'Tahun Ajaran '.$tahunAjaran->nama_tahun_ajaran.' berhasil diaktifkan');
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return redirect()->back()->with('error', 'Gagal mengaktifkan tahun ajaran');
-        }
-    }
-
-    // ============================================
-    // MATA PELAJARAN
-    // ============================================
-
-    public function mataPelajaranIndex(Request $request)
-    {
-        $query = MataPelajaran::query();
-
-        if ($request->filled('jenjang')) {
-            $query->where('jenjang', $request->jenjang);
-        }
-
-        $mataPelajaran = $query->orderBy('nama_mapel')->paginate(15);
-        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
-
-        return view('waka.mata-pelajaran.index', compact('mataPelajaran', 'jenjangs'));
-    }
-
-    // ============================================
-    // KELAS
-    // ============================================
-
-    public function kelasIndex(Request $request)
-    {
-        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-
-        $query = Kelas::with(['tahunAjaran', 'cabang', 'waliKelas'])->withCount('siswa');
-
-        if ($request->filled('tahun_ajaran_id')) {
-            $query->where('tahun_ajaran_id', $request->tahun_ajaran_id);
-        } elseif ($tahunAjaranAktif) {
-            $query->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-        }
-
-        if ($request->filled('jenjang')) {
-            $query->where('jenjang', $request->jenjang);
-        }
-
-        if ($request->filled('cabang_id')) {
-            $query->where('cabang_id', $request->cabang_id);
-        }
-
-        $kelas = $query->orderBy('jenjang')->orderBy('nama_kelas')->paginate(15);
-
-        $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
-        $cabangs = Cabang::where('is_active', true)->get();
-        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
-
-        return view('waka.kelas.index', compact('kelas', 'tahunAjarans', 'tahunAjaranAktif', 'cabangs', 'jenjangs'));
-    }
-
-    // ============================================
-    // MANAJEMEN SISWA
-    // ============================================
-
-    public function manajemenSiswaIndex(Request $request)
-    {
-        $query = Siswa::with(['kelas.tahunAjaran', 'cabang', 'user']);
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_lengkap', 'like', "%{$search}%")
-                    ->orWhere('nis', 'like', "%{$search}%")
-                    ->orWhere('nisn', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('jenjang')) {
-            $query->whereHas('kelas', fn ($q) => $q->where('jenjang', $request->jenjang));
-        }
-
-        if ($request->filled('kelas_id')) {
-            $query->where('kelas_id', $request->kelas_id);
-        }
-
-        if ($request->filled('cabang_id')) {
-            $query->where('cabang_id', $request->cabang_id);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $siswa = $query->orderBy('nama_lengkap')->paginate(15);
-
-        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
-        $cabangList = Cabang::where('is_active', true)->get();
-        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
-
-        return view('waka.manajemen-siswa.index', compact('siswa', 'kelasList', 'cabangList', 'jenjangs'));
-    }
-
-    // ============================================
-    // WALI KELAS
-    // ============================================
-
-    public function waliKelasIndex(Request $request)
-    {
-        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-
-        $query = Kelas::with(['tahunAjaran', 'cabang', 'waliKelas'])->withCount('siswa');
-
-        if ($request->filled('tahun_ajaran_id')) {
-            $query->where('tahun_ajaran_id', $request->tahun_ajaran_id);
-        } elseif ($tahunAjaranAktif) {
-            $query->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-        }
-
-        if ($request->filled('jenjang')) {
-            $query->where('jenjang', $request->jenjang);
-        }
-
-        if ($request->filled('status_wali')) {
-            if ($request->status_wali == 'ada') {
-                $query->whereNotNull('wali_kelas_id');
-            } else {
-                $query->whereNull('wali_kelas_id');
-            }
-        }
-
-        $kelas = $query->orderBy('jenjang')->orderBy('nama_kelas')->paginate(15);
-
-        $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
-        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
-
-        // Available wali kelas
-        $availableWaliKelas = TenagaPendidik::with('user')
-            ->whereHas('user', fn ($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])->where('is_active', true))
-            ->orderBy('nama_lengkap')
-            ->get();
-
-        return view('waka.wali-kelas.index', compact('kelas', 'tahunAjarans', 'tahunAjaranAktif', 'jenjangs', 'availableWaliKelas'));
-    }
-
-    public function waliKelasAssign(Request $request, $kelasId)
-    {
-        $request->validate([
-            'wali_kelas_id' => 'required|exists:tenaga_pendidik,id',
-        ]);
-
-        $kelas = Kelas::findOrFail($kelasId);
-        $kelas->wali_kelas_id = $request->wali_kelas_id;
-        $kelas->save();
-
-        return redirect()->route('waka.wali-kelas.index')
-            ->with('success', 'Wali kelas berhasil ditugaskan');
-    }
-
-    public function waliKelasRemove($kelasId)
-    {
-        $kelas = Kelas::findOrFail($kelasId);
-        $kelas->wali_kelas_id = null;
-        $kelas->save();
-
-        return redirect()->route('waka.wali-kelas.index')
-            ->with('success', 'Wali kelas berhasil dihapus dari kelas');
-    }
-
-    // ============================================
-    // JADWAL GURU PENGAJAR
-    // ============================================
-
-    public function guruPengajarIndex(Request $request)
-    {
-        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-
-        $query = GuruPengajarKelas::with(['tenagaPendidik', 'kelas.tahunAjaran', 'mataPelajaran']);
-
-        if ($request->filled('tahun_ajaran_id')) {
-            $query->whereHas('kelas', fn ($q) => $q->where('tahun_ajaran_id', $request->tahun_ajaran_id));
-        } elseif ($tahunAjaranAktif) {
-            $query->whereHas('kelas', fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id));
-        }
-
-        if ($request->filled('guru_id')) {
-            $query->where('tenaga_pendidik_id', $request->guru_id);
-        }
-
-        if ($request->filled('kelas_id')) {
-            $query->where('kelas_id', $request->kelas_id);
-        }
-
-        $jadwalGuru = $query->orderBy('kelas_id')->paginate(20);
-
-        $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
-        $guruList = TenagaPendidik::with('user')
-            ->whereHas('user', fn ($q) => $q->whereIn('role', ['guru_pengajar', 'wali_kelas'])->where('is_active', true))
-            ->orderBy('nama_lengkap')
-            ->get();
-        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
-
-        return view('waka.guru-pengajar.index', compact('jadwalGuru', 'tahunAjarans', 'tahunAjaranAktif', 'guruList', 'kelasList'));
     }
 
     // ============================================
@@ -386,7 +148,9 @@ class WakilKepalaSekolahController extends Controller
             return $tp;
         });
 
-        return view('waka.monitoring.guru-pengajar', compact('guruPengajar'));
+        $tahunAjarans = TahunAjaran::orderByDesc('tanggal_mulai')->get();
+
+        return view('admin.monitoring.guru-pengajar', compact('guruPengajar', 'tahunAjarans', 'taFilterId'));
     }
 
     public function monitoringWaliKelas(Request $request)
@@ -450,7 +214,9 @@ class WakilKepalaSekolahController extends Controller
             return $tp;
         });
 
-        return view('waka.monitoring.wali-kelas', compact('waliKelas'));
+        $tahunAjarans = TahunAjaran::orderByDesc('tanggal_mulai')->get();
+
+        return view('admin.monitoring.wali-kelas', compact('waliKelas', 'tahunAjarans', 'taFilterId'));
     }
 
     public function monitoringSiswa(Request $request)
@@ -523,7 +289,7 @@ class WakilKepalaSekolahController extends Controller
             ->when($tahunAjaranAktif, fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
             ->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
-        return view('waka.monitoring.siswa', compact('siswa', 'kelasList'));
+        return view('admin.monitoring.siswa', compact('siswa', 'kelasList'));
     }
 
     // ============================================
@@ -538,7 +304,7 @@ class WakilKepalaSekolahController extends Controller
             ->orderByDesc('id')
             ->paginate(15);
 
-        return view('waka.catatan.index', compact('catatan'));
+        return view('admin.catatan.index', compact('catatan'));
     }
 
     public function catatanCreate()
@@ -559,7 +325,12 @@ class WakilKepalaSekolahController extends Controller
         $siswaList = Siswa::with('user')->where('status', 'aktif')
             ->where('cabang_id', $userCabangId)->get();
 
-        return view('waka.catatan.create', compact('roles', 'tenagaPendidik', 'siswaList'));
+        return view('admin.catatan.create', [
+            'roles' => $roles,
+            'tenagaPendidik' => $tenagaPendidik,
+            'siswaList' => $siswaList,
+            'recipientMode' => 'single',
+        ]);
     }
 
     public function catatanStore(Request $request)
@@ -595,7 +366,7 @@ class WakilKepalaSekolahController extends Controller
             $catatan->markAsRead(auth()->id());
         }
 
-        return view('waka.catatan.show', compact('catatan'));
+        return view('admin.catatan.show', compact('catatan'));
     }
 
     public function catatanDestroy($id)

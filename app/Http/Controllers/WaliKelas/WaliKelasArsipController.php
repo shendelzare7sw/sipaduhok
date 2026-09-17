@@ -159,7 +159,7 @@ class WaliKelasArsipController extends Controller
 
         // List bulan tersedia untuk dropdown
         $bulanTersedia = Presensi::where('kelas_id', $kelas->id)
-            ->select(DB::raw("DATE_FORMAT(tanggal, '%Y-%m') as bulan"))
+            ->selectRaw('SUBSTR(tanggal, 1, 7) as bulan')
             ->groupBy('bulan')
             ->orderByDesc('bulan')
             ->pluck('bulan');

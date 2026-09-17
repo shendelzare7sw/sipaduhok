@@ -1,7 +1,11 @@
 @extends('layouts.print')
 
+@php
+    $routePrefix = request()->routeIs('waka.*') ? 'waka' : 'admin';
+@endphp
+
 @section('title', 'Daftar Kelas')
-@section('back-url', route('admin.kelas.index'))
+@section('back-url', route($routePrefix . '.kelas.index'))
 @section('report-title', 'Daftar Kelas')
 
 @section('report-meta')

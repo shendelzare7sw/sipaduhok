@@ -88,6 +88,9 @@ class RaporController extends Controller
             ->where('status', 'aktif')
             ->orderBy('nama_lengkap', 'asc')
             ->get();
+        $selectedSiswaId = $siswaList->contains('id', (int) $request->get('siswa_id'))
+            ? (int) $request->get('siswa_id')
+            : null;
 
         // For each student, check if rapor exists
         $raporList = $siswaList->map(function ($siswa) use ($kelas, $semester, $jenisRapor) {
@@ -137,6 +140,7 @@ class RaporController extends Controller
             'statusCount' => $statusCount,
             'templateMapelList' => $templateMapelList,
             'templatesByMapel' => $templatesByMapel,
+            'selectedSiswaId' => $selectedSiswaId,
         ]);
     }
 
@@ -356,6 +360,12 @@ class RaporController extends Controller
             'jumlah_alpha' => 'required|integer|min:0',
             'nilai' => 'nullable|array',
             'nilai.*.deskripsi' => 'nullable|string',
+            'deskripsi' => 'nullable|array',
+            'deskripsi.*' => 'nullable|string',
+            'visible' => 'nullable|array',
+            'visible.*' => 'boolean',
+            'kelompok_override' => 'nullable|array',
+            'kelompok_override.*' => 'nullable|in:A,B',
             'kegiatan_ekstra' => 'nullable|array',
             'kegiatan_ekstra.*.kegiatan_nama' => 'nullable|string|max:100',
             'kegiatan_ekstra.*.predikat' => 'nullable|in:A,B,C',
@@ -365,6 +375,17 @@ class RaporController extends Controller
 
         $rapor = Rapor::findOrFail($raporId);
         $this->assertRaporMilikWali($rapor);
+
+        $allowedNilaiIds = $rapor->raporNilai()->pluck('id')->map(fn ($id) => (int) $id)->all();
+        foreach (['deskripsi', 'visible', 'kelompok_override'] as $field) {
+            foreach (array_keys($request->input($field, [])) as $raporNilaiId) {
+                if (!in_array((int) $raporNilaiId, $allowedNilaiIds, true)) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        "$field.$raporNilaiId" => 'Komponen nilai ini bukan milik rapor yang sedang diedit.',
+                    ]);
+                }
+            }
+        }
 
         // Update rapor
         $rapor->update([
@@ -381,7 +402,7 @@ class RaporController extends Controller
         // Update nilai rapor jika ada
         if ($request->has('deskripsi')) {
             foreach ($request->deskripsi as $raporNilaiId => $deskripsi) {
-                RaporNilai::where('id', $raporNilaiId)->update([
+                RaporNilai::where('rapor_id', $rapor->id)->whereKey($raporNilaiId)->update([
                     'deskripsi' => $deskripsi,
                 ]);
             }
@@ -397,19 +418,19 @@ class RaporController extends Controller
         // Update kelompok override
         if ($request->has('kelompok_override')) {
             foreach ($request->kelompok_override as $raporNilaiId => $kelompok) {
-                RaporNilai::where('id', $raporNilaiId)->update([
+                RaporNilai::where('rapor_id', $rapor->id)->whereKey($raporNilaiId)->update([
                     'kelompok_override' => $kelompok ?: null,
                 ]);
             }
         }
 
         // Update kegiatan ekstrakurikuler
-        if ($request->has('kegiatan_ekstra')) {
+        if ($request->has('kegiatan_ekstra_present')) {
             // Delete existing
             $rapor->kegiatanEkstra()->delete();
 
             // Create new from request
-            foreach ($request->kegiatan_ekstra as $kegiatan) {
+            foreach ($request->input('kegiatan_ekstra', []) as $kegiatan) {
                 if (! empty($kegiatan['kegiatan_nama'])) {
                     RaporKegiatanEkstra::create([
                         'rapor_id' => $rapor->id,
@@ -833,12 +854,26 @@ class RaporController extends Controller
             'uploaded_pdf' => 'required_if:mode,upload_pdf|file|mimes:pdf|max:10240', // 10MB max
         ]);
 
-        $siswa = Siswa::findOrFail($request->siswa_id);
-        $kelas = $siswa->kelas;
+        $tenagaPendidik = $this->getTenagaPendidik();
+
+        if (! $tenagaPendidik) {
+            return back()->with('error', 'Data tenaga pendidik tidak ditemukan.');
+        }
+
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
 
         if (! $kelas) {
-            return back()->with('error', 'Siswa tidak terdaftar di kelas manapun.');
+            return back()->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
+
+        $siswa = Siswa::whereKey($request->siswa_id)
+            ->where('kelas_id', $kelas->id)
+            ->where('status', 'aktif')
+            ->firstOrFail();
 
         // Check if rapor already exists
         $exists = Rapor::where('siswa_id', $siswa->id)

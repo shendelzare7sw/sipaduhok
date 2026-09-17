@@ -3,27 +3,29 @@
 <head>
     <meta charset="utf-8">
     <title>Rapor PAS - {{ $rapor->siswa->nama_lengkap }}</title>
+    @vite('resources/css/rapor-document.css')
     <link rel="stylesheet" href="{{ asset('css/wali-kelas/rapor/print-pas.css') }}">
 </head>
-<body>
+<body class="font-[Arial,sans-serif] text-[10pt] leading-[1.4]">
     @php
         $alignmentValue = fn($value, $default) => in_array($value, ['left', 'center', 'right', 'justify'], true) ? $value : $default;
         $deskripsiAlignment = $alignmentValue($rapor->deskripsi_alignment ?? null, 'left');
         $keteranganEkstraAlignment = $alignmentValue($rapor->keterangan_ekstra_alignment ?? null, 'left');
         $catatanAlignment = $alignmentValue($rapor->catatan_alignment ?? null, 'center');
+        $alignmentClasses = ['left' => 'text-left', 'center' => 'text-center', 'right' => 'text-right', 'justify' => 'text-justify'];
     @endphp
 
     <!-- Header -->
-    <div class="header">
-        <h1>HOUSE OF KNOWLEDGE</h1>
-        <h2>The Second Home For Your Children - 家庭教育</h2>
-        <p>Jl. Contoh No. 123, Kota, Provinsi | Telp: (021) 1234567 | Email: info@hok.sch.id</p>
-        <hr style="margin: 15px 0;">
-        <h1>PENCAPAIAN KOMPETENSI PESERTA DIDIK</h1>
+    <div class="mb-5 text-center">
+        <h1 class="my-[5px] text-[16pt]">HOUSE OF KNOWLEDGE</h1>
+        <h2 class="my-[5px] text-[14pt] font-normal">The Second Home For Your Children - 家庭教育</h2>
+        <p class="my-[3px] text-[9pt]">Jl. Contoh No. 123, Kota, Provinsi | Telp: (021) 1234567 | Email: info@hok.sch.id</p>
+        <hr class="my-[15px]">
+        <h1 class="my-[5px] text-[16pt]">PENCAPAIAN KOMPETENSI PESERTA DIDIK</h1>
     </div>
 
     <!-- Info Siswa -->
-    <table class="info-table">
+    <table class="mb-[15px] w-full [&_td]:px-2 [&_td]:py-[3px] [&_td:first-child]:w-[150px] [&_td:first-child]:font-bold">
         <tr>
             <td>Nama Siswa</td>
             <td>: {{ $rapor->siswa->nama_lengkap }}</td>
@@ -47,9 +49,9 @@
     </table>
 
     <!-- Kelompok A (Wajib) -->
-    <table class="nilai-table">
+    <table class="mb-[15px] w-full border-collapse [&_td]:border [&_td]:border-solid [&_td]:border-black [&_td]:p-[5px] [&_td:first-child]:w-10 [&_td:first-child]:text-center [&_td:nth-child(3)]:w-[60px] [&_td:nth-child(3)]:text-center [&_th]:border [&_th]:border-solid [&_th]:border-black [&_th]:bg-[#f0f0f0] [&_th]:p-[5px] [&_th]:text-center [&_th]:font-bold">
         <thead>
-            <tr class="group-header">
+            <tr class="bg-[#d0d0d0] text-center font-bold">
                 <th colspan="4">KELOMPOK A (Wajib)</th>
             </tr>
             <tr>
@@ -71,7 +73,7 @@
                     <td>{{ $no++ }}</td>
                     <td>{{ $nilai->mataPelajaran->nama_mapel }}</td>
                     <td>{{ $nilai->nilai_angka }}</td>
-                    <td style="text-align: {{ $deskripsiAlignment }};">{{ $nilai->deskripsi ?? '-' }}</td>
+                    <td class="{{ $alignmentClasses[$deskripsiAlignment] }}">{{ $nilai->deskripsi ?? '-' }}</td>
                 </tr>
                 @endif
             @endforeach
@@ -79,9 +81,9 @@
     </table>
 
     <!-- Kelompok B (Pilihan) -->
-    <table class="nilai-table">
+    <table class="mb-[15px] w-full border-collapse [&_td]:border [&_td]:border-solid [&_td]:border-black [&_td]:p-[5px] [&_td:first-child]:w-10 [&_td:first-child]:text-center [&_td:nth-child(3)]:w-[60px] [&_td:nth-child(3)]:text-center [&_th]:border [&_th]:border-solid [&_th]:border-black [&_th]:bg-[#f0f0f0] [&_th]:p-[5px] [&_th]:text-center [&_th]:font-bold">
         <thead>
-            <tr class="group-header">
+            <tr class="bg-[#d0d0d0] text-center font-bold">
                 <th colspan="4">KELOMPOK B (Pilihan)</th>
             </tr>
             <tr>
@@ -102,7 +104,7 @@
                     <td>{{ $no++ }}</td>
                     <td>{{ $nilai->mataPelajaran->nama_mapel }}</td>
                     <td>{{ $nilai->nilai_angka }}</td>
-                    <td style="text-align: {{ $deskripsiAlignment }};">{{ $nilai->deskripsi ?? '-' }}</td>
+                    <td class="{{ $alignmentClasses[$deskripsiAlignment] }}">{{ $nilai->deskripsi ?? '-' }}</td>
                 </tr>
                 @endif
             @endforeach
@@ -110,9 +112,9 @@
     </table>
 
     <!-- Kegiatan Ekstrakurikuler -->
-    <table class="ekstra-table">
+    <table class="mb-[15px] w-full border-collapse [&_td]:border [&_td]:border-solid [&_td]:border-black [&_td]:p-[5px] [&_th]:border [&_th]:border-solid [&_th]:border-black [&_th]:bg-[#f0f0f0] [&_th]:p-[5px]">
         <thead>
-            <tr class="group-header">
+            <tr class="bg-[#d0d0d0] text-center font-bold">
                 <th colspan="4">Kegiatan Ekstrakurikuler</th>
             </tr>
             <tr>
@@ -125,17 +127,17 @@
         <tbody>
             @forelse($rapor->kegiatanEkstra as $ekstra)
             <tr>
-                <td style="text-align: center;">{{ $loop->iteration }}</td>
+                <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $ekstra->kegiatan_nama }}</td>
-                <td style="text-align: center;">{{ $ekstra->predikat ?? '-' }}</td>
-                <td style="text-align: {{ $keteranganEkstraAlignment }};">{{ $ekstra->keterangan ?? '-' }}</td>
+                <td class="text-center">{{ $ekstra->predikat ?? '-' }}</td>
+                <td class="{{ $alignmentClasses[$keteranganEkstraAlignment] }}">{{ $ekstra->keterangan ?? '-' }}</td>
             </tr>
             @empty
             @foreach(\App\Models\RaporKegiatanEkstra::getDefaultKegiatan() as $kegiatan)
             <tr>
-                <td style="text-align: center;">{{ $loop->iteration }}</td>
+                <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $kegiatan }}</td>
-                <td style="text-align: center;">-</td>
+                <td class="text-center">-</td>
                 <td>-</td>
             </tr>
             @endforeach
@@ -145,7 +147,7 @@
 
     <!-- Ketidakhadiran -->
     <h3>Ketidakhadiran</h3>
-    <table class="kehadiran-table">
+    <table class="mb-[15px] w-1/2 border-collapse [&_td]:border [&_td]:border-solid [&_td]:border-black [&_td]:p-[5px] [&_td:first-child]:w-[150px] [&_td:first-child]:font-bold">
         <tr>
             <td>Sakit</td>
             <td>: {{ $rapor->jumlah_sakit }} hari</td>
@@ -162,30 +164,30 @@
 
     <!-- Catatan Wali Kelas -->
     <h3>Catatan Wali Kelas</h3>
-    <div class="catatan" style="text-align: {{ $catatanAlignment }};">
+    <div class="mb-[15px] min-h-20 border border-solid border-black p-[10px] {{ $alignmentClasses[$catatanAlignment] }}">
         {{ $rapor->catatan_wali_kelas ?? '-' }}
     </div>
 
     <!-- Tanda Tangan -->
-    <div class="signature">
-        <table>
+    <div class="mt-[30px]">
+        <table class="w-full [&_td]:p-[10px] [&_td]:text-center [&_td]:align-top">
             <tr>
                 <td width="33%">
                     <div>Wali Siswa/Wali</div>
-                    <div class="sign-line">(...........................)</div>
+                    <div class="mt-[60px] [border-top:1px_solid_#000] pt-[5px]">(...........................)</div>
                 </td>
-                <td width="34%" style="text-align: center;">
+                <td width="34%" class="text-center">
                     <div>{{ $rapor->kelas->cabang->kota ?? 'Tangerang Selatan' }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                 </td>
                 <td width="33%">
                     <div>Wali Kelas</div>
-                    <div class="sign-line">{{ $rapor->kelas->waliKelas->nama ?? '(...........................)' }}</div>
+                    <div class="mt-[60px] [border-top:1px_solid_#000] pt-[5px]">{{ $rapor->kelas->waliKelas->nama ?? '(...........................)' }}</div>
                 </td>
             </tr>
         </table>
-        <div style="text-align: center; margin-top: 30px; font-weight: bold;">
+        <div class="mt-[30px] text-center font-bold">
             Ketua PKBM House of Knowledge<br>
-            <div style="margin-top: 60px; border-top: 1px solid #000; display: inline-block; padding-top: 5px;">
+            <div class="mt-[60px] inline-block [border-top:1px_solid_#000] pt-[5px]">
                 Fransisda Tiodora Ferdiansyah, S.Psi., MM
             </div>
         </div>

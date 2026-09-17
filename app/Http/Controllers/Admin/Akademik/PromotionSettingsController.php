@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin\Akademik;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use App\Models\TahunAjaran;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class PromotionSettingsController extends Controller
 {
@@ -89,25 +89,25 @@ class PromotionSettingsController extends Controller
             }
         }
 
-        DB::transaction(function () use ($validated, $request) {
+        DB::transaction(function () use ($validated) {
             // Parse dates (browser sends yyyy-mm-dd format)
             $tanggalRapor = $validated['tanggal_pengambilan_rapor'];
-            
+
             $tanggalEksekusi = null;
             if ($validated['tanggal_eksekusi']) {
                 // Parse date and combine with time
                 $date = \Carbon\Carbon::parse($validated['tanggal_eksekusi'], 'Asia/Jakarta');
-                
+
                 // If time is provided, set it; otherwise default to 02:00 AM
                 if ($validated['waktu_eksekusi']) {
                     [$hour, $minute] = explode(':', $validated['waktu_eksekusi']);
-                    $date->setTime((int)$hour, (int)$minute, 0);
+                    $date->setTime((int) $hour, (int) $minute, 0);
                 } else {
                     $date->setTime(2, 0, 0); // Default to 2 AM
                 }
                 $tanggalEksekusi = $date;
             }
-            
+
             // 1. Save Settings
             DB::table('pengaturan_naik_kelas')->updateOrInsert(
                 ['tahun_ajaran_id' => $validated['tahun_ajaran_id']],
@@ -150,10 +150,8 @@ class PromotionSettingsController extends Controller
             }
         });
 
-        $routePrefix = $request->routeIs('waka.*') ? 'waka.kenaikan-kelas' : 'admin.akademik.kenaikan-kelas';
-
         return redirect()
-            ->route($routePrefix . '.settings.index')
+            ->route('admin.akademik.kenaikan-kelas.settings.index')
             ->with('success', 'Pengaturan Naik Kelas berhasil disimpan & Jadwal Otomatis diperbarui.');
     }
 }

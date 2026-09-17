@@ -1,5 +1,5 @@
-<div id="admin-search-backdrop" class="fixed inset-0 z-[60] hidden bg-slate-950/50 backdrop-blur-sm"></div>
-<section id="admin-search-panel" class="fixed left-1/2 top-4 z-[70] hidden w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:top-20" role="dialog" aria-modal="true" aria-label="Cari menu">
+<div id="admin-search-backdrop" class="fixed inset-0 z-[60] hidden bg-slate-950/50 backdrop-blur-sm print:!hidden"></div>
+<section id="admin-search-panel" class="fixed left-1/2 top-4 z-[70] hidden w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:top-20 print:!hidden" role="dialog" aria-modal="true" aria-label="Cari menu">
     <div class="flex items-center gap-3 border-b border-slate-200 px-4">
         <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
         <input id="admin-menu-search" type="search" class="h-14 min-w-0 flex-1 border-0 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:ring-0" placeholder="Contoh: import siswa, jadwal, pembayaran..." autocomplete="off">

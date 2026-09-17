@@ -96,7 +96,7 @@ class GuruPengajarController extends Controller
 
         $stats = compact('totalGuru', 'guruWithAssignment', 'totalPenugasan', 'totalMataPelajaran');
 
-        return view('waka.guru-pengajar.index', compact(
+        return view('admin.guru-pengajar.index', compact(
             'guruList', 'tahunAjarans', 'currentTahunAjaran', 'stats'
         ));
     }
@@ -114,6 +114,14 @@ class GuruPengajarController extends Controller
         if (! $tahunAjaranId && $tahunAjaranAktif) {
             $tahunAjaranId = $tahunAjaranAktif->id;
         }
+
+        $isAssignedToUserBranch = $guruPengajar->guruKelas()
+            ->whereHas('kelas', fn ($query) => $query
+                ->where('cabang_id', $cabangId)
+                ->when($tahunAjaranId, fn ($yearQuery) => $yearQuery->where('tahun_ajaran_id', $tahunAjaranId)))
+            ->exists();
+
+        abort_unless($isAssignedToUserBranch, 403, 'Anda tidak berhak mengakses guru dari cabang lain.');
 
         $guruPengajar->load(['user', 'guruKelas' => function ($q) use ($tahunAjaranId, $cabangId) {
             $q->whereHas('kelas', fn ($k) => $k->where('cabang_id', $cabangId)
@@ -139,7 +147,7 @@ class GuruPengajarController extends Controller
             'totalPenugasan' => $guruPengajar->guruKelas->count(),
         ];
 
-        return view('waka.guru-pengajar.show', compact(
+        return view('admin.guru-pengajar.show', compact(
             'guruPengajar', 'tahunAjarans', 'currentTahunAjaran',
             'jadwalList', 'stats'
         ));
@@ -165,7 +173,7 @@ class GuruPengajarController extends Controller
             ->orderBy('jam_mulai')
             ->get();
 
-        return view('waka.guru-pengajar.manage-kelas', compact('kelas', 'jadwalList'));
+        return view('admin.guru-pengajar.manage-kelas', compact('kelas', 'jadwalList'));
     }
 
     /**
@@ -276,6 +284,6 @@ class GuruPengajarController extends Controller
         $tahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
         $cabang = auth()->user()->cabang;
 
-        return view('waka.guru-pengajar.print', compact('guruList', 'tahunAjaran', 'cabang'));
+        return view('admin.guru-pengajar.print', compact('guruList', 'tahunAjaran', 'cabang'));
     }
 }

@@ -2,105 +2,46 @@
 
 @section('title', 'Jadwal Pelajaran')
 @section('page-title', 'Jadwal Pelajaran')
-@section('page-subtitle', isset($kelas) ? 'Lihat jadwal pelajaran kelas ' . $kelas->nama_kelas : 'Kelola jadwal pelajaran')
-
-
-@section('styles')
-    @vite(['resources/css/wali-kelas/jadwal/index.css', 'resources/js/wali-kelas/jadwal/index.js'])
-@endsection
+@section('page-subtitle', $kelas ? 'Jadwal kelas '.$kelas->nama_kelas : 'Jadwal kelas yang Anda walikan')
 
 @section('content')
-<div class="wk-page">
-<div class="container-fluid px-0">
-
+<div class="min-w-0 space-y-5">
     @if($error ?? false)
-        <div class="alert alert-danger shadow-sm border-start border-danger border-4">
-            <i class="fas fa-exclamation-triangle me-2"></i>{{ $error }}
-        </div>
+        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-800" role="alert"><i class="fas fa-triangle-exclamation mr-2" aria-hidden="true"></i>{{ $error }}</div>
     @endif
 
-    {{-- HEADER ACTIONS --}}
     @if($kelas)
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col">
-                    <h4 class="m-0 fw-bold text-primary">
-                        <i class="fas fa-calendar-alt me-2"></i>Jadwal Kelas {{ $kelas->nama_kelas }}
-                    </h4>
-                    <p class="text-muted small mb-0 mt-1">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Jadwal pelajaran dikelola oleh Admin. Anda dapat melihat dan mencetak jadwal.
-                    </p>
-                </div>
-                <div class="col-auto">
-                    <a href="{{ route('wali.jadwal.print') }}" target="_blank" class="btn btn-primary shadow-sm">
-                        <i class="fas fa-print me-1"></i> Cetak Jadwal
-                    </a>
-                </div>
+        <header class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div class="min-w-0">
+                <p class="text-xs font-bold uppercase tracking-[0.16em] text-sky-700">Akademik · {{ strtoupper($kelas->jenjang) }}</p>
+                <h1 class="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">Jadwal Kelas {{ $kelas->nama_kelas }}</h1>
+                <p class="mt-1 text-sm leading-6 text-slate-500">Jadwal dikelola oleh Admin. Wali kelas dapat melihat dan mencetaknya.</p>
             </div>
-        </div>
-    </div>
-    @endif
+            <a href="{{ route('wali.jadwal.print') }}" target="_blank" rel="noopener" class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-sky-700 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-sky-800"><i class="fas fa-print" aria-hidden="true"></i>Cetak jadwal</a>
+        </header>
 
-    {{-- JADWAL PER HARI --}}
-    @if($kelas)
-    <div class="row">
-        @foreach($hariList as $hari)
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow card-hari h-100">
-                <div class="header-hari d-flex justify-content-between align-items-center">
-                    <h5 class="m-0 fw-bold text-gray-800">
-                        <i class="fas fa-clock me-2 text-primary"></i>{{ $hari }}
-                    </h5>
-                    <span class="badge bg-primary rounded-pill px-3 py-2">
-                        {{ $jadwalPerHari[$hari]->count() }} Pelajaran
-                    </span>
-                </div>
-                <div class="card-body p-0">
-                    @if($jadwalPerHari[$hari]->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover table-jadwal wk-card-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="ps-4">Jam</th>
-                                    <th>Mata Pelajaran</th>
-                                    <th>Pengajar</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($jadwalPerHari[$hari] as $jadwal)
-                                <tr>
-                                    <td class="ps-4 align-middle">
-                                        <div class="jam-badge small">
-                                            {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
-                                        </div>
-                                    </td>
-                                    <td class="align-middle">
-                                        <div class="fw-bold text-gray-800">{{ $jadwal->mataPelajaran->nama_mapel }}</div>
-                                        <small class="text-muted">{{ $jadwal->mataPelajaran->kode_mapel }}</small>
-                                    </td>
-                                    <td class="align-middle small fw-bold text-gray-600">
-                                        {{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+        <section class="grid min-w-0 gap-4 lg:grid-cols-2" aria-label="Jadwal per hari">
+            @foreach($hariList as $hari)
+                <article class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fas fa-clock text-sky-700" aria-hidden="true"></i>{{ $hari }}</h2>
+                        <span class="shrink-0 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-800">{{ $jadwalPerHari[$hari]->count() }} pelajaran</span>
                     </div>
+                    @if($jadwalPerHari[$hari]->isNotEmpty())
+                        <ul class="divide-y divide-slate-100">
+                            @foreach($jadwalPerHari[$hari] as $jadwal)
+                                <li class="grid min-w-0 gap-2 px-5 py-4 sm:grid-cols-[110px_minmax(0,1fr)] sm:gap-4">
+                                    <span class="inline-flex h-fit w-fit rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold tabular-nums text-slate-700">{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}–{{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}</span>
+                                    <div class="min-w-0"><p class="font-bold text-slate-900">{{ $jadwal->mataPelajaran->nama_mapel ?? 'Mata pelajaran belum tersedia' }}</p><p class="mt-0.5 text-xs text-slate-500">{{ $jadwal->mataPelajaran->kode_mapel ?? '-' }} · {{ $jadwal->guru->nama_lengkap ?? 'Pengajar belum ditentukan' }}</p></div>
+                                </li>
+                            @endforeach
+                        </ul>
                     @else
-                    <div class="text-center py-5">
-                        <i class="fas fa-calendar-times fa-3x text-gray-200 mb-3"></i>
-                        <p class="text-gray-500 small">Belum ada jadwal hari ini</p>
-                    </div>
+                        <div class="px-5 py-10 text-center text-sm text-slate-500"><i class="fas fa-calendar-xmark mb-3 block text-2xl text-slate-300" aria-hidden="true"></i>Belum ada jadwal hari ini.</div>
                     @endif
-                </div>
-            </div>
-        </div>
-        @endforeach
-    </div>
+                </article>
+            @endforeach
+        </section>
     @endif
 </div>
-</div>
-
 @endsection

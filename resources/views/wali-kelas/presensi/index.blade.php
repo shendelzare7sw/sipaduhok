@@ -2,333 +2,78 @@
 
 @section('title', 'Presensi Siswa')
 @section('page-title', 'Presensi Siswa')
-@section('page-subtitle', isset($kelas) && $kelas ? 'Kelola presensi siswa kelas ' . $kelas->nama_kelas : 'Kelola presensi siswa')
-
-
-@section('styles')
-    @vite(['resources/css/wali-kelas/presensi/index.css', 'resources/js/wali-kelas/presensi/index.js'])
-@endsection
+@section('page-subtitle', $kelas ? 'Kelas '.$kelas->nama_kelas : 'Kelola kehadiran siswa')
 
 @section('content')
-<div class="wk-page">
-<div class="container-fluid px-0">
+<div class="min-w-0 w-full space-y-4" x-data="{ semester: @js($semester ?? '') }">
     @if($error ?? false)
-        <div class="alert alert-danger shadow-sm border-start border-danger border-4">
-            <i class="fas fa-exclamation-triangle me-2"></i>{{ $error }}
-        </div>
+        <p class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">{{ $error }}</p>
     @endif
 
-    {{-- Teks session('warning') sudah dirender layouts.sneat secara global (dulu dobel
-         di sini). Blok ini cuma untuk detail baris-per-baris import_errors, yang layout
-         tidak tahu cara menampilkannya. --}}
     @if(session('import_errors'))
-        <div class="alert alert-warning shadow-sm border-start border-warning border-4 alert-dismissible fade show">
-            <strong>Detail:</strong>
-            <ul class="mt-2 mb-0 small">
-                @foreach(session('import_errors') as $ie)
-                    <li>{{ $ie }}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+            <p class="font-bold">Baris yang perlu diperbaiki</p>
+            <ul class="mt-2 list-disc space-y-1 pl-5">@foreach(session('import_errors') as $issue)<li>{{ $issue }}</li>@endforeach</ul>
         </div>
-    @endif
-
-    {{-- HEADER ACTIONS --}}
-    @if($kelas)
-    <div class="card shadow mb-4 text-center text-sm-start">
-        <div class="card-body py-3">
-            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-sm-between gap-2">
-                <h5 class="m-0 fw-bold text-primary">Presensi Kelas {{ $kelas->nama_kelas }}</h5>
-                {{-- Button grid: 2-col on mobile, single row on sm+ --}}
-                <div class="presensi-btn-grid">
-                    <a href="{{ route('wali.presensi.validasi-izin') }}" class="btn btn-warning btn-sm fw-bold text-white">
-                        <i class="fas fa-check-circle me-1"></i> Validasi Izin
-                    </a>
-                    <button type="button" class="btn btn-success btn-sm fw-bold"
-                        data-bs-toggle="modal" data-bs-target="#importPresensiModal">
-                        <i class="fas fa-file-excel me-1"></i> Import Excel
-                    </button>
-                    <a href="{{ route('wali.presensi.print-rekap', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-secondary btn-sm fw-bold">
-                        <i class="fas fa-print me-1"></i> Cetak Rekap
-                    </a>
-                    <a href="{{ route('wali.presensi.riwayat') }}" class="btn btn-info btn-sm fw-bold text-white">
-                        <i class="fas fa-history me-1"></i> Riwayat & Edit
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
     @endif
 
     @if($kelas)
-    {{-- FILTER TANGGAL --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-white">
-            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-filter me-2"></i>Filter Laporan & Tanggal</h6>
-        </div>
-        <div class="card-body">
-            <form action="{{ route('wali.presensi.index') }}" method="GET">
-                <div class="row align-items-end">
-                    <div class="col-md-2 mb-3 mb-md-0">
-                        <label class="small fw-bold">TANGGAL PRESENSI</label>
-                        <input type="date" name="tanggal" class="form-control" value="{{ $tanggal }}" data-auto-submit>
-                    </div>
-                    <div class="col-md-2 mb-3 mb-md-0">
-                        <label class="small fw-bold">SEMESTER</label>
-                        <select name="semester" class="form-select" data-auto-submit>
-                            <option value="">Semua (Per Bulan)</option>
-                            <option value="ganjil" {{ ($semester ?? '') == 'ganjil' ? 'selected' : '' }}>Ganjil</option>
-                            <option value="genap" {{ ($semester ?? '') == 'genap' ? 'selected' : '' }}>Genap</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-3 mb-md-0">
-                        <label class="small fw-bold">LIHAT BULAN</label>
-                        <select name="bulan" class="form-select" data-auto-submit {{ ($semester ?? '') ? 'disabled' : '' }}>
-                            @for($m = 1; $m <= 12; $m++)
-                                <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>
-                                    {{ \Carbon\Carbon::create(now()->year, $m, 1)->locale('id')->isoFormat('MMMM') }}
-                                </option>
-                            @endfor
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-3 mb-md-0">
-                        <label class="small fw-bold">TAHUN</label>
-                        <select name="tahun" class="form-select" data-auto-submit {{ ($semester ?? '') ? 'disabled' : '' }}>
-                            @for($y = now()->year - 2; $y <= now()->year + 1; $y++)
-                                <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
-                            @endfor
-                        </select>
-                    </div>
-                    <div class="col-md-4 col-lg-2">
-                        <a href="{{ route('wali.presensi.index') }}" class="btn btn-light w-100 border fw-bold text-primary">
-                            <i class="fas fa-sync-alt me-1"></i> Reset Filter
-                        </a>
-                    </div>
-                </div>
+        <header class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+            <div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-700">Kehadiran siswa</p><h1 class="mt-1 text-lg font-extrabold text-slate-900">Presensi Kelas {{ $kelas->nama_kelas }}</h1><p class="mt-0.5 text-xs text-slate-500">Pilih tanggal, catat kehadiran, lalu simpan seluruh kelas.</p></div>
+            <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                <a href="{{ route('wali.presensi.validasi-izin') }}" class="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-amber-50 px-3 text-xs font-bold text-amber-800 hover:bg-amber-100"><i class="fas fa-check-circle" aria-hidden="true"></i>Validasi izin</a>
+                <button type="button" @click="$refs.importDialog.showModal()" class="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-emerald-50 px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-100"><i class="fas fa-file-excel" aria-hidden="true"></i>Impor Excel</button>
+                <a href="{{ route('wali.presensi.print-rekap', ['bulan' => $bulan, 'tahun' => $tahun, 'semester' => $semester ?? null]) }}" target="_blank" rel="noopener" class="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-slate-100 px-3 text-xs font-bold text-slate-700 hover:bg-slate-200"><i class="fas fa-print" aria-hidden="true"></i>Cetak rekap</a>
+                <a href="{{ route('wali.presensi.riwayat') }}" class="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-sky-50 px-3 text-xs font-bold text-sky-800 hover:bg-sky-100"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i>Riwayat & edit</a>
+            </div>
+        </header>
+
+        <section class="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm" aria-labelledby="filter-presensi-title">
+            <h2 id="filter-presensi-title" class="text-sm font-extrabold text-slate-900"><i class="fas fa-filter mr-2 text-sky-700" aria-hidden="true"></i>Periode dan tanggal</h2>
+            <form action="{{ route('wali.presensi.index') }}" method="GET" class="mt-3 grid min-w-0 grid-cols-2 gap-3 lg:grid-cols-[minmax(140px,1.2fr)_repeat(3,minmax(120px,1fr))_auto] lg:items-end">
+                <label class="min-w-0 text-xs font-bold text-slate-600">Tanggal input<input type="date" name="tanggal" value="{{ $tanggal }}" class="mt-1 block h-10 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2.5 text-sm font-medium text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"></label>
+                <label class="min-w-0 text-xs font-bold text-slate-600">Semester<select name="semester" x-model="semester" class="mt-1 block h-10 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2.5 text-sm font-medium text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100"><option value="">Per bulan</option><option value="ganjil">Ganjil</option><option value="genap">Genap</option></select></label>
+                <label class="min-w-0 text-xs font-bold text-slate-600">Bulan<select name="bulan" :disabled="!!semester" class="mt-1 block h-10 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2.5 text-sm font-medium text-slate-800 disabled:bg-slate-100 disabled:text-slate-400">@for($month = 1; $month <= 12; $month++)<option value="{{ $month }}" @selected($bulan == $month)>{{ \Carbon\Carbon::create(now()->year, $month, 1)->locale('id')->translatedFormat('F') }}</option>@endfor</select></label>
+                <label class="min-w-0 text-xs font-bold text-slate-600">Tahun<select name="tahun" :disabled="!!semester" class="mt-1 block h-10 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2.5 text-sm font-medium text-slate-800 disabled:bg-slate-100 disabled:text-slate-400">@for($year = now()->year - 2; $year <= now()->year + 1; $year++)<option value="{{ $year }}" @selected($tahun == $year)>{{ $year }}</option>@endfor</select></label>
+                <div class="col-span-2 flex gap-2 lg:col-span-1"><button type="submit" class="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-sky-700 px-3 text-xs font-bold text-white hover:bg-sky-800"><i class="fas fa-check" aria-hidden="true"></i>Terapkan</button><a href="{{ route('wali.presensi.index') }}" class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-600 hover:bg-slate-50" aria-label="Reset filter"><i class="fas fa-rotate-left" aria-hidden="true"></i></a></div>
             </form>
-        </div>
-    </div>
+        </section>
 
-    {{-- INPUT PRESENSI HARIAN --}}
-    <div class="card shadow mb-4 border-start border-primary border-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white">
-            <h6 class="m-0 fw-bold text-primary">
-                <i class="fas fa-edit me-2"></i>Input: {{ \Carbon\Carbon::parse($tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
-            </h6>
-        </div>
-        <div class="card-body p-0">
-            <form id="formPresensi" action="{{ route('wali.presensi.input-harian') }}" method="POST">
+        <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-labelledby="input-presensi-title" x-data>
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-3"><div><h2 id="input-presensi-title" class="text-sm font-extrabold text-slate-900">Input presensi</h2><p class="mt-0.5 text-xs text-slate-500">{{ \Carbon\Carbon::parse($tanggal)->locale('id')->translatedFormat('l, d F Y') }}</p></div><span class="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-800">{{ $siswaList->count() }} siswa</span></div>
+            <form x-ref="presensiForm" action="{{ route('wali.presensi.input-harian') }}" method="POST" @submit.prevent="$refs.confirmDialog.showModal()">
                 @csrf
-                <input type="hidden" name="kelas_id" value="{{ $kelas->id }}">
-                <input type="hidden" name="tanggal" value="{{ $tanggal }}">
-
-                <div class="table-responsive">
-                    <table class="table table-hover wk-card-table mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="text-center" width="50">NO</th>
-                                <th>IDENTITAS SISWA</th>
-                                <th width="200" class="text-center">STATUS KEHADIRAN</th>
-                                <th>KETERANGAN</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($siswaList as $index => $siswa)
-                                @php
-                                    $presensi = $presensiData[$siswa->id] ?? null;
-                                    $status = $presensi ? $presensi->status : 'hadir';
-                                @endphp
-                                <tr>
-                                    <td class="text-center align-middle fw-bold text-gray-600">{{ $index + 1 }}</td>
-                                    <td class="align-middle">
-                                        <div class="fw-bold text-gray-800">{{ $siswa->nama_lengkap }}</div>
-                                        <div class="small text-muted">NIS: {{ $siswa->nis }}</div>
-                                        <input type="hidden" name="presensi[{{ $index }}][siswa_id]" value="{{ $siswa->id }}">
-                                    </td>
-                                    <td class="align-middle">
-                                        <select name="presensi[{{ $index }}][status]" class="form-select status-select text-center shadow-sm" required>
-                                            <option value="hadir" {{ $status == 'hadir' ? 'selected' : '' }} class="text-success fw-bold">
-                                                Hadir
-                                            </option>
-                                            <option value="sakit" {{ $status == 'sakit' ? 'selected' : '' }} class="text-warning fw-bold">
-                                                Sakit
-                                            </option>
-                                            <option value="izin" {{ $status == 'izin' ? 'selected' : '' }} class="text-primary fw-bold">
-                                                Izin
-                                            </option>
-                                            <option value="alpha" {{ $status == 'alpha' ? 'selected' : '' }} class="text-danger fw-bold">
-                                                Alpha
-                                            </option>
-                                        </select>
-                                    </td>
-                                    <td class="align-middle">
-                                        <input type="text" name="presensi[{{ $index }}][keterangan]" class="form-control form-control-sm bg-light"
-                                               placeholder="Catatan..." value="{{ $presensi ? $presensi->keterangan : '' }}">
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer bg-white text-end py-3">
-                    <button type="button" class="btn btn-primary px-5 shadow fw-bold" data-bs-toggle="modal" data-bs-target="#konfirmasiSimpanModal">
-                        <i class="fas fa-save me-2"></i>Simpan Data Presensi
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- REKAP BULANAN --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-white border-bottom-0">
-            <h6 class="m-0 fw-bold text-gray-800">
-                <i class="fas fa-book-open me-2 text-info"></i>Rekapitulasi:
-                @if($semester ?? false)
-                    Semester {{ ucfirst($semester) }} — {{ $tahunAjaran->nama_tahun_ajaran ?? '' }}
-                @else
-                    {{ \Carbon\Carbon::create($tahun, $bulan, 1)->locale('id')->isoFormat('MMMM YYYY') }}
-                @endif
-            </h6>
-        </div>
-        <div class="card-body p-0 text-center">
-            <div class="table-responsive">
-                <table class="table table-bordered table-rekap wk-card-table mb-0">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th rowspan="2">No</th>
-                            <th rowspan="2" class="text-start">Nama Siswa</th>
-                            <th colspan="4" class="py-2">Ringkasan Status</th>
-                            <th rowspan="2">Total</th>
-                        </tr>
-                        <tr>
-                            <th class="text-success bg-hadir py-1"><i class="fas fa-check me-1"></i>H</th>
-                            <th class="text-warning bg-sakit py-1"><i class="fas fa-thermometer-half me-1"></i>S</th>
-                            <th class="text-primary bg-izin py-1"><i class="fas fa-envelope me-1"></i>I</th>
-                            <th class="text-danger bg-alpha py-1"><i class="fas fa-times me-1"></i>A</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($siswaList as $index => $siswa)
-                            @php
-                                $rekap = $rekapBulan[$siswa->id];
-                                $total = $rekap['hadir'] + $rekap['sakit'] + $rekap['izin'] + $rekap['alpha'];
-                            @endphp
-                            <tr>
-                                <td class="align-middle" data-label="No">{{ $index + 1 }}</td>
-                                <td class="text-start fw-bold align-middle text-gray-800" data-label="Nama Siswa">{{ $siswa->nama_lengkap }}</td>
-                                <td class="rekap-cell bg-hadir text-success align-middle" data-label="Hadir">{{ $rekap['hadir'] }}</td>
-                                <td class="rekap-cell bg-sakit text-warning align-middle" data-label="Sakit">{{ $rekap['sakit'] }}</td>
-                                <td class="rekap-cell bg-izin text-primary align-middle" data-label="Izin">{{ $rekap['izin'] }}</td>
-                                <td class="rekap-cell bg-alpha text-danger align-middle" data-label="Alpha">{{ $rekap['alpha'] }}</td>
-                                <td class="rekap-cell fw-bold bg-light align-middle text-dark" data-label="Total">{{ $total }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    @endif
-</div>
-</div>
-
-{{-- MODAL KONFIRMASI SIMPAN --}}
-<div class="modal fade" id="konfirmasiSimpanModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold text-white">
-                    <i class="fas fa-question-circle me-2"></i>Konfirmasi Simpan Data
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <i class="fas fa-save fa-3x text-primary mb-3"></i>
-                <h6 class="fw-bold mb-2">Apakah Anda yakin ingin menyimpan data presensi?</h6>
-                <p class="text-muted small mb-0">Data yang sudah disimpan akan menggantikan data presensi sebelumnya untuk tanggal ini.</p>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Tidak
-                </button>
-                <button type="button" class="btn btn-primary" id="btnSubmitPresensi">
-                    <i class="fas fa-check me-1"></i> Ya, Simpan
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- MODAL IMPORT EXCEL --}}
-<div class="modal fade" id="importPresensiModal" tabindex="-1" aria-labelledby="importPresensiModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-bold" id="importPresensiModalLabel">
-                    <i class="fas fa-file-excel me-2"></i>Import Presensi dari Excel
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ route('wali.presensi.import-excel') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <input type="hidden" name="kelas_id" value="{{ $kelas->id ?? '' }}">
-                <div class="modal-body">
-
-                    {{-- Petunjuk --}}
-                    <div class="alert alert-info py-2 small mb-3">
-                        <i class="bi bi-info-circle-fill me-1"></i>
-                        <strong>Petunjuk import:</strong>
-                        <ol class="mt-1 mb-0 ps-3">
-                            <li>Download template di bawah — template sudah berisi daftar nama & NIS siswa.</li>
-                            <li>Isi kolom <strong>Status</strong> dengan: <code>hadir</code>, <code>sakit</code>, <code>izin</code>, atau <code>alpha</code>.</li>
-                            <li>Kolom <strong>Keterangan</strong> bersifat opsional.</li>
-                            <li><strong>Jangan ubah</strong> kolom NIS — digunakan untuk mencocokkan data.</li>
-                            <li>Simpan file lalu upload di sini.</li>
-                        </ol>
-                    </div>
-
-                    {{-- Tanggal --}}
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">TANGGAL PRESENSI</label>
-                        <input type="date" name="tanggal" id="importTanggal" class="form-control"
-                               value="{{ $tanggal }}" required>
-                    </div>
-
-                    {{-- Download Template --}}
-                    <div class="mb-3">
-                        <a id="btnDownloadTemplate"
-                           href="{{ route('wali.presensi.download-template', ['tanggal' => $tanggal]) }}"
-                           class="btn btn-outline-success btn-sm w-100 fw-bold">
-                            <i class="fas fa-download me-1"></i> Download Template Excel
-                        </a>
-                        <div class="text-muted small mt-1 text-center">
-                            Template berisi daftar siswa kelas {{ $kelas->nama_kelas ?? '' }} siap diisi.
+                <input type="hidden" name="kelas_id" value="{{ $kelas->id }}"><input type="hidden" name="tanggal" value="{{ $tanggal }}">
+                <div class="hidden grid-cols-[48px_minmax(0,1fr)_160px_256px] bg-slate-50 px-4 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-500 lg:grid"><span>No</span><span>Siswa</span><span>Status</span><span>Keterangan</span></div>
+                <div class="divide-y divide-slate-100">
+                    @forelse($siswaList as $index => $siswa)
+                        @php($presensi = $presensiData[$siswa->id] ?? null)
+                        <div class="grid min-w-0 grid-cols-2 gap-2 px-4 py-3 lg:grid-cols-[48px_minmax(0,1fr)_160px_256px] lg:items-center lg:gap-0 lg:py-2.5">
+                            <span class="hidden text-xs text-slate-500 lg:block">{{ $index + 1 }}</span>
+                            <div class="col-span-2 min-w-0 lg:col-span-1"><p class="truncate text-sm font-bold text-slate-900" title="{{ $siswa->nama_lengkap }}">{{ $siswa->nama_lengkap }}</p><p class="text-[11px] text-slate-500">NIS: {{ $siswa->nis ?? $siswa->nisn ?? '-' }}</p></div>
+                            <input type="hidden" name="presensi[{{ $index }}][siswa_id]" value="{{ $siswa->id }}">
+                            <label class="text-[11px] font-bold text-slate-600 lg:pr-3"><span class="lg:sr-only">Status</span><select name="presensi[{{ $index }}][status]" aria-label="Status {{ $siswa->nama_lengkap }}" required class="mt-1 h-9 w-full rounded-lg border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-800 lg:mt-0"><option value="hadir" @selected(($presensi->status ?? 'hadir') === 'hadir')>Hadir</option><option value="sakit" @selected(($presensi->status ?? '') === 'sakit')>Sakit</option><option value="izin" @selected(($presensi->status ?? '') === 'izin')>Izin</option><option value="alpha" @selected(($presensi->status ?? '') === 'alpha')>Alpha</option></select></label>
+                            <label class="min-w-0 text-[11px] font-bold text-slate-600"><span class="lg:sr-only">Keterangan</span><input type="text" name="presensi[{{ $index }}][keterangan]" aria-label="Keterangan {{ $siswa->nama_lengkap }}" value="{{ $presensi->keterangan ?? '' }}" placeholder="Opsional" class="mt-1 h-9 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2 text-xs font-medium text-slate-800 lg:mt-0"></label>
                         </div>
-                    </div>
-
-                    {{-- File Upload --}}
-                    <div class="mb-2">
-                        <label class="form-label fw-bold small">UPLOAD FILE EXCEL / CSV</label>
-                        <input type="file" name="file_excel" class="form-control"
-                               accept=".csv,.xlsx,.xls" required>
-                        @error('file_excel')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
-                        @enderror
-                        <div class="text-muted small mt-1">Format: .csv, .xlsx, atau .xls (maks. 2 MB)</div>
-                    </div>
-
+                    @empty
+                        <p class="px-4 py-8 text-center text-sm text-slate-500">Belum ada siswa aktif di kelas ini.</p>
+                    @endforelse
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> Batal
-                    </button>
-                    <button type="submit" class="btn btn-success btn-sm fw-bold">
-                        <i class="fas fa-upload me-1"></i> Import Sekarang
-                    </button>
-                </div>
+                <div class="flex justify-end border-t border-slate-100 px-4 py-3"><button type="submit" @disabled($siswaList->isEmpty()) class="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 text-xs font-bold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:bg-slate-300"><i class="fas fa-floppy-disk" aria-hidden="true"></i>Simpan presensi</button></div>
             </form>
-        </div>
-    </div>
+            <dialog x-ref="confirmDialog" class="w-[calc(100%-2rem)] max-w-md rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50" @click.self="$el.close()"><div class="px-5 py-5"><h3 class="text-base font-extrabold text-slate-900">Simpan presensi?</h3><p class="mt-2 text-sm leading-6 text-slate-600">Data {{ $siswaList->count() }} siswa untuk {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('d F Y') }} akan disimpan. Data yang sudah ada pada tanggal ini akan diperbarui.</p><div class="mt-5 flex justify-end gap-2"><button type="button" @click="$refs.confirmDialog.close()" class="min-h-10 rounded-lg border border-slate-300 px-4 text-xs font-bold text-slate-700">Batal</button><button type="button" @click="$refs.presensiForm.submit()" class="min-h-10 rounded-lg bg-sky-700 px-4 text-xs font-bold text-white">Ya, simpan</button></div></div></dialog>
+        </section>
+
+        <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-labelledby="rekap-presensi-title">
+            <div class="border-b border-slate-100 px-4 py-3"><h2 id="rekap-presensi-title" class="text-sm font-extrabold text-slate-900">Rekap kehadiran</h2><p class="mt-0.5 text-xs text-slate-500">{{ ($semester ?? false) ? 'Semester '.ucfirst($semester).' · '.($tahunAjaran->nama_tahun_ajaran ?? '') : \Carbon\Carbon::create($tahun, $bulan, 1)->locale('id')->translatedFormat('F Y') }}</p></div>
+            <div class="divide-y divide-slate-100 lg:hidden">@forelse($siswaList as $siswa)@php($rekap = $rekapBulan[$siswa->id])<div class="px-4 py-3"><p class="text-xs font-bold text-slate-900">{{ $siswa->nama_lengkap }}</p><div class="mt-2 flex flex-wrap gap-1.5 text-[11px] font-bold"><span class="rounded-md bg-emerald-50 px-2 py-1 text-emerald-800">H {{ $rekap['hadir'] }}</span><span class="rounded-md bg-amber-50 px-2 py-1 text-amber-800">S {{ $rekap['sakit'] }}</span><span class="rounded-md bg-sky-50 px-2 py-1 text-sky-800">I {{ $rekap['izin'] }}</span><span class="rounded-md bg-rose-50 px-2 py-1 text-rose-800">A {{ $rekap['alpha'] }}</span><span class="rounded-md bg-slate-100 px-2 py-1 text-slate-700">Total {{ array_sum($rekap) }}</span></div></div>@empty<p class="px-4 py-8 text-center text-sm text-slate-500">Belum ada siswa untuk direkap.</p>@endforelse</div>
+            <div class="hidden overflow-x-auto lg:block"><table class="w-full table-fixed text-left text-xs"><colgroup><col class="w-12"><col><col class="w-16"><col class="w-16"><col class="w-16"><col class="w-16"><col class="w-20"></colgroup><thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-4 py-2">No</th><th class="px-3 py-2">Siswa</th><th class="px-2 py-2 text-center">Hadir</th><th class="px-2 py-2 text-center">Sakit</th><th class="px-2 py-2 text-center">Izin</th><th class="px-2 py-2 text-center">Alpha</th><th class="px-2 py-2 text-center">Total</th></tr></thead><tbody class="divide-y divide-slate-100">@forelse($siswaList as $index => $siswa)@php($rekap = $rekapBulan[$siswa->id])<tr><td class="px-4 py-2.5 text-slate-500">{{ $index + 1 }}</td><td class="truncate px-3 py-2.5 font-semibold text-slate-900" title="{{ $siswa->nama_lengkap }}">{{ $siswa->nama_lengkap }}</td><td class="px-2 py-2.5 text-center font-bold text-emerald-700">{{ $rekap['hadir'] }}</td><td class="px-2 py-2.5 text-center font-bold text-amber-700">{{ $rekap['sakit'] }}</td><td class="px-2 py-2.5 text-center font-bold text-sky-700">{{ $rekap['izin'] }}</td><td class="px-2 py-2.5 text-center font-bold text-rose-700">{{ $rekap['alpha'] }}</td><td class="px-2 py-2.5 text-center font-extrabold text-slate-900">{{ array_sum($rekap) }}</td></tr>@empty<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">Belum ada siswa untuk direkap.</td></tr>@endforelse</tbody></table></div>
+        </section>
+
+        <dialog x-ref="importDialog" class="w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50" @click.self="$el.close()">
+            <div class="border-b border-slate-100 px-5 py-4"><div class="flex items-center justify-between gap-3"><h2 class="text-base font-extrabold text-slate-900">Impor presensi Excel</h2><button type="button" @click="$refs.importDialog.close()" class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Tutup"><i class="fas fa-xmark" aria-hidden="true"></i></button></div><p class="mt-1 text-xs text-slate-500">Gunakan template sesuai siswa di kelas ini.</p></div>
+            <form action="{{ route('wali.presensi.import-excel') }}" method="POST" enctype="multipart/form-data" class="space-y-4 px-5 py-4">@csrf<input type="hidden" name="kelas_id" value="{{ $kelas->id }}"><ol class="list-decimal space-y-1 rounded-lg bg-sky-50 px-6 py-3 text-xs leading-5 text-sky-900"><li>Unduh template yang sudah memuat NIS siswa.</li><li>Isi status: hadir, sakit, izin, atau alpha; keterangan opsional.</li><li>Jangan mengubah NIS, lalu unggah file yang telah diisi.</li></ol><label class="block text-xs font-bold text-slate-700">Tanggal presensi<input type="date" name="tanggal" value="{{ $tanggal }}" required class="mt-1 block h-10 w-full rounded-lg border border-slate-300 px-3 text-sm"></label><a href="{{ route('wali.presensi.download-template', ['tanggal' => $tanggal]) }}" class="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-100"><i class="fas fa-download" aria-hidden="true"></i>Unduh template Excel</a><label class="block text-xs font-bold text-slate-700">File Excel atau CSV<input type="file" name="file_excel" accept=".csv,.xlsx,.xls" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-xs file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:font-bold"></label><p class="text-xs text-slate-500">Format .csv, .xlsx, .xls; maksimal 2 MB.</p>@error('file_excel')<p class="text-xs text-rose-700">{{ $message }}</p>@enderror<div class="flex justify-end gap-2 border-t border-slate-100 pt-4"><button type="button" @click="$refs.importDialog.close()" class="min-h-10 rounded-lg border border-slate-300 px-4 text-xs font-bold text-slate-700">Batal</button><button type="submit" class="min-h-10 rounded-lg bg-emerald-700 px-4 text-xs font-bold text-white">Impor sekarang</button></div></form>
+        </dialog>
+    @endif
 </div>
 @endsection

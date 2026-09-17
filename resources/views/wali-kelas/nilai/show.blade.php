@@ -2,244 +2,114 @@
 
 @section('title', 'Detail Nilai - ' . $siswa->nama_lengkap)
 @section('page-title', 'Detail Nilai Siswa')
-@section('page-subtitle', $siswa->nama_lengkap . ' - ' . $kelas->nama_kelas)
-
-
-@section('styles')
-    @vite(['resources/css/wali-kelas/nilai/show.css', 'resources/js/wali-kelas/nilai/show.js'])
-@endsection
+@section('page-subtitle', $siswa->nama_lengkap . ' · ' . $kelas->nama_kelas)
 
 @section('content')
 @php
     $isKelasAkhir = $kelas->isTingkatAkhir();
+    $score = fn ($value, $decimals = 1) => $value === null ? '—' : number_format((float) $value, $decimals, ',', '.');
 @endphp
-<div class="wk-page">
-<div class="container-fluid px-0">
-    
-    {{-- Buttons --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
-        <a href="{{ route('wali.nilai.index') }}" class="btn btn-light btn-sm fw-bold shadow-sm border text-gray-700">
-            <i class="fas fa-arrow-left me-1"></i> Kembali
-        </a>
-        <div class="d-flex gap-2">
-            <a href="{{ route('wali.nilai.edit', $siswa->id) }}?semester={{ $semester }}" class="btn btn-primary btn-sm fw-bold shadow-sm">
-                <i class="fas fa-edit me-1"></i> Edit Nilai
-            </a>
-            <a href="{{ route('wali.nilai.print-siswa', [$siswa->id, 'semester' => request('semester', '')]) }}" target="_blank" class="btn btn-outline-secondary btn-sm fw-bold">
-                <i class="fas fa-print me-1"></i> Cetak
-            </a>
-        </div>
-    </div>
-
-    {{-- Student Info Card --}}
-    <div class="card student-card shadow-sm mb-4">
-        <div class="card-body p-4">
-            <h4 class="fw-bold text-gray-900 mb-3">
-                <i class="fas fa-user-graduate text-primary me-2"></i>{{ $siswa->nama_lengkap }}
-            </h4>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="small text-muted fw-bold text-uppercase">NIS</div>
-                    <div class="fw-bold text-dark">{{ $siswa->nis }}</div>
-                </div>
-                <div class="col-md-3">
-                    <div class="small text-muted fw-bold text-uppercase">NISN</div>
-                    <div class="fw-bold text-dark">{{ $siswa->nisn }}</div>
-                </div>
-                <div class="col-md-3">
-                    <div class="small text-muted fw-bold text-uppercase">Kelas</div>
-                    <div class="fw-bold text-dark">{{ $kelas->nama_kelas }}</div>
-                </div>
-                <div class="col-md-3">
-                    <div class="small text-muted fw-bold text-uppercase">Tahun Ajaran</div>
-                    <div class="fw-bold text-dark">{{ $kelas->tahunAjaran->nama_tahun_ajaran }}</div>
-                </div>
+<div class="min-w-0 w-full space-y-4">
+    <header class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+                <p class="text-xs font-bold uppercase tracking-wide text-sky-700">Rekap nilai · Semester {{ ucfirst($semester) }}</p>
+                <h1 class="mt-1 text-lg font-extrabold text-slate-900">{{ $siswa->nama_lengkap }}</h1>
+                <p class="mt-1 text-xs text-slate-500">{{ $kelas->nama_kelas }} · {{ $kelas->tahunAjaran->nama_tahun_ajaran ?? 'Tahun ajaran belum tersedia' }} · NIS {{ $siswa->nis ?: '—' }} · NISN {{ $siswa->nisn ?: '—' }}</p>
+            </div>
+            <div class="flex w-full flex-wrap gap-2 sm:w-auto">
+                <a href="{{ route('wali.nilai.index', ['semester' => $semester]) }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50"><i class="fas fa-arrow-left" aria-hidden="true"></i>Daftar</a>
+                <a href="{{ route('wali.nilai.edit', ['siswa' => $siswa->id, 'semester' => $semester]) }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 text-xs font-bold text-white hover:bg-sky-800"><i class="fas fa-pen" aria-hidden="true"></i>Edit nilai</a>
+                <a href="{{ route('wali.nilai.print-siswa', ['siswa' => $siswa->id, 'semester' => $semester]) }}" target="_blank" rel="noopener" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50"><i class="fas fa-print" aria-hidden="true"></i>Cetak</a>
             </div>
         </div>
-    </div>
+    </header>
 
-    {{-- Nilai Table --}}
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white py-3 border-0">
-            <h6 class="m-0 fw-bold text-primary">
-                <i class="fas fa-chart-line me-2"></i>Rekap Nilai Per Mata Pelajaran
-            </h6>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover wk-card-table nilai-show-table mb-0 align-middle">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" class="text-center col-no">No</th>
-                            <th rowspan="2" class="mapel-col">Mata Pelajaran</th>
-                            <th colspan="2" class="text-center th-tugas">Tugas</th>
-                            <th colspan="2" class="text-center th-latihan">Latihan</th>
-                            <th colspan="2" class="text-center th-uh">UH</th>
-                            <th rowspan="2" class="text-center exam-col">PTS</th>
-                            <th rowspan="2" class="text-center exam-col">PAS</th>
-                            <th rowspan="2" class="text-center nilai-akhir-cell final-col">N. Akhir</th>
-                            <th rowspan="2" class="text-center predikat-col">Predikat</th>
-                            <th rowspan="2" class="text-center status-col">Status</th>
-                        </tr>
-                        <tr>
-                            <th class="text-center th-tugas count-col">Jml</th>
-                            <th class="text-center th-tugas rata-cell average-col">Rata</th>
-                            <th class="text-center th-latihan count-col">Jml</th>
-                            <th class="text-center th-latihan rata-cell average-col">Rata</th>
-                            <th class="text-center th-uh count-col">Jml</th>
-                            <th class="text-center th-uh rata-cell average-col">Rata</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php $no = 1; @endphp
-                        @foreach($mataPelajaranList as $mapel)
-                            @php
-                                $nilai = $nilaiData[$mapel->id] ?? null;
-                                
-                                // Count filled tugas
-                                $tugasCount = 0;
-                                $latihanCount = 0;
-                                $uhCount = 0;
-                                if ($nilai) {
-                                    for ($i = 1; $i <= 5; $i++) {
-                                        if ($nilai->{'tugas_'.$i} !== null) $tugasCount++;
-                                        if ($nilai->{'latihan_'.$i} !== null) $latihanCount++;
-                                        if ($nilai->{'uh_'.$i} !== null) $uhCount++;
-                                    }
+    <section class="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="Ringkasan nilai">
+        <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"><p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Mapel bernilai</p><p class="mt-1 text-xl font-extrabold text-slate-900">{{ $totalNilai }}<span class="ml-1 text-xs font-medium text-slate-500">/ {{ $mataPelajaranList->count() }}</span></p></div>
+        <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"><p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Rata-rata</p><p class="mt-1 text-xl font-extrabold text-slate-900">{{ $totalNilai ? $score($rataRataSiswa, 1) : '—' }}</p></div>
+        <div class="col-span-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:col-span-1"><p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Tuntas</p><p class="mt-1 text-xl font-extrabold text-emerald-700">{{ $jumlahTuntas }}<span class="ml-1 text-xs font-medium text-slate-500">/ {{ $totalNilai }} mapel bernilai</span></p></div>
+    </section>
+
+    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-labelledby="nilai-heading">
+        <div class="border-b border-slate-100 px-4 py-3"><h2 id="nilai-heading" class="text-sm font-extrabold text-slate-900">Nilai per mata pelajaran</h2><p class="mt-0.5 text-xs text-slate-500">Kosong berarti belum diisi; angka 0 tetap nilai yang tercatat.</p></div>
+        <div class="hidden overflow-x-auto lg:block">
+            <table class="min-w-[1040px] w-full text-left text-xs">
+                <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wide text-slate-600"><tr><th scope="col" class="px-3 py-3">Mata pelajaran</th><th scope="col" class="px-2 py-3 text-center">Tugas</th><th scope="col" class="px-2 py-3 text-center">Rata tugas</th><th scope="col" class="px-2 py-3 text-center">Latihan</th><th scope="col" class="px-2 py-3 text-center">Rata latihan</th><th scope="col" class="px-2 py-3 text-center">UH</th><th scope="col" class="px-2 py-3 text-center">Rata UH</th><th scope="col" class="px-2 py-3 text-center">PTS</th><th scope="col" class="px-2 py-3 text-center">PAS</th><th scope="col" class="px-2 py-3 text-center">Akhir</th><th scope="col" class="px-3 py-3">Status</th></tr></thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($mataPelajaranList as $mapel)
+                        @php
+                            $nilai = $nilaiData[$mapel->id] ?? null;
+                            $counts = ['tugas' => 0, 'latihan' => 0, 'uh' => 0];
+                            foreach (array_keys($counts) as $group) {
+                                for ($i = 1; $i <= 5; $i++) {
+                                    if ($nilai?->{$group.'_'.$i} !== null) $counts[$group]++;
                                 }
-                                
-                                // Determine status based on nilai_akhir and KKM (default 70)
-                                $kkm = 70;
-                                $isTuntas = $nilai && $nilai->nilai_akhir >= $kkm;
-                            @endphp
-                            <tr>
-                                <td class="text-center fw-bold col-no" data-label="No">{{ $no++ }}</td>
-                                <td class="wk-main-cell" data-label="Mata Pelajaran">
-                                    <div class="fw-bold">{{ $mapel->nama_mapel }}</div>
-                                    <small class="text-muted">{{ $mapel->kode_mapel }}</small>
-                                </td>
-                                <td class="text-center" data-label="Tugas Terisi">{{ $tugasCount }}/5</td>
-                                <td class="text-center rata-cell" data-label="Rata Tugas">
-                                    {{ $nilai && $nilai->rata_tugas !== null ? number_format($nilai->rata_tugas, 1) : '-' }}
-                                </td>
-                                <td class="text-center" data-label="Latihan Terisi">{{ $latihanCount }}/5</td>
-                                <td class="text-center rata-cell" data-label="Rata Latihan">
-                                    {{ $nilai && $nilai->rata_latihan !== null ? number_format($nilai->rata_latihan, 1) : '-' }}
-                                </td>
-                                <td class="text-center" data-label="UH Terisi">{{ $uhCount }}/5</td>
-                                <td class="text-center rata-cell" data-label="Rata UH">
-                                    {{ $nilai && $nilai->rata_uh !== null ? number_format($nilai->rata_uh, 1) : '-' }}
-                                </td>
-                                <td class="text-center" data-label="PTS">
-                                    {{ $nilai && $nilai->pts !== null ? number_format($nilai->pts, 0) : '-' }}
-                                </td>
-                                <td class="text-center" data-label="PAS">
-                                    {{ $nilai && $nilai->pas !== null ? number_format($nilai->pas, 0) : '-' }}
-                                </td>
-                                <td class="text-center nilai-akhir-cell" data-label="Nilai Akhir">
-                                    {{ $nilai && $nilai->nilai_akhir !== null ? number_format($nilai->nilai_akhir, 2) : '-' }}
-                                </td>
-                                <td class="text-center nilai-pill-cell" data-label="Predikat">
-                                    @if($nilai && $nilai->nilai_akhir !== null)
-                                        <span class="badge predikat-badge nilai-pill {{ $nilai->predikat() == 'A' ? 'bg-success' : ($nilai->predikat() == 'B' ? 'bg-primary' : ($nilai->predikat() == 'C' ? 'bg-warning text-dark' : 'bg-danger')) }}">
-                                            {{ $nilai->predikat() }}
-                                        </span>
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                                <td class="text-center nilai-pill-cell" data-label="Status">
-                                    @if($nilai && $nilai->nilai_akhir !== null)
-                                        @if($isTuntas)
-                                            <span class="badge nilai-pill status-pill bg-success">Tuntas</span>
-                                        @else
-                                            <span class="badge nilai-pill status-pill bg-danger">Belum Tuntas</span>
-                                        @endif
-                                    @else
-                                        <span class="badge nilai-pill status-pill bg-secondary">Belum Ada</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    {{-- Tingkat Akhir Section --}}
-    @if($isKelasAkhir)
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white py-3 border-0">
-            <h6 class="m-0 fw-bold text-success">
-                <i class="fas fa-graduation-cap me-2"></i>Penilaian Tingkat Akhir (TO, UPK, Ujian Praktek)
-            </h6>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover wk-card-table mb-0 align-middle">
-                    <thead>
+                            }
+                            $hasFinal = $nilai?->nilai_akhir !== null;
+                            $isTuntas = $hasFinal && $nilai->nilai_akhir >= 70;
+                        @endphp
                         <tr>
-                            <th class="text-center col-no">No</th>
-                            <th class="col-mapel-wide">Mata Pelajaran</th>
-                            <th class="text-center col-score">TO 1</th>
-                            <th class="text-center col-score">TO 2</th>
-                            <th class="text-center col-score">TO 3</th>
-                            <th class="text-center col-score">UPK</th>
-                            <th class="text-center col-practice">Ujian Praktek</th>
+                            <th scope="row" class="px-3 py-3 font-bold text-slate-900">{{ $mapel->nama_mapel }}<span class="block text-[11px] font-normal text-slate-500">{{ $mapel->kode_mapel }}</span></th>
+                            <td class="px-2 py-3 text-center">{{ $counts['tugas'] }}/5</td><td class="px-2 py-3 text-center">{{ $score($nilai?->rata_tugas) }}</td>
+                            <td class="px-2 py-3 text-center">{{ $counts['latihan'] }}/5</td><td class="px-2 py-3 text-center">{{ $score($nilai?->rata_latihan) }}</td>
+                            <td class="px-2 py-3 text-center">{{ $counts['uh'] }}/5</td><td class="px-2 py-3 text-center">{{ $score($nilai?->rata_uh) }}</td>
+                            <td class="px-2 py-3 text-center">{{ $score($nilai?->pts, 0) }}</td><td class="px-2 py-3 text-center">{{ $score($nilai?->pas, 0) }}</td>
+                            <td class="px-2 py-3 text-center font-extrabold text-slate-900">{{ $score($nilai?->nilai_akhir, 2) }}</td>
+                            <td class="px-3 py-3"><span class="inline-flex rounded-full px-2 py-1 text-[11px] font-bold {{ !$hasFinal ? 'bg-slate-100 text-slate-700' : ($isTuntas ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800') }}">{{ !$hasFinal ? 'Belum ada' : ($isTuntas ? 'Tuntas' : 'Belum tuntas') }}</span></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @php $no = 1; @endphp
-                        @foreach($mataPelajaranList as $mapel)
-                            @php
-                                $nilai = $nilaiData[$mapel->id] ?? null;
-                            @endphp
-                            <tr>
-                                <td class="text-center fw-bold col-no">{{ $no++ }}</td>
-                                <td>
-                                    <div class="fw-bold">{{ $mapel->nama_mapel }}</div>
-                                </td>
-                                <td class="text-center">
-                                    {{ $nilai && $nilai->to_1 !== null ? number_format($nilai->to_1, 0) : '-' }}
-                                </td>
-                                <td class="text-center">
-                                    {{ $nilai && $nilai->to_2 !== null ? number_format($nilai->to_2, 0) : '-' }}
-                                </td>
-                                <td class="text-center">
-                                    {{ $nilai && $nilai->to_3 !== null ? number_format($nilai->to_3, 0) : '-' }}
-                                </td>
-                                <td class="text-center">
-                                    {{ $nilai && $nilai->upk !== null ? number_format($nilai->upk, 0) : '-' }}
-                                </td>
-                                <td class="text-center">
-                                    {{ $nilai && $nilai->ujian_praktek !== null ? number_format($nilai->ujian_praktek, 0) : '-' }}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                    @empty
+                        <tr><td colspan="11" class="px-4 py-8 text-center text-sm text-slate-500">Belum ada mata pelajaran untuk kelas ini.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    </div>
+        <div class="divide-y divide-slate-100 lg:hidden">
+            @forelse($mataPelajaranList as $mapel)
+                @php
+                    $nilai = $nilaiData[$mapel->id] ?? null;
+                    $counts = ['tugas' => 0, 'latihan' => 0, 'uh' => 0];
+                    foreach (array_keys($counts) as $group) {
+                        for ($i = 1; $i <= 5; $i++) {
+                            if ($nilai?->{$group.'_'.$i} !== null) $counts[$group]++;
+                        }
+                    }
+                    $hasFinal = $nilai?->nilai_akhir !== null;
+                    $isTuntas = $hasFinal && $nilai->nilai_akhir >= 70;
+                @endphp
+                <details class="group px-4 py-3">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-3">
+                        <span class="min-w-0"><span class="block text-sm font-bold text-slate-900">{{ $mapel->nama_mapel }}</span><span class="text-[11px] text-slate-500">{{ $mapel->kode_mapel }} · {{ !$hasFinal ? 'Belum ada nilai akhir' : ($isTuntas ? 'Tuntas' : 'Belum tuntas') }}</span></span>
+                        <span class="flex shrink-0 items-center gap-2"><span class="text-sm font-extrabold text-sky-800">{{ $score($nilai?->nilai_akhir, 2) }}</span><i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform group-open:rotate-180" aria-hidden="true"></i></span>
+                    </summary>
+                    <dl class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                        @foreach(['Tugas' => ['tugas', 'rata_tugas'], 'Latihan' => ['latihan', 'rata_latihan'], 'UH' => ['uh', 'rata_uh']] as $label => [$group, $average])
+                            <div class="rounded-lg bg-slate-50 p-2"><dt class="text-slate-500">{{ $label }} · {{ $counts[$group] }}/5</dt><dd class="mt-1 font-bold text-slate-900">{{ $score($nilai?->$average) }}</dd></div>
+                        @endforeach
+                        <div class="rounded-lg bg-slate-50 p-2"><dt class="text-slate-500">PTS / PAS</dt><dd class="mt-1 font-bold text-slate-900">{{ $score($nilai?->pts, 0) }} / {{ $score($nilai?->pas, 0) }}</dd></div>
+                    </dl>
+                </details>
+            @empty
+                <p class="px-4 py-8 text-center text-sm text-slate-500">Belum ada mata pelajaran untuk kelas ini.</p>
+            @endforelse
+        </div>
+    </section>
+
+    @if($isKelasAkhir)
+        <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 class="text-sm font-extrabold text-slate-900">Penilaian tingkat akhir</h2>
+            <div class="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                @foreach($mataPelajaranList as $mapel)
+                    @php $nilai = $nilaiData[$mapel->id] ?? null; @endphp
+                    <div class="rounded-lg border border-slate-200 p-3"><h3 class="text-xs font-bold text-slate-900">{{ $mapel->nama_mapel }}</h3><dl class="mt-2 grid grid-cols-5 gap-1 text-[11px]">@foreach(['TO 1' => 'to_1', 'TO 2' => 'to_2', 'TO 3' => 'to_3', 'UPK' => 'upk', 'Praktik' => 'ujian_praktek'] as $label => $field)<div><dt class="text-slate-500">{{ $label }}</dt><dd class="font-bold text-slate-900">{{ $score($nilai?->$field, 0) }}</dd></div>@endforeach</dl></div>
+                @endforeach
+            </div>
+        </section>
     @endif
 
-    {{-- Info Box --}}
-    <div class="alert alert-info border-0 mb-4">
-        <div class="d-flex align-items-start">
-            <i class="fas fa-info-circle fa-2x text-info opacity-50 me-3"></i>
-            <div>
-                <div class="fw-bold text-info text-uppercase small mb-1">Keterangan</div>
-                <ul class="mb-0 small text-gray-700">
-                    <li><strong>Jml</strong>: Jumlah nilai yang sudah terisi dari maksimal 5 nilai</li>
-                    <li><strong>Rata</strong>: Rata-rata dihitung hanya dari nilai yang terisi (kolom kosong tidak dihitung sebagai 0)</li>
-                    <li><strong>N. Akhir</strong>: Formula = ((Rata Tugas × 1) + (Rata Latihan × 1) + (Rata UH × 2) + (PTS × 3) + (PAS × 3)) / 10</li>
-                    <li><strong>KKM</strong>: 70 (nilai minimal untuk dinyatakan Tuntas)</li>
-                </ul>
-            </div>
-        </div>
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4 text-xs text-sky-900">
+        <p class="max-w-2xl leading-5">Rata-rata memakai nilai yang terisi saja. Nilai akhir menggunakan bobot Tugas 1, Latihan 1, UH 2, PTS 3, dan PAS 3; KKM acuan 70.</p>
+        <a href="{{ route('wali.rapor.index', ['semester' => $semester, 'siswa_id' => $siswa->id]) }}" class="inline-flex min-h-10 items-center gap-2 rounded-lg bg-sky-700 px-3 font-bold text-white hover:bg-sky-800">Lanjut ke rapor<i class="fas fa-arrow-right" aria-hidden="true"></i></a>
     </div>
-
-</div>
 </div>
 @endsection

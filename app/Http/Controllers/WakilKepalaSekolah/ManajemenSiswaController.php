@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\WakilKepalaSekolah;
 
 use App\Http\Controllers\Controller;
-use App\Models\Siswa;
-use App\Models\Kelas;
 use App\Models\Cabang;
-use App\Models\TahunAjaran;
+use App\Models\Kelas;
+use App\Models\Siswa;
 use App\Models\StatusNaikKelasSiswa;
+use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\Templates\SiswaTemplate;
-use App\Imports\SiswaImport;
 
 class ManajemenSiswaController extends Controller
 {
@@ -20,7 +17,7 @@ class ManajemenSiswaController extends Controller
     {
         $cabangId = auth()->user()->cabang_id;
 
-        if (!$cabangId) {
+        if (! $cabangId) {
             abort(403, 'Akun Anda belum memiliki cabang yang ditetapkan. Hubungi administrator.');
         }
 
@@ -44,7 +41,7 @@ class ManajemenSiswaController extends Controller
     private function scopeOrangTuaRole($query): void
     {
         $query->where('role', 'orang_tua')
-            ->orWhereHas('roleRelation', fn($roleQuery) => $roleQuery->where('name', 'orang_tua'));
+            ->orWhereHas('roleRelation', fn ($roleQuery) => $roleQuery->where('name', 'orang_tua'));
     }
 
     private function ensureParentInUserCabang(int $parentId): void
@@ -59,7 +56,7 @@ class ManajemenSiswaController extends Controller
             })
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             abort(403, 'Wali siswa/wali harus berasal dari cabang Anda.');
         }
     }
@@ -71,7 +68,7 @@ class ManajemenSiswaController extends Controller
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $taFilterId = $request->tahun_ajaran_id ?: ($tahunAjaranAktif?->id);
         $isHistorical = $taFilterId && $tahunAjaranAktif && $taFilterId != $tahunAjaranAktif->id;
-        $filterNoKelas = !$isHistorical && $request->boolean('no_kelas');
+        $filterNoKelas = ! $isHistorical && $request->boolean('no_kelas');
 
         $query = Siswa::with(['user', 'cabang', 'kelas.tahunAjaran']);
 
@@ -79,9 +76,9 @@ class ManajemenSiswaController extends Controller
         $query->where('cabang_id', $userCabangId);
 
         // Filter by tahun ajaran via scope (mendukung snapshot historis)
-        if ($taFilterId && !$filterNoKelas) {
+        if ($taFilterId && ! $filterNoKelas) {
             $query->forTahunAjaran($taFilterId);
-            $query->with(['statusNaikKelas' => fn($q) => $q->where('tahun_ajaran_id', $taFilterId)]);
+            $query->with(['statusNaikKelas' => fn ($q) => $q->where('tahun_ajaran_id', $taFilterId)]);
         }
 
         // Search
@@ -95,12 +92,12 @@ class ManajemenSiswaController extends Controller
         }
 
         // Filter by jenjang — hanya saat TA aktif
-        if (!$isHistorical && !$filterNoKelas && $request->filled('jenjang')) {
-            $query->whereHas('kelas', fn($q) => $q->where('jenjang', $request->jenjang));
+        if (! $isHistorical && ! $filterNoKelas && $request->filled('jenjang')) {
+            $query->whereHas('kelas', fn ($q) => $q->where('jenjang', $request->jenjang));
         }
 
         // Filter by kelas — hanya saat TA aktif
-        if (!$isHistorical && !$filterNoKelas && $request->filled('kelas_id')) {
+        if (! $isHistorical && ! $filterNoKelas && $request->filled('kelas_id')) {
             $kelasId = $request->kelas_id;
             if (is_array($kelasId)) {
                 $query->whereIn('kelas_id', $kelasId);
@@ -112,7 +109,7 @@ class ManajemenSiswaController extends Controller
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        } elseif (!$isHistorical) {
+        } elseif (! $isHistorical) {
             $query->where('status', 'aktif');
         }
 
@@ -128,14 +125,14 @@ class ManajemenSiswaController extends Controller
         $cabangs = Cabang::where('id', $userCabangId)->get(); // hanya cabang user
         $kelasList = Kelas::with('cabang')
             ->where('cabang_id', $userCabangId)
-            ->when($taFilterId, fn($q) => $q->where('tahun_ajaran_id', $taFilterId))
+            ->when($taFilterId, fn ($q) => $q->where('tahun_ajaran_id', $taFilterId))
             ->orderBy('jenjang')->orderBy('nama_kelas')->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
         // Statistics — historis pakai snapshot, aktif pakai live
         if ($isHistorical) {
             $snapshotIds = StatusNaikKelasSiswa::where('tahun_ajaran_id', $taFilterId)
-                ->whereHas('siswa', fn($q) => $q->where('cabang_id', $userCabangId))
+                ->whereHas('siswa', fn ($q) => $q->where('cabang_id', $userCabangId))
                 ->pluck('siswa_id');
             $stats = [
                 'totalSiswa' => $snapshotIds->count(),
@@ -156,7 +153,7 @@ class ManajemenSiswaController extends Controller
             ];
         }
 
-        return view('waka.manajemen-siswa.index', compact(
+        return view('admin.manajemen-siswa.index', compact(
             'siswaList', 'tahunAjarans', 'tahunAjaranAktif', 'cabangs', 'kelasList',
             'jenjangs', 'stats', 'isHistorical', 'taFilterId'
         ));
@@ -175,7 +172,7 @@ class ManajemenSiswaController extends Controller
         $kelasList = Kelas::with(['cabang', 'tahunAjaran'])
             ->withCount('siswa')
             ->where('cabang_id', $userCabangId)
-            ->when($tahunAjaranAktif, fn($query) => $query->where('tahun_ajaran_id', $tahunAjaranAktif->id))
+            ->when($tahunAjaranAktif, fn ($query) => $query->where('tahun_ajaran_id', $tahunAjaranAktif->id))
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
             ->get();
@@ -183,8 +180,8 @@ class ManajemenSiswaController extends Controller
         // Get available parents (orang_tua role yang belum terhubung dengan siswa ini)
         $currentParentIds = $siswa->orangTua->pluck('id')->toArray();
         $availableParents = User::where(function ($query) {
-                $this->scopeOrangTuaRole($query);
-            })
+            $this->scopeOrangTuaRole($query);
+        })
             ->where('cabang_id', $userCabangId)
             ->where('is_active', true)
             ->whereNotIn('id', $currentParentIds)
@@ -192,7 +189,7 @@ class ManajemenSiswaController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('waka.manajemen-siswa.show', compact('siswa', 'kelasList', 'availableParents'));
+        return view('admin.manajemen-siswa.show', compact('siswa', 'kelasList', 'tahunAjaranAktif', 'availableParents'));
     }
 
     public function assignKelas(Request $request, Siswa $siswa)
@@ -200,7 +197,7 @@ class ManajemenSiswaController extends Controller
         $this->ensureSiswaInUserCabang($siswa);
 
         $validated = $request->validate([
-            'kelas_id' => 'nullable|exists:kelas,id'
+            'kelas_id' => 'nullable|exists:kelas,id',
         ]);
 
         if ($validated['kelas_id']) {
@@ -255,6 +252,7 @@ class ManajemenSiswaController extends Controller
 
             if ($duplicateRelation) {
                 $relationLabel = $validated['relationship'] === 'ayah_kandung' ? 'Ayah Kandung' : 'Ibu Kandung';
+
                 return back()->with('error', "Siswa sudah memiliki {$relationLabel}.");
             }
         }
@@ -292,6 +290,7 @@ class ManajemenSiswaController extends Controller
 
             if ($duplicateRelation) {
                 $relationLabel = $validated['relationship'] === 'ayah_kandung' ? 'Ayah Kandung' : 'Ibu Kandung';
+
                 return back()->with('error', "Siswa sudah memiliki {$relationLabel}.");
             }
         }
@@ -369,7 +368,7 @@ class ManajemenSiswaController extends Controller
         $query->where('cabang_id', $userCabangId);
 
         if ($request->filled('jenjang')) {
-            $query->whereHas('kelas', fn($q) => $q->where('jenjang', $request->jenjang));
+            $query->whereHas('kelas', fn ($q) => $q->where('jenjang', $request->jenjang));
         }
 
         if ($request->filled('kelas_id')) {
@@ -402,14 +401,14 @@ class ManajemenSiswaController extends Controller
 
         // Get specific kelas if filtered
         $kelas = null;
-        if ($request->filled('kelas_id') && !is_array($request->kelas_id)) {
+        if ($request->filled('kelas_id') && ! is_array($request->kelas_id)) {
             $kelas = Kelas::with('waliKelas')
                 ->where('cabang_id', $userCabangId)
                 ->find($request->kelas_id);
         }
         $cabang = auth()->user()->cabang;
 
-        return view('waka.manajemen-siswa.print', compact('siswaList', 'kelas', 'cabang', 'sortBy'));
+        return view('admin.manajemen-siswa.print', compact('siswaList', 'kelas', 'cabang', 'sortBy'));
     }
 
     public function printKartu(Siswa $siswa)
@@ -417,7 +416,8 @@ class ManajemenSiswaController extends Controller
         $this->ensureSiswaInUserCabang($siswa);
 
         $siswa->load(['kelas.tahunAjaran', 'cabang', 'studentParents.parent']);
-        return view('waka.manajemen-siswa.print-kartu', compact('siswa'));
+
+        return view('admin.manajemen-siswa.print-kartu', compact('siswa'));
     }
 
     public function perKelas(Request $request, Kelas $kelas)
@@ -445,7 +445,7 @@ class ManajemenSiswaController extends Controller
             'sisaKuota' => $kelas->kuota_siswa - $siswaList->count(),
         ];
 
-        return view('waka.manajemen-siswa.per-kelas', compact('kelas', 'siswaList', 'availableSiswa', 'stats'));
+        return view('admin.manajemen-siswa.per-kelas', compact('kelas', 'siswaList', 'availableSiswa', 'stats'));
     }
 
     public function addToKelas(Request $request, Kelas $kelas)
@@ -453,7 +453,7 @@ class ManajemenSiswaController extends Controller
         $this->ensureKelasInUserCabang($kelas);
 
         $validated = $request->validate([
-            'siswa_id' => 'required|exists:siswa,id'
+            'siswa_id' => 'required|exists:siswa,id',
         ]);
 
         $siswa = Siswa::findOrFail($validated['siswa_id']);
@@ -483,7 +483,7 @@ class ManajemenSiswaController extends Controller
         $this->ensureKelasInUserCabang($kelas);
 
         $validated = $request->validate([
-            'siswa_id' => 'required|exists:siswa,id'
+            'siswa_id' => 'required|exists:siswa,id',
         ]);
 
         $siswa = Siswa::findOrFail($validated['siswa_id']);

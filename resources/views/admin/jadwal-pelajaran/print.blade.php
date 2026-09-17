@@ -1,6 +1,9 @@
+@php
+    $routePrefix = request()->routeIs('waka.*') ? 'waka' : 'admin';
+@endphp
 @extends('layouts.print')
 @section('title', 'Jadwal ' . $kelas->nama_kelas)
-@section('back-url', route('admin.jadwal-pelajaran.show', ['kelas' => $kelas->id, 'tahun_ajaran_id' => $currentTahunAjaran->id]))
+@section('back-url', route($routePrefix . '.jadwal-pelajaran.show', ['kelas' => $kelas->id, 'tahun_ajaran_id' => $currentTahunAjaran->id]))
 @section('report-title', 'Jadwal Pelajaran')
 @section('report-meta')<p class="mt-1 text-xs text-slate-600 print:text-[8pt]">Kelas {{ $kelas->nama_kelas }} · {{ $kelas->jenjang }} · Tahun ajaran {{ $currentTahunAjaran->nama_tahun_ajaran }}</p>@endsection
 

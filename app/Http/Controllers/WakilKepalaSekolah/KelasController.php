@@ -122,7 +122,7 @@ class KelasController extends Controller
                 ->whereDoesntHave('waliKelasAssignments')->count(),
         ];
 
-        return view('waka.kelas.index', compact('kelas', 'tahunAjarans', 'jenjangs', 'currentTahunAjaran', 'stats'));
+        return view('admin.kelas.index', compact('kelas', 'tahunAjarans', 'jenjangs', 'currentTahunAjaran', 'stats'));
     }
 
     public function create()
@@ -130,6 +130,7 @@ class KelasController extends Controller
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $userCabangId = $this->getUserCabangId();
         $userCabang = auth()->user()->cabang;
+        $cabangs = collect([$userCabang]);
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
         // Penugasan wajib di-eager-load DAN di-scope ke cabang + TA aktif. Kalau
         // tidak, blade memicu lazy-load yang menarik SELURUH penugasan lintas cabang
@@ -147,7 +148,7 @@ class KelasController extends Controller
             })->with('kelas');
         }])->orderBy('nama_lengkap')->get();
 
-        return view('waka.kelas.create', compact('tahunAjarans', 'userCabang', 'jenjangs', 'waliKelasOptions'));
+        return view('admin.kelas.create', compact('tahunAjarans', 'cabangs', 'jenjangs', 'waliKelasOptions'));
     }
 
     public function store(Request $request)
@@ -221,7 +222,7 @@ class KelasController extends Controller
             'sisaKuota' => $kelas->kuota_siswa - Siswa::where('kelas_id', $kelas->id)->where('status', 'aktif')->count(),
         ];
 
-        return view('waka.kelas.show', compact('kelas', 'siswa', 'stats'));
+        return view('admin.kelas.show', compact('kelas', 'siswa', 'stats'));
     }
 
     public function edit(Kelas $kelas)
@@ -231,6 +232,7 @@ class KelasController extends Controller
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $userCabangId = $this->getUserCabangId();
         $userCabang = auth()->user()->cabang;
+        $cabangs = collect([$userCabang]);
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
         // Penugasan wajib di-eager-load DAN di-scope ke cabang + TA aktif. Kalau
         // tidak, blade memicu lazy-load yang menarik SELURUH penugasan lintas cabang
@@ -248,7 +250,7 @@ class KelasController extends Controller
             })->with('kelas');
         }])->orderBy('nama_lengkap')->get();
 
-        return view('waka.kelas.edit', compact('kelas', 'tahunAjarans', 'userCabang', 'jenjangs', 'waliKelasOptions'));
+        return view('admin.kelas.edit', compact('kelas', 'tahunAjarans', 'cabangs', 'jenjangs', 'waliKelasOptions'));
     }
 
     public function update(Request $request, Kelas $kelas)
@@ -378,7 +380,7 @@ class KelasController extends Controller
             'sisaKuota' => $sisaKuota,
         ];
 
-        return view('waka.kelas.manage-siswa', compact('kelas', 'siswaInKelas', 'siswaAvailable', 'stats', 'sisaKuota'));
+        return view('admin.kelas.manage-siswa', compact('kelas', 'siswaInKelas', 'siswaAvailable', 'stats', 'sisaKuota'));
     }
 
     public function addSiswa(Request $request, Kelas $kelas)
@@ -486,14 +488,18 @@ class KelasController extends Controller
             $currentTahunAjaran = TahunAjaran::where('is_active', true)->first();
         }
 
-        return view('waka.kelas.print', compact('kelas', 'currentTahunAjaran'));
+        return view('admin.kelas.print', [
+            'kelas' => $kelas,
+            'tahunAjaran' => $currentTahunAjaran,
+            'cabang' => auth()->user()->cabang,
+        ]);
     }
 
     public function import()
     {
         $this->getUserCabangId();
 
-        return view('waka.kelas.import');
+        return view('admin.kelas.import');
     }
 
     public function downloadTemplate()

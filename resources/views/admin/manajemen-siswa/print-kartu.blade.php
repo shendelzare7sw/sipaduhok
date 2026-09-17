@@ -3,6 +3,7 @@
 @section('title', 'Kartu Siswa - '.$siswa->nama_lengkap)
 
 @php
+    $routePrefix = request()->routeIs('waka.*') ? 'waka' : 'admin';
     $cabang = $siswa->cabang;
     $namaSekolah = $cabang ? strtoupper(preg_replace('/\s*\(?\s*Gedung\s+\w+\s*\)?$/i','',$cabang->nama_cabang)) : 'PKBM HOUSE OF KNOWLEDGE';
     $alamatSekolah = $cabang->alamat ?? 'Jl. Ruko Reni Jaya, Pamulang';
@@ -15,7 +16,7 @@
 
 @section('page-content')
 <div x-data="{ photo: @js($initialPhoto) }" class="min-h-screen">
-    <header class="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur print:hidden sm:px-5"><a href="{{ route('admin.manajemen-siswa.show',$siswa) }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 no-underline"><i class="fas fa-arrow-left"></i>Kembali</a><div class="min-w-0 text-center"><p class="truncate text-xs font-bold uppercase tracking-wider text-brand-600">Pratinjau kartu siswa</p><p class="truncate text-sm font-extrabold">{{ $siswa->nama_lengkap }}</p></div><button type="button" data-print-page class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white"><i class="fas fa-print"></i><span class="hidden sm:inline">Cetak</span></button></header>
+    <header class="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur print:hidden sm:px-5"><a href="{{ route($routePrefix.'.manajemen-siswa.show',$siswa) }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 no-underline"><i class="fas fa-arrow-left"></i>Kembali</a><div class="min-w-0 text-center"><p class="truncate text-xs font-bold uppercase tracking-wider text-brand-600">Pratinjau kartu siswa</p><p class="truncate text-sm font-extrabold">{{ $siswa->nama_lengkap }}</p></div><button type="button" data-print-page class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white"><i class="fas fa-print"></i><span class="hidden sm:inline">Cetak</span></button></header>
 
     <main class="min-w-0 w-full p-3 print:p-0 sm:p-6">
         <div class="mx-auto flex max-w-6xl flex-wrap justify-center gap-5 print:max-w-none print:justify-start print:gap-[5mm]">

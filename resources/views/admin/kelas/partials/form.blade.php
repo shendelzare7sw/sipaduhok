@@ -1,8 +1,10 @@
 @php
+    $routePrefix = request()->routeIs('waka.*') ? 'waka' : 'admin';
+    $isWaka = $routePrefix === 'waka';
     $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
     $editing = isset($kelas);
     $selectedTahun = (string) old('tahun_ajaran_id', $editing ? $kelas->tahun_ajaran_id : ($tahunAjarans->firstWhere('is_active', true)?->id ?? ''));
-    $selectedCabang = (string) old('cabang_id', $editing ? $kelas->cabang_id : '');
+    $selectedCabang = (string) old('cabang_id', $editing ? $kelas->cabang_id : ($isWaka ? $cabangs->first()?->id : ''));
     $selectedJenjang = old('jenjang', $editing ? $kelas->jenjang : '');
     $selectedNama = old('nama_kelas', $editing ? $kelas->nama_kelas : '');
     $selectedWali = (string) old('wali_kelas_id', $editing ? $kelas->wali_kelas_id : '');
@@ -41,7 +43,7 @@
     }"
 >
     <header class="flex min-w-0 items-start gap-3">
-        <a href="{{ route('admin.kelas.index') }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali ke daftar kelas"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
+        <a href="{{ route($routePrefix . '.kelas.index') }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali ke daftar kelas"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
         <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Data master kelas</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">{{ $editing ? 'Edit kelas ' . $kelas->nama_kelas : 'Buat kelas baru' }}</h2><p class="mt-1 text-sm text-slate-500">Lengkapi data dasar terlebih dahulu. Siswa ditempatkan setelah kelas tersimpan.</p></div>
     </header>
 
@@ -49,18 +51,22 @@
         <aside class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><p class="font-extrabold">Data kelas belum dapat disimpan.</p><ul class="mt-2 list-disc space-y-1 pl-5 text-xs">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></aside>
     @endif
 
-    <form action="{{ $editing ? route('admin.kelas.update', $kelas) : route('admin.kelas.store') }}" method="POST" class="space-y-4">
+    <form action="{{ $editing ? route($routePrefix . '.kelas.update', $kelas) : route($routePrefix . '.kelas.store') }}" method="POST" class="space-y-4">
         @csrf
         @if($editing)
             @method('PUT')
-            <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.kelas.index')) }}">
+            <input type="hidden" name="_return_url" value="{{ url()->previous(route($routePrefix . '.kelas.index')) }}">
         @endif
 
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <header class="flex items-start gap-3 border-b border-slate-200 px-4 py-4 sm:px-5"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><i class="fas fa-chalkboard" aria-hidden="true"></i></span><div><h3 class="font-extrabold text-slate-950">Identitas kelas</h3><p class="mt-0.5 text-xs text-slate-500">Tahun, cabang, dan jenjang membentuk kode kelas otomatis.</p></div></header>
             <div class="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
                 <label class="block"><span class="{{ $labelClass }}">Tahun ajaran <span class="text-red-500">*</span></span><select id="tahun_ajaran_id" name="tahun_ajaran_id" x-model="tahunId" class="{{ $inputClass }}" required><option value="">Pilih tahun ajaran</option>@foreach($tahunAjarans as $ta)<option value="{{ $ta->id }}">{{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' (Aktif)' : '' }}</option>@endforeach</select>@error('tahun_ajaran_id')<span class="mt-1.5 block text-xs font-semibold text-red-600">{{ $message }}</span>@enderror</label>
-                <label class="block"><span class="{{ $labelClass }}">Cabang <span class="text-red-500">*</span></span><select id="cabang_id" name="cabang_id" x-model="cabangId" class="{{ $inputClass }}" required><option value="">Pilih cabang</option>@foreach($cabangs as $cabang)<option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>@endforeach</select>@error('cabang_id')<span class="mt-1.5 block text-xs font-semibold text-red-600">{{ $message }}</span>@enderror</label>
+                @if($isWaka)
+                    <label class="block"><span class="{{ $labelClass }}">Cabang</span><input type="hidden" name="cabang_id" value="{{ $cabangs->first()?->id }}"><input type="text" value="{{ $cabangs->first()?->nama_cabang ?? 'Cabang belum ditetapkan' }}" class="{{ $inputClass }} bg-slate-50 text-slate-500" readonly></label>
+                @else
+                    <label class="block"><span class="{{ $labelClass }}">Cabang <span class="text-red-500">*</span></span><select id="cabang_id" name="cabang_id" x-model="cabangId" class="{{ $inputClass }}" required><option value="">Pilih cabang</option>@foreach($cabangs as $cabang)<option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>@endforeach</select>@error('cabang_id')<span class="mt-1.5 block text-xs font-semibold text-red-600">{{ $message }}</span>@enderror</label>
+                @endif
                 <label class="block"><span class="{{ $labelClass }}">Jenjang <span class="text-red-500">*</span></span><select id="jenjang" name="jenjang" x-model="jenjang" class="{{ $inputClass }}" required><option value="">Pilih jenjang</option>@foreach($jenjangs as $item)<option value="{{ $item }}">{{ $item }}</option>@endforeach</select>@error('jenjang')<span class="mt-1.5 block text-xs font-semibold text-red-600">{{ $message }}</span>@enderror</label>
                 <div>
                     <label for="nama_kelas" class="{{ $labelClass }}">Nama kelas <span class="text-red-500">*</span></label>
@@ -90,8 +96,8 @@
         <aside class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-900"><p class="font-extrabold"><i class="fas fa-circle-info mr-1" aria-hidden="true"></i>Langkah setelah menyimpan</p><p class="mt-1">Buka detail kelas lalu pilih <strong>Kelola siswa</strong> untuk menempatkan siswa ke kelas ini.</p></aside>
 
         <div class="sticky bottom-3 z-10 flex flex-wrap items-center justify-end gap-2 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
-            @if($editing)<a href="{{ route('admin.kelas.show', $kelas) }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-50 px-4 text-sm font-bold text-blue-700 no-underline hover:bg-blue-100"><i class="fas fa-eye" aria-hidden="true"></i>Lihat detail</a>@endif
-            <a href="{{ route('admin.kelas.index') }}" class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a>
+            @if($editing)<a href="{{ route($routePrefix . '.kelas.show', $kelas) }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-50 px-4 text-sm font-bold text-blue-700 no-underline hover:bg-blue-100"><i class="fas fa-eye" aria-hidden="true"></i>Lihat detail</a>@endif
+            <a href="{{ route($routePrefix . '.kelas.index') }}" class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a>
             <button type="submit" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-save" aria-hidden="true"></i>{{ $editing ? 'Simpan perubahan' : 'Simpan kelas' }}</button>
         </div>
     </form>

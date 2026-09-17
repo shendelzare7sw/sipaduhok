@@ -6,7 +6,8 @@
 
 @section('content')
 @php
-    $routePrefix = request()->routeIs('ketua.*') ? 'ketua' : 'admin';
+    $routePrefix = request()->routeIs('waka.*') ? 'waka' : (request()->routeIs('ketua.*') ? 'ketua' : 'admin');
+    $recipientMode = $recipientMode ?? 'multi';
     $backUrl = url()->previous(route($routePrefix . '.catatan.index'));
     $selectedType = old('tipe_penerima', 'semua');
     $selectedUsers = collect(old('penerima_ids', []))->map(fn ($id) => (string) $id);
@@ -82,6 +83,7 @@
                 @error('role_penerima') <span class="mt-1.5 block text-xs font-semibold text-red-600">{{ $message }}</span> @enderror
             </div>
 
+            @if($recipientMode === 'multi')
             <div data-recipient-panel="individu" data-filter-root class="hidden overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
                 <div class="grid gap-3 border-b border-slate-200 p-4 md:grid-cols-3">
                     <div>
@@ -115,6 +117,26 @@
                 @error('penerima_ids') <span class="block px-4 pb-3 text-xs font-semibold text-red-600">{{ $message }}</span> @enderror
                 @error('penerima_ids.*') <span class="block px-4 pb-3 text-xs font-semibold text-red-600">{{ $message }}</span> @enderror
             </div>
+            @else
+            <div data-recipient-panel="individu" class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <label for="penerima_id" class="block text-sm font-bold text-slate-700">Penerima individu <span class="text-red-500">*</span></label>
+                <select id="penerima_id" name="penerima_id" class="{{ $inputClass }}">
+                    <option value="">Pilih penerima di cabang Anda</option>
+                    <optgroup label="Tenaga Pendidik">
+                        @foreach($tenagaPendidik as $guru)
+                            <option value="{{ $guru->user_id }}" @selected((string) old('penerima_id') === (string) $guru->user_id)>{{ $guru->nama_lengkap }} ({{ ucwords(str_replace('_', ' ', $guru->user->role ?? '')) }})</option>
+                        @endforeach
+                    </optgroup>
+                    <optgroup label="Siswa">
+                        @foreach($siswaList as $student)
+                            <option value="{{ $student->user_id }}" @selected((string) old('penerima_id') === (string) $student->user_id)>{{ $student->nama_lengkap }}{{ $student->kelas ? ' · '.$student->kelas->nama_kelas : '' }}</option>
+                        @endforeach
+                    </optgroup>
+                </select>
+                @error('penerima_id') <span class="mt-1.5 block text-xs font-semibold text-red-600">{{ $message }}</span> @enderror
+                <p class="mt-1.5 text-xs text-slate-500">Daftar penerima dibatasi ke tenaga pendidik dan siswa di cabang Anda.</p>
+            </div>
+            @endif
         </div>
     </section>
 

@@ -2,209 +2,30 @@
 
 @section('title', 'Template Capaian Kompetensi')
 @section('page-title', 'Template Capaian Kompetensi')
-@section('page-subtitle', 'Kelola template deskripsi capaian untuk rapor')
-
-
-@section('styles')
-    @vite(['resources/js/wali-kelas/template-capaian/index.js'])
-@endsection
+@section('page-subtitle', 'Deskripsi capaian untuk rapor siswa')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap">
-        <a href="{{ route('wali.rapor.index') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Kembali
-        </a>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
-            <i class="fas fa-plus"></i> Tambah Template
-        </button>
-    </div>
-
-    <!-- Filter -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filter</h6>
-        </div>
-        <div class="card-body">
-            <form method="GET">
-                <div class="row">
-                    <div class="col-md-5">
-                        <select name="mata_pelajaran_id" class="form-control">
-                            <option value="">Semua Mata Pelajaran</option>
-                            @foreach($mataPelajaranList as $mapel)
-                                <option value="{{ $mapel->id }}" {{ request('mata_pelajaran_id') == $mapel->id ? 'selected' : '' }}>
-                                    {{ $mapel->nama_mapel }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-5">
-                        <input type="text" name="search" class="form-control" placeholder="Cari nama template..." value="{{ request('search') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search"></i> Filter
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Data Table -->
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="thead-light">
-                        <tr>
-                            <th width="50">No</th>
-                            <th width="220">Mata Pelajaran</th>
-                            <th>Deskripsi Capaian</th>
-                            <th width="150" class="text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($templates as $template)
-                        <tr>
-                            <td>{{ $loop->iteration + ($templates->currentPage() - 1) * $templates->perPage() }}</td>
-                            <td>{{ $template->mataPelajaran->nama_mapel ?? '-' }}</td>
-                            <td>{{ Str::limit($template->template_text, 140) }}</td>
-                            <td class="text-center">
-                                <button type="button"
-                                        class="btn btn-info btn-sm js-template-edit"
-                                        data-update-url="{{ route('wali.template-capaian.update', $template->id) }}"
-                                        data-mata-pelajaran-id="{{ $template->mata_pelajaran_id }}"
-                                        data-template-text="{{ $template->template_text }}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button type="button" class="btn btn-danger btn-sm"
-                                    data-bs-toggle="modal" data-bs-target="#hapusTemplateModal"
-                                    data-action="{{ route('wali.template-capaian.destroy', $template->id) }}"
-                                    data-nama="{{ $template->mataPelajaran->nama_mapel ?? 'template ini' }}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="text-center text-muted">
-                                <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
-                                Tidak ada template
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mt-3">
-                {{ $templates->links() }}
-            </div>
-        </div>
-    </div>
+<div class="min-w-0 w-full space-y-4" x-data="{ editing: false, actionUrl: '', mapelId: '', templateText: '', deleteAction: '', deleteName: '' }">
+    <header class="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><div><h1 class="text-lg font-extrabold text-slate-900">Template capaian kompetensi</h1><p class="mt-1 text-xs text-slate-500">Kalimat yang dapat digunakan ulang saat mengisi deskripsi rapor.</p></div><div class="flex gap-2"><a href="{{ route('wali.rapor.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700"><i class="fas fa-arrow-left" aria-hidden="true"></i>Rapor</a><button type="button" @click="editing = false; actionUrl = '{{ route('wali.template-capaian.store') }}'; mapelId = ''; templateText = ''; $refs.formDialog.showModal()" class="inline-flex min-h-10 items-center gap-2 rounded-lg bg-sky-700 px-3 text-xs font-bold text-white"><i class="fas fa-plus" aria-hidden="true"></i>Tambah</button></div></header>
+    <form method="GET" action="{{ route('wali.template-capaian.index') }}" class="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[minmax(170px,1fr)_minmax(180px,1fr)_auto] sm:items-end"><label class="text-xs font-bold text-slate-700">Mata pelajaran<select name="mata_pelajaran_id" class="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-normal text-slate-800"><option value="">Semua mata pelajaran</option>@foreach($mataPelajaranList as $mapel)<option value="{{ $mapel->id }}" @selected(request('mata_pelajaran_id') == $mapel->id)>{{ $mapel->nama_mapel }}</option>@endforeach</select></label><label class="text-xs font-bold text-slate-700">Cari template<input type="search" name="search" value="{{ request('search') }}" placeholder="Kata kunci deskripsi" class="mt-1 h-10 w-full rounded-lg border border-slate-300 px-3 text-sm font-normal text-slate-800"></label><button type="submit" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-sky-700 px-4 text-xs font-bold text-white">Terapkan</button></form>
+    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-labelledby="template-heading"><div class="border-b border-slate-100 px-4 py-3"><h2 id="template-heading" class="text-sm font-extrabold text-slate-900">Daftar template</h2><p class="text-xs text-slate-500">{{ $templates->total() }} template ditemukan.</p></div><div class="divide-y divide-slate-100">
+        @forelse($templates as $template)
+            <article class="flex flex-wrap items-start justify-between gap-3 px-4 py-3"><div class="min-w-0 flex-1"><h3 class="text-xs font-bold text-slate-900">{{ $template->mataPelajaran->nama_mapel ?? 'Mata pelajaran tidak tersedia' }}</h3><p class="mt-1 whitespace-pre-line break-words text-xs leading-5 text-slate-600">{{ $template->template_text }}</p></div><div class="flex gap-2"><button type="button" data-action="{{ route('wali.template-capaian.update', $template->id) }}" data-mapel="{{ $template->mata_pelajaran_id }}" data-text="{{ $template->template_text }}" @click="editing = true; actionUrl = $el.dataset.action; mapelId = $el.dataset.mapel; templateText = $el.dataset.text; $refs.formDialog.showModal()" class="inline-flex min-h-9 items-center rounded-lg border border-sky-200 bg-sky-50 px-3 text-xs font-bold text-sky-800">Edit</button><button type="button" data-action="{{ route('wali.template-capaian.destroy', $template->id) }}" data-name="{{ $template->mataPelajaran->nama_mapel ?? 'template ini' }}" @click="deleteAction = $el.dataset.action; deleteName = $el.dataset.name; $refs.deleteDialog.showModal()" class="inline-flex min-h-9 items-center rounded-lg border border-rose-200 bg-rose-50 px-3 text-xs font-bold text-rose-800">Hapus</button></div></article>
+        @empty
+            <p class="px-4 py-9 text-center text-sm text-slate-500">Belum ada template yang cocok.</p>
+        @endforelse
+    </div>@if($templates->hasPages())<div class="border-t border-slate-100 px-4 py-3">{{ $templates->links() }}</div>@endif</section>
+    <dialog x-ref="formDialog" class="w-[calc(100%-2rem)] max-w-xl rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50" @click.self="$el.close()"><div class="border-b border-slate-100 px-4 py-3"><h2 class="text-sm font-extrabold text-slate-900" x-text="editing ? 'Edit template' : 'Tambah template'"></h2></div><form :action="actionUrl" method="POST" class="space-y-4 p-4">
+        @csrf
+        <template x-if="editing"><input type="hidden" name="_method" value="PUT"></template>
+        <label class="block text-xs font-bold text-slate-700">Mata pelajaran<select name="mata_pelajaran_id" x-model="mapelId" required class="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-normal text-slate-800"><option value="">Pilih mata pelajaran</option>@foreach($mataPelajaranList as $mapel)<option value="{{ $mapel->id }}">{{ $mapel->nama_mapel }}</option>@endforeach</select></label>
+        <label class="block text-xs font-bold text-slate-700">Deskripsi capaian<textarea name="template_text" x-model="templateText" rows="5" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal text-slate-800"></textarea><span class="mt-1 block text-[11px] font-normal leading-4 text-slate-500">Kalimat ini digunakan dalam rapor. Sertakan predikat di awal bila perlu.</span></label>
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4"><button type="button" @click="$refs.formDialog.close()" class="min-h-10 rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700">Batal</button><button type="submit" class="min-h-10 rounded-lg bg-sky-700 px-3 text-xs font-bold text-white" x-text="editing ? 'Simpan perubahan' : 'Tambah template'"></button></div>
+    </form></dialog>
+    <dialog x-ref="deleteDialog" class="w-[calc(100%-2rem)] max-w-md rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50" @click.self="$el.close()"><div class="border-b border-slate-100 px-4 py-3"><h2 class="text-sm font-extrabold text-slate-900">Hapus template?</h2></div><p class="px-4 py-4 text-xs leading-5 text-slate-700">Template <strong x-text="deleteName"></strong> akan dihapus dan tidak dapat dipulihkan.</p><form :action="deleteAction" method="POST" class="flex justify-end gap-2 border-t border-slate-100 p-4">
+        @csrf
+        @method('DELETE')
+        <button type="button" @click="$refs.deleteDialog.close()" class="min-h-10 rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700">Batal</button><button type="submit" class="min-h-10 rounded-lg bg-rose-600 px-3 text-xs font-bold text-white">Ya, hapus</button>
+    </form></dialog>
 </div>
-
-<!-- Create Modal -->
-<div class="modal fade" id="createModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form action="{{ route('wali.template-capaian.store') }}" method="POST">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah Template</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Mata Pelajaran <span class="text-danger">*</span></label>
-                        <select name="mata_pelajaran_id" class="form-control" required>
-                            <option value="">Pilih Mata Pelajaran</option>
-                            @foreach($mataPelajaranList as $mapel)
-                                <option value="{{ $mapel->id }}">{{ $mapel->nama_mapel }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Deskripsi Capaian <span class="text-danger">*</span></label>
-                        <textarea name="template_text" class="form-control" rows="5" placeholder="Contoh: Sangat baik, ananda menguasai ..." required></textarea>
-                        <small class="text-muted">Kalimat ini yang akan mengisi deskripsi capaian di rapor siswa. Sertakan predikat (mis. "Sangat Baik") di awal bila perlu.</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form id="editForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Template</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Mata Pelajaran <span class="text-danger">*</span></label>
-                        <select name="mata_pelajaran_id" id="edit_mata_pelajaran_id" class="form-control" required>
-                            <option value="">Pilih Mata Pelajaran</option>
-                            @foreach($mataPelajaranList as $mapel)
-                                <option value="{{ $mapel->id }}">{{ $mapel->nama_mapel }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Deskripsi Capaian <span class="text-danger">*</span></label>
-                        <textarea name="template_text" id="edit_template_text" class="form-control" rows="5" required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Update</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Hapus Template -->
-<div class="modal fade" id="hapusTemplateModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title fw-bold text-white">
-                    <i class="fas fa-trash me-2"></i>Hapus Template
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
-                <h6 class="fw-bold mb-2">Hapus template ini?</h6>
-                <p class="text-muted small mb-1">Mata Pelajaran: <strong id="namaTemplateDihapus"></strong></p>
-                <p class="text-muted small mb-0">Tindakan ini tidak dapat dibatalkan.</p>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Batal
-                </button>
-                <form id="formHapusTemplate" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger fw-bold">
-                        <i class="fas fa-trash me-1"></i> Ya, Hapus
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 @endsection

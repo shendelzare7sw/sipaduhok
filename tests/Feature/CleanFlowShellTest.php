@@ -29,7 +29,8 @@ class CleanFlowShellTest extends TestCase
             @section('content')<p>Konten uji</p>@endsection
         BLADE);
 
-        $this->assertStringContainsString('bg-[#1261a6]', $html);
+        $this->assertStringContainsString('bg-[#17699f]', $html);
+        $this->assertStringContainsString('from-[#245f91]', $html);
         $this->assertStringContainsString('cleanflow-nav', $html);
         $this->assertStringContainsString('admin-notification-panel', $html);
         $this->assertStringContainsString('Halaman Keuangan', $html);

@@ -6,7 +6,7 @@
 
 @section('content')
 @php
-    $routePrefix = request()->routeIs('waka.*') ? 'waka.kenaikan-kelas' : 'admin.akademik.kenaikan-kelas';
+    $routePrefix = 'admin.akademik.kenaikan-kelas';
     $tahunLabel = $tahun->nama_tahun_ajaran ?? $tahun->nama ?? $tahun->tahun_ajaran ?? '-';
     $configured = collect($existingKKM ?? [])->filter(fn ($value) => $value !== null);
 @endphp

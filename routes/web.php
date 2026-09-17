@@ -52,9 +52,6 @@ use App\Http\Controllers\WakilKepalaSekolah\GuruPengajarController as WakaGuruPe
 use App\Http\Controllers\WakilKepalaSekolah\JadwalPelajaranController as WakaJadwalPelajaranController;
 use App\Http\Controllers\WakilKepalaSekolah\KelasController as WakaKelasController;
 use App\Http\Controllers\WakilKepalaSekolah\ManajemenSiswaController as WakaManajemenSiswaController;
-use App\Http\Controllers\WakilKepalaSekolah\MataPelajaranController as WakaMataPelajaranController;
-use App\Http\Controllers\WakilKepalaSekolah\PengaturanIstirahatController as WakaPengaturanIstirahatController;
-use App\Http\Controllers\WakilKepalaSekolah\TahunAjaranController as WakaTahunAjaranController;
 // Siswa Controllers
 use App\Http\Controllers\WakilKepalaSekolah\WakilKepalaSekolahController;
 use App\Http\Controllers\WakilKepalaSekolah\WaliKelasController as WakaWaliKelasController;
@@ -753,27 +750,6 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:wakil_kepala_sekolah'])->prefix('waka')->name('waka.')->group(function () {
         Route::get('/dashboard', [WakilKepalaSekolahController::class, 'dashboard'])->name('dashboard');
 
-        // Tahun Ajaran
-        Route::prefix('tahun-ajaran')->name('tahun-ajaran.')->group(function () {
-            Route::get('/', [WakaTahunAjaranController::class, 'index'])->name('index');
-            Route::get('/create', [WakaTahunAjaranController::class, 'create'])->name('create');
-            Route::post('/', [WakaTahunAjaranController::class, 'store'])->name('store');
-            Route::get('/{tahunAjaran}', [WakaTahunAjaranController::class, 'show'])->name('show');
-            Route::get('/{tahunAjaran}/edit', [WakaTahunAjaranController::class, 'edit'])->name('edit');
-            Route::put('/{tahunAjaran}', [WakaTahunAjaranController::class, 'update'])->name('update');
-            Route::delete('/{tahunAjaran}', [WakaTahunAjaranController::class, 'destroy'])->name('destroy');
-            Route::post('/{id}/toggle-active', [WakaTahunAjaranController::class, 'toggleActive'])->name('toggle-active');
-            Route::post('/{id}/activate', [WakaTahunAjaranController::class, 'toggleActive'])->name('activate');
-        });
-
-        // Mata Pelajaran
-        Route::get('mata-pelajaran/import', [WakaMataPelajaranController::class, 'import'])->name('mata-pelajaran.import');
-        Route::post('mata-pelajaran/import', [WakaMataPelajaranController::class, 'importStore'])->name('mata-pelajaran.import.store');
-        Route::get('mata-pelajaran/template', [WakaMataPelajaranController::class, 'downloadTemplate'])->name('mata-pelajaran.template');
-        Route::get('mata-pelajaran/suggest-kode', [WakaMataPelajaranController::class, 'suggestKodeMapel'])->name('mata-pelajaran.suggest-kode');
-        Route::get('mata-pelajaran/print', [WakaMataPelajaranController::class, 'print'])->name('mata-pelajaran.print');
-        Route::resource('mata-pelajaran', WakaMataPelajaranController::class);
-
         // Kelas
         Route::get('kelas/import', [WakaKelasController::class, 'import'])->name('kelas.import');
         Route::post('kelas/import', [WakaKelasController::class, 'importStore'])->name('kelas.import.store');
@@ -868,41 +844,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{id}', [WakilKepalaSekolahController::class, 'catatanShow'])->name('show');
         });
 
-        // Pengaturan Istirahat
-        Route::prefix('pengaturan-istirahat')->name('pengaturan-istirahat.')->group(function () {
-            Route::get('/', [WakaPengaturanIstirahatController::class, 'index'])->name('index');
-            Route::get('/create', [WakaPengaturanIstirahatController::class, 'create'])->name('create');
-            Route::post('/', [WakaPengaturanIstirahatController::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [WakaPengaturanIstirahatController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [WakaPengaturanIstirahatController::class, 'update'])->name('update');
-            Route::delete('/{id}', [WakaPengaturanIstirahatController::class, 'destroy'])->name('destroy');
-            Route::patch('/{id}/toggle-status', [WakaPengaturanIstirahatController::class, 'toggleStatus'])->name('toggle-status');
-        });
-
-        // Promotion System Settings
-        Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function () {
-            // Note: We use Admin controllers for shared functionality to ensure consistency
-            // Settings and KKM are defined at the end of this group
-
-            // Report Access
-            Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
-            Route::get('/report/print', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'print'])->name('report.print');
-            Route::post('/execute', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'execute'])->name('execute');
-
-            // Individual/Batch Rollback
-            Route::post('/rollback/{statusId}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollback'])->name('rollback');
-            Route::post('/rollback-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollbackSelected'])->name('rollback-selected');
-
-            // Promote Selected
-            Route::post('/promote-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'promoteSelected'])->name('promote-selected');
-
-            // Scheduling
-            Route::post('/cancel-schedule/{id}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'cancelSchedule'])->name('cancel-schedule');
-
-            // Settings and KKM
-            Route::resource('settings', \App\Http\Controllers\Admin\Akademik\PromotionSettingsController::class)->only(['index', 'store']);
-            Route::resource('kkm', \App\Http\Controllers\Admin\Akademik\PromotionKKMController::class)->only(['index', 'store']);
-        });
     });
 
     /*

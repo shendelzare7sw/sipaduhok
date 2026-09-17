@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50">
+<html lang="id" class="h-full bg-slate-50 print:bg-white">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,7 +14,7 @@
     @yield('styles')
     @stack('styles')
 </head>
-<body class="min-h-full bg-slate-50 font-sans text-slate-800 antialiased">
+<body class="min-h-full bg-slate-50 font-sans text-slate-800 antialiased print:bg-white">
     @php
         $dashboardRoute = match (auth()->user()->role ?? null) {
             'admin', 'super_admin' => 'admin.dashboard',
@@ -43,9 +43,9 @@
         $sidebarView = $sidebarMap[auth()->user()->role ?? ''] ?? null;
     @endphp
 
-    <div id="admin-sidebar-overlay" class="fixed inset-0 z-40 hidden bg-slate-950/60 backdrop-blur-sm lg:hidden" aria-hidden="true"></div>
+    <div id="admin-sidebar-overlay" class="fixed inset-0 z-40 hidden bg-slate-950/60 backdrop-blur-sm lg:hidden print:!hidden" aria-hidden="true"></div>
 
-    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#17699f] bg-gradient-to-b from-[#245f91] via-[#176fa8] to-[#0f5688] text-white shadow-2xl transition-transform duration-200 lg:translate-x-0">
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#17699f] bg-gradient-to-b from-[#245f91] via-[#176fa8] to-[#0f5688] text-white shadow-2xl transition-transform duration-200 lg:translate-x-0 print:!hidden">
         <div class="relative flex h-20 shrink-0 items-center border-b border-white/15 px-4">
             <a href="{{ route($dashboardRoute) }}" class="flex min-w-0 flex-1 items-center gap-2.5 pr-11 no-underline lg:pr-0">
                 <img src="{{ asset('img/logo.png') }}" alt="SIPADUHOK" class="h-12 w-12 shrink-0 object-contain">
@@ -87,8 +87,8 @@
         </div>
     </aside>
 
-    <div class="flex min-h-screen flex-col lg:pl-72">
-        <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
+    <div class="flex min-h-screen flex-col lg:pl-72 print:!block print:!min-h-0 print:!pl-0">
+        <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur print:!hidden">
             <div class="flex h-20 w-full min-w-0 items-center gap-3 px-4 sm:px-6 lg:px-8">
                 <button type="button" data-sidebar-open class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 lg:hidden" aria-label="Buka menu">
                     <i class="fa-solid fa-bars"></i>
@@ -117,7 +117,7 @@
             </div>
         </header>
 
-        <main class="legacy-content min-w-0 w-full flex-1 overflow-x-clip px-3 pb-5 pt-2 sm:px-6 sm:pb-7 sm:pt-3 lg:px-8">
+        <main class="legacy-content min-w-0 w-full flex-1 overflow-x-clip px-3 pb-5 pt-2 sm:px-6 sm:pb-7 sm:pt-3 lg:px-8 print:!block print:!overflow-visible print:!p-0">
             @foreach(['success', 'error', 'warning', 'info'] as $flashType)
                 @if(session($flashType))
                     <div class="hidden" data-flash="{{ $flashType === 'error' ? 'error' : $flashType }}" data-title="{{ $flashType === 'success' ? 'Berhasil' : ucfirst($flashType) }}" data-message="{{ session($flashType) }}"></div>
@@ -140,6 +140,6 @@
         @endif
     @endauth
 
-    @stack('modals')
+    <div class="print:!hidden">@stack('modals')</div>
 </body>
 </html>

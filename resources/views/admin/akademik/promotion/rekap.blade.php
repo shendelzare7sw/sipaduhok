@@ -7,8 +7,8 @@
 @section('content')
 @php
     $activeTab = in_array(request('tab'), ['history', 'scheduling'], true) ? request('tab') : 'simulation';
-    $isAdminContext = str_contains(Route::currentRouteName(), 'admin.');
-    $routeBase = $isAdminContext ? 'admin.akademik.kenaikan-kelas' : 'waka.kenaikan-kelas';
+    $isAdminContext = true;
+    $routeBase = 'admin.akademik.kenaikan-kelas';
     $settingsRoute = $routeBase . '.settings.index';
     $printRoute = $routeBase . '.report.print';
     $executeRoute = $routeBase . '.execute';

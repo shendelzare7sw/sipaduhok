@@ -6,7 +6,7 @@
 
 @section('content')
 @php
-    $routePrefix = request()->routeIs('waka.*') ? 'waka.kenaikan-kelas' : 'admin.akademik.kenaikan-kelas';
+    $routePrefix = 'admin.akademik.kenaikan-kelas';
     $tahunLabel = $tahun->nama_tahun_ajaran ?? $tahun->nama ?? $tahun->tahun_ajaran ?? '-';
     $tanggalRapor = old('tanggal_pengambilan_rapor', $setting && $setting->tanggal_pengambilan_rapor ? \Carbon\Carbon::parse($setting->tanggal_pengambilan_rapor)->format('Y-m-d') : '');
     $tanggalEksekusi = old('tanggal_eksekusi', $setting && $setting->tanggal_eksekusi ? \Carbon\Carbon::parse($setting->tanggal_eksekusi)->format('Y-m-d') : '');

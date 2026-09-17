@@ -3,24 +3,24 @@
 namespace App\Http\Controllers\Admin\Akademik;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
-use App\Models\TahunAjaran;
 use App\Models\MataPelajaran;
+use App\Models\TahunAjaran;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class PromotionKKMController extends Controller
 {
     public function index(Request $request): View
     {
         $tahunActive = TahunAjaran::where('is_active', true)->firstOrFail();
-        
+
         // Filter jenjang if needed, default SMA
         $jenjang = $request->get('jenjang', 'SMA');
-        
+
         $mapelList = MataPelajaran::where('jenjang', $jenjang)->get();
-        
+
         // Get existing KKM
         $existingKKM = DB::table('pengaturan_kkm')
             ->where('tahun_ajaran_id', $tahunActive->id)
@@ -31,7 +31,7 @@ class PromotionKKMController extends Controller
             'tahun' => $tahunActive,
             'mapelList' => $mapelList,
             'existingKKM' => $existingKKM,
-            'jenjang' => $jenjang
+            'jenjang' => $jenjang,
         ]);
     }
 
@@ -59,10 +59,8 @@ class PromotionKKMController extends Controller
             );
         }
 
-        $routePrefix = $request->routeIs('waka.*') ? 'waka.kenaikan-kelas' : 'admin.akademik.kenaikan-kelas';
-
         return redirect()
-            ->route($routePrefix . '.kkm.index', ['jenjang' => $validated['jenjang']])
+            ->route('admin.akademik.kenaikan-kelas.kkm.index', ['jenjang' => $validated['jenjang']])
             ->with('success', 'Pengaturan KKM berhasil disimpan');
     }
 }

@@ -2,307 +2,61 @@
 
 @section('title', 'Arsip Kelas: ' . $kelas->nama_kelas)
 @section('page-title', 'Arsip Kelas: ' . $kelas->nama_kelas)
-@section('page-subtitle', 'TA ' . ($kelas->tahunAjaran->nama_tahun_ajaran ?? '-') . ' · ' . ($kelas->cabang->nama_cabang ?? '-'))
-
-
-@section('styles')
-    @vite(['resources/css/wali-kelas/arsip/show.css', 'resources/js/wali-kelas/arsip/show.js'])
-@endsection
+@section('page-subtitle', 'TA ' . ($kelas->tahunAjaran->nama_tahun_ajaran ?? '—') . ' · ' . ($kelas->cabang->nama_cabang ?? '—'))
 
 @section('content')
-<div class="container-xxl">
-    {{-- Banner read-only --}}
-    <div class="arsip-banner">
-        <i class="fas fa-archive"></i>
-        <strong>Mode Arsip — Read-Only.</strong>
-        Anda melihat data historis kelas <strong>{{ $kelas->nama_kelas }}</strong>
-        di <strong>TA {{ $kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong>.
-        Tidak ada operasi edit/hapus yang tersedia di mode ini.
-        <a href="{{ route('wali.arsip.index') }}" class="ms-2 fw-bold arsip-back-link">
-            <i class="fas fa-arrow-left"></i> Kembali ke daftar
-        </a>
-    </div>
+<div class="min-w-0 w-full space-y-4">
+    <header class="rounded-xl border border-sky-200 bg-sky-50 p-4"><div class="flex flex-wrap items-start justify-between gap-3"><div><p class="text-xs font-bold uppercase tracking-wide text-sky-700">Mode arsip · baca saja</p><h1 class="mt-1 text-lg font-extrabold text-slate-900">{{ $kelas->nama_kelas }}</h1><p class="mt-1 text-xs text-slate-600">{{ $kelas->jenjang }} · TA {{ $kelas->tahunAjaran->nama_tahun_ajaran ?? '—' }} · {{ $kelas->cabang->nama_cabang ?? '—' }}</p></div><a href="{{ route('wali.arsip.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-lg border border-sky-200 bg-white px-3 text-xs font-bold text-sky-800"><i class="fas fa-arrow-left" aria-hidden="true"></i>Daftar arsip</a></div></header>
+    <section class="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4" aria-label="Ringkasan arsip">
+        @foreach(['Siswa tercatat' => $totalSiswa ?? 0, 'Total rapor' => $totalRapor ?? 0, 'Record presensi' => $totalPresensi ?? 0, 'Record nilai' => $totalNilai ?? 0] as $label => $value)
+            <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"><p class="text-[10px] font-bold uppercase tracking-wide text-slate-500 sm:text-xs">{{ $label }}</p><p class="mt-1 text-xl font-extrabold text-slate-900">{{ $value }}</p>@if($label === 'Total rapor')<p class="text-[11px] text-slate-500">{{ $totalRaporTerbit ?? 0 }} diterbitkan</p>@endif</div>
+        @endforeach
+    </section>
+    <nav class="flex gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1 shadow-sm" aria-label="Bagian arsip">
+        @foreach(['siswa' => ['Siswa', 'show'], 'rapor' => ['Rapor', 'rapor'], 'presensi' => ['Presensi', 'presensi'], 'nilai' => ['Nilai', 'nilai']] as $tab => [$label, $route])
+            <a href="{{ route('wali.arsip.'.$route, $kelas->id) }}" @if($activeTab === $tab) aria-current="page" @endif class="inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg px-3 text-xs font-bold {{ $activeTab === $tab ? 'bg-sky-700 text-white' : 'text-slate-600 hover:bg-slate-50' }}">{{ $label }}</a>
+        @endforeach
+    </nav>
 
-    {{-- Summary --}}
-    <div class="summary-row">
-        <div class="summary-card">
-            <div class="label">Siswa Tercatat</div>
-            <div class="value">{{ $totalSiswa ?? 0 }}</div>
-        </div>
-        <div class="summary-card">
-            <div class="label">Total Rapor</div>
-            <div class="value">{{ $totalRapor ?? 0 }}</div>
-            <div class="sub">{{ $totalRaporTerbit ?? 0 }} diterbitkan</div>
-        </div>
-        <div class="summary-card">
-            <div class="label">Record Presensi</div>
-            <div class="value">{{ $totalPresensi ?? 0 }}</div>
-        </div>
-        <div class="summary-card">
-            <div class="label">Record Nilai</div>
-            <div class="value">{{ $totalNilai ?? 0 }}</div>
-        </div>
-    </div>
-
-    {{-- Tabs --}}
-    <div class="arsip-tabs">
-        <a href="{{ route('wali.arsip.show', $kelas->id) }}" class="{{ $activeTab === 'siswa' ? 'active' : '' }}">
-            <i class="fas fa-users"></i> Siswa
-        </a>
-        <a href="{{ route('wali.arsip.rapor', $kelas->id) }}" class="{{ $activeTab === 'rapor' ? 'active' : '' }}">
-            <i class="fas fa-file-alt"></i> Rapor
-        </a>
-        <a href="{{ route('wali.arsip.presensi', $kelas->id) }}" class="{{ $activeTab === 'presensi' ? 'active' : '' }}">
-            <i class="fas fa-clipboard-check"></i> Presensi
-        </a>
-        <a href="{{ route('wali.arsip.nilai', $kelas->id) }}" class="{{ $activeTab === 'nilai' ? 'active' : '' }}">
-            <i class="fas fa-chart-line"></i> Nilai
-        </a>
-    </div>
-
-    {{-- TAB CONTENT --}}
     @if($activeTab === 'siswa')
-        @if(!isset($siswaList) || $siswaList->isEmpty())
-            <div class="empty-tab">
-                <i class="fas fa-user-slash"></i>
-                <div>Belum ada siswa tercatat di kelas ini.</div>
-            </div>
-        @else
-            <table class="data-table wk-card-table">
-                <thead>
-                    <tr>
-                        <th width="50">No</th>
-                        <th>Nama</th>
-                        <th>NIS / NISN</th>
-                        <th>JK</th>
-                        <th>Status Saat Ini</th>
-                        <th>Hasil di TA Ini</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($siswaList as $i => $siswa)
-                        @php $snap = $siswa->statusNaikKelas->first(); @endphp
-                        <tr>
-                            <td>{{ $i + 1 }}</td>
-                            <td><strong>{{ $siswa->nama_lengkap }}</strong></td>
-                            <td>
-                                {{ $siswa->nis ?: '-' }}<br>
-                                <small class="text-muted">{{ $siswa->nisn ?: '-' }}</small>
-                            </td>
-                            <td>
-                                <span class="badge badge-mini {{ $siswa->jenis_kelamin === 'L' ? 'bg-info' : 'bg-pink' }}">
-                                    {{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge badge-mini bg-{{ $siswa->status === 'aktif' ? 'success' : ($siswa->status === 'lulus' ? 'info' : 'secondary') }}">
-                                    {{ ucfirst($siswa->status) }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($snap)
-                                    @php
-                                        $clsMap = [
-                                            'NAIK_KELAS' => 'badge bg-success',
-                                            'NAIK_KELAS_TUNGGAKAN' => 'badge bg-warning',
-                                            'TIDAK_NAIK_KELAS' => 'badge bg-danger',
-                                            'LULUS' => 'badge bg-info',
-                                            'LULUS_TUNGGAKAN' => 'badge bg-warning',
-                                        ];
-                                        $cls = $clsMap[$snap->status_kelulusan] ?? 'badge bg-secondary';
-                                    @endphp
-                                    <span class="{{ $cls }} badge-mini">
-                                        {{ str_replace('_', ' ', $snap->status_kelulusan) }}
-                                    </span>
-                                    @if($snap->kelas_tujuan)
-                                        <small class="text-muted d-block">→ {{ $snap->kelas_tujuan }}</small>
-                                    @endif
-                                @else
-                                    <small class="text-muted">-</small>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-
+        <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"><div class="border-b border-slate-100 px-4 py-3"><h2 class="text-sm font-extrabold text-slate-900">Siswa yang tercatat</h2></div><div class="divide-y divide-slate-100">
+            @forelse($siswaList ?? [] as $siswa)
+                @php $snap = $siswa->statusNaikKelas->first(); @endphp
+                <article class="grid gap-2 px-4 py-3 text-xs sm:grid-cols-[minmax(180px,1.4fr)_minmax(120px,0.8fr)_minmax(130px,0.8fr)] sm:items-center"><div><h3 class="text-sm font-bold text-slate-900">{{ $siswa->nama_lengkap }}</h3><p class="text-[11px] text-slate-500">NIS {{ $siswa->nis ?: '—' }} · NISN {{ $siswa->nisn ?: '—' }} · {{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</p></div><div><span class="block text-[11px] text-slate-500">Status kini</span><strong class="text-slate-800">{{ ucfirst($siswa->status ?? '—') }}</strong></div><div><span class="block text-[11px] text-slate-500">Hasil TA ini</span><strong class="text-slate-800">{{ $snap ? str_replace('_', ' ', $snap->status_kelulusan) : '—' }}</strong>@if($snap?->kelas_tujuan)<span class="block text-[11px] text-slate-500">→ {{ $snap->kelas_tujuan }}</span>@endif</div></article>
+            @empty
+                <p class="px-4 py-9 text-center text-sm text-slate-500">Belum ada siswa tercatat.</p>
+            @endforelse
+        </div></section>
     @elseif($activeTab === 'rapor')
-        @if(!isset($raporList) || $raporList->isEmpty())
-            <div class="empty-tab">
-                <i class="fas fa-file"></i>
-                <div>Belum ada rapor di kelas ini.</div>
-            </div>
-        @else
-            <table class="data-table wk-card-table">
-                <thead>
-                    <tr>
-                        <th width="50">No</th>
-                        <th>Siswa</th>
-                        <th width="100">Semester</th>
-                        <th width="120">Status</th>
-                        <th width="160">Review Ketua</th>
-                        <th width="120">Diperbarui</th>
-                        <th width="100">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($raporList as $i => $rapor)
-                        <tr>
-                            <td>{{ $i + 1 }}</td>
-                            <td><strong>{{ $rapor->siswa->nama_lengkap ?? '-' }}</strong></td>
-                            <td>{{ $rapor->semester ?? '-' }}</td>
-                            <td><span class="badge-rapor {{ $rapor->status }}">{{ ucfirst($rapor->status ?? '-') }}</span></td>
-                            <td>
-                                @if($rapor->status_review_ketua)
-                                    <span class="badge-rapor {{ $rapor->status_review_ketua === 'revisi' ? 'revisi' : 'draft' }}">
-                                        {{ ucfirst($rapor->status_review_ketua) }}
-                                    </span>
-                                @else
-                                    <small class="text-muted">-</small>
-                                @endif
-                            </td>
-                            <td><small>{{ $rapor->updated_at?->format('d/m/Y H:i') ?? '-' }}</small></td>
-                            <td>
-                                @if($rapor->status === 'draft' || $rapor->status_review_ketua === 'revisi')
-                                    <a href="{{ route('wali.rapor.edit', $rapor->id) }}" class="btn btn-sm btn-warning">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-                                @else
-                                    <a href="{{ route('wali.rapor.preview', $rapor->id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                                        <i class="fas fa-eye"></i> Lihat
-                                    </a>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-
+        <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"><div class="border-b border-slate-100 px-4 py-3"><h2 class="text-sm font-extrabold text-slate-900">Rapor historis</h2><p class="text-xs text-slate-500">Informasi rapor kelas ini ditampilkan tanpa aksi edit.</p></div><div class="divide-y divide-slate-100">
+            @forelse($raporList ?? [] as $rapor)
+                <article class="grid gap-2 px-4 py-3 text-xs sm:grid-cols-[minmax(180px,1.4fr)_minmax(140px,0.8fr)_minmax(120px,0.8fr)] sm:items-center"><div><h3 class="text-sm font-bold text-slate-900">{{ $rapor->siswa->nama_lengkap ?? 'Siswa tidak tersedia' }}</h3><p class="text-[11px] text-slate-500">Semester {{ ucfirst($rapor->semester ?? '—') }} · {{ $rapor->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS' }}</p></div><div><span class="block text-[11px] text-slate-500">Status rapor</span><strong class="text-slate-800">{{ ucfirst($rapor->status ?? '—') }}</strong>@if($rapor->status_review_ketua)<span class="block text-[11px] text-slate-500">Ketua: {{ ucfirst($rapor->status_review_ketua) }}</span>@endif</div><p class="text-[11px] text-slate-500">Diubah {{ $rapor->updated_at?->format('d/m/Y H:i') ?? '—' }}</p></article>
+            @empty
+                <p class="px-4 py-9 text-center text-sm text-slate-500">Belum ada rapor di kelas ini.</p>
+            @endforelse
+        </div></section>
     @elseif($activeTab === 'presensi')
-        <div class="filter-bar">
-            <form method="GET" class="d-flex gap-2 align-items-center">
-                <label class="small fw-bold mb-0">Filter Bulan:</label>
-                <select name="bulan" data-auto-submit class="form-select form-select-sm filter-select-presensi">
-                    <option value="">Semua bulan</option>
-                    @foreach(($bulanTersedia ?? collect()) as $bln)
-                        <option value="{{ $bln }}" @selected(($bulanFilter ?? '') === $bln)>
-                            {{ \Carbon\Carbon::createFromFormat('Y-m', $bln)->locale('id')->translatedFormat('F Y') }}
-                        </option>
-                    @endforeach
-                </select>
-                @if(!empty($bulanFilter))
-                    <a href="{{ route('wali.arsip.presensi', $kelas->id) }}" class="btn btn-sm btn-outline-secondary">Reset</a>
-                @endif
-            </form>
-        </div>
-
-        @if(!isset($rekapPresensi) || $rekapPresensi->isEmpty())
-            <div class="empty-tab">
-                <i class="fas fa-calendar-times"></i>
-                <div>Belum ada record presensi untuk kelas/periode ini.</div>
-            </div>
-        @else
-            <table class="data-table wk-card-table">
-                <thead>
-                    <tr>
-                        <th width="50">No</th>
-                        <th>Siswa</th>
-                        <th width="80" class="text-center">Hadir</th>
-                        <th width="80" class="text-center">Sakit</th>
-                        <th width="80" class="text-center">Izin</th>
-                        <th width="80" class="text-center">Alpha</th>
-                        <th width="80" class="text-center">Total</th>
-                        <th width="100" class="text-center">% Kehadiran</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($rekapPresensi as $i => $r)
-                        @php $persen = $r->total > 0 ? round(($r->hadir / $r->total) * 100, 1) : 0; @endphp
-                        <tr>
-                            <td>{{ $i + 1 }}</td>
-                            <td><strong>{{ $r->siswa->nama_lengkap ?? 'Siswa #'.$r->siswa_id }}</strong></td>
-                            <td class="text-center">{{ $r->hadir }}</td>
-                            <td class="text-center">{{ $r->sakit }}</td>
-                            <td class="text-center">{{ $r->izin }}</td>
-                            <td class="text-center {{ $r->alpha > 0 ? 'text-alpha-danger' : 'text-alpha-muted' }}">{{ $r->alpha }}</td>
-                            <td class="text-center fw-bold">{{ $r->total }}</td>
-                            <td class="text-center fw-bold {{ $persen >= 80 ? 'text-attendance-good' : ($persen >= 60 ? 'text-attendance-warning' : 'text-attendance-danger') }}">
-                                {{ $persen }}%
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-
+        <form method="GET" action="{{ route('wali.arsip.presensi', $kelas->id) }}" class="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><label class="min-w-[180px] flex-1 text-xs font-bold text-slate-700">Bulan<select name="bulan" class="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-normal text-slate-800"><option value="">Semua bulan</option>@foreach(($bulanTersedia ?? collect()) as $bln)<option value="{{ $bln }}" @selected(($bulanFilter ?? '') === $bln)>{{ \Carbon\Carbon::createFromFormat('Y-m', $bln)->locale('id')->translatedFormat('F Y') }}</option>@endforeach</select></label><button type="submit" class="min-h-10 rounded-lg bg-sky-700 px-4 text-xs font-bold text-white">Terapkan</button><a href="{{ route('wali.arsip.presensi', $kelas->id) }}" class="inline-flex min-h-10 items-center rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700">Reset</a></form>
+        <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"><div class="border-b border-slate-100 px-4 py-3"><h2 class="text-sm font-extrabold text-slate-900">Rekap presensi historis</h2></div><div class="divide-y divide-slate-100">
+            @forelse($rekapPresensi ?? [] as $r)
+                @php $persen = $r->total > 0 ? round(($r->hadir / $r->total) * 100, 1) : 0; @endphp
+                <article class="flex flex-wrap items-center justify-between gap-3 px-4 py-3"><div class="min-w-0"><h3 class="text-sm font-bold text-slate-900">{{ $r->siswa->nama_lengkap ?? 'Siswa #'.$r->siswa_id }}</h3><p class="mt-1 text-[11px] text-slate-500">Hadir {{ $r->hadir }} · Sakit {{ $r->sakit }} · Izin {{ $r->izin }} · Alpha {{ $r->alpha }} · Total {{ $r->total }}</p></div><strong class="text-sm {{ $persen >= 80 ? 'text-emerald-700' : ($persen >= 60 ? 'text-amber-800' : 'text-rose-700') }}">{{ $persen }}%</strong></article>
+            @empty
+                <p class="px-4 py-9 text-center text-sm text-slate-500">Belum ada record presensi untuk periode ini.</p>
+            @endforelse
+        </div></section>
     @elseif($activeTab === 'nilai')
-        <div class="filter-bar">
-            <form method="GET" class="d-flex gap-2 align-items-center">
-                <label class="small fw-bold mb-0">Filter Semester:</label>
-                <select name="semester" data-auto-submit class="form-select form-select-sm filter-select-semester">
-                    <option value="">Semua semester</option>
-                    @foreach(($semesterTersedia ?? collect()) as $sm)
-                        <option value="{{ $sm }}" @selected(($semesterFilter ?? '') == $sm)>Semester {{ $sm }}</option>
-                    @endforeach
-                </select>
-                @if(!empty($semesterFilter))
-                    <a href="{{ route('wali.arsip.nilai', $kelas->id) }}" class="btn btn-sm btn-outline-secondary">Reset</a>
-                @endif
-            </form>
-        </div>
-
-        @if(!isset($nilaiBySiswa) || $nilaiBySiswa->isEmpty())
-            <div class="empty-tab">
-                <i class="fas fa-chart-bar"></i>
-                <div>Belum ada record nilai untuk kelas/semester ini.</div>
-            </div>
-        @else
-            @foreach($nilaiBySiswa as $siswaId => $nilaiItems)
-                @php
-                    $siswa = $nilaiItems->first()->siswa;
-                    $nilaiByMapel = $nilaiItems->groupBy('mata_pelajaran_id');
-                @endphp
-                <div class="card mb-3">
-                    <div class="card-header arsip-card-header-soft">
-                        <strong>{{ $siswa->nama_lengkap ?? 'Siswa #'.$siswaId }}</strong>
-                        <small class="text-muted ms-2">NIS: {{ $siswa->nis ?? '-' }}</small>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="nilai-pivot wk-card-table">
-                            <thead>
-                                <tr>
-                                    <th>Mata Pelajaran</th>
-                                    <th width="80">Semester</th>
-                                    <th width="80">Tugas</th>
-                                    <th width="80">UTS</th>
-                                    <th width="80">UAS</th>
-                                    <th width="100">Nilai Akhir</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($nilaiByMapel as $mapelId => $records)
-                                    @foreach($records as $n)
-                                        @php $nilaiAkhir = (float) ($n->nilai_akhir ?? 0); @endphp
-                                        <tr>
-                                            <td>{{ $n->mataPelajaran->nama_mapel ?? 'Mapel #'.$mapelId }}</td>
-                                            <td class="score">{{ $n->semester ?? '-' }}</td>
-                                            <td class="score">{{ $n->nilai_tugas ?? '-' }}</td>
-                                            <td class="score">{{ $n->nilai_uts ?? '-' }}</td>
-                                            <td class="score">{{ $n->nilai_uas ?? '-' }}</td>
-                                            <td class="score {{ $nilaiAkhir >= 70 ? 'pass' : ($nilaiAkhir > 0 ? 'below' : '') }}">
-                                                {{ $n->nilai_akhir ?? '-' }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            @endforeach
-        @endif
+        <form method="GET" action="{{ route('wali.arsip.nilai', $kelas->id) }}" class="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><label class="min-w-[180px] flex-1 text-xs font-bold text-slate-700">Semester<select name="semester" class="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-normal text-slate-800"><option value="">Semua semester</option>@foreach(($semesterTersedia ?? collect()) as $sm)<option value="{{ $sm }}" @selected(($semesterFilter ?? '') === $sm)>Semester {{ ucfirst($sm) }}</option>@endforeach</select></label><button type="submit" class="min-h-10 rounded-lg bg-sky-700 px-4 text-xs font-bold text-white">Terapkan</button><a href="{{ route('wali.arsip.nilai', $kelas->id) }}" class="inline-flex min-h-10 items-center rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700">Reset</a></form>
+        @forelse($nilaiBySiswa ?? [] as $siswaId => $nilaiItems)
+            @php $siswa = $nilaiItems->first()->siswa; @endphp
+            <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"><div class="border-b border-slate-100 px-4 py-3"><h2 class="text-sm font-extrabold text-slate-900">{{ $siswa->nama_lengkap ?? 'Siswa #'.$siswaId }}</h2><p class="text-[11px] text-slate-500">NIS {{ $siswa->nis ?? '—' }}</p></div><div class="divide-y divide-slate-100">
+                @foreach($nilaiItems as $n)
+                    <article class="grid gap-2 px-4 py-3 text-xs sm:grid-cols-[minmax(150px,1.3fr)_repeat(4,minmax(70px,0.5fr))] sm:items-center"><div><h3 class="font-bold text-slate-900">{{ $n->mataPelajaran->nama_mapel ?? 'Mapel tidak tersedia' }}</h3><p class="text-[11px] text-slate-500">Semester {{ ucfirst($n->semester ?? '—') }}</p></div>@foreach(['Tugas' => 'rata_tugas', 'PTS' => 'pts', 'PAS' => 'pas', 'Akhir' => 'nilai_akhir'] as $label => $field)<div><span class="text-[11px] text-slate-500">{{ $label }}</span><strong class="ml-1 text-slate-900 sm:block sm:ml-0">{{ $n->$field === null ? '—' : number_format((float) $n->$field, 1, ',', '.') }}</strong></div>@endforeach</article>
+                @endforeach
+            </div></section>
+        @empty
+            <p class="rounded-xl border border-slate-200 bg-white px-4 py-9 text-center text-sm text-slate-500 shadow-sm">Belum ada record nilai untuk semester ini.</p>
+        @endforelse
     @endif
 </div>
 @endsection

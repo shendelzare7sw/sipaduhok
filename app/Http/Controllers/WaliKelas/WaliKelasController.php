@@ -4,16 +4,14 @@ namespace App\Http\Controllers\WaliKelas;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use App\Models\TenagaPendidik;
-use App\Models\Kelas;
-use App\Models\Siswa;
+use App\Models\JadwalPelajaran;
 use App\Models\Presensi;
 use App\Models\Rapor;
-use App\Models\JadwalPelajaran;
+use App\Models\Siswa;
 use App\Models\WaliKelasAssignment;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class WaliKelasController extends Controller
 {
@@ -26,7 +24,7 @@ class WaliKelasController extends Controller
     {
         $tenagaPendidik = $this->getTenagaPendidik();
 
-        if (!$tenagaPendidik) {
+        if (! $tenagaPendidik) {
             return view('wali-kelas.dashboard')->with([
                 'error' => 'Data tenaga pendidik tidak ditemukan.',
                 'waliKelas' => null,
@@ -67,7 +65,7 @@ class WaliKelasController extends Controller
         // Get selected kelas
         $kelas = $this->getSelectedKelas($tenagaPendidik);
 
-        if (!$kelas) {
+        if (! $kelas) {
             return redirect()->route('wali.pilih-kelas');
         }
 
@@ -102,9 +100,9 @@ class WaliKelasController extends Controller
 
         // Jadwal pelajaran hari ini
         $hari = now()->locale('id')->dayName;
-        $jadwalHariIni = JadwalPelajaran::whereHas('kelas', function($q) use ($kelas) {
-                $q->where('kelas.id', $kelas->id);
-            })
+        $jadwalHariIni = JadwalPelajaran::whereHas('kelas', function ($q) use ($kelas) {
+            $q->where('kelas.id', $kelas->id);
+        })
             ->where('hari', $hari)
             ->with('mataPelajaran', 'guru')
             ->orderBy('jam_mulai')
@@ -134,7 +132,7 @@ class WaliKelasController extends Controller
     {
         $tenagaPendidik = $this->getTenagaPendidik();
 
-        if (!$tenagaPendidik) {
+        if (! $tenagaPendidik) {
             return view('wali-kelas.rapor-pending.index', [
                 'tenagaPendidik' => null,
                 'raporList' => collect(),
@@ -156,7 +154,7 @@ class WaliKelasController extends Controller
             ->whereIn('kelas_id', $kelasIds)
             ->where(function ($q) {
                 $q->where('status', 'draft')
-                  ->orWhere('status_review_ketua', 'revisi');
+                    ->orWhere('status_review_ketua', 'revisi');
             })
             ->orderByDesc('updated_at')
             ->get();
@@ -172,71 +170,6 @@ class WaliKelasController extends Controller
             'totalDraft' => $totalDraft,
             'totalRevisi' => $totalRevisi,
             'totalKirim' => $totalKirim,
-        ]);
-    }
-
-    /**
-     * Display jadwal pelajaran for wali kelas (read-only)
-     */
-    public function jadwalPelajaran(): View|RedirectResponse
-    {
-        $tenagaPendidik = $this->getTenagaPendidik();
-
-        if (!$tenagaPendidik) {
-            return view('wali-kelas.jadwal-pelajaran')->with([
-                'error' => 'Data tenaga pendidik tidak ditemukan.',
-                'waliKelas' => null,
-                'kelas' => null,
-                'kelasList' => collect(),
-                'jadwalByHari' => collect(),
-                'hariList' => [],
-            ]);
-        }
-
-        $kelasList = $this->getKelasWali($tenagaPendidik);
-
-        if ($kelasList->isEmpty()) {
-            return view('wali-kelas.jadwal-pelajaran')->with([
-                'waliKelas' => $tenagaPendidik,
-                'kelas' => null,
-                'kelasList' => collect(),
-                'message' => 'Anda belum ditugaskan sebagai wali kelas.',
-                'jadwalByHari' => collect(),
-                'hariList' => [],
-            ]);
-        }
-
-        if ($this->needsKelasSelection($tenagaPendidik)) {
-            return redirect()->route('wali.pilih-kelas');
-        }
-
-        $kelas = $this->getSelectedKelas($tenagaPendidik);
-
-        if (!$kelas) {
-            return redirect()->route('wali.pilih-kelas');
-        }
-
-        $kelas->load(['cabang', 'tahunAjaran']);
-
-        $jadwalList = JadwalPelajaran::with(['mataPelajaran', 'guru'])
-            ->where('kelas_id', $kelas->id)
-            ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
-            ->get();
-
-        // Group by hari
-        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $jadwalByHari = collect($hariList)->mapWithKeys(function($hari) use ($jadwalList) {
-            return [
-                $hari => $jadwalList->where('hari', $hari)->sortBy('jam_mulai')->values()
-            ];
-        });
-
-        return view('wali-kelas.jadwal-pelajaran', [
-            'waliKelas' => $tenagaPendidik,
-            'kelas' => $kelas,
-            'kelasList' => $kelasList,
-            'jadwalByHari' => $jadwalByHari,
-            'hariList' => $hariList,
         ]);
     }
 }

@@ -4,8 +4,8 @@ namespace App\Http\Controllers\WakilKepalaSekolah;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kelas;
-use App\Models\TenagaPendidik;
 use App\Models\TahunAjaran;
+use App\Models\TenagaPendidik;
 use App\Models\WaliKelasAssignment;
 use Illuminate\Http\Request;
 
@@ -15,7 +15,7 @@ class WaliKelasController extends Controller
     {
         $cabangId = auth()->user()->cabang_id;
 
-        if (!$cabangId) {
+        if (! $cabangId) {
             abort(403, 'Akun Anda belum memiliki cabang yang ditetapkan. Hubungi administrator.');
         }
 
@@ -35,13 +35,13 @@ class WaliKelasController extends Controller
             ->where('is_active', true)
             ->where(function ($roleQuery) {
                 $roleQuery->where('role', 'wali_kelas')
-                    ->orWhereHas('roleRelation', fn($relationQuery) => $relationQuery->where('name', 'wali_kelas'));
+                    ->orWhereHas('roleRelation', fn ($relationQuery) => $relationQuery->where('name', 'wali_kelas'));
             });
     }
 
     private function ensureWaliKelasInUserCabang(?int $waliKelasId): void
     {
-        if (!$waliKelasId) {
+        if (! $waliKelasId) {
             return;
         }
 
@@ -53,7 +53,7 @@ class WaliKelasController extends Controller
             })
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             abort(403, 'Wali kelas harus berasal dari cabang Anda.');
         }
     }
@@ -104,7 +104,7 @@ class WaliKelasController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('nama_kelas', 'like', "%{$search}%")
                     ->orWhere('kode_kelas', 'like', "%{$search}%")
-                    ->orWhereHas('waliKelasAssignments.tenagaPendidik', fn($wq) => $wq->where('nama_lengkap', 'like', "%{$search}%"));
+                    ->orWhereHas('waliKelasAssignments.tenagaPendidik', fn ($wq) => $wq->where('nama_lengkap', 'like', "%{$search}%"));
             });
         }
 
@@ -145,24 +145,24 @@ class WaliKelasController extends Controller
         // Statistics (filtered by user's cabang)
         $stats = [
             'totalKelas' => Kelas::where('cabang_id', $userCabangId)
-                ->when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))->count(),
+                ->when($currentTahunAjaran, fn ($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))->count(),
             'kelasWithWali' => Kelas::where('cabang_id', $userCabangId)
-                ->when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
+                ->when($currentTahunAjaran, fn ($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
                 ->whereHas('waliKelasAssignments')->count(),
             'kelasWithoutWali' => Kelas::where('cabang_id', $userCabangId)
-                ->when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
+                ->when($currentTahunAjaran, fn ($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
                 ->whereDoesntHave('waliKelasAssignments')->count(),
             'totalWaliKelas' => TenagaPendidik::whereHas('user', function ($query) use ($userCabangId) {
                 $query->where('cabang_id', $userCabangId)
                     ->where('is_active', true)
                     ->where(function ($roleQuery) {
                         $roleQuery->whereIn('role', ['wali_kelas', 'guru_pengajar'])
-                            ->orWhereHas('roleRelation', fn($relationQuery) => $relationQuery->whereIn('name', ['wali_kelas', 'guru_pengajar']));
+                            ->orWhereHas('roleRelation', fn ($relationQuery) => $relationQuery->whereIn('name', ['wali_kelas', 'guru_pengajar']));
                     });
             })->count(),
         ];
 
-        return view('waka.wali-kelas.index', compact(
+        return view('admin.wali-kelas.index', compact(
             'kelasList',
             'tahunAjarans',
             'jenjangs',
@@ -175,7 +175,7 @@ class WaliKelasController extends Controller
     public function assign(Request $request, $kelasId)
     {
         $validated = $request->validate([
-            'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id'
+            'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id',
         ]);
 
         $kelas = Kelas::findOrFail($kelasId);
@@ -192,7 +192,7 @@ class WaliKelasController extends Controller
 
             if ($exists) {
                 return back()
-                    ->with('info', 'Wali kelas ini sudah ditugaskan ke kelas ' . $kelas->nama_kelas);
+                    ->with('info', 'Wali kelas ini sudah ditugaskan ke kelas '.$kelas->nama_kelas);
             }
 
             // Create new assignment (keeping existing assignments - multi-class support)
@@ -235,7 +235,7 @@ class WaliKelasController extends Controller
             'siswaPerempuan' => $kelas->siswa->where('jenis_kelamin', 'P')->count(),
         ];
 
-        return view('waka.wali-kelas.show', compact('kelas', 'waliKelasOptions', 'stats'));
+        return view('admin.wali-kelas.show', compact('kelas', 'waliKelasOptions', 'stats'));
     }
 
     public function print(Request $request)
@@ -277,6 +277,6 @@ class WaliKelasController extends Controller
             $tahunAjaran = TahunAjaran::where('is_active', true)->first();
         }
 
-        return view('waka.wali-kelas.print', compact('kelasList', 'tahunAjaran'));
+        return view('admin.wali-kelas.print', compact('kelasList', 'tahunAjaran'));
     }
 }

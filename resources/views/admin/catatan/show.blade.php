@@ -6,7 +6,7 @@
 
 @section('content')
 @php
-    $routePrefix = request()->routeIs('ketua.*') ? 'ketua' : 'admin';
+    $routePrefix = request()->routeIs('waka.*') ? 'waka' : (request()->routeIs('ketua.*') ? 'ketua' : 'admin');
     $sentAt = $catatan->tanggal_kirim ? \Carbon\Carbon::parse($catatan->tanggal_kirim) : $catatan->created_at;
     $priority = $catatan->prioritas ?: 'biasa';
     $readers = $catatan->relationLoaded('pembaca') ? $catatan->pembaca : collect();
@@ -26,11 +26,13 @@
 <div class="space-y-4">
     <div class="flex items-center justify-between gap-3">
         <a href="{{ route($routePrefix . '.catatan.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-bold text-slate-700 no-underline transition hover:border-brand-300 hover:text-brand-700"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali</a>
+        @if((int) $catatan->pengirim_id === (int) auth()->id())
         <form action="{{ route($routePrefix . '.catatan.destroy', $catatan->id) }}" method="POST" data-confirm data-confirm-title="Hapus catatan ini?" data-confirm-message="Riwayat catatan akan dihapus dan tidak dapat dipulihkan." data-confirm-text="Ya, hapus">
             @csrf
             @method('DELETE')
             <button type="submit" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-red-50 px-3.5 text-sm font-bold text-red-700 hover:bg-red-100"><i class="fas fa-trash" aria-hidden="true"></i>Hapus</button>
         </form>
+        @endif
     </div>
 
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

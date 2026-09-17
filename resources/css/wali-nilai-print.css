@@ -1,0 +1,10 @@
+/* Standalone Nilai print document: keep browser table metrics without Tailwind preflight. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+@tailwind utilities;
+
+@media print {
+    @page { size: A4 landscape; margin: 6mm; }
+    #pageContainer { zoom: 1 !important; }
+    table { page-break-inside: avoid; }
+}

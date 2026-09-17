@@ -2,360 +2,88 @@
 
 @section('title', 'Dashboard Wali Kelas')
 @section('page-title', 'Dashboard Wali Kelas')
-@section('page-subtitle', 'Kelola kelas dan siswa Anda')
-
-
-@section('styles')
-    @vite(['resources/css/wali-kelas/dashboard.css', 'resources/js/wali-kelas/dashboard.js'])
-@endsection
+@section('page-subtitle', 'Pantau kelas dan tindak lanjut siswa')
 
 @section('content')
-
-    @if(isset($message))
-        <div class="error-card">
-            <i class="fas fa-user-slash d-block"></i>
-            <h4>Akses Terbatas</h4>
-            <p>{{ $message }}</p>
-        </div>
-    @elseif(!$kelas)
-        <div class="error-card">
-            <i class="fas fa-user-slash d-block"></i>
-            <h4>Akses Terbatas</h4>
-            <p>Anda belum ditugaskan sebagai wali kelas. Silakan hubungi bagian Admin Kurikulum.</p>
-        </div>
+<div class="min-w-0 w-full space-y-4">
+    @if(isset($message) || ! $kelas)
+        <section class="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center shadow-sm sm:p-8">
+            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700"><i class="fas fa-user-slash" aria-hidden="true"></i></span>
+            <h1 class="mt-4 text-lg font-extrabold text-slate-900">Kelas belum tersedia</h1>
+            <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">{{ $message ?? $error ?? 'Anda belum ditugaskan sebagai wali kelas. Silakan hubungi bagian Admin Kurikulum.' }}</p>
+        </section>
     @else
+        @php
+            $totalPresensi = array_sum($presensiStats);
+            $stats = [
+                ['value' => $totalSiswa, 'label' => 'Siswa aktif', 'icon' => 'fa-users', 'tone' => 'bg-sky-50 text-sky-700'],
+                ['value' => $presensiStats['hadir'], 'label' => 'Hadir hari ini', 'icon' => 'fa-user-check', 'tone' => 'bg-emerald-50 text-emerald-700'],
+                ['value' => $izinMenungguValidasi, 'label' => 'Izin perlu validasi', 'icon' => 'fa-clipboard-check', 'tone' => 'bg-amber-50 text-amber-700'],
+                ['value' => $raporBelumSelesai, 'label' => 'Rapor draft', 'icon' => 'fa-file-lines', 'tone' => 'bg-violet-50 text-violet-700'],
+            ];
+        @endphp
 
-        <!-- Class Info Banner -->
-        <div class="class-info-banner">
-            <div class="class-info-icon">
-                <i class="fas fa-school"></i>
+        <header class="flex flex-col gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-800 to-cyan-700 px-4 py-4 !text-white shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-5">
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-100">Ruang Wali Kelas</p>
+                <h1 class="mt-1 text-xl font-extrabold !text-white sm:text-2xl">Kelas {{ $kelas->nama_kelas }}</h1>
+                <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-sky-50"><span>{{ strtoupper($kelas->jenjang) }}</span><span>{{ $kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</span><span>{{ $kelas->cabang->nama_cabang ?? '-' }}</span></p>
             </div>
-            <div class="class-info-details">
-                <div class="class-info-name">Kelas {{ $kelas->nama_kelas }}</div>
-                <div class="class-info-meta">
-                    <span><i class="fas fa-layer-group"></i> {{ strtoupper($kelas->jenjang) }}</span>
-                    <span><i class="fas fa-calendar-alt"></i> {{ $kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</span>
-                    <span><i class="fas fa-map-marker-alt"></i> {{ $kelas->cabang->nama_cabang ?? '-' }}</span>
-                </div>
-            </div>
-        </div>
+            @if($kelasList->count() > 1)
+                <a href="{{ route('wali.pilih-kelas') }}" class="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-white/30 bg-white/15 px-3 text-xs font-bold !text-white transition hover:bg-white/25"><i class="fas fa-right-left" aria-hidden="true"></i>Ganti kelas</a>
+            @endif
+        </header>
 
-        <!-- Quick Stats -->
-        <div class="row g-3 mb-4">
-            <!-- Total Siswa -->
-            <div class="col-6 col-xl-3">
-                <div class="wk-card">
-                    <div class="stat-widget">
-                        <div class="stat-details">
-                            <div class="stat-value">{{ $totalSiswa }}</div>
-                            <div class="stat-label">Total Siswa</div>
-                        </div>
-                        <div class="stat-icon-box stat-icon-primary-soft">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
+        <section class="grid min-w-0 grid-cols-2 gap-2.5 lg:grid-cols-4" aria-label="Ringkasan kelas">
+            @foreach($stats as $stat)
+                <article class="flex min-w-0 items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-3 shadow-sm sm:px-4">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg {{ $stat['tone'] }}"><i class="fas {{ $stat['icon'] }} text-xs" aria-hidden="true"></i></span>
+                    <div class="min-w-0">
+                        <p class="text-lg font-extrabold leading-none text-slate-900 sm:text-xl">{{ $stat['value'] }}</p>
+                        <p class="mt-1 text-[10px] font-bold uppercase leading-tight tracking-wide text-slate-500 sm:text-[11px]">{{ $stat['label'] }}</p>
                     </div>
-                    <div class="stat-footer">
-                        <span>Kelas {{ $kelas->nama_kelas }}</span>
-                        <i class="fas fa-users opacity-50"></i>
-                    </div>
-                </div>
-            </div>
+                </article>
+            @endforeach
+        </section>
 
-            <!-- Hadir Hari Ini -->
-            <div class="col-6 col-xl-3">
-                <div class="wk-card">
-                    <div class="stat-widget">
-                        <div class="stat-details">
-                            <div class="stat-value">{{ $presensiStats['hadir'] }}</div>
-                            <div class="stat-label">Hadir Hari Ini</div>
-                        </div>
-                        <div class="stat-icon-box stat-icon-success-soft">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-                    <div class="stat-footer">
-                        @php $persenHadir = $totalSiswa > 0 ? round(($presensiStats['hadir'] / $totalSiswa) * 100) : 0; @endphp
-                        <span class="{{ $persenHadir >= 80 ? 'text-success' : ($persenHadir >= 50 ? 'text-warning' : 'text-danger') }}">
-                            <i class="fas fa-chart-line me-1"></i>{{ $persenHadir }}% kehadiran
-                        </span>
-                        <i class="fas fa-clock opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Izin Pending -->
-            <div class="col-6 col-xl-3">
-                <div class="wk-card {{ $izinMenungguValidasi > 0 ? 'wk-card-warning-border' : '' }}">
-                    <div class="stat-widget">
-                        <div class="stat-details">
-                            <div class="stat-value">{{ $izinMenungguValidasi }}</div>
-                            <div class="stat-label">Izin Pending</div>
-                        </div>
-                        <div class="stat-icon-box stat-icon-warning-soft">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                    </div>
-                    <div class="stat-footer">
-                        @if($izinMenungguValidasi > 0)
-                            <span class="text-warning fw-semibold"><i class="fas fa-exclamation-circle me-1"></i>Perlu Validasi</span>
-                        @else
-                            <span class="text-success"><i class="fas fa-check me-1"></i>Semua Clear</span>
-                        @endif
-                        <i class="fas fa-bell opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rapor Draft -->
-            <div class="col-6 col-xl-3">
-                <div class="wk-card">
-                    <div class="stat-widget">
-                        <div class="stat-details">
-                            <div class="stat-value">{{ $raporBelumSelesai }}</div>
-                            <div class="stat-label">Rapor Draft</div>
-                        </div>
-                        <div class="stat-icon-box stat-icon-purple-soft">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                    </div>
-                    <div class="stat-footer">
-                        @if($raporBelumSelesai > 0)
-                            <span class="text-warning"><i class="fas fa-edit me-1"></i>Belum selesai</span>
-                        @else
-                            <span class="text-success"><i class="fas fa-check-circle me-1"></i>Semua selesai</span>
-                        @endif
-                        <i class="fas fa-file opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Layout Grid -->
-        <div class="row g-4 mb-4">
-
-            <!-- Left Column: Jadwal & Presensi -->
-            <div class="col-lg-8 d-flex flex-column gap-4">
-
-                <!-- Jadwal Pelajaran Hari Ini -->
-                <div class="wk-card">
-                    <div class="wk-card-header">
-                        <h5 class="wk-card-title">
-                            <i class="fas fa-calendar-day text-warning"></i> Jadwal Hari Ini
-                            <span class="badge bg-label-primary ms-1 wk-day-badge">{{ now()->locale('id')->translatedFormat('l') }}</span>
-                        </h5>
-                        <a href="{{ route('wali.jadwal.index') }}" class="text-primary fw-semibold text-decoration-none wk-small-link">
-                            Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
-                        </a>
-                    </div>
-                    @if($jadwalHariIni->count() > 0)
-                        <ul class="jadwal-list">
+        <div class="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,1fr)]">
+            <div class="min-w-0 space-y-4">
+                <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-3"><div><h2 class="text-sm font-extrabold text-slate-900">Jadwal hari ini</h2><p class="text-xs text-slate-500">{{ now()->locale('id')->translatedFormat('l, d F Y') }}</p></div><a href="{{ route('wali.jadwal.index') }}" class="inline-flex min-h-9 items-center gap-2 rounded-lg px-2 text-xs font-bold text-sky-700 hover:bg-sky-50">Lihat semua<i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+                    @if($jadwalHariIni->isNotEmpty())
+                        <ul class="divide-y divide-slate-100">
                             @foreach($jadwalHariIni as $jadwal)
-                                <li class="jadwal-item">
-                                    <div class="jadwal-time">
-                                        {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
-                                    </div>
-                                    <div class="jadwal-dot"></div>
-                                    <div class="jadwal-body">
-                                        <div class="jadwal-mapel">{{ $jadwal->mataPelajaran->nama_mapel }}</div>
-                                        <div class="jadwal-guru">{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : 'Belum ditentukan' }}</div>
-                                    </div>
-                                </li>
+                                <li class="flex min-w-0 flex-wrap items-start gap-3 px-5 py-3 sm:flex-nowrap"><span class="shrink-0 rounded-lg bg-sky-50 px-2.5 py-1 text-xs font-bold tabular-nums text-sky-800">{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}–{{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}</span><div class="min-w-0"><p class="font-bold text-slate-900">{{ $jadwal->mataPelajaran->nama_mapel ?? 'Mata pelajaran belum tersedia' }}</p><p class="text-xs text-slate-500">{{ $jadwal->guru->nama_lengkap ?? 'Pengajar belum ditentukan' }}</p></div></li>
                             @endforeach
                         </ul>
                     @else
-                        <div class="empty-state">
-                            <i class="fas fa-coffee d-block"></i>
-                            <div class="empty-state-title">Tidak Ada Jadwal</div>
-                            <div class="empty-state-desc">Tidak ada pelajaran terjadwal untuk hari ini.</div>
-                        </div>
+                        <p class="px-5 py-9 text-center text-sm text-slate-500"><i class="fas fa-mug-hot mr-2 text-sky-600" aria-hidden="true"></i>Tidak ada pelajaran terjadwal hari ini.</p>
                     @endif
-                </div>
+                </section>
 
-                <!-- Rekap Presensi Hari Ini -->
-                <div class="wk-card">
-                    <div class="wk-card-header">
-                        <h5 class="wk-card-title">
-                            <i class="fas fa-clipboard-list text-info"></i> Rekap Presensi
-                        </h5>
-                        <span class="text-muted wk-date-text">{{ now()->translatedFormat('d F Y') }}</span>
-                    </div>
-                    <div class="presensi-grid">
-                        <div class="presensi-item">
-                            <div class="presensi-number text-success">{{ $presensiStats['hadir'] }}</div>
-                            <div class="presensi-label">Hadir</div>
-                        </div>
-                        <div class="presensi-item">
-                            <div class="presensi-number text-warning">{{ $presensiStats['sakit'] }}</div>
-                            <div class="presensi-label">Sakit</div>
-                        </div>
-                        <div class="presensi-item">
-                            <div class="presensi-number text-primary">{{ $presensiStats['izin'] }}</div>
-                            <div class="presensi-label">Izin</div>
-                        </div>
-                        <div class="presensi-item">
-                            <div class="presensi-number text-danger">{{ $presensiStats['alpha'] }}</div>
-                            <div class="presensi-label">Alpha</div>
-                        </div>
-                    </div>
-                    @php $totalPresensi = array_sum($presensiStats); @endphp
-                    @if($totalPresensi > 0 && $totalSiswa > 0)
-                        <div class="px-4 pb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2 progress-meta">
-                                <span>Progress Input ({{ $totalPresensi }}/{{ $totalSiswa }})</span>
-                                <span class="fw-bold">{{ round(($totalPresensi / $totalSiswa) * 100) }}%</span>
-                            </div>
-                            <div class="progress progress-thin">
-                                <div class="progress-bar bg-success progress-segment-start" role="progressbar" data-progress-width="{{ ($presensiStats['hadir'] / $totalSiswa) * 100 }}"></div>
-                                <div class="progress-bar bg-warning" role="progressbar" data-progress-width="{{ ($presensiStats['sakit'] / $totalSiswa) * 100 }}"></div>
-                                <div class="progress-bar bg-primary" role="progressbar" data-progress-width="{{ ($presensiStats['izin'] / $totalSiswa) * 100 }}"></div>
-                                <div class="progress-bar bg-danger progress-segment-end" role="progressbar" data-progress-width="{{ ($presensiStats['alpha'] / $totalSiswa) * 100 }}"></div>
-                            </div>
-                        </div>
-                    @elseif($totalPresensi == 0)
-                        <div class="text-center pb-3">
-                            <a href="{{ route('wali.presensi.index') }}" class="btn btn-sm btn-outline-primary px-4 presensi-action-btn">
-                                <i class="fas fa-clipboard-check me-1"></i> Input Presensi Sekarang
-                            </a>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Status Kelas -->
-                @php
-                    $persenHadir = $totalSiswa > 0 ? round(($presensiStats['hadir'] / $totalSiswa) * 100) : 0;
-                    $persenRapor = $totalSiswa > 0 ? round((($totalSiswa - $raporBelumSelesai) / $totalSiswa) * 100) : 0;
-                @endphp
-                <div class="wk-card flex-grow-1">
-                    <div class="wk-card-header">
-                        <h5 class="wk-card-title">
-                            <i class="fas fa-chart-bar text-purple"></i> Status Kelas
-                        </h5>
-                    </div>
-                    <ul class="status-list">
-                        <li class="status-item">
-                            <div class="status-icon stat-icon-success-soft">
-                                <i class="fas fa-user-check"></i>
-                            </div>
-                            <div class="status-body">
-                                <div class="status-header">
-                                    <span class="status-label">Kehadiran Hari Ini</span>
-                                    <span class="status-value {{ $persenHadir >= 80 ? 'text-success' : ($persenHadir >= 50 ? 'text-warning' : 'text-danger') }}">{{ $persenHadir }}%</span>
-                                </div>
-                                <div class="progress progress-thinner">
-                                    <div class="progress-bar progress-rounded {{ $persenHadir >= 80 ? 'bg-success' : ($persenHadir >= 50 ? 'bg-warning' : 'bg-danger') }}" data-progress-width="{{ $persenHadir }}"></div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="status-item">
-                            <div class="status-icon stat-icon-purple-soft">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <div class="status-body">
-                                <div class="status-header">
-                                    <span class="status-label">Penyelesaian Rapor</span>
-                                    <span class="status-value {{ $persenRapor >= 100 ? 'text-success' : ($persenRapor >= 50 ? 'text-warning' : 'text-danger') }}">{{ $persenRapor }}%</span>
-                                </div>
-                                <div class="progress progress-thinner">
-                                    <div class="progress-bar progress-rounded {{ $persenRapor >= 100 ? 'bg-success' : ($persenRapor >= 50 ? 'bg-warning' : 'bg-danger') }}" data-progress-width="{{ $persenRapor }}"></div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="status-item">
-                            <div class="status-icon stat-icon-warning-soft">
-                                <i class="fas fa-bell"></i>
-                            </div>
-                            <div class="status-body">
-                                <div class="status-header">
-                                    <span class="status-label">Izin Menunggu</span>
-                                    <span class="status-value {{ $izinMenungguValidasi == 0 ? 'text-success' : 'text-warning' }}">{{ $izinMenungguValidasi }} pengajuan</span>
-                                </div>
-                                <div class="progress progress-thinner">
-                                    <div class="progress-bar progress-rounded {{ $izinMenungguValidasi == 0 ? 'bg-success' : 'bg-warning' }}" data-progress-width="{{ $izinMenungguValidasi > 0 ? 100 : 0 }}"></div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="status-item">
-                            <div class="status-icon stat-icon-primary-soft">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="status-body">
-                                <div class="status-header">
-                                    <span class="status-label">Siswa Terdaftar</span>
-                                    <span class="status-value text-primary">{{ $totalSiswa }} siswa</span>
-                                </div>
-                                <div class="progress progress-thinner">
-                                    <div class="progress-bar bg-primary progress-rounded" data-progress-width="100"></div>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-
+                <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-2"><div><h2 class="text-sm font-extrabold text-slate-900">Rekap presensi</h2><p class="text-xs text-slate-500">{{ $totalPresensi }} dari {{ $totalSiswa }} siswa tercatat hari ini</p></div><a href="{{ route('wali.presensi.index') }}" class="inline-flex min-h-9 items-center gap-2 rounded-lg px-2 text-xs font-bold text-sky-700 hover:bg-sky-50">Kelola presensi<i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+                    <dl class="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2">
+                        <div class="min-w-0 rounded-lg bg-emerald-50 px-2 py-2"><dt class="truncate text-[10px] font-semibold text-emerald-800">Hadir</dt><dd class="text-lg font-extrabold leading-tight text-emerald-900">{{ $presensiStats['hadir'] }}</dd></div>
+                        <div class="min-w-0 rounded-lg bg-amber-50 px-2 py-2"><dt class="truncate text-[10px] font-semibold text-amber-800">Sakit</dt><dd class="text-lg font-extrabold leading-tight text-amber-900">{{ $presensiStats['sakit'] }}</dd></div>
+                        <div class="min-w-0 rounded-lg bg-sky-50 px-2 py-2"><dt class="truncate text-[10px] font-semibold text-sky-800">Izin</dt><dd class="text-lg font-extrabold leading-tight text-sky-900">{{ $presensiStats['izin'] }}</dd></div>
+                        <div class="min-w-0 rounded-lg bg-rose-50 px-2 py-2"><dt class="truncate text-[10px] font-semibold text-rose-800">Alpha</dt><dd class="text-lg font-extrabold leading-tight text-rose-900">{{ $presensiStats['alpha'] }}</dd></div>
+                    </dl>
+                </section>
             </div>
 
-            <!-- Right Column: Aksi Cepat -->
-            <div class="col-lg-4 d-flex flex-column gap-4">
-
-                <!-- Quick Links -->
-                <div class="wk-card flex-grow-1">
-                    <div class="wk-card-header">
-                        <h5 class="wk-card-title">
-                            <i class="fas fa-bolt text-warning"></i> Akses Cepat
-                        </h5>
-                    </div>
-                    <div class="quick-links-grid">
-                        <a href="{{ route('wali.presensi.index') }}" class="quick-link-item">
-                            <i class="fas fa-clipboard-check text-primary"></i>
-                            <span class="quick-link-text">Input<br>Presensi</span>
-                        </a>
-                        <a href="{{ route('wali.presensi.validasi-izin') }}" class="quick-link-item">
-                            <div class="position-relative">
-                                <i class="fas fa-check-circle text-warning"></i>
-                                @if($izinMenungguValidasi > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm quick-link-badge">
-                                        {{ $izinMenungguValidasi > 99 ? '99+' : $izinMenungguValidasi }}
-                                    </span>
-                                @endif
-                            </div>
-                            <span class="quick-link-text">Validasi<br>Izin</span>
-                        </a>
-                        <a href="{{ route('wali.nilai.index') }}" class="quick-link-item">
-                            <i class="fas fa-chart-line text-info"></i>
-                            <span class="quick-link-text">Lihat<br>Nilai</span>
-                        </a>
-                        <a href="{{ route('wali.rapor.index') }}" class="quick-link-item">
-                            <div class="position-relative">
-                                <i class="fas fa-file-alt text-success"></i>
-                                @if($raporBelumSelesai > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning shadow-sm quick-link-badge quick-link-badge-warning">
-                                        {{ $raporBelumSelesai }}
-                                    </span>
-                                @endif
-                            </div>
-                            <span class="quick-link-text">Kelola<br>Rapor</span>
-                        </a>
-                        <a href="{{ route('wali.presensi.rekap-harian') }}" class="quick-link-item">
-                            <i class="fas fa-calendar-day text-purple"></i>
-                            <span class="quick-link-text">Rekap<br>Harian</span>
-                        </a>
-                        <a href="{{ route('wali.presensi.riwayat') }}" class="quick-link-item">
-                            <i class="fas fa-history text-secondary"></i>
-                            <span class="quick-link-text">Riwayat<br>Presensi</span>
-                        </a>
-                        <a href="{{ route('wali.jadwal.index') }}" class="quick-link-item">
-                            <i class="fas fa-calendar-week text-warning"></i>
-                            <span class="quick-link-text">Jadwal<br>Pelajaran</span>
-                        </a>
-                        <a href="{{ route('wali.kenaikan-kelas.prediction') }}" class="quick-link-item">
-                            <i class="fas fa-chart-bar text-danger"></i>
-                            <span class="quick-link-text">Prediksi<br>Kenaikan</span>
-                        </a>
-                    </div>
-                </div>
-
-            </div>
+            <aside class="min-w-0 space-y-4">
+                <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><h2 class="text-sm font-extrabold text-slate-900">Tindak lanjut</h2><p class="text-xs text-slate-500">Pekerjaan kelas yang perlu dipantau.</p><div class="mt-3 space-y-2">
+                    <a href="{{ route('wali.presensi.validasi-izin') }}" class="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-800 transition hover:border-amber-300 hover:bg-amber-50"><span><i class="fas fa-clipboard-check mr-2 text-amber-600" aria-hidden="true"></i>Validasi izin</span><span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">{{ $izinMenungguValidasi }}</span></a>
+                    <a href="{{ route('wali.rapor.index') }}" class="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-800 transition hover:border-violet-300 hover:bg-violet-50"><span><i class="fas fa-file-lines mr-2 text-violet-600" aria-hidden="true"></i>Rapor draft</span><span class="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-bold text-violet-800">{{ $raporBelumSelesai }}</span></a>
+                </div></section>
+                <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><h2 class="text-sm font-extrabold text-slate-900">Akses cepat</h2><div class="mt-3 grid grid-cols-2 gap-2">
+                    @foreach([['label' => 'Nilai siswa', 'route' => 'wali.nilai.index', 'icon' => 'fa-chart-line'], ['label' => 'Prediksi kenaikan', 'route' => 'wali.kenaikan-kelas.prediction', 'icon' => 'fa-chart-column'], ['label' => 'Validasi akses', 'route' => 'wali.validasi-akses.index', 'icon' => 'fa-user-check'], ['label' => 'Arsip kelas', 'route' => 'wali.arsip.index', 'icon' => 'fa-box-archive']] as $shortcut)
+                        <a href="{{ route($shortcut['route']) }}" class="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-slate-200 p-2 text-center text-[11px] font-bold leading-tight text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-800"><i class="fas {{ $shortcut['icon'] }} text-sm text-sky-600" aria-hidden="true"></i>{{ $shortcut['label'] }}</a>
+                    @endforeach
+                </div></section>
+            </aside>
         </div>
-
     @endif
-
+</div>
 @endsection

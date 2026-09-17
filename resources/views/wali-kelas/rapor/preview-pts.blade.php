@@ -4,27 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapor {{ $rapor->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS' }} - {{ $rapor->siswa->nama_lengkap }}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    @vite('resources/css/rapor-document.css')
     @include('partials.anti-screenshot')
     <link rel="stylesheet" href="{{ asset('css/wali-kelas/rapor/preview-pts.css') }}">
 </head>
 <body>
-    <div class="print-bar no-print">
-        <a href="#" class="btn-back" data-history-back>
-            <i class="bi bi-arrow-left"></i> Kembali
+    <div class="print-bar no-print sticky top-0 z-[100] mb-4 flex max-w-[100vw] items-center justify-end gap-2 overflow-x-auto border-b border-[#e5e7eb] bg-white/95 px-5 py-2.5 backdrop-blur-[4px] max-[575px]:justify-start max-[575px]:gap-1.5 max-[575px]:px-2 max-[575px]:py-2 print:hidden">
+        <a href="#" class="btn-back inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-[#6b7280] px-[18px] py-[9px] text-sm font-semibold text-white no-underline hover:bg-[#4b5563] max-[575px]:px-2.5 max-[575px]:py-2 max-[575px]:text-xs" data-history-back>
+            <span aria-hidden="true">←</span> Kembali
         </a>
-        <div class="zoom-controls">
-            <button class="btn-zoom" data-zoom-action="out" title="Perkecil"><i class="bi bi-dash"></i></button>
-            <span class="zoom-level" id="zoomLevel">100%</span>
-            <button class="btn-zoom" data-zoom-action="in" title="Perbesar"><i class="bi bi-plus"></i></button>
-            <button class="btn-zoom" data-zoom-action="reset" title="Reset" style="font-size: 12px;">Fit</button>
+        <div class="zoom-controls inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg border border-[#e5e7eb] bg-[#f9fafb] px-1 py-0.5">
+            <button type="button" class="btn-zoom inline-flex min-w-9 items-center justify-center rounded-md border border-[#d1d5db] bg-[#f3f4f6] px-3 py-[7px] text-base font-semibold text-[#374151] hover:bg-[#e5e7eb] max-[575px]:min-w-8 max-[575px]:px-[9px]" data-zoom-action="out" title="Perkecil" aria-label="Perkecil">−</button>
+            <span class="zoom-level min-w-[45px] select-none text-center text-[13px] font-semibold text-[#6b7280] max-[575px]:min-w-[38px] max-[575px]:text-xs" id="zoomLevel">100%</span>
+            <button type="button" class="btn-zoom inline-flex min-w-9 items-center justify-center rounded-md border border-[#d1d5db] bg-[#f3f4f6] px-3 py-[7px] text-base font-semibold text-[#374151] hover:bg-[#e5e7eb] max-[575px]:min-w-8 max-[575px]:px-[9px]" data-zoom-action="in" title="Perbesar" aria-label="Perbesar">+</button>
+            <button type="button" class="btn-zoom inline-flex min-w-9 items-center justify-center rounded-md border border-[#d1d5db] bg-[#f3f4f6] px-3 py-[7px] text-xs font-semibold text-[#374151] hover:bg-[#e5e7eb] max-[575px]:min-w-8 max-[575px]:px-[9px]" data-zoom-action="reset" title="Reset zoom">Fit</button>
         </div>
-        <button class="btn-print" data-print-page
+        <button type="button" class="btn-print inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-[#1e3a8a] px-[18px] py-[9px] text-sm font-semibold text-white shadow-[0_2px_4px_rgba(0,0,0,0.15)] hover:bg-[#1e40af] max-[575px]:px-2.5 max-[575px]:py-2 max-[575px]:text-xs" data-print-page
                 title="Setelah klik Cetak, untuk hasil paling bersih di Chrome: buka 'More settings' di dialog print → uncheck 'Headers and footers'.">
-            <i class="bi bi-printer-fill"></i> Cetak Rapor
+            <span aria-hidden="true">▣</span> Cetak Rapor
         </button>
-        <i class="bi bi-info-circle text-muted ms-2" style="font-size: 14px; cursor: help;"
-           title="Tip: di dialog Print Chrome → 'More settings' → uncheck 'Headers and footers' supaya cetakan bersih dari tanggal & URL."></i>
+        <span class="ml-2 cursor-help text-sm text-slate-500 max-[575px]:hidden" aria-label="Tip: nonaktifkan Headers and footers di dialog cetak Chrome" title="Tip: di dialog Print Chrome → 'More settings' → uncheck 'Headers and footers' supaya cetakan bersih dari tanggal & URL.">ⓘ</span>
     </div>
     <!-- Watermark implemented via CSS background -->
 

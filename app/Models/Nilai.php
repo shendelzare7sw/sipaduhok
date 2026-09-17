@@ -121,8 +121,10 @@ class Nilai extends Model
             $this->tugas_5
         ], fn($v) => $v !== null);
 
-        if (empty($nilai))
+        if (empty($nilai)) {
+            $this->rata_tugas = null;
             return null;
+        }
 
         $this->rata_tugas = array_sum($nilai) / count($nilai);
         return $this->rata_tugas;
@@ -139,8 +141,10 @@ class Nilai extends Model
             $this->latihan_5
         ], fn($v) => $v !== null);
 
-        if (empty($nilai))
+        if (empty($nilai)) {
+            $this->rata_latihan = null;
             return null;
+        }
 
         $this->rata_latihan = array_sum($nilai) / count($nilai);
         return $this->rata_latihan;
@@ -157,8 +161,10 @@ class Nilai extends Model
             $this->uh_5
         ], fn($v) => $v !== null);
 
-        if (empty($nilai))
+        if (empty($nilai)) {
+            $this->rata_uh = null;
             return null;
+        }
 
         $this->rata_uh = array_sum($nilai) / count($nilai);
         return $this->rata_uh;
@@ -179,6 +185,16 @@ class Nilai extends Model
     {
         // Hitung rata-rata dulu
         $this->hitungSemuaRata();
+
+        // Semua komponen kosong adalah "belum dinilai", bukan nilai nol.
+        // Angka 0 yang benar-benar diinput tetap dihitung sebagai nilai.
+        if ($this->rata_tugas === null && $this->rata_latihan === null
+            && $this->rata_uh === null && $this->pts === null && $this->pas === null) {
+            $this->nilai_akhir = null;
+            $this->save();
+
+            return null;
+        }
 
         $rataTugas = $this->rata_tugas ?? 0;
         $rataLatihan = $this->rata_latihan ?? 0;

@@ -1,143 +1,38 @@
 @extends('layouts.app')
 
 @section('title', 'Rekap Harian Presensi')
-@section('page-title', 'Rekap Harian Presensi')
-@section('page-subtitle', 'Daftar laporan presensi harian kelas ' . ($kelas->nama_kelas ?? ''))
-
-
-@section('styles')
-    @vite(['resources/css/wali-kelas/presensi/rekap-harian.css', 'resources/js/wali-kelas/presensi/rekap-harian.js'])
-@endsection
+@section('page-title', 'Rekap Harian')
+@section('page-subtitle', 'Telusuri presensi per tanggal')
 
 @section('content')
-<div class="wk-page">
-<div class="container-fluid px-0">
+<div class="min-w-0 w-full space-y-4" x-data="{ semester: @js($semester ?? '') }">
+    <header class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm"><div><h1 class="text-lg font-extrabold text-slate-900">Rekap harian</h1><p class="mt-0.5 text-xs text-slate-500">Pilih tanggal untuk melihat dan mengoreksi presensi siswa.</p></div><a href="{{ route('wali.presensi.index') }}" class="inline-flex min-h-9 items-center gap-2 rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali</a></header>
 
     @if($error ?? false)
-        <div class="alert alert-danger shadow-sm border-start border-danger border-4">
-            <i class="fas fa-exclamation-triangle me-2"></i>{{ $error }}
-        </div>
-    @endif
-
-    {{-- Header --}}
-    <div class="card shadow-sm mb-4 border-start border-primary border-4">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                    <h5 class="fw-bold text-gray-900 mb-1"><i class="fas fa-calendar-day me-2 text-primary"></i>Rekap Harian Presensi</h5>
-                    <p class="text-muted mb-0 small">Klik tanggal untuk melihat detail laporan presensi hari tersebut</p>
-                </div>
-                <a href="{{ route('wali.presensi.index') }}" class="btn btn-secondary btn-sm shadow-sm">
-                    <i class="fas fa-arrow-left me-1"></i>Kembali
-                </a>
-            </div>
-        </div>
-    </div>
-
-    @if(!($error ?? false))
-    {{-- Filter Bulan & Tahun --}}
-    <div class="card shadow-sm mb-4">
-        <div class="card-body py-3">
-            <form method="GET" action="{{ route('wali.presensi.rekap-harian') }}" class="row g-2 align-items-end">
-                <div class="col-auto">
-                    <label class="form-label fw-bold small mb-1">Semester</label>
-                    <select name="semester" class="form-select form-select-sm filter-select-md" data-auto-submit>
-                        <option value="">Semua (Per Bulan)</option>
-                        <option value="ganjil" {{ ($semester ?? '') == 'ganjil' ? 'selected' : '' }}>Ganjil</option>
-                        <option value="genap" {{ ($semester ?? '') == 'genap' ? 'selected' : '' }}>Genap</option>
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <label class="form-label fw-bold small mb-1">Bulan</label>
-                    <select name="bulan" class="form-select form-select-sm filter-select-md" {{ ($semester ?? '') ? 'disabled' : '' }}>
-                        @foreach(range(1,12) as $m)
-                            <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>
-                                {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <label class="form-label fw-bold small mb-1">Tahun</label>
-                    <select name="tahun" class="form-select form-select-sm filter-select-sm" {{ ($semester ?? '') ? 'disabled' : '' }}>
-                        @foreach(range(now()->year - 2, now()->year + 1) as $y)
-                            <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary btn-sm shadow-sm">
-                        <i class="fas fa-filter me-1"></i>Filter
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-    @endif
-
-    @if(!($error ?? false))
-    {{-- Date List --}}
-    @if($dates->isEmpty())
-        <div class="card shadow-sm">
-            <div class="card-body text-center py-5">
-                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                <h6 class="text-muted">Belum ada data presensi untuk bulan ini</h6>
-                <p class="text-muted small mb-3">Silakan input presensi harian terlebih dahulu</p>
-                <a href="{{ route('wali.presensi.index') }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-edit me-1"></i>Input Presensi
-                </a>
-            </div>
-        </div>
+        <p class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">{{ $error }}</p>
     @else
-        <div class="row g-3">
-            @foreach($dates as $date)
-                @php
-                    $tanggalObj = \Carbon\Carbon::parse($date->tanggal);
-                    $tanggalParam = $tanggalObj->toDateString();
-                    $persen = $date->total_siswa > 0 ? round(($date->hadir / $date->total_siswa) * 100) : 0;
-                @endphp
-                <div class="col-md-6 col-lg-4">
-                    <a href="{{ route('wali.presensi.show-harian', ['tanggal' => $tanggalParam]) }}" class="text-decoration-none">
-                        <div class="card shadow-sm date-card h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h6 class="fw-bold text-gray-900 mb-0">
-                                            {{ $tanggalObj->translatedFormat('l') }}
-                                        </h6>
-                                        <span class="text-primary fw-bold">
-                                            {{ $tanggalObj->translatedFormat('d F Y') }}
-                                        </span>
-                                    </div>
-                                    <span class="badge bg-primary rounded-pill">{{ $date->total_siswa }} siswa</span>
-                                </div>
-                                <div class="d-flex flex-wrap gap-1 mt-2">
-                                    <span class="stat-pill bg-label-success">
-                                        <i class="fas fa-check me-1"></i>{{ $date->hadir }}
-                                    </span>
-                                    <span class="stat-pill bg-label-warning">
-                                        <i class="fas fa-thermometer me-1"></i>{{ $date->sakit }}
-                                    </span>
-                                    <span class="stat-pill bg-label-info">
-                                        <i class="fas fa-envelope me-1"></i>{{ $date->izin }}
-                                    </span>
-                                    <span class="stat-pill bg-label-danger">
-                                        <i class="fas fa-times me-1"></i>{{ $date->alpha }}
-                                    </span>
-                                </div>
-                                <div class="progress mt-2 progress-thinner">
-                                    <div class="progress-bar bg-success" data-progress-width="{{ $persen }}"></div>
-                                </div>
-                                <small class="text-muted">Kehadiran {{ $persen }}%</small>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            @endforeach
-        </div>
-    @endif
-    @endif
+        <form action="{{ route('wali.presensi.rekap-harian') }}" method="GET" class="grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm sm:grid-cols-[repeat(3,minmax(0,1fr))_auto] sm:items-end">
+            <label class="min-w-0 text-xs font-bold text-slate-600">Semester<select name="semester" x-model="semester" class="mt-1 block h-10 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-sm font-medium text-slate-800"><option value="">Per bulan</option><option value="ganjil">Ganjil</option><option value="genap">Genap</option></select></label>
+            <label class="min-w-0 text-xs font-bold text-slate-600">Bulan<select name="bulan" :disabled="!!semester" class="mt-1 block h-10 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-sm font-medium text-slate-800 disabled:bg-slate-100 disabled:text-slate-400">@foreach(range(1, 12) as $month)<option value="{{ $month }}" @selected($bulan == $month)>{{ \Carbon\Carbon::create()->month($month)->locale('id')->translatedFormat('F') }}</option>@endforeach</select></label>
+            <label class="min-w-0 text-xs font-bold text-slate-600">Tahun<select name="tahun" :disabled="!!semester" class="mt-1 block h-10 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-sm font-medium text-slate-800 disabled:bg-slate-100 disabled:text-slate-400">@foreach(range(now()->year - 2, now()->year + 1) as $year)<option value="{{ $year }}" @selected($tahun == $year)>{{ $year }}</option>@endforeach</select></label>
+            <button type="submit" class="inline-flex h-10 items-center justify-center gap-2 self-end rounded-lg bg-sky-700 px-4 text-xs font-bold text-white hover:bg-sky-800"><i class="fas fa-filter" aria-hidden="true"></i>Terapkan</button>
+        </form>
 
-</div>
+        @if($dates->isEmpty())
+            <section class="rounded-xl border border-slate-200 bg-white px-4 py-9 text-center shadow-sm"><i class="fas fa-calendar-xmark text-2xl text-slate-300" aria-hidden="true"></i><h2 class="mt-3 text-sm font-bold text-slate-900">Belum ada presensi pada periode ini</h2><p class="mt-1 text-xs text-slate-500">Mulai dari input presensi kelas.</p><a href="{{ route('wali.presensi.index') }}" class="mt-4 inline-flex min-h-9 items-center rounded-lg bg-sky-700 px-4 text-xs font-bold text-white">Input presensi</a></section>
+        @else
+            <section class="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="Daftar tanggal presensi">
+                @foreach($dates as $date)
+                    @php($day = \Carbon\Carbon::parse($date->tanggal))
+                    @php($percent = $date->total_siswa > 0 ? round($date->hadir / $date->total_siswa * 100) : 0)
+                    <a href="{{ route('wali.presensi.show-harian', ['tanggal' => $day->toDateString()]) }}" class="block min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm transition hover:border-sky-300 hover:bg-sky-50">
+                        <div class="flex items-start justify-between gap-2"><div><h2 class="text-sm font-extrabold text-slate-900">{{ $day->locale('id')->translatedFormat('l') }}</h2><p class="mt-0.5 text-xs font-bold text-sky-700">{{ $day->locale('id')->translatedFormat('d F Y') }}</p></div><span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-700">{{ $date->total_siswa }} siswa</span></div>
+                        <div class="mt-3 flex flex-wrap gap-1.5 text-[11px] font-bold"><span class="rounded-md bg-emerald-50 px-2 py-1 text-emerald-800">H {{ $date->hadir }}</span><span class="rounded-md bg-amber-50 px-2 py-1 text-amber-800">S {{ $date->sakit }}</span><span class="rounded-md bg-sky-50 px-2 py-1 text-sky-800">I {{ $date->izin }}</span><span class="rounded-md bg-rose-50 px-2 py-1 text-rose-800">A {{ $date->alpha }}</span></div>
+                        <p class="mt-3 border-t border-slate-100 pt-2 text-xs text-slate-500">Kehadiran <strong class="text-slate-800">{{ $percent }}%</strong><i class="fas fa-arrow-right ml-2 text-sky-600" aria-hidden="true"></i></p>
+                    </a>
+                @endforeach
+            </section>
+        @endif
+    @endif
 </div>
 @endsection

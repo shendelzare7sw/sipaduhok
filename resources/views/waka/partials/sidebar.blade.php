@@ -4,7 +4,6 @@
             ['label' => 'Dashboard', 'route' => 'waka.dashboard', 'patterns' => ['waka.dashboard'], 'icon' => 'fa-home'],
         ]],
         ['label' => 'Manajemen Akademik', 'items' => [
-            ['label' => 'Tahun Ajaran', 'route' => 'waka.tahun-ajaran.index', 'patterns' => ['waka.tahun-ajaran.*'], 'icon' => 'fa-calendar-alt'],
             [
                 'label' => 'Data Kelas & Penugasan',
                 'patterns' => ['waka.kelas.*', 'waka.wali-kelas.*', 'waka.guru-pengajar.*', 'waka.manajemen-siswa.*'],
@@ -16,20 +15,7 @@
                     ['label' => 'Manajemen Siswa', 'route' => 'waka.manajemen-siswa.index', 'patterns' => ['waka.manajemen-siswa.*']],
                 ],
             ],
-            ['label' => 'Mata Pelajaran', 'route' => 'waka.mata-pelajaran.index', 'patterns' => ['waka.mata-pelajaran.*'], 'icon' => 'fa-book'],
             ['label' => 'Jadwal Pelajaran', 'route' => 'waka.jadwal-pelajaran.index', 'patterns' => ['waka.jadwal-pelajaran.*'], 'icon' => 'fa-calendar-week'],
-        ]],
-        ['label' => 'Kenaikan Kelas', 'items' => [
-            [
-                'label' => 'Pengaturan Kenaikan',
-                'patterns' => ['waka.kenaikan-kelas.kkm.*', 'waka.kenaikan-kelas.settings.*'],
-                'icon' => 'fa-cogs',
-                'children' => [
-                    ['label' => 'Pengaturan KKM', 'route' => 'waka.kenaikan-kelas.kkm.index', 'patterns' => ['waka.kenaikan-kelas.kkm.*']],
-                    ['label' => 'Pengaturan Kenaikan', 'route' => 'waka.kenaikan-kelas.settings.index', 'patterns' => ['waka.kenaikan-kelas.settings.*']],
-                ],
-            ],
-            ['label' => 'Proses & Rekap', 'route' => 'waka.kenaikan-kelas.report', 'patterns' => ['waka.kenaikan-kelas.report'], 'icon' => 'fa-tasks'],
         ]],
         ['label' => 'Monitoring & Analitik', 'items' => [
             [

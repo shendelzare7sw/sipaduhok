@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekap Nilai {{ $selectedMapel->nama_mapel }} - {{ $kelas->nama_kelas }}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('css/wali-kelas/nilai/print-detail.css') }}">
 </head>
 <body>
@@ -20,7 +19,7 @@
             <button class="btn-c" data-zoom-action="fit" title="Sesuaikan layar" style="font-size:11px; padding:7px 10px;">Fit</button>
         </div>
         <button class="btn-c btn-print" data-print-page>
-            <i class="bi bi-printer-fill"></i> Cetak / PDF
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 15h12v6H6zM18 12h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cetak / PDF
         </button>
     </div>
 
@@ -39,7 +38,7 @@
                     <strong>Wali Kelas:</strong> {{ $kelas->waliKelas->nama_lengkap ?? ($wali->nama_lengkap ?? '-') }}
                 </div>
                 <span class="semester-badge">
-                    <i class="bi bi-calendar3-week"></i> Semester {{ $semesterLabel }}
+                    <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 3v4m10-4v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Semester {{ $semesterLabel }}
                 </span>
             </div>
 

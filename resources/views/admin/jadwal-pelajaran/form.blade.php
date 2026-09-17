@@ -6,6 +6,8 @@
 
 @section('content')
 @php
+    $routePrefix = request()->routeIs('waka.*') ? 'waka' : 'admin';
+    $isWaka = $routePrefix === 'waka';
     $editing = isset($jadwalPelajaran);
     $selectedKelas = collect(old('kelas_ids', $editing ? $jadwalPelajaran->kelas->pluck('id')->all() : (request('kelas_id') ? [request('kelas_id')] : [])))->map(fn ($id) => (string) $id)->values()->all();
     $selectedTahun = (string) old('tahun_ajaran_id', $editing ? $jadwalPelajaran->tahun_ajaran_id : ($currentTahunAjaran?->id ?? ''));
@@ -29,7 +31,7 @@
     guruVisible(nama, cabang) { return (!this.guruSearch || nama.includes(this.guruSearch.toLowerCase())) && (!this.selectedCabang.length || !cabang || this.selectedCabang.includes(cabang)); }
 }">
     <header class="flex min-w-0 items-start gap-3">
-        <a href="{{ route('admin.jadwal-pelajaran.index', $editing ? ['tahun_ajaran_id' => $jadwalPelajaran->tahun_ajaran_id] : request()->query()) }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
+        <a href="{{ route($routePrefix . '.jadwal-pelajaran.index', $editing ? ['tahun_ajaran_id' => $jadwalPelajaran->tahun_ajaran_id] : request()->query()) }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
         <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Langkah 6 · Persiapan data</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">{{ $editing ? 'Edit jadwal ' . $jadwalPelajaran->mataPelajaran->nama_mapel : 'Susun jadwal baru' }}</h2><p class="mt-1 text-sm text-slate-500">Pilih kelas terlebih dahulu; pilihan mapel dan guru akan menyesuaikan otomatis.</p></div>
     </header>
 
@@ -37,7 +39,7 @@
         <aside class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><p class="font-extrabold">Jadwal belum dapat disimpan.</p><ul class="mt-2 list-disc space-y-1 pl-5 text-xs">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></aside>
     @endif
 
-    <form action="{{ $editing ? route('admin.jadwal-pelajaran.update', $jadwalPelajaran) : route('admin.jadwal-pelajaran.store') }}" method="POST" class="space-y-4">
+    <form action="{{ $editing ? route($routePrefix . '.jadwal-pelajaran.update', $jadwalPelajaran) : route($routePrefix . '.jadwal-pelajaran.store') }}" method="POST" class="space-y-4">
         @csrf
         @if($editing) @method('PUT') @endif
         <input type="hidden" name="is_multi_jenjang" :value="selectedJenjang.length > 1 ? 1 : 0">
@@ -49,7 +51,7 @@
                     @if($editing)
                         <select class="{{ $inputClass }} bg-slate-50" disabled>@foreach($tahunAjarans as $ta)<option value="{{ $ta->id }}" @selected($selectedTahun === (string) $ta->id)>{{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' (Aktif)' : '' }}</option>@endforeach</select><input type="hidden" name="tahun_ajaran_id" value="{{ $selectedTahun }}">
                     @else
-                        <select name="tahun_ajaran_id" class="{{ $inputClass }}" required @change="window.location.href = @js(route('admin.jadwal-pelajaran.create')) + '?tahun_ajaran_id=' + $event.target.value"><option value="">Pilih tahun ajaran</option>@foreach($tahunAjarans as $ta)<option value="{{ $ta->id }}" @selected($selectedTahun === (string) $ta->id)>{{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' (Aktif)' : '' }}</option>@endforeach</select>
+                        <select name="tahun_ajaran_id" class="{{ $inputClass }}" required @change="window.location.href = @js(route($routePrefix . '.jadwal-pelajaran.create')) + '?tahun_ajaran_id=' + $event.target.value"><option value="">Pilih tahun ajaran</option>@foreach($tahunAjarans as $ta)<option value="{{ $ta->id }}" @selected($selectedTahun === (string) $ta->id)>{{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' (Aktif)' : '' }}</option>@endforeach</select>
                     @endif
                 </label>
 
@@ -92,7 +94,7 @@
                     <button type="button" @click="openIstirahat = !openIstirahat" class="flex w-full items-center justify-between gap-3 text-left"><span><span class="block text-sm font-extrabold text-slate-800"><i class="fas fa-mug-hot mr-2 text-amber-500"></i>Cek waktu istirahat</span><span class="mt-0.5 block text-xs text-slate-500">Ditampilkan sesuai jenjang kelas dan hari yang dipilih.</span></span><i class="fas fa-chevron-down text-slate-400 transition" :class="openIstirahat && 'rotate-180'"></i></button>
                     <div x-cloak x-show="openIstirahat" class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">@foreach($pengaturanIstirahat as $jenjang => $items)@foreach($items as $item)<article x-show="(!selectedJenjang.length || selectedJenjang.includes(@js($jenjang))) && (!hari || @js(is_array($item->hari_aktif) ? $item->hari_aktif : [$item->hari_aktif]).includes(hari))" class="rounded-xl border border-amber-200 bg-amber-50 p-3"><div class="flex items-center justify-between gap-2"><span class="text-xs font-extrabold text-amber-800">{{ $jenjang }} · Istirahat {{ $item->urutan }}</span><strong class="whitespace-nowrap text-xs text-slate-800">{{ substr($item->jam_mulai, 0, 5) }}–{{ substr($item->jam_selesai, 0, 5) }}</strong></div><p class="mt-1 text-xs text-slate-600">{{ $item->nama_istirahat }}</p></article>@endforeach @endforeach</div>
                 @else
-                    <p class="text-xs text-amber-800"><i class="fas fa-triangle-exclamation mr-1"></i>Belum ada waktu istirahat. <a href="{{ route('admin.pengaturan-istirahat.index') }}" class="font-bold text-amber-900">Atur sekarang</a>.</p>
+                    <p class="text-xs text-amber-800"><i class="fas fa-triangle-exclamation mr-1"></i>Belum ada waktu istirahat.@unless($isWaka) <a href="{{ route('admin.pengaturan-istirahat.index') }}" class="font-bold text-amber-900">Atur sekarang</a>.@endunless</p>
                 @endif
             </div>
             <div class="border-t border-slate-200 p-4 sm:p-5"><label class="block"><span class="{{ $labelClass }}">Keterangan <span class="text-xs font-medium text-slate-400">(opsional)</span></span><textarea name="keterangan" rows="3" class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Catatan tambahan untuk jadwal ini">{{ old('keterangan', $editing ? $jadwalPelajaran->keterangan : '') }}</textarea></label></div>
@@ -102,7 +104,7 @@
             <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><header class="border-b border-slate-200 px-4 py-4 sm:px-5"><h3 class="font-extrabold text-slate-950"><i class="fas fa-history mr-2 text-brand-600"></i>Riwayat perubahan</h3></header><div class="divide-y divide-slate-100">@foreach($jadwalPelajaran->histories->sortByDesc('changed_at')->take(10) as $history)<article class="grid gap-1 px-4 py-3 text-xs sm:grid-cols-[140px_160px_minmax(0,1fr)] sm:px-5"><time class="font-semibold text-slate-500">{{ $history->changed_at->format('d/m/Y H:i') }}</time><strong class="text-slate-800">{{ ucfirst(str_replace('_', ' ', $history->field_changed)) }}</strong><p class="min-w-0 break-words text-slate-600">{{ $history->old_value ?: '—' }} <i class="fas fa-arrow-right mx-1 text-slate-300"></i> {{ $history->new_value ?: '—' }}</p></article>@endforeach</div></section>
         @endif
 
-        <div class="sticky bottom-3 z-10 flex flex-wrap items-center justify-end gap-2 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none"><a href="{{ route('admin.jadwal-pelajaran.index', $editing ? ['tahun_ajaran_id' => $jadwalPelajaran->tahun_ajaran_id] : request()->query()) }}" class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-save"></i>{{ $editing ? 'Simpan perubahan' : 'Simpan jadwal' }}</button></div>
+        <div class="sticky bottom-3 z-10 flex flex-wrap items-center justify-end gap-2 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none"><a href="{{ route($routePrefix . '.jadwal-pelajaran.index', $editing ? ['tahun_ajaran_id' => $jadwalPelajaran->tahun_ajaran_id] : request()->query()) }}" class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50">Batal</a><button type="submit" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-save"></i>{{ $editing ? 'Simpan perubahan' : 'Simpan jadwal' }}</button></div>
     </form>
 </div>
 @endsection

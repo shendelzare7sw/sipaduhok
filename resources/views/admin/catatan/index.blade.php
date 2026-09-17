@@ -5,12 +5,13 @@
 @section('page-subtitle', 'Kirim dan kelola catatan instruksi untuk pengguna')
 
 @section('content')
+    @php $isWaka = request()->routeIs('waka.*'); @endphp
     @include('catatan.partials.index-content', [
-        'routePrefix' => request()->routeIs('ketua.*') ? 'ketua' : 'admin',
-        'showDirection' => false,
-        'toolbarDescription' => 'Kelola riwayat catatan, instruksi, dan teguran yang sudah dikirim.',
-        'listTitle' => 'Riwayat Catatan Terkirim',
-        'emptyTitle' => 'Belum ada catatan terkirim',
-        'emptyDescription' => 'Catatan yang Anda buat akan tampil sebagai riwayat di halaman ini.',
+        'routePrefix' => $isWaka ? 'waka' : (request()->routeIs('ketua.*') ? 'ketua' : 'admin'),
+        'showDirection' => $isWaka,
+        'toolbarDescription' => $isWaka ? 'Kelola catatan akademik yang Anda kirim atau terima di cabang.' : 'Kelola riwayat catatan, instruksi, dan teguran yang sudah dikirim.',
+        'listTitle' => $isWaka ? 'Riwayat Catatan' : 'Riwayat Catatan Terkirim',
+        'emptyTitle' => $isWaka ? 'Belum ada catatan' : 'Belum ada catatan terkirim',
+        'emptyDescription' => $isWaka ? 'Catatan yang Anda kirim atau terima akan tampil di halaman ini.' : 'Catatan yang Anda buat akan tampil sebagai riwayat di halaman ini.',
     ])
 @endsection

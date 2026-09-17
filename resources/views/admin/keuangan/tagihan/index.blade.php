@@ -236,7 +236,7 @@
             <div x-cloak x-show="selected.length" x-transition class="fixed bottom-14 left-1/2 z-[1040] flex w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-3 py-3 text-white shadow-2xl min-[769px]:bottom-16 sm:w-auto sm:px-4">
                 <span class="min-w-0 flex-1 whitespace-nowrap text-xs font-bold sm:text-sm"><i class="fas fa-square-check mr-1 text-blue-300"></i><span x-text="selected.length"></span> siswa dipilih</span>
                 <button type="button" @click="selected = []" class="min-h-9 rounded-xl bg-white/10 px-3 text-xs font-bold hover:bg-white/20">Batal</button>
-                <button type="button" @click="resetSelected" class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-red-600 px-3 text-xs font-bold hover:bg-red-500"><i class="fas fa-trash-arrow-up"></i>Reset</button>
+                <button type="button" @click="resetSelected" class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-red-600 px-3 text-xs font-bold text-white hover:bg-red-500"><i class="fas fa-trash-arrow-up"></i>Reset</button>
             </div>
         </template>
 

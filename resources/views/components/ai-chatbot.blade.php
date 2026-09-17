@@ -3,7 +3,7 @@
     $chatbotUserRole = auth()->user()->role ?? 'guest';
 @endphp
 
-<div data-ai-chatbot>
+<div data-ai-chatbot class="print:!hidden">
     <button
         id="aiChatbotFab"
         type="button"

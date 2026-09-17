@@ -70,21 +70,64 @@ class AdminJadwalPelajaranUiTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->actingAs($waka)->get(route('waka.jadwal-pelajaran.index', ['tahun_ajaran_id' => $tahun->id]))
+        $wakaIndex = $this->actingAs($waka)->get(route('waka.jadwal-pelajaran.index', ['tahun_ajaran_id' => $tahun->id]));
+        $wakaIndex
             ->assertOk()
-            ->assertSee('x-data="{ toolsOpen: false, exportOpen: false }"', false)
+            ->assertSee('Daftar jadwal')
+            ->assertSee('Pilih guru baru')
             ->assertSee('sm:!w-64', false)
-            ->assertSee('grid-cols-4', false)
+            ->assertSee('grid-cols-3', false)
+            ->assertDontSee('Istirahat')
+            ->assertDontSee('/waka/pengaturan-istirahat', false)
             ->assertSee('lg:!px-5', false)
             ->assertSee('whitespace-nowrap', false)
             ->assertSee('Duplikasi periode')
-            ->assertSee('PDF semua jadwal');
+            ->assertSee('PDF semua jadwal')
+            ->assertSee(route('waka.jadwal-pelajaran.create', ['tahun_ajaran_id' => $tahun->id]), false)
+            ->assertDontSee('/admin/jadwal-pelajaran', false)
+            ->assertDontSee('data-bs-toggle', false)
+            ->assertDontSee('resources/js/waka/jadwal-pelajaran/index.js', false);
+
+        $this->actingAs($waka)->get(route('waka.jadwal-pelajaran.create', ['tahun_ajaran_id' => $tahun->id]))
+            ->assertOk()->assertSee('Susun jadwal baru')->assertSee('name="kelas_ids[]"', false)
+            ->assertSee(route('waka.jadwal-pelajaran.store'), false)
+            ->assertDontSee('/admin/jadwal-pelajaran', false);
+
+        $this->actingAs($waka)->get(route('waka.jadwal-pelajaran.edit', $jadwal))
+            ->assertOk()->assertSee('Edit jadwal Matematika')->assertSee('Simpan perubahan')
+            ->assertSee(route('waka.jadwal-pelajaran.update', $jadwal), false)
+            ->assertDontSee('/admin/jadwal-pelajaran', false);
+
+        $this->actingAs($waka)->get(route('waka.jadwal-pelajaran.show', ['kelas' => $kelas->id, 'tahun_ajaran_id' => $tahun->id]))
+            ->assertOk()->assertSee('Jadwal per kelas')->assertSee('Matematika')
+            ->assertSee(route('waka.jadwal-pelajaran.preview-print', ['kelas' => $kelas->id, 'tahun_ajaran_id' => $tahun->id]), false)
+            ->assertDontSee('/admin/jadwal-pelajaran', false);
+
+        $this->actingAs($waka)->get(route('waka.jadwal-pelajaran.import'))
+            ->assertOk()->assertSee('Import dari Excel')->assertSee('name="file"', false)
+            ->assertSee(route('waka.jadwal-pelajaran.import.store'), false)
+            ->assertDontSee('/admin/jadwal-pelajaran', false);
+
+        $this->actingAs($waka)->get(route('waka.jadwal-pelajaran.preview-print', ['kelas' => $kelas->id, 'tahun_ajaran_id' => $tahun->id]))
+            ->assertOk()->assertSee('Pratinjau dokumen')->assertSee('Matematika')
+            ->assertSee(route('waka.jadwal-pelajaran.show', ['kelas' => $kelas->id, 'tahun_ajaran_id' => $tahun->id]), false)
+            ->assertDontSee('/admin/jadwal-pelajaran', false);
+
+        $this->actingAs($waka)->get(route('waka.jadwal-pelajaran.export-pdf', ['tahun_ajaran_id' => $tahun->id]))
+            ->assertOk()->assertSee('Daftar Jadwal Pelajaran')->assertSee('Matematika')
+            ->assertDontSee('/admin/jadwal-pelajaran', false);
 
         foreach (['form.css', 'import.css', 'index.css', 'show.css'] as $file) {
             $this->assertFalse(File::exists(resource_path("css/admin/jadwal-pelajaran/{$file}")));
         }
         foreach (['form.js', 'import.js', 'index.js', 'show.js'] as $file) {
             $this->assertFalse(File::exists(resource_path("js/admin/jadwal-pelajaran/{$file}")));
+        }
+        foreach (['form.css', 'import.css', 'index.css', 'show.css'] as $file) {
+            $this->assertFalse(File::exists(resource_path("css/waka/jadwal-pelajaran/{$file}")));
+        }
+        foreach (['form.js', 'import.js', 'index.js', 'show.js'] as $file) {
+            $this->assertFalse(File::exists(resource_path("js/waka/jadwal-pelajaran/{$file}")));
         }
     }
 

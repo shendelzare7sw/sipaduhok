@@ -1,6 +1,9 @@
+@php
+    $routePrefix = request()->routeIs('waka.*') ? 'waka' : 'admin';
+@endphp
 @extends('layouts.print')
 @section('title', 'Daftar Jadwal Pelajaran')
-@section('back-url', route('admin.jadwal-pelajaran.index', request()->query()))
+@section('back-url', route($routePrefix . '.jadwal-pelajaran.index', request()->query()))
 @section('report-title', 'Daftar Jadwal Pelajaran')
 @section('report-meta')
 <p class="mt-1 text-xs text-slate-600 print:text-[8pt]">Tahun ajaran {{ $tahunAjaran?->nama_tahun_ajaran ?? 'semua periode' }} · {{ $jadwalList->count() }} sesi</p>

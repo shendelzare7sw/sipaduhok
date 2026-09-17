@@ -2,257 +2,75 @@
 
 @section('title', 'Nilai Siswa')
 @section('page-title', 'Nilai Siswa')
-@section('page-subtitle', isset($kelas) && $kelas ? 'Lihat nilai siswa kelas ' . $kelas->nama_kelas : 'Kelola nilai siswa')
-
-
-@section('styles')
-    @vite(['resources/css/wali-kelas/nilai/index.css', 'resources/js/wali-kelas/nilai/index.js'])
-@endsection
+@section('page-subtitle', isset($kelas) && $kelas ? 'Nilai kelas ' . $kelas->nama_kelas : 'Kelola nilai siswa')
 
 @section('content')
-<div class="wk-page">
-<div class="container-fluid px-0">
+@php
+    $score = fn ($value, $decimals = 1) => $value === null ? '—' : number_format((float) $value, $decimals, ',', '.');
+@endphp
+<div class="min-w-0 w-full space-y-4">
     @if($error ?? false)
-        <div class="alert alert-danger shadow-sm border-start border-danger border-4">
-            <i class="fas fa-exclamation-triangle me-2"></i>{{ $error }}
-        </div>
+        <p class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800" role="alert">{{ $error }}</p>
     @else
-        {{-- HEADER ACTIONS --}}
-        <div class="card shadow mb-4">
-            <div class="card-body py-3">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h5 class="m-0 fw-bold text-primary">Rekapitulasi Nilai Akademik</h5>
-                    </div>
-                    <div class="col-auto">
-                        <a href="{{ route('wali.nilai.print', ['mata_pelajaran_id' => $selectedMapelId ?? '', 'semester' => $semester ?? '']) }}" target="_blank" class="btn btn-secondary btn-sm shadow-sm">
-                            <i class="fas fa-print me-1"></i> Cetak Rekap Nilai
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <header class="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div><p class="text-xs font-bold uppercase tracking-wide text-sky-700">Kelas {{ $kelas->nama_kelas }}</p><h1 class="mt-1 text-lg font-extrabold text-slate-900">Rekap nilai akademik</h1><p class="mt-1 text-xs text-slate-500">Pilih semester dan mata pelajaran, lalu buka nilai tiap siswa.</p></div>
+            <a href="{{ route('wali.nilai.print', ['mata_pelajaran_id' => $selectedMapelId ?? '', 'semester' => $semester]) }}" target="_blank" rel="noopener" class="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50"><i class="fas fa-print" aria-hidden="true"></i>Cetak rekap</a>
+        </header>
 
-        {{-- FILTER SEMESTER & MATA PELAJARAN --}}
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center">
-                <h6 class="m-0 fw-bold text-primary"><i class="fas fa-filter me-2"></i>Filter Nilai</h6>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-light text-dark border"><i class="fas fa-calendar me-1"></i>Semester {{ ucfirst($semester ?? 'genap') }}</span>
-                    @if(($semester ?? 'genap') == ($currentSemester ?? 'genap'))
-                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>Aktif</span>
-                    @endif
-                </div>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('wali.nilai.index') }}" method="GET">
-                    <div class="row align-items-end g-2">
-                        {{-- Semester Selector --}}
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold"><i class="fas fa-calendar-alt me-1"></i>Semester</label>
-                            <select name="semester" class="form-select border-start border-success border-4 shadow-sm" data-auto-submit>
-                                <option value="ganjil" {{ ($semester ?? 'genap') == 'ganjil' ? 'selected' : '' }}>Ganjil (Jul-Des)</option>
-                                <option value="genap" {{ ($semester ?? 'genap') == 'genap' ? 'selected' : '' }}>Genap (Jan-Jun)</option>
-                            </select>
-                        </div>
-                        {{-- Mata Pelajaran Selector --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold"><i class="fas fa-book me-1"></i>Mata Pelajaran</label>
-                            <select name="mata_pelajaran_id" class="form-select border-start border-primary border-4 shadow-sm" data-auto-submit>
-                                <option value="">-- Lihat Semua (Ringkasan Siswa) --</option>
-                                @foreach($mataPelajaranList as $mapel)
-                                    <option value="{{ $mapel->id }}" {{ ($selectedMapelId ?? null) == $mapel->id ? 'selected' : '' }}>
-                                        {{ $mapel->nama_mapel }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        {{-- Reset Button --}}
-                        <div class="col-md-3">
-                            <a href="{{ route('wali.nilai.index') }}" class="btn btn-light border w-100 fw-bold">
-                                <i class="fas fa-sync-alt me-1"></i> Reset Filter
-                            </a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <form action="{{ route('wali.nilai.index') }}" method="GET" class="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-[180px_minmax(220px,1fr)_auto] lg:items-end">
+            <label class="min-w-0 text-xs font-bold text-slate-700">Semester<select name="semester" class="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800"><option value="ganjil" @selected($semester === 'ganjil')>Ganjil</option><option value="genap" @selected($semester === 'genap')>Genap</option></select></label>
+            <label class="min-w-0 text-xs font-bold text-slate-700">Mata pelajaran<select name="mata_pelajaran_id" class="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800"><option value="">Semua mapel · daftar siswa</option>@foreach($mataPelajaranList as $mapel)<option value="{{ $mapel->id }}" @selected($selectedMapelId == $mapel->id)>{{ $mapel->nama_mapel }}</option>@endforeach</select></label>
+            <div class="flex gap-2"><button type="submit" class="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 text-xs font-bold text-white hover:bg-sky-800"><i class="fas fa-filter" aria-hidden="true"></i>Terapkan</button><a href="{{ route('wali.nilai.index', ['semester' => $semester]) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700" aria-label="Reset filter mapel"><i class="fas fa-rotate-left" aria-hidden="true"></i></a></div>
+        </form>
 
-        {{-- STATISTIK KELAS (Tampil jika Mapel tertentu dipilih) --}}
-        @if(isset($selectedMapelId) && $selectedMapelId)
-            <div class="row mb-2">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-start border-primary border-4 shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row g-0 align-items-center">
-                                <div class="col me-2">
-                                    <div class="text-xs fw-bold text-primary text-uppercase mb-1">Rata-rata Kelas</div>
-                                    <div class="h5 mb-0 fw-bold text-gray-800">{{ number_format($rataRataKelas, 2) }}</div>
-                                </div>
-                                <div class="col-auto"><i class="fas fa-calculator fa-2x text-gray-300"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-start border-success border-4 shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row g-0 align-items-center">
-                                <div class="col me-2">
-                                    <div class="text-xs fw-bold text-success text-uppercase mb-1">Nilai Tertinggi</div>
-                                    <div class="h5 mb-0 fw-bold text-gray-800">{{ number_format($nilaiTertinggi, 2) }}</div>
-                                </div>
-                                <div class="col-auto"><i class="fas fa-trophy fa-2x text-gray-300"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-start border-danger border-4 shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row g-0 align-items-center">
-                                <div class="col me-2">
-                                    <div class="text-xs fw-bold text-danger text-uppercase mb-1">Nilai Terendah</div>
-                                    <div class="h5 mb-0 fw-bold text-gray-800">{{ number_format($nilaiTerendah, 2) }}</div>
-                                </div>
-                                <div class="col-auto"><i class="fas fa-chart-line fa-2x text-gray-300"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-start border-info border-4 shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row g-0 align-items-center">
-                                <div class="col me-2">
-                                    <div class="text-xs fw-bold text-info text-uppercase mb-1">Ketuntasan Siswa</div>
-                                    <div class="h5 mb-0 fw-bold text-gray-800">{{ $jumlahTuntas }} / {{ $siswaList->count() }}</div>
-                                </div>
-                                <div class="col-auto"><i class="fas fa-user-check fa-2x text-gray-300"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        @if($selectedMapel)
+            <section class="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Statistik nilai mapel">
+                @foreach(['Rata-rata kelas' => $score($rataRataKelas, 2), 'Tertinggi' => $score($nilaiTertinggi, 2), 'Terendah' => $score($nilaiTerendah, 2), 'Tuntas' => $jumlahTuntas.' / '.$siswaList->count()] as $label => $value)
+                    <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"><p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">{{ $label }}</p><p class="mt-1 text-lg font-extrabold text-slate-900">{{ $value }}</p></div>
+                @endforeach
+            </section>
+            @if(($jumlahGuruUpdate ?? 0) > 0)
+                <p class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900"><strong>{{ $jumlahGuruUpdate }} siswa memiliki pembaruan nilai dari guru.</strong> Buka Edit Nilai siswa untuk membandingkan dan memilih sinkronisasi. Tidak ada perubahan otomatis.</p>
+            @endif
         @endif
 
-        @if(isset($selectedMapelId) && $selectedMapelId && ($jumlahGuruUpdate ?? 0) > 0)
-            <div class="alert alert-warning shadow-sm border-start border-warning border-4 mb-4">
-                <div class="d-flex align-items-start">
-                    <i class="fas fa-bell fa-lg me-3 mt-1 text-warning"></i>
-                    <div>
-                        <h6 class="alert-heading fw-bold mb-1">{{ $jumlahGuruUpdate }} siswa punya update nilai dari guru</h6>
-                        <p class="small mb-0 text-muted">
-                            Guru pengajar mapel ini sudah menyimpan nilai baru setelah Anda terakhir mengedit.
-                            Klik tombol <span class="badge bg-warning text-dark"><i class="fas fa-bell"></i></span> di kolom AKSI siswa terkait untuk membuka halaman edit — di sana ada tombol <strong>Preview vs Guru</strong> & <strong>Sinkronisasi dari Guru</strong> per mata pelajaran.
-                        </p>
-                    </div>
-                </div>
+        <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-labelledby="siswa-heading">
+            <div class="border-b border-slate-100 px-4 py-3"><h2 id="siswa-heading" class="text-sm font-extrabold text-slate-900">Daftar siswa{{ $selectedMapel ? ' · '.$selectedMapel->nama_mapel : '' }}</h2><p class="mt-0.5 text-xs text-slate-500">{{ $siswaList->count() }} siswa · Semester {{ ucfirst($semester) }}</p></div>
+            <div class="hidden overflow-x-auto lg:block">
+                <table class="w-full min-w-[850px] text-left text-xs">
+                    <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wide text-slate-600"><tr><th scope="col" class="px-4 py-3">Siswa</th><th scope="col" class="px-3 py-3">NIS</th>@if($selectedMapel)@foreach(['Tugas', 'Latihan', 'UH', 'PTS', 'PAS', 'Akhir'] as $label)<th scope="col" class="px-2 py-3 text-center">{{ $label }}</th>@endforeach
+                    @endif<th scope="col" class="px-4 py-3 text-right">Aksi</th></tr></thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($siswaList as $siswa)
+                            @php
+                                $nilai = $selectedMapel ? ($nilaiData[$siswa->id] ?? null) : null;
+                                $guruBaru = $nilai && $nilai->hasGuruUpdate() && $nilai->guru_terakhir_simpan_at
+                                    && (!$nilai->wali_terakhir_edit_at || $nilai->guru_terakhir_simpan_at->gt($nilai->wali_terakhir_edit_at));
+                            @endphp
+                            <tr><th scope="row" class="px-4 py-3 font-bold text-slate-900">{{ $siswa->nama_lengkap }}@if($guruBaru)<span class="ml-2 rounded-full bg-amber-50 px-2 py-1 text-[10px] text-amber-900">Update guru</span>@endif</th><td class="px-3 py-3 text-slate-600">{{ $siswa->nis ?: '—' }}</td>@if($selectedMapel)@foreach(['rata_tugas','rata_latihan','rata_uh','pts','pas','nilai_akhir'] as $field)<td class="px-2 py-3 text-center font-semibold text-slate-800">{{ $score($nilai?->$field) }}</td>@endforeach
+                    @endif<td class="px-4 py-3"><div class="flex justify-end gap-2"><a href="{{ route('wali.nilai.show', ['siswa' => $siswa->id, 'semester' => $semester]) }}" class="inline-flex min-h-9 items-center rounded-lg border border-slate-300 px-3 font-bold text-slate-700">Detail</a><a href="{{ route('wali.nilai.edit', ['siswa' => $siswa->id, 'semester' => $semester]) }}" class="inline-flex min-h-9 items-center rounded-lg bg-sky-700 px-3 font-bold text-white">Edit</a></div></td></tr>
+                        @empty
+                            <tr><td colspan="{{ $selectedMapel ? 9 : 3 }}" class="px-4 py-8 text-center text-sm text-slate-500">Belum ada siswa yang cocok.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-        @endif
-
-        {{-- TABEL UTAMA NILAI --}}
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 bg-white">
-                <h6 class="m-0 fw-bold text-primary">
-                    <i class="fas fa-table me-2"></i>Daftar Nilai {{ $selectedMapel ? ': ' . $selectedMapel->nama_mapel : '(Seluruh Siswa)' }}
-                </h6>
+            <div class="divide-y divide-slate-100 lg:hidden">
+                @forelse($siswaList as $siswa)
+                    @php
+                        $nilai = $selectedMapel ? ($nilaiData[$siswa->id] ?? null) : null;
+                        $guruBaru = $nilai && $nilai->hasGuruUpdate() && $nilai->guru_terakhir_simpan_at
+                            && (!$nilai->wali_terakhir_edit_at || $nilai->guru_terakhir_simpan_at->gt($nilai->wali_terakhir_edit_at));
+                    @endphp
+                    <article class="space-y-2 px-4 py-3"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="text-sm font-bold text-slate-900">{{ $siswa->nama_lengkap }}</h3><p class="text-[11px] text-slate-500">NIS {{ $siswa->nis ?: '—' }}</p></div>@if($guruBaru)<span class="shrink-0 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-900">Update guru</span>@endif</div>
+                        @if($selectedMapel)<dl class="grid grid-cols-3 gap-2 rounded-lg bg-slate-50 p-2 text-[11px]">@foreach(['Tugas' => 'rata_tugas','Latihan' => 'rata_latihan','UH' => 'rata_uh','PTS' => 'pts','PAS' => 'pas','Akhir' => 'nilai_akhir'] as $label => $field)<div><dt class="text-slate-500">{{ $label }}</dt><dd class="text-sm font-bold text-slate-900">{{ $score($nilai?->$field) }}</dd></div>@endforeach</dl>@endif
+                        <div class="flex gap-2"><a href="{{ route('wali.nilai.show', ['siswa' => $siswa->id, 'semester' => $semester]) }}" class="inline-flex min-h-9 flex-1 items-center justify-center rounded-lg border border-slate-300 text-xs font-bold text-slate-700">Detail</a><a href="{{ route('wali.nilai.edit', ['siswa' => $siswa->id, 'semester' => $semester]) }}" class="inline-flex min-h-9 flex-1 items-center justify-center rounded-lg bg-sky-700 text-xs font-bold text-white">Edit nilai</a></div>
+                    </article>
+                @empty
+                    <p class="px-4 py-8 text-center text-sm text-slate-500">Belum ada siswa yang cocok.</p>
+                @endforelse
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover wk-card-table mb-0">
-                        <thead>
-                            <tr>
-                                <th class="col-no">NO</th>
-                                <th class="col-nis">NIS</th>
-                                <th class="text-start col-siswa">NAMA LENGKAP SISWA</th>
-                                @if(isset($selectedMapelId) && $selectedMapelId)
-                                    <th>TUGAS</th>
-                                    <th>LATIHAN</th>
-                                    <th>UH</th>
-                                    <th>PTS</th>
-                                    <th>PAS</th>
-                                    <th>N. AKHIR</th>
-                                @endif
-                                <th width="100">AKSI</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($siswaList ?? [] as $index => $siswa)
-                                @php
-                                    $nilai = (isset($selectedMapelId) && $selectedMapelId) ? ($nilaiData[$siswa->id] ?? null) : null;
-                                    $guruBaruUpdate = $nilai
-                                        && $nilai->hasGuruUpdate()
-                                        && $nilai->guru_terakhir_simpan_at
-                                        && (!$nilai->wali_terakhir_edit_at
-                                            || $nilai->guru_terakhir_simpan_at->gt($nilai->wali_terakhir_edit_at));
-                                    $waliEditBeda = $nilai
-                                        && $nilai->wali_terakhir_edit_at
-                                        && $nilai->hasGuruUpdate()
-                                        && !$guruBaruUpdate;
-                                @endphp
-                                <tr>
-                                    <td class="text-center align-middle fw-bold text-gray-600 col-no">{{ $loop->iteration }}</td>
-                                    <td class="text-center align-middle fw-bold text-gray-800 col-nis">{{ $siswa->nis }}</td>
-                                    <td class="align-middle col-siswa">
-                                        <div class="fw-bold text-gray-900">{{ $siswa->nama_lengkap }}</div>
-                                        <small class="text-muted">Kelas: {{ $kelas->nama_kelas }}</small>
-                                        @if($guruBaruUpdate)
-                                            <div class="mt-1">
-                                                <span class="badge bg-warning text-dark" title="Guru pengajar sudah update nilai setelah Anda terakhir edit. Buka detail untuk preview diff & sync.">
-                                                    <i class="fas fa-bell me-1"></i> Guru Update Baru
-                                                </span>
-                                            </div>
-                                        @elseif($waliEditBeda)
-                                            <div class="mt-1">
-                                                <span class="badge bg-info text-white" title="Nilai saat ini berbeda dari snapshot guru karena Anda sudah mengedit.">
-                                                    <i class="fas fa-user-edit me-1"></i> Edit Wali
-                                                </span>
-                                            </div>
-                                        @endif
-                                    </td>
-
-                                    @if(isset($selectedMapelId) && $selectedMapelId)
-                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->rata_tugas ?? 0, 1) : '-' }}</td>
-                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->rata_latihan ?? 0, 1) : '-' }}</td>
-                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->rata_uh ?? 0, 1) : '-' }}</td>
-                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->pts ?? 0, 1) : '-' }}</td>
-                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->pas ?? 0, 1) : '-' }}</td>
-                                        <td class="text-center align-middle">
-                                            <span class="nilai-akhir">{{ $nilai ? number_format($nilai->nilai_akhir ?? 0, 1) : '-' }}</span>
-                                        </td>
-                                    @endif
-
-                                    <td class="text-center align-middle">
-                                        <div class="d-flex gap-1 justify-content-center">
-                                            <a href="{{ route('wali.nilai.show', $siswa->id) }}?semester={{ $semester }}" class="btn btn-info btn-sm rounded-circle shadow-sm nilai-action-btn" title="Lihat Profil Nilai">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('wali.nilai.edit', $siswa->id) }}?semester={{ $semester }}" class="btn {{ $guruBaruUpdate ? 'btn-warning' : 'btn-primary' }} btn-sm rounded-circle shadow-sm nilai-action-btn" title="{{ $guruBaruUpdate ? 'Ada update guru — buka untuk preview & sinkron' : 'Edit nilai semua mapel' }}">
-                                                <i class="fas {{ $guruBaruUpdate ? 'fa-bell' : 'fa-edit' }}"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="9" class="text-center py-5">
-                                        <i class="fas fa-database fa-3x text-gray-200 mb-3"></i>
-                                        <p class="text-gray-500 mb-0">Belum ada data siswa untuk ditampilkan.</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        </section>
     @endif
 </div>
-</div>
-</div>
-
 @endsection

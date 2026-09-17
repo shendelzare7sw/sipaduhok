@@ -3,20 +3,21 @@
 <head>
     <meta charset="utf-8">
     <title>Rapor PTS - {{ $rapor->siswa->nama_lengkap }}</title>
+    @vite('resources/css/rapor-document.css')
     <link rel="stylesheet" href="{{ asset('css/wali-kelas/rapor/print-pts.css') }}">
 </head>
-<body>
+<body class="font-[Arial,sans-serif] text-[9pt] leading-[1.18]">
     <!-- Header -->
-    <div class="header">
-        <h1>HOUSE OF KNOWLEDGE</h1>
-        <h2>The Second Home For Your Children - 家庭教育</h2>
-        <p>Jl. Contoh No. 123, Kota, Provinsi | Telp: (021) 1234567 | Email: info@hok.sch.id</p>
-        <hr style="margin: 15px 0;">
-        <h1>LAPORAN PENILAIAN TENGAH SEMESTER</h1>
+    <div class="mb-2 text-center">
+        <h1 class="my-[3px] text-[12pt]">HOUSE OF KNOWLEDGE</h1>
+        <h2 class="my-0.5 text-[10pt] font-normal">The Second Home For Your Children - 家庭教育</h2>
+        <p class="my-0.5 text-[7.5pt]">Jl. Contoh No. 123, Kota, Provinsi | Telp: (021) 1234567 | Email: info@hok.sch.id</p>
+        <hr class="my-2">
+        <h1 class="my-[3px] text-[12pt]">LAPORAN PENILAIAN TENGAH SEMESTER</h1>
     </div>
 
     <!-- Info Siswa -->
-    <table class="info-table">
+    <table class="mb-[7px] w-full [&_td]:px-[6px] [&_td]:py-px [&_td:first-child]:w-[150px] [&_td:first-child]:font-bold">
         <tr>
             <td>Nama Siswa</td>
             <td>: {{ $rapor->siswa->nama_lengkap }}</td>
@@ -40,7 +41,7 @@
     </table>
 
     <!-- Tabel Nilai -->
-    <table class="nilai-table">
+    <table class="mb-2 w-full table-fixed border-collapse [&_td]:border [&_td]:border-solid [&_td]:border-black [&_td]:px-[3px] [&_td]:py-0.5 [&_td]:text-center [&_td]:text-[8pt] [&_td:nth-child(2)]:text-left [&_th]:border [&_th]:border-solid [&_th]:border-black [&_th]:bg-[#f0f0f0] [&_th]:px-[3px] [&_th]:py-0.5 [&_th]:text-center [&_th]:text-[8pt] [&_th]:font-bold">
         <thead>
             <tr>
                 <th width="30">No</th>
@@ -76,12 +77,12 @@
                 $count++;
             @endphp
             @endforeach
-            <tr style="font-weight: bold;">
+            <tr class="font-bold">
                 <td colspan="6">Jumlah</td>
                 <td>{{ $totalNilai }}</td>
                 <td></td>
             </tr>
-            <tr style="font-weight: bold;">
+            <tr class="font-bold">
                 <td colspan="6">Rata-rata</td>
                 <td>{{ $count > 0 ? number_format($totalNilai / $count, 2) : 0 }}</td>
                 <td></td>
@@ -90,8 +91,8 @@
     </table>
 
     <!-- Kegiatan Ekstrakurikuler -->
-    <h3>Kegiatan Ekstrakurikuler</h3>
-    <table class="ekstra-table">
+    <h3 class="mb-1 mt-[6px] text-[9.5pt]">Kegiatan Ekstrakurikuler</h3>
+    <table class="mb-2 w-[60%] border-collapse [&_td]:border [&_td]:border-solid [&_td]:border-black [&_td]:px-[3px] [&_td]:py-0.5 [&_th]:border [&_th]:border-solid [&_th]:border-black [&_th]:bg-[#f0f0f0] [&_th]:px-[3px] [&_th]:py-0.5">
         <thead>
             <tr>
                 <th width="40">No</th>
@@ -102,16 +103,16 @@
         <tbody>
             @forelse($rapor->kegiatanEkstra as $ekstra)
             <tr>
-                <td style="text-align: center;">{{ $loop->iteration }}</td>
+                <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $ekstra->kegiatan_nama }}</td>
-                <td style="text-align: center;">{{ $ekstra->predikat ?? '-' }}</td>
+                <td class="text-center">{{ $ekstra->predikat ?? '-' }}</td>
             </tr>
             @empty
             @foreach(\App\Models\RaporKegiatanEkstra::getDefaultKegiatan() as $kegiatan)
             <tr>
-                <td style="text-align: center;">{{ $loop->iteration }}</td>
+                <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $kegiatan }}</td>
-                <td style="text-align: center;">-</td>
+                <td class="text-center">-</td>
             </tr>
             @endforeach
             @endforelse
@@ -119,8 +120,8 @@
     </table>
 
     <!-- Ketidakhadiran -->
-    <h3>Ketidakhadiran</h3>
-    <table class="kehadiran-table">
+    <h3 class="mb-1 mt-[6px] text-[9.5pt]">Ketidakhadiran</h3>
+    <table class="mb-2 w-1/2 border-collapse [&_td]:border [&_td]:border-solid [&_td]:border-black [&_td]:px-[3px] [&_td]:py-0.5 [&_td:first-child]:w-[150px] [&_td:first-child]:font-bold">
         <tr>
             <td>Sakit</td>
             <td>: {{ $rapor->jumlah_sakit }} hari</td>
@@ -133,34 +134,34 @@
             <td>Tanpa Keterangan</td>
             <td>: {{ $rapor->jumlah_alpha }} hari</td>
         </tr>
-        <tr style="font-weight: bold;">
+        <tr class="font-bold">
             <td>Jumlah</td>
             <td>: {{ $rapor->jumlah_sakit + $rapor->jumlah_izin + $rapor->jumlah_alpha }} hari</td>
         </tr>
     </table>
 
     <!-- Tanda Tangan -->
-    <div class="signature">
-        <table>
+    <div class="mt-3">
+        <table class="w-full [&_td]:p-1 [&_td]:text-center [&_td]:align-top">
             <tr>
                 <td width="33%">
                     <div>Wali Siswa/Wali</div>
-                    <div class="sign-line">(...........................)</div>
+                    <div class="mt-7 [border-top:1px_solid_#000] pt-[3px]">(...........................)</div>
                 </td>
-                <td width="34%" style="text-align: center;">
+                <td width="34%" class="text-center">
                     <div>{{ $rapor->kelas->cabang->kota ?? 'Kota' }}, {{ now()->format('d F Y') }}</div>
                 </td>
                 <td width="33%">
                     <div>Wali Kelas</div>
-                    <div class="sign-line">{{ $rapor->kelas->waliKelas->nama ?? '(...........................)' }}</div>
+                    <div class="mt-7 [border-top:1px_solid_#000] pt-[3px]">{{ $rapor->kelas->waliKelas->nama ?? '(...........................)' }}</div>
                 </td>
             </tr>
         </table>
-        <div style="text-align: right; margin-top: 30px; font-weight: bold;">
-            <div style="margin-bottom: 5px;">{{ $rapor->kelas->cabang->kota ?? 'Tangerang Selatan' }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-            <div style="display: inline-block; text-align: center;">
+        <div class="mt-[10px] text-right font-bold">
+            <div class="mb-[5px]">{{ $rapor->kelas->cabang->kota ?? 'Tangerang Selatan' }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
+            <div class="inline-block text-center">
                 <div>Ketua PKBM House of Knowledge</div>
-                <div style="margin-top: 60px; border-top: 1px solid #000; display: inline-block; padding-top: 5px;">
+                <div class="mt-8 inline-block [border-top:1px_solid_#000] pt-[5px]">
                     Fransisda Tiodora Ferdiansyah, S.Psi., MM
                 </div>
             </div>

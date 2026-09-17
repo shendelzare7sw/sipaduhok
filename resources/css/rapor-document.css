@@ -1,0 +1,3 @@
+/* Standalone rapor documents intentionally omit Tailwind preflight to preserve
+   the existing table metrics, print pagination, and watermark positioning. */
+@tailwind utilities;

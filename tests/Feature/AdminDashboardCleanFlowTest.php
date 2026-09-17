@@ -27,7 +27,8 @@ class AdminDashboardCleanFlowTest extends TestCase
             ->assertSee('Masukkan banyak siswa')
             ->assertSee('admin-notification-panel', false)
             ->assertSee('Tandai dibaca')
-            ->assertSee('bg-[#1261a6]', false)
+            ->assertSee('bg-[#17699f]', false)
+            ->assertSee('from-[#245f91]', false)
             ->assertSee('h-12 w-12 shrink-0 object-contain', false)
             ->assertSee('xl:grid-cols-6', false)
             ->assertSee('min-h-20', false);

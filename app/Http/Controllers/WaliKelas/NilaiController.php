@@ -5,6 +5,7 @@ namespace App\Http\Controllers\WaliKelas;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\MataPelajaran;
@@ -114,7 +115,9 @@ class NilaiController extends Controller
             ->orderBy('nama_mapel', 'asc')
             ->get();
         
-        $selectedMapelId = $request->get('mata_pelajaran_id', null);
+        $selectedMapelId = $mataPelajaranList->contains('id', (int) $request->get('mata_pelajaran_id'))
+            ? (int) $request->get('mata_pelajaran_id')
+            : null;
         
         // Initialize variables
         $selectedMapel = null;
@@ -126,7 +129,7 @@ class NilaiController extends Controller
         $jumlahGuruUpdate = 0;
 
         if ($selectedMapelId) {
-            $selectedMapel = MataPelajaran::find($selectedMapelId);
+            $selectedMapel = $mataPelajaranList->firstWhere('id', $selectedMapelId);
 
             if ($selectedMapel) {
                 // Filter siswa that can access this mapel
@@ -145,7 +148,7 @@ class NilaiController extends Controller
                 $nilaiData = $nilaiQuery->keyBy('siswa_id');
 
                 if ($nilaiQuery->count() > 0) {
-                    $nilaiAkhirArray = $nilaiQuery->pluck('nilai_akhir')->filter()->values();
+                    $nilaiAkhirArray = $nilaiQuery->pluck('nilai_akhir')->filter(fn ($score) => $score !== null)->values();
 
                     if ($nilaiAkhirArray->count() > 0) {
                         $rataRataKelas = $nilaiAkhirArray->avg();
@@ -210,7 +213,9 @@ class NilaiController extends Controller
 
         // Get semester from request or default to current
         $currentSemester = Nilai::getCurrentSemester();
-        $semester = $request->get('semester', $currentSemester);
+        $semester = in_array($request->get('semester'), ['ganjil', 'genap'], true)
+            ? $request->get('semester')
+            : $currentSemester;
 
         $kelasList = $this->getKelasWali($wali);
         $kelas->load(['siswa', 'tahunAjaran']);
@@ -243,10 +248,11 @@ class NilaiController extends Controller
             ->get()
             ->keyBy('mata_pelajaran_id');
         
-        $totalNilai = $nilaiData->pluck('nilai_akhir')->filter()->count();
-        $rataRataSiswa = $totalNilai > 0 ? $nilaiData->pluck('nilai_akhir')->filter()->avg() : 0;
+        $nilaiAkhirTerisi = $nilaiData->pluck('nilai_akhir')->filter(fn ($score) => $score !== null);
+        $totalNilai = $nilaiAkhirTerisi->count();
+        $rataRataSiswa = $totalNilai > 0 ? $nilaiAkhirTerisi->avg() : 0;
         $jumlahTuntas = $nilaiData->filter(function($nilai) {
-            return $nilai->nilai_akhir && $nilai->nilai_akhir >= 70;
+            return $nilai->nilai_akhir !== null && $nilai->nilai_akhir >= 70;
         })->count();
         $persentaseTuntas = $totalNilai > 0 ? ($jumlahTuntas / $totalNilai) * 100 : 0;
         
@@ -571,9 +577,31 @@ class NilaiController extends Controller
             ? $request->input('semester')
             : $currentSemester;
 
+        $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
+            ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+            ->where('semester', $semester)
+            ->pluck('mata_pelajaran_id')
+            ->unique()
+            ->toArray();
+        $allowedMapelIds = $this->mataPelajaranQuery($kelas, $existingNilaiMapelIds)
+            ->get()
+            ->filter(fn ($mapel) => $siswa->canAccessMapel($mapel))
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        foreach ($validated['nilai'] as $key => $nilaiInput) {
+            $mapelId = (int) $nilaiInput['mata_pelajaran_id'];
+            if ((int) $key !== $mapelId || !in_array($mapelId, $allowedMapelIds, true)) {
+                throw ValidationException::withMessages([
+                    "nilai.$key.mata_pelajaran_id" => 'Mata pelajaran ini tidak tersedia untuk siswa dan kelas yang dipilih.',
+                ]);
+            }
+        }
+
         $mapelTanpaGuru = [];
 
-        foreach ($request->nilai as $nilaiInput) {
+        foreach ($validated['nilai'] as $nilaiInput) {
             $dataToUpdate = [
                 'edited_by_wali_id' => $wali->id,
                 'wali_terakhir_edit_at' => now(),
@@ -628,11 +656,11 @@ class NilaiController extends Controller
 
         if (!empty($mapelTanpaGuru)) {
             $namaMapel = MataPelajaran::whereIn('id', $mapelTanpaGuru)->pluck('nama_mapel')->implode(', ');
-            return redirect()->route('wali.nilai.index')
+            return redirect()->route('wali.nilai.show', ['siswa' => $siswa->id, 'semester' => $semester])
                 ->with('warning', "Nilai lainnya tersimpan. Mapel berikut dilewati karena belum ada guru pengajar yang ditugaskan di kelas ini: {$namaMapel}.");
         }
 
-        return redirect()->route('wali.nilai.index')
+        return redirect()->route('wali.nilai.show', ['siswa' => $siswa->id, 'semester' => $semester])
             ->with('success', 'Nilai siswa berhasil diperbarui.');
     }
 

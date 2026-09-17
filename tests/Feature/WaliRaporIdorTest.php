@@ -40,30 +40,31 @@ class WaliRaporIdorTest extends TestCase
             $this->assertNotNull($cabang);
             $this->assertNotNull($ta, 'Butuh tahun ajaran aktif (getKelasWali men-scope ke TA aktif)');
 
-            $waliUser = new User();
+            $waliUser = new User;
             $waliUser->name = 'Wali F11';
             $waliUser->email = "wali.f11.$suffix@test.local";
             $waliUser->role = 'wali_kelas';
             $waliUser->password = bcrypt('password');
             $waliUser->save();
 
-            $tenaga = new TenagaPendidik();
+            $tenaga = new TenagaPendidik;
             $tenaga->user_id = $waliUser->id;
             $tenaga->nama_lengkap = 'Wali F11';
             $tenaga->jenis_kelamin = 'L';
             $tenaga->save();
 
-            $kelasOwn = $this->makeKelas($cabang->id, $ta->id, 'A' . $suffix);   // diampu wali
-            $kelasForeign = $this->makeKelas($cabang->id, $ta->id, 'B' . $suffix); // BUKAN diampu
+            $kelasOwn = $this->makeKelas($cabang->id, $ta->id, 'A'.$suffix);   // diampu wali
+            $kelasForeign = $this->makeKelas($cabang->id, $ta->id, 'B'.$suffix); // BUKAN diampu
 
-            $assign = new WaliKelasAssignment();
+            $assign = new WaliKelasAssignment;
             $assign->tenaga_pendidik_id = $tenaga->id;
             $assign->kelas_id = $kelasOwn->id;
             $assign->assigned_at = now();
             $assign->save();
 
-            $raporOwn = $this->makeRapor($this->makeSiswa($cabang->id, $kelasOwn->id, 'O' . $suffix)->id, $kelasOwn->id, $ta->id);
-            $raporForeign = $this->makeRapor($this->makeSiswa($cabang->id, $kelasForeign->id, 'F' . $suffix)->id, $kelasForeign->id, $ta->id);
+            $raporOwn = $this->makeRapor($this->makeSiswa($cabang->id, $kelasOwn->id, 'O'.$suffix)->id, $kelasOwn->id, $ta->id);
+            $foreignSiswa = $this->makeSiswa($cabang->id, $kelasForeign->id, 'F'.$suffix);
+            $raporForeign = $this->makeRapor($foreignSiswa->id, $kelasForeign->id, $ta->id);
 
             $this->actingAs($waliUser)->withoutMiddleware();
 
@@ -81,6 +82,18 @@ class WaliRaporIdorTest extends TestCase
             // Negatif (F-11): rapor kelas lain harus ditolak & tidak berubah.
             $this->put(route('wali.rapor.update', $raporForeign->id), $payload)->assertNotFound();
             $this->assertNull($raporForeign->fresh()->catatan_wali_kelas);
+
+            // Mode buat rapor alternatif harus memeriksa kepemilikan siswa sebelum membuat rapor.
+            $this->post(route('wali.rapor.create-with-mode'), [
+                'siswa_id' => $foreignSiswa->id,
+                'semester' => 'genap',
+                'jenis_rapor' => 'akhir_semester',
+                'mode' => 'auto_generate',
+            ])->assertNotFound();
+            $this->assertFalse(Rapor::where('siswa_id', $foreignSiswa->id)
+                ->where('semester', 'genap')
+                ->where('jenis_rapor', 'akhir_semester')
+                ->exists());
         } finally {
             DB::connection('mysql')->rollBack();
         }
@@ -88,32 +101,33 @@ class WaliRaporIdorTest extends TestCase
 
     private function makeKelas(int $cabangId, int $taId, string $suffix): Kelas
     {
-        $k = new Kelas();
+        $k = new Kelas;
         $k->cabang_id = $cabangId;
         $k->tahun_ajaran_id = $taId;
-        $k->nama_kelas = 'Kelas ' . $suffix;
+        $k->nama_kelas = 'Kelas '.$suffix;
         $k->jenjang = 'SMP';
-        $k->kode_kelas = 'K' . $suffix;
+        $k->kode_kelas = 'K'.$suffix;
         $k->kuota_siswa = 30;
         $k->save();
+
         return $k;
     }
 
     private function makeSiswa(int $cabangId, int $kelasId, string $suffix): Siswa
     {
-        $u = new User();
-        $u->name = 'Siswa ' . $suffix;
+        $u = new User;
+        $u->name = 'Siswa '.$suffix;
         $u->email = "siswa.$suffix@test.local";
         $u->role = 'siswa';
         $u->password = bcrypt('password');
         $u->save();
 
-        $s = new Siswa();
+        $s = new Siswa;
         $s->user_id = $u->id;
         $s->cabang_id = $cabangId;
         $s->kelas_id = $kelasId;
-        $s->nisn = 'N' . $suffix;
-        $s->nama_lengkap = 'Siswa ' . $suffix;
+        $s->nisn = 'N'.$suffix;
+        $s->nama_lengkap = 'Siswa '.$suffix;
         $s->jenis_kelamin = 'L';
         $s->tempat_lahir = '-';
         $s->tanggal_lahir = '2010-01-01';
@@ -121,18 +135,20 @@ class WaliRaporIdorTest extends TestCase
         $s->tanggal_masuk = now();
         $s->status = 'aktif';
         $s->save();
+
         return $s;
     }
 
     private function makeRapor(int $siswaId, int $kelasId, int $taId): Rapor
     {
-        $r = new Rapor();
+        $r = new Rapor;
         $r->siswa_id = $siswaId;
         $r->kelas_id = $kelasId;
         $r->tahun_ajaran_id = $taId;
         $r->semester = 'ganjil';
         $r->status = 'draft';
         $r->save();
+
         return $r;
     }
 }

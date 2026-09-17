@@ -1,7 +1,9 @@
 @extends('layouts.print')
 
+@php $routePrefix = request()->routeIs('waka.*') ? 'waka' : 'admin'; @endphp
+
 @section('title', 'Daftar Siswa')
-@section('back-url', route('admin.manajemen-siswa.index', request()->query()))
+@section('back-url', route($routePrefix.'.manajemen-siswa.index', request()->query()))
 @section('report-title', 'Daftar Siswa')
 @section('report-meta')
 <p class="mt-1 text-xs text-slate-600 print:text-[8pt]">

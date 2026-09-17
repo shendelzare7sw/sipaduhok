@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use App\Models\Siswa;
 use App\Models\Presensi;
 use App\Models\TahunAjaran;
@@ -321,6 +322,16 @@ class PresensiController extends Controller
             abort(403, 'Anda tidak memiliki akses ke pengajuan izin ini.');
         }
 
+        $isLegacyPending = $presensi->status_validasi === null
+            && in_array($presensi->status, ['sakit', 'izin'], true)
+            && str_contains($presensi->keterangan ?? '', 'Diajukan oleh wali siswa');
+        if (!in_array($presensi->status, ['sakit', 'izin'], true)
+            || ($presensi->status_validasi !== 'pending' && !$isLegacyPending)) {
+            throw ValidationException::withMessages([
+                'status' => 'Pengajuan ini sudah diproses atau bukan permohonan sakit/izin yang menunggu validasi.',
+            ]);
+        }
+
         if ($request->status == 'setuju') {
             $keteranganBaru = $presensi->keterangan . ' - Divalidasi dan disetujui oleh wali kelas';
             if ($request->keterangan) {
@@ -479,28 +490,34 @@ class PresensiController extends Controller
         $validated = $request->validate([
             'status' => 'required|in:hadir,sakit,izin,alpha',
             'keterangan' => 'nullable|string|max:500',
-            'status_validasi' => 'nullable|in:pending,disetujui,ditolak',
+            'status_validasi' => 'prohibited',
         ]);
 
         $statusToSave = $validated['status'];
-        $statusValidasi = $validated['status_validasi'] ?? null;
+        $isLegacyPending = $presensi->status_validasi === null
+            && in_array($presensi->status, ['sakit', 'izin'], true)
+            && str_contains($presensi->keterangan ?? '', 'Diajukan oleh wali siswa');
+        $isPending = $presensi->status_validasi === 'pending' || $isLegacyPending;
 
-        // Auto-adjust status based on validasi jika frontend terlewat
-        if ($statusValidasi === 'ditolak') {
-            $statusToSave = 'alpha';
-        } elseif ($statusValidasi === 'disetujui' && $statusToSave === 'alpha') {
-            $statusToSave = 'izin';
+        if ($isPending && $statusToSave !== $presensi->status) {
+            throw ValidationException::withMessages([
+                'status' => 'Pengajuan yang menunggu keputusan harus diproses melalui menu Validasi Izin.',
+            ]);
         }
 
-        if ($statusValidasi === 'pending' && !in_array($statusToSave, ['sakit', 'izin'], true)) {
-            $statusValidasi = null;
-        }
+        // Kehadiran dan keputusan pengajuan adalah dua hal berbeda. Keputusan
+        // pending hanya dapat diambil melalui prosesValidasiIzin().
+        $statusValidasi = match (true) {
+            $isPending => 'pending',
+            $statusToSave === 'alpha' && $presensi->status === 'alpha' && $presensi->status_validasi === 'ditolak' => 'ditolak',
+            in_array($statusToSave, ['sakit', 'izin'], true) => 'disetujui',
+            default => null,
+        };
 
         $presensi->update([
             'status' => $statusToSave,
-            'keterangan' => $validated['keterangan'],
+            'keterangan' => $validated['keterangan'] ?? null,
             'status_validasi' => $statusValidasi,
-            'diinput_oleh' => Auth::id(),
         ]);
 
         return back()->with('success', 'Data presensi berhasil diperbarui.');
