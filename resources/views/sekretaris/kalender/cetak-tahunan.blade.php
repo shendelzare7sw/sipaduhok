@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Kalender Akademik Tahunan</title>
     <style>
-        @page { margin: 15mm; }
+        @page { margin: 0; }
         body { font-family: Arial, sans-serif; font-size: 10pt; }
         .header-table { width: 100%; border-bottom: 3px solid #3b82f6; margin-bottom: 8px; }
         .header-title { text-align: center; margin-bottom: 20px; }

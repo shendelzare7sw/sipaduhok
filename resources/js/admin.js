@@ -87,6 +87,127 @@ Alpine.data('codeSuggestions', (endpoint) => ({
     },
 }));
 
+Alpine.data('tagihanPage', () => ({
+    selectedItems: [],
+    selectedCount: 0,
+    totalBayar: 0,
+    paymentItems: [],
+    showPayModal: false,
+    selectedMethod: '',
+    submitting: false,
+    copySuccess: false,
+    availableChannelCount: 0,
+
+    init() {
+        this.$watch('selectedItems', () => this.updateTotal());
+        this.$watch('selectedMethod', () => this.updateAvailableChannels());
+        this.updateTotal();
+    },
+
+    formatRupiah(num) {
+        return `Rp ${Number(num || 0).toLocaleString('id-ID')}`;
+    },
+
+    selectedBillInputs() {
+        const selected = new Set(this.selectedItems.map((item) => String(item)));
+
+        return [...this.$root.querySelectorAll('input[type="checkbox"][data-amount]')]
+            .filter((checkbox) => selected.has(String(checkbox.value)));
+    },
+
+    updateTotal() {
+        const inputs = this.selectedBillInputs();
+
+        this.selectedCount = inputs.length;
+        this.totalBayar = inputs.reduce(
+            (total, input) => total + (Number.parseInt(input.dataset.amount || '0', 10) || 0),
+            0,
+        );
+        this.updateAvailableChannels();
+    },
+
+    updateAvailableChannels() {
+        if (this.selectedMethod !== 'paywuz') {
+            this.availableChannelCount = 0;
+            return;
+        }
+
+        this.availableChannelCount = [...this.$root.querySelectorAll('[data-payment-channel]')]
+            .filter((channel) => {
+                const min = Number.parseInt(channel.dataset.minAmount || '0', 10);
+                const max = Number.parseInt(channel.dataset.maxAmount || '0', 10);
+
+                return this.totalBayar >= min && this.totalBayar <= max;
+            }).length;
+    },
+
+    openPaymentModal() {
+        this.paymentItems = this.selectedBillInputs()
+            .map((checkbox) => ({
+                id: checkbox.value,
+                amount: Number.parseInt(checkbox.dataset.amount || '0', 10) || 0,
+                label: checkbox.dataset.label || 'Tagihan',
+            }))
+            .filter((item) => item.amount > 0);
+
+        if (!this.paymentItems.length) {
+            window.Swal?.fire({
+                icon: 'info',
+                title: 'Tagihan belum dipilih',
+                text: 'Pilih minimal satu tagihan yang masih memiliki sisa pembayaran.',
+                confirmButtonColor: '#1874cd',
+            }) || window.alert('Pilih minimal satu tagihan yang masih memiliki sisa pembayaran.');
+            return;
+        }
+
+        this.selectedMethod = '';
+        this.submitting = false;
+        this.showPayModal = true;
+    },
+
+    isChannelAvailable(min, max) {
+        return this.totalBayar >= min && this.totalBayar <= max;
+    },
+
+    handleSubmit(event) {
+        if (!this.selectedMethod) {
+            event.preventDefault();
+            return;
+        }
+
+        if (this.selectedMethod === 'paywuz'
+            && !event.target.querySelector('input[name="payment_method"]:checked')) {
+            event.preventDefault();
+            return;
+        }
+
+        this.submitting = true;
+    },
+
+    validateFileSize(event) {
+        const file = event.target.files?.[0];
+        if (file && file.size / 1024 / 1024 > 10) {
+            window.Swal?.fire({
+                icon: 'warning',
+                title: 'File terlalu besar',
+                text: `Maksimal 10MB. File Anda ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
+                confirmButtonColor: '#1874cd',
+            }) || window.alert('Ukuran file terlalu besar. Maksimal 10MB.');
+            event.target.value = '';
+        }
+    },
+
+    async copyRekening(text) {
+        try {
+            await window.CleanFlow.copyText(text);
+            this.copySuccess = true;
+            window.setTimeout(() => { this.copySuccess = false; }, 2000);
+        } catch {
+            this.copySuccess = false;
+        }
+    },
+}));
+
 Alpine.start();
 
 document.addEventListener('DOMContentLoaded', () => {

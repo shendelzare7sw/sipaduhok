@@ -28,7 +28,7 @@ class PembayaranDigitalController extends Controller
     public function prosesBayar(Request $request, int $siswaId, PaywuzService $paywuz): RedirectResponse
     {
         $user = Auth::user();
-        $siswa = $user->children()->find($siswaId);
+        $siswa = $user->financialChildren()->find($siswaId);
 
         if (! $siswa) {
             return redirect()->route('wali-siswa.dashboard')->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
@@ -175,7 +175,7 @@ class PembayaranDigitalController extends Controller
     public function processBulkPay(Request $request, int $siswaId, PaywuzService $paywuz): RedirectResponse
     {
         $user = Auth::user();
-        $siswa = $user->children()->find($siswaId);
+        $siswa = $user->financialChildren()->find($siswaId);
 
         if (! $siswa) {
             return redirect()->route('wali-siswa.dashboard')->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
@@ -410,6 +410,7 @@ class PembayaranDigitalController extends Controller
         $allPayments = Pembayaran::with('tagihan')
             ->where('payment_gateway', 'paywuz')
             ->where('order_id', $payment->order_id)
+            ->where('siswa_id', $payment->siswa_id)
             ->get();
         $totalBayar = (int) $allPayments->sum('jumlah_bayar');
         $paymentMethods = [];
@@ -533,6 +534,10 @@ class PembayaranDigitalController extends Controller
         }
 
         $oldOrderId = (string) $payment->order_id;
+        if (blank($oldOrderId)) {
+            return back()->with('error', 'Transaksi digital belum memiliki nomor pesanan yang valid.');
+        }
+
         $amount = (int) Pembayaran::query()
             ->where('payment_gateway', 'paywuz')
             ->where('order_id', $oldOrderId)
@@ -764,7 +769,7 @@ class PembayaranDigitalController extends Controller
     private function guardParentAccess(Pembayaran $payment): void
     {
         abort_unless(
-            Auth::user()?->children()->where('siswa.id', $payment->siswa_id)->exists(),
+            Auth::user()?->financialChildren()->where('siswa.id', $payment->siswa_id)->exists(),
             403,
             'Anda tidak memiliki akses ke transaksi ini.',
         );

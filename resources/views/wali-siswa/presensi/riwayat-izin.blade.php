@@ -3,195 +3,179 @@
 @section('title', 'Riwayat Pengajuan Izin - ' . $siswa->nama_lengkap)
 @section('page-title', 'Riwayat Pengajuan Izin')
 
-
-@section('styles')
-    @vite(['resources/css/wali-siswa/presensi/riwayat-izin.css'])
-@endsection
-
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y permission-history-page">
+<div class="min-w-0 w-full space-y-4">
 
-        <!-- Page Header -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-            <div class="mb-3 mb-md-0">
-                <h4 class="fw-bold mb-1">Riwayat Pengajuan Izin</h4>
-                <p class="text-muted mb-0">
-                    <i class="fas fa-user-graduate me-1"></i>{{ $siswa->nama_lengkap }}
-                    <span class="mx-2">|</span>
-                    <i class="fas fa-school me-1"></i>{{ $siswa->kelas->nama_kelas ?? 'Belum ada kelas' }}
-                </p>
+    {{-- Page Header --}}
+    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h4 class="text-lg font-bold text-slate-800">Riwayat Pengajuan Izin</h4>
+            <p class="mt-0.5 text-sm text-slate-500">
+                <i class="fa-solid fa-user-graduate mr-1"></i>{{ $siswa->nama_lengkap }}
+                <span class="mx-1">·</span>
+                <i class="fa-solid fa-school mr-1"></i>{{ $siswa->kelas->nama_kelas ?? 'Belum ada kelas' }}
+            </p>
+        </div>
+        <a href="{{ route('wali-siswa.presensi.anak', $siswa->id) }}" class="inline-flex items-center gap-1.5 self-start rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+            <i class="fa-solid fa-arrow-left"></i> Kembali
+        </a>
+    </div>
+
+    @if($pengajuanIzin->count() > 0)
+        {{-- Riwayat List --}}
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
+                <i class="fa-solid fa-history text-brand-600"></i>
+                <h5 class="text-base font-semibold text-slate-800">Riwayat Pengajuan Izin ({{ $pengajuanIzin->count() }})</h5>
             </div>
             <div>
-                <a href="{{ route('wali-siswa.presensi.anak', $siswa->id) }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="fas fa-arrow-left me-1"></i>Kembali
-                </a>
-            </div>
-        </div>
-
-        @if($pengajuanIzin->count() > 0)
-            <!-- Riwayat List -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-history me-2 text-primary"></i>
-                        Riwayat Pengajuan Izin ({{ $pengajuanIzin->count() }})
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    @foreach($pengajuanIzin as $index => $presensi)
-                        @php
-                            $statusValidasi = $presensi->status_validasi;
-                            if (!$statusValidasi) {
-                                if (str_contains($presensi->keterangan ?? '', 'ditolak')) {
-                                    $statusValidasi = 'ditolak';
-                                } elseif (str_contains($presensi->keterangan ?? '', 'Divalidasi')) {
-                                    $statusValidasi = 'disetujui';
-                                }
+                @foreach($pengajuanIzin as $index => $presensi)
+                    @php
+                        $statusValidasi = $presensi->status_validasi;
+                        if (!$statusValidasi) {
+                            if (str_contains($presensi->keterangan ?? '', 'ditolak')) {
+                                $statusValidasi = 'ditolak';
+                            } elseif (str_contains($presensi->keterangan ?? '', 'Divalidasi')) {
+                                $statusValidasi = 'disetujui';
                             }
+                        }
 
-                            $isValidated = in_array($statusValidasi, ['disetujui', 'ditolak']);
-                            $isApproved = $statusValidasi === 'disetujui';
-                            $isRejected = $statusValidasi === 'ditolak';
+                        $isValidated = in_array($statusValidasi, ['disetujui', 'ditolak']);
+                        $isApproved = $statusValidasi === 'disetujui';
+                        $isRejected = $statusValidasi === 'ditolak';
 
-                            // Extract bukti from column first, then legacy keterangan text.
-                            $buktiPath = $presensi->bukti_file;
-                            if (!$buktiPath && preg_match('/\(Bukti: (.+?)\)/', $presensi->keterangan ?? '', $matches)) {
-                                $buktiPath = $matches[1];
-                            }
+                        $buktiPath = $presensi->bukti_file;
+                        if (!$buktiPath && preg_match('/\(Bukti: (.+?)\)/', $presensi->keterangan ?? '', $matches)) {
+                            $buktiPath = $matches[1];
+                        }
 
-                            $keteranganText = preg_replace('/\s*\(Bukti: .+?\)/', '', $presensi->keterangan ?? '-');
-                            $buktiUrl = $buktiPath ? asset('storage/' . $buktiPath) : null;
-                            $buktiExtension = $buktiPath ? strtolower(pathinfo($buktiPath, PATHINFO_EXTENSION)) : null;
-                            $isBuktiImage = in_array($buktiExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                            $isBuktiPdf = $buktiExtension === 'pdf';
-                        @endphp
+                        $keteranganText = preg_replace('/\s*\(Bukti: .+?\)/', '', $presensi->keterangan ?? '-');
+                        $buktiUrl = $buktiPath ? asset('storage/' . $buktiPath) : null;
+                        $buktiExtension = $buktiPath ? strtolower(pathinfo($buktiPath, PATHINFO_EXTENSION)) : null;
+                        $isBuktiImage = in_array($buktiExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                        $isBuktiPdf = $buktiExtension === 'pdf';
 
-                        <div class="border-bottom p-4 {{ $index % 2 == 0 ? 'bg-white' : 'bg-light' }}">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="avatar flex-shrink-0 me-3">
-                                            <div
-                                                class="avatar-initial rounded-circle
-                                                                    {{ $isRejected ? 'bg-label-danger' : ($presensi->status == 'sakit' ? 'bg-label-warning' : 'bg-label-info') }}">
-                                                <i
-                                                    class="fas {{ $isRejected ? 'fa-times' : ($presensi->status == 'sakit' ? 'fa-notes-medical' : 'fa-file-alt') }}"></i>
-                                            </div>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-2">
-                                                <span
-                                                    class="badge
-                                                                        {{ $isRejected ? 'bg-danger' : ($presensi->status == 'sakit' ? 'bg-warning' : 'bg-info') }}">
-                                                    {{ strtoupper($presensi->status) }}
-                                                </span>
-                                                @if($isValidated)
-                                                    @if($isApproved)
-                                                        <span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i> Disetujui</span>
-                                                    @elseif($isRejected)
-                                                        <span class="badge bg-danger ms-2"><i class="fas fa-times me-1"></i> Ditolak</span>
-                                                    @endif
-                                                @else
-                                                    <span class="badge bg-warning ms-2"><i class="fas fa-clock me-1"></i> Menunggu Validasi</span>
-                                                @endif
-                                            </h6>
-                                            <div class="text-muted small mb-2">
-                                                <i class="fas fa-calendar me-1"></i>
-                                                <strong>Tanggal:</strong>
-                                                {{ \Carbon\Carbon::parse($presensi->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
-                                            </div>
-                                            <div class="text-muted small mb-2">
-                                                <i class="fas fa-comment me-1"></i>
-                                                <strong>Keterangan:</strong>
-                                                {{ $keteranganText }}
-                                            </div>
+                        $statusBadgeClasses = $isRejected
+                            ? 'bg-red-100 text-red-700'
+                            : ($presensi->status == 'sakit' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700');
+                        $statusIconBgClasses = $isRejected
+                            ? 'bg-red-50 text-red-500'
+                            : ($presensi->status == 'sakit' ? 'bg-amber-50 text-amber-500' : 'bg-blue-50 text-blue-500');
+                    @endphp
 
-                                            @if($buktiPath)
-                                                <div class="mt-2">
-                                                    <button type="button"
-                                                            class="btn btn-outline-primary btn-sm"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#buktiModal{{ $presensi->id }}">
-                                                        <i class="fas fa-paperclip me-1"></i>Lihat Bukti
-                                                    </button>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
+                    <div class="border-b border-slate-200 p-4 last:border-b-0 {{ $index % 2 == 0 ? 'bg-white' : 'bg-slate-50/50' }}"
+                         x-data="{ showBukti: false }">
+                        <div class="flex flex-col gap-3 md:flex-row">
+                            {{-- Left: Details --}}
+                            <div class="flex flex-1 items-start gap-3">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $statusIconBgClasses }}">
+                                    <i class="fa-solid {{ $isRejected ? 'fa-times' : ($presensi->status == 'sakit' ? 'fa-notes-medical' : 'fa-file-alt') }}"></i>
                                 </div>
-                                <div class="col-md-4">
-                                    @if(!$isValidated)
-                                        <!-- Bisa diedit jika belum divalidasi -->
-                                        <div class="d-grid gap-2">
-                                            <a href="{{ route('wali-siswa.presensi.edit-izin', $presensi->id) }}"
-                                                class="btn btn-warning btn-sm">
-                                                <i class="fas fa-edit me-1"></i>Edit Pengajuan
-                                            </a>
-                                        </div>
-                                    @else
-                                        <div class="alert alert-sm {{ $isApproved ? 'alert-success' : 'alert-danger' }} mb-0">
-                                            <small>
-                                                <strong>{{ $isApproved ? 'Sudah Disetujui' : 'Ditolak' }}</strong><br>
-                                                Tidak dapat diedit lagi
-                                            </small>
-                                        </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="mb-2 flex flex-wrap items-center gap-1.5">
+                                        <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold {{ $statusBadgeClasses }}">
+                                            {{ strtoupper($presensi->status) }}
+                                        </span>
+                                        @if($isValidated)
+                                            @if($isApproved)
+                                                <span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700"><i class="fa-solid fa-check mr-0.5"></i> Disetujui</span>
+                                            @elseif($isRejected)
+                                                <span class="rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-bold text-red-700"><i class="fa-solid fa-times mr-0.5"></i> Ditolak</span>
+                                            @endif
+                                        @else
+                                            <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-700"><i class="fa-solid fa-clock mr-0.5"></i> Menunggu Validasi</span>
+                                        @endif
+                                    </div>
+                                    <div class="mb-1 text-xs text-slate-500">
+                                        <i class="fa-solid fa-calendar mr-1"></i>
+                                        <strong>Tanggal:</strong>
+                                        {{ \Carbon\Carbon::parse($presensi->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
+                                    </div>
+                                    <div class="text-xs text-slate-500">
+                                        <i class="fa-solid fa-comment mr-1"></i>
+                                        <strong>Keterangan:</strong>
+                                        {{ $keteranganText }}
+                                    </div>
+
+                                    @if($buktiPath)
+                                        <button type="button" @click="showBukti = true"
+                                                class="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-brand-300 px-3 py-1.5 text-xs font-semibold text-brand-700 transition hover:bg-brand-50">
+                                            <i class="fa-solid fa-paperclip"></i> Lihat Bukti
+                                        </button>
                                     @endif
                                 </div>
                             </div>
+
+                            {{-- Right: Actions --}}
+                            <div class="shrink-0 md:w-44">
+                                @if(!$isValidated)
+                                    <a href="{{ route('wali-siswa.presensi.edit-izin', $presensi->id) }}"
+                                       class="flex w-full items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-amber-600">
+                                        <i class="fa-solid fa-edit"></i> Edit Pengajuan
+                                    </a>
+                                @else
+                                    <div class="rounded-lg {{ $isApproved ? 'border border-emerald-200 bg-emerald-50' : 'border border-red-200 bg-red-50' }} p-3 text-center">
+                                        <p class="text-xs font-bold {{ $isApproved ? 'text-emerald-700' : 'text-red-700' }}">{{ $isApproved ? 'Sudah Disetujui' : 'Ditolak' }}</p>
+                                        <p class="mt-0.5 text-[10px] text-slate-500">Tidak dapat diedit lagi</p>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
 
+                        {{-- Alpine Dialog for Bukti --}}
                         @if($buktiPath)
-                            <div class="modal fade" id="buktiModal{{ $presensi->id }}" tabindex="-1" aria-labelledby="buktiModalLabel{{ $presensi->id }}" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-xl">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="buktiModalLabel{{ $presensi->id }}">
-                                                <i class="fas fa-paperclip me-2"></i>Lampiran Bukti
+                            <template x-teleport="body">
+                                <div x-show="showBukti" x-cloak
+                                     class="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4"
+                                     @keydown.escape.window="showBukti = false">
+                                    <div @click.outside="showBukti = false"
+                                         x-show="showBukti" x-transition
+                                         class="relative w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl">
+                                        <div class="flex items-center justify-between border-b border-slate-200 px-5 py-3">
+                                            <h5 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                                                <i class="fa-solid fa-paperclip text-brand-600"></i> Lampiran Bukti
                                             </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                            <button @click="showBukti = false" class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
                                         </div>
-                                        <div class="modal-body p-0">
+                                        <div class="p-0">
                                             @if($isBuktiImage)
-                                                <div class="text-center p-3">
-                                                    <img src="{{ $buktiUrl }}"
-                                                         alt="Lampiran bukti {{ $siswa->nama_lengkap }}"
-                                                         class="img-fluid rounded permission-proof-image">
+                                                <div class="p-4 text-center">
+                                                    <img src="{{ $buktiUrl }}" alt="Lampiran bukti {{ $siswa->nama_lengkap }}" class="mx-auto max-h-[75vh] rounded-lg object-contain">
                                                 </div>
                                             @elseif($isBuktiPdf)
-                                                <iframe src="{{ $buktiUrl }}"
-                                                        title="Lampiran bukti {{ $siswa->nama_lengkap }}"
-                                                        class="permission-proof-frame"></iframe>
+                                                <iframe src="{{ $buktiUrl }}" title="Lampiran bukti {{ $siswa->nama_lengkap }}" class="h-[75vh] w-full border-0"></iframe>
                                             @else
-                                                <div class="text-center p-5">
-                                                    <i class="fas fa-file fa-3x text-muted mb-3"></i>
-                                                    <p class="text-muted mb-0">Format lampiran tidak dapat dipreview.</p>
+                                                <div class="px-5 py-12 text-center">
+                                                    <i class="fa-solid fa-file text-5xl text-slate-300"></i>
+                                                    <p class="mt-3 text-sm text-slate-500">Format lampiran tidak dapat dipreview.</p>
                                                 </div>
                                             @endif
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </template>
                         @endif
-                    @endforeach
-                </div>
-            </div>
-        @else
-            <!-- Empty State -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center py-5">
-                    <div class="avatar avatar-xl mx-auto mb-3">
-                        <div class="avatar-initial rounded-circle bg-label-info">
-                            <i class="fas fa-inbox fa-3x"></i>
-                        </div>
                     </div>
-                    <h5 class="fw-bold mb-2">Belum Ada Pengajuan Izin</h5>
-                    <p class="text-muted mb-3">Anda belum pernah mengajukan izin untuk {{ $siswa->nama_lengkap }}</p>
-                    <a href="{{ route('wali-siswa.presensi.ajukan-izin', $siswa->id) }}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i>Ajukan Izin Sekarang
-                    </a>
-                </div>
+                @endforeach
             </div>
-        @endif
+        </div>
+    @else
+        {{-- Empty State --}}
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="px-6 py-12 text-center">
+                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-blue-400">
+                    <i class="fa-solid fa-inbox text-2xl"></i>
+                </div>
+                <h5 class="font-bold text-slate-700">Belum Ada Pengajuan Izin</h5>
+                <p class="mt-1 text-sm text-slate-500">Anda belum pernah mengajukan izin untuk {{ $siswa->nama_lengkap }}</p>
+                <a href="{{ route('wali-siswa.presensi.ajukan-izin', $siswa->id) }}" class="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700">
+                    <i class="fa-solid fa-plus"></i> Ajukan Izin Sekarang
+                </a>
+            </div>
+        </div>
+    @endif
 
-    </div>
+</div>
 @endsection

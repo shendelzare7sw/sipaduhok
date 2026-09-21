@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 @media print {
-    @page { size: A4 landscape; margin: 6mm; }
+    @page { size: A4 landscape; margin: 0; }
     #pageContainer { zoom: 1 !important; }
     table { page-break-inside: avoid; }
 }

@@ -87,21 +87,29 @@ class OrangTuaController extends Controller
             ]);
         }
 
-        $childIds = $children->pluck('id')->toArray();
+        $financialChildIds = $children
+            ->filter(fn (Siswa $child): bool => (bool) $child->pivot->is_financial_responsible)
+            ->pluck('id')
+            ->all();
+
+        $childIds = $financialChildIds;
         $this->syncPendingDigitalPayments($childIds);
 
         // Hitung total tagihan dan pembayaran untuk semua anak
         $summary = [];
         foreach ($children as $child) {
+            $canFinance = (bool) $child->pivot->is_financial_responsible;
             $totalTagihan = Tagihan::where('siswa_id', $child->id)->sum('jumlah');
             $totalBayar = Pembayaran::where('siswa_id', $child->id)
                 ->where('status_validasi', 'disetujui')
                 ->sum('jumlah_bayar');
 
             $summary[$child->id] = [
-                'total_tagihan' => $totalTagihan,
-                'total_bayar' => $totalBayar,
-                'sisa_tagihan' => $totalTagihan - $totalBayar,
+                'can_finance' => $canFinance,
+                'can_academic' => (bool) $child->pivot->can_access_academic,
+                'total_tagihan' => $canFinance ? $totalTagihan : 0,
+                'total_bayar' => $canFinance ? $totalBayar : 0,
+                'sisa_tagihan' => $canFinance ? $totalTagihan - $totalBayar : 0,
             ];
         }
 
@@ -117,7 +125,7 @@ class OrangTuaController extends Controller
         $user = Auth::user();
 
         // Pastikan siswa ini adalah anak dari wali siswa yang login
-        $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
+        $siswa = $user->financialChildren()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
             return redirect()->route('wali-siswa.dashboard')
@@ -224,7 +232,7 @@ class OrangTuaController extends Controller
         $user = Auth::user();
 
         // Pastikan siswa ini adalah anak dari wali siswa yang login
-        $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
+        $siswa = $user->academicChildren()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
             return redirect()->route('wali-siswa.dashboard')
@@ -259,12 +267,13 @@ class OrangTuaController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil rapor dan pastikan itu milik anak dari wali siswa yang login
-        $rapor = Rapor::with(['siswa.kelas', 'tahunAjaran', 'raporNilai.mataPelajaran', 'kegiatanEkstra'])
+        // Hanya rapor yang sudah diterbitkan yang boleh dibuka lewat URL langsung.
+        $rapor = Rapor::where('status', 'diterbitkan')
+            ->with(['siswa.kelas', 'tahunAjaran', 'raporNilai.mataPelajaran', 'kegiatanEkstra'])
             ->findOrFail($raporId);
 
         // Cek apakah siswa ini adalah anak dari wali siswa yang login
-        $isMyChild = $user->children()->where('siswa.id', $rapor->siswa_id)->exists();
+        $isMyChild = $user->academicChildren()->where('siswa.id', $rapor->siswa_id)->exists();
 
         if (!$isMyChild) {
             return redirect()->route('wali-siswa.dashboard')
@@ -289,7 +298,7 @@ class OrangTuaController extends Controller
         $user = Auth::user();
 
         // Pastikan siswa ini adalah anak dari wali siswa yang login
-        $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
+        $siswa = $user->academicChildren()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
             return redirect()->route('wali-siswa.dashboard')
@@ -345,7 +354,7 @@ class OrangTuaController extends Controller
         $user = Auth::user();
 
         // Pastikan siswa ini adalah anak dari wali siswa yang login
-        $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
+        $siswa = $user->academicChildren()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
             return redirect()->route('wali-siswa.dashboard')
@@ -364,7 +373,7 @@ class OrangTuaController extends Controller
         $user = Auth::user();
 
         // Pastikan siswa ini adalah anak dari wali siswa yang login
-        $siswa = $user->children()->find($siswaId);
+        $siswa = $user->academicChildren()->find($siswaId);
 
         if (!$siswa) {
             return redirect()->route('wali-siswa.dashboard')
@@ -396,6 +405,16 @@ class OrangTuaController extends Controller
 
         if ($existingPresensi && $existingPresensi->status === 'hadir') {
             return back()->with('error', 'Anak Anda sudah hadir pada tanggal tersebut.');
+        }
+
+        if ($existingPresensi
+            && filled($existingPresensi->diinput_oleh)
+            && (int) $existingPresensi->diinput_oleh !== (int) $user->id) {
+            return back()->with('error', 'Presensi pada tanggal tersebut sudah diajukan oleh akun lain.');
+        }
+
+        if ($existingPresensi && $existingPresensi->status_validasi === 'disetujui') {
+            return back()->with('error', 'Pengajuan pada tanggal tersebut sudah divalidasi dan tidak dapat diganti.');
         }
 
         // Upload bukti jika ada
@@ -453,7 +472,7 @@ class OrangTuaController extends Controller
         $user = Auth::user();
 
         // Pastikan siswa ini adalah anak dari wali siswa yang login
-        $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
+        $siswa = $user->academicChildren()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
             return redirect()->route('wali-siswa.dashboard')
@@ -482,7 +501,7 @@ class OrangTuaController extends Controller
     {
         $user = Auth::user();
 
-        $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
+        $siswa = $user->academicChildren()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
             return redirect()->route('wali-siswa.dashboard')
@@ -525,11 +544,16 @@ class OrangTuaController extends Controller
         $presensi = Presensi::with('siswa.kelas')->findOrFail($presensiId);
 
         // Pastikan siswa adalah anak dari wali siswa yang login
-        $isMyChild = $user->children()->where('siswa.id', $presensi->siswa_id)->exists();
+        $isMyChild = $user->academicChildren()->where('siswa.id', $presensi->siswa_id)->exists();
 
         if (!$isMyChild) {
             return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data ini.');
+        }
+
+        if ((int) $presensi->diinput_oleh !== (int) $user->id) {
+            return redirect()->route('wali-siswa.dashboard')
+                ->with('error', 'Anda tidak memiliki akses ke pengajuan ini.');
         }
 
         // Cek apakah sudah divalidasi
@@ -551,11 +575,16 @@ class OrangTuaController extends Controller
         $presensi = Presensi::with('siswa')->findOrFail($presensiId);
 
         // Pastikan siswa adalah anak dari wali siswa yang login
-        $isMyChild = $user->children()->where('siswa.id', $presensi->siswa_id)->exists();
+        $isMyChild = $user->academicChildren()->where('siswa.id', $presensi->siswa_id)->exists();
 
         if (!$isMyChild) {
             return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data ini.');
+        }
+
+        if ((int) $presensi->diinput_oleh !== (int) $user->id) {
+            return redirect()->route('wali-siswa.dashboard')
+                ->with('error', 'Anda tidak memiliki akses ke pengajuan ini.');
         }
 
         // Cek apakah sudah divalidasi
@@ -627,7 +656,7 @@ class OrangTuaController extends Controller
         }
 
         // Pastikan akses
-        $siswa = $user->children()->find($mainPayment->siswa_id);
+        $siswa = $user->financialChildren()->find($mainPayment->siswa_id);
         if (!$siswa) {
             abort(403, 'Akses ditolak.');
         }
@@ -671,12 +700,16 @@ class OrangTuaController extends Controller
         ]);
 
         $user = Auth::user();
-        $rapor = Rapor::findOrFail($raporId);
+        $rapor = Rapor::where('status', 'diterbitkan')->findOrFail($raporId);
 
         // Verify parent-child relationship
-        $isMyChild = $user->children()->where('siswa.id', $rapor->siswa_id)->exists();
-        if (!$isMyChild) {
+        $siswa = $user->academicChildren()->find($rapor->siswa_id);
+        if (!$siswa) {
             return back()->with('error', 'Anda tidak memiliki akses ke rapor ini.');
+        }
+
+        if (!$siswa->hasFullRaporAccess()) {
+            return back()->with('error', 'Akses rapor belum dibuka. Rapor harus divalidasi oleh Bendahara, Wali Kelas, dan Ketua PKBM.');
         }
 
         // Check if already has pending request
@@ -736,7 +769,22 @@ class OrangTuaController extends Controller
             return redirect()->route('wali-siswa.dashboard')->with('error', 'Link download sudah kadaluarsa.');
         }
 
+        $siswa = $user->academicChildren()->find($request->siswa_id);
+        if (! $siswa) {
+            return redirect()->route('wali-siswa.dashboard')->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
+        }
+
         $rapor = $request->rapor;
+        if (! $rapor
+            || $rapor->status !== 'diterbitkan'
+            || (int) $rapor->siswa_id !== (int) $request->siswa_id) {
+            return redirect()->route('wali-siswa.dashboard')->with('error', 'Rapor tersebut sudah tidak tersedia.');
+        }
+
+        if (! $siswa->hasFullRaporAccess()) {
+            return redirect()->route('wali-siswa.dashboard')
+                ->with('error', 'Akses rapor sudah ditutup. Silakan hubungi sekolah untuk informasi lebih lanjut.');
+        }
 
         // Render rapor to PDF (reuse existing preview view)
         $viewName = $rapor->jenis_rapor === 'tengah_semester'

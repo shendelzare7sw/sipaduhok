@@ -8,14 +8,15 @@
  *   2. Tabel panjang tetap rapi saat dicetak (header berulang, baris tak terbelah).
  *   3. Responsif di ponsel (tabel bisa di-scroll, kontainer ikut lebar layar).
  *
- * Catatan: footer URL bawaan browser SENGAJA dibiarkan (margin != 0) — keputusan
- * penundaan perubahan footer. Jangan set `@page { margin: 0 }` di sini.
+ * `@page` memakai margin nol agar Chrome/Edge tidak menyediakan area untuk
+ * header/footer browser (tanggal, URL, dan nomor halaman) pada hasil PDF.
+ * Setiap dokumen tetap mengatur ruang isi melalui wrapper atau padding-nya.
  */
 
 /* 1. Ukuran & margin kertas */
 @page {
     size: A4 portrait;
-    margin: 12mm;
+    margin: 0;
 }
 
 /* 2. Perilaku saat mencetak */

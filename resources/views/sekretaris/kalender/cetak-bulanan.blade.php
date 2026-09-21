@@ -6,7 +6,7 @@
     <title>Kalender Akademik - {{ $bulan }}</title>
     <style>
         @page {
-            margin: 12mm;
+            margin: 0;
             size: A4 landscape;
         }
 

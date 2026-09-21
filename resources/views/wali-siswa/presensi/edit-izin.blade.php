@@ -3,28 +3,22 @@
 @section('title', 'Edit Pengajuan Izin')
 @section('page-title', 'Edit Pengajuan Izin')
 
-
-@section('styles')
-    @vite(['resources/css/wali-siswa/presensi/edit-izin.css'])
-@endsection
-
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y wali-siswa-edit-izin-page">
+<div class="min-w-0 w-full space-y-4">
 
-    <!-- Page Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-        <div class="mb-3 mb-md-0">
-            <h4 class="fw-bold mb-1">Edit Pengajuan Izin</h4>
-            <p class="text-muted mb-0">
-                <i class="fas fa-user-graduate me-1"></i>{{ $presensi->siswa->nama_lengkap }}
-                <span class="mx-2">|</span>
-                <i class="fas fa-school me-1"></i>{{ $presensi->siswa->kelas->nama_kelas ?? 'Belum ada kelas' }}
+    {{-- Page Header --}}
+    <div class="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h4 class="text-lg font-bold text-slate-800">Edit Pengajuan Izin</h4>
+            <p class="mt-0.5 text-sm text-slate-500">
+                <i class="fa-solid fa-user-graduate mr-1"></i>{{ $presensi->siswa->nama_lengkap }}
+                <span class="mx-1">·</span>
+                <i class="fa-solid fa-school mr-1"></i>{{ $presensi->siswa->kelas->nama_kelas ?? 'Belum ada kelas' }}
             </p>
         </div>
     </div>
 
     @php
-        // Extract existing data
         $keteranganText = preg_replace('/\s*\(Bukti: .+?\)/', '', $presensi->keterangan);
         $keteranganText = preg_replace('/\s*-\s*Diajukan oleh wali siswa.+/', '', $keteranganText);
 
@@ -38,148 +32,128 @@
         $isPdf = strtolower($extension) === 'pdf';
     @endphp
 
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Form Card -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-transparent border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-edit me-2 text-warning"></i>
-                        Edit Pengajuan Izin/Sakit
-                    </h5>
+    <div class="mx-auto max-w-3xl">
+        {{-- Form Card --}}
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
+                <i class="fa-solid fa-edit text-amber-500"></i>
+                <h5 class="text-base font-semibold text-slate-800">Edit Pengajuan Izin/Sakit</h5>
+            </div>
+            <div class="p-4">
+                {{-- Info Callout --}}
+                <div class="mb-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3.5 text-sm text-blue-800">
+                    <i class="fa-solid fa-info-circle mt-0.5 shrink-0"></i>
+                    <div>
+                        <strong>Perhatian:</strong> Anda dapat mengedit pengajuan izin yang belum divalidasi oleh wali kelas.
+                        Pastikan data yang dimasukkan sudah benar.
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    <div class="alert alert-info d-flex align-items-start mb-4">
-                        <i class="fas fa-info-circle me-2 mt-1"></i>
-                        <div>
-                            <strong>Perhatian:</strong> Anda dapat mengedit pengajuan izin yang belum divalidasi oleh wali kelas.
-                            Pastikan data yang dimasukkan sudah benar.
-                        </div>
+
+                <form action="{{ route('wali-siswa.presensi.update-izin', $presensi->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    @method('PUT')
+
+                    {{-- Tanggal (Read Only) --}}
+                    <div>
+                        <label class="mb-1.5 block text-sm font-bold text-slate-700">Tanggal</label>
+                        <input type="text"
+                               value="{{ \Carbon\Carbon::parse($presensi->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}"
+                               readonly
+                               class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-500 cursor-not-allowed">
+                        <p class="mt-1 text-xs text-slate-400">Tanggal tidak dapat diubah</p>
                     </div>
 
-                    <form action="{{ route('wali-siswa.presensi.update-izin', $presensi->id) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        @method('PUT')
+                    {{-- Jenis --}}
+                    <div>
+                        <label class="mb-1.5 block text-sm font-bold text-slate-700">
+                            Jenis Izin <span class="text-red-500">*</span>
+                        </label>
+                        <select name="jenis" required
+                                class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 @error('jenis') !border-red-400 !ring-red-400/20 @enderror">
+                            <option value="">-- Pilih Jenis Izin --</option>
+                            <option value="sakit" {{ old('jenis', $presensi->status) === 'sakit' ? 'selected' : '' }}>Sakit</option>
+                            <option value="izin" {{ old('jenis', $presensi->status) === 'izin' ? 'selected' : '' }}>Izin</option>
+                        </select>
+                        @error('jenis')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                        <!-- Tanggal (Read Only) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
-                                Tanggal
-                            </label>
-                            <input type="text"
-                                   class="form-control"
-                                   value="{{ \Carbon\Carbon::parse($presensi->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}"
-                                   readonly>
-                            <small class="text-muted">Tanggal tidak dapat diubah</small>
-                        </div>
+                    {{-- Keterangan --}}
+                    <div>
+                        <label class="mb-1.5 block text-sm font-bold text-slate-700">
+                            Keterangan <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="keterangan" rows="4" required placeholder="Jelaskan alasan ketidakhadiran anak Anda secara detail..."
+                                  class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 @error('keterangan') !border-red-400 !ring-red-400/20 @enderror">{{ old('keterangan', trim($keteranganText)) }}</textarea>
+                        @error('keterangan')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
+                        <p class="mt-1 text-xs text-slate-400">Maksimal 500 karakter</p>
+                    </div>
 
-                        <!-- Jenis -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
-                                Jenis Izin <span class="text-danger">*</span>
-                            </label>
-                            <select name="jenis" class="form-select @error('jenis') is-invalid @enderror" required>
-                                <option value="">-- Pilih Jenis Izin --</option>
-                                <option value="sakit" {{ old('jenis', $presensi->status) === 'sakit' ? 'selected' : '' }}>
-                                    Sakit
-                                </option>
-                                <option value="izin" {{ old('jenis', $presensi->status) === 'izin' ? 'selected' : '' }}>
-                                    Izin
-                                </option>
-                            </select>
-                            @error('jenis')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Keterangan -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
-                                Keterangan <span class="text-danger">*</span>
-                            </label>
-                            <textarea name="keterangan"
-                                      rows="4"
-                                      class="form-control @error('keterangan') is-invalid @enderror"
-                                      placeholder="Jelaskan alasan ketidakhadiran anak Anda secara detail..."
-                                      required>{{ old('keterangan', trim($keteranganText)) }}</textarea>
-                            @error('keterangan')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">Maksimal 500 karakter</small>
-                        </div>
-
-                        <!-- Bukti Lama -->
-                        @if($buktiPath)
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Bukti Saat Ini</label>
-                                <div class="card border-primary">
-                                    <div class="card-body p-3">
-                                        @if($isImage)
-                                            <div class="text-center mb-2">
-                                                <img src="{{ asset('storage/' . $buktiPath) }}"
-                                                     alt="Bukti"
-                                                     class="img-fluid rounded proof-preview">
-                                            </div>
-                                        @elseif($isPdf)
-                                            <div class="text-center mb-2">
-                                                <i class="fas fa-file-pdf fa-3x text-danger"></i>
-                                                <p class="mt-2 mb-0"><small>File PDF</small></p>
-                                            </div>
-                                        @else
-                                            <div class="text-center mb-2">
-                                                <i class="fas fa-file fa-3x text-secondary"></i>
-                                                <p class="mt-2 mb-0"><small>File {{ strtoupper($extension) }}</small></p>
-                                            </div>
-                                        @endif
-
-                                        <div class="d-grid gap-2 mt-2">
-                                            <a href="{{ asset('storage/' . $buktiPath) }}"
-                                               target="_blank"
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye me-1"></i>Lihat Bukti
-                                            </a>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="hapus_bukti" value="1" id="hapus_bukti">
-                                                <label class="form-check-label text-danger" for="hapus_bukti">
-                                                    <i class="fas fa-trash me-1"></i>Hapus bukti ini
-                                                </label>
-                                            </div>
-                                        </div>
+                    {{-- Bukti Lama --}}
+                    @if($buktiPath)
+                        <div>
+                            <label class="mb-1.5 block text-sm font-bold text-slate-700">Bukti Saat Ini</label>
+                            <div class="rounded-lg border border-brand-200 bg-brand-50/30 p-4">
+                                @if($isImage)
+                                    <div class="mb-3 text-center">
+                                        <img src="{{ asset('storage/' . $buktiPath) }}" alt="Bukti" class="mx-auto max-h-[150px] rounded-lg object-contain">
                                     </div>
+                                @elseif($isPdf)
+                                    <div class="mb-3 text-center">
+                                        <i class="fa-solid fa-file-pdf text-4xl text-red-500"></i>
+                                        <p class="mt-2 text-xs text-slate-500">File PDF</p>
+                                    </div>
+                                @else
+                                    <div class="mb-3 text-center">
+                                        <i class="fa-solid fa-file text-4xl text-slate-400"></i>
+                                        <p class="mt-2 text-xs text-slate-500">File {{ strtoupper($extension) }}</p>
+                                    </div>
+                                @endif
+
+                                <div class="space-y-2">
+                                    <a href="{{ asset('storage/' . $buktiPath) }}" target="_blank"
+                                       class="flex w-full items-center justify-center gap-1.5 rounded-lg border border-brand-300 px-3 py-2 text-xs font-semibold text-brand-700 transition hover:bg-brand-50">
+                                        <i class="fa-solid fa-eye"></i> Lihat Bukti
+                                    </a>
+                                    <label class="flex items-center gap-2 text-sm text-red-600 cursor-pointer">
+                                        <input type="checkbox" name="hapus_bukti" value="1" class="rounded border-slate-300 text-red-600 focus:ring-red-500/20">
+                                        <i class="fa-solid fa-trash text-xs"></i> Hapus bukti ini
+                                    </label>
                                 </div>
                             </div>
-                        @endif
-
-                        <!-- Upload Bukti Baru -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">{{ $buktiPath ? 'Ganti Bukti Baru' : 'Upload Bukti' }}</label>
-                            <input type="file"
-                                   name="bukti"
-                                   class="form-control @error('bukti') is-invalid @enderror"
-                                   accept=".jpg,.jpeg,.png,.pdf">
-                            @error('bukti')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">
-                                <i class="fas fa-paperclip me-1"></i>
-                                Format: JPG, PNG, PDF. Maksimal 2MB.
-                                @if($buktiPath)
-                                    <br>Upload file baru akan mengganti bukti lama.
-                                @endif
-                            </small>
                         </div>
+                    @endif
 
-                        <!-- Buttons -->
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button type="submit" class="btn btn-warning">
-                                <i class="fas fa-save me-1"></i>Simpan Perubahan
-                            </button>
-                            <a href="{{ route('wali-siswa.presensi.riwayat-izin', $presensi->siswa_id) }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Batal
-                            </a>
-                        </div>
-                    </form>
-                </div>
+                    {{-- Upload Bukti Baru --}}
+                    <div>
+                        <label class="mb-1.5 block text-sm font-bold text-slate-700">{{ $buktiPath ? 'Ganti Bukti Baru' : 'Upload Bukti' }}</label>
+                        <input type="file" name="bukti" accept=".jpg,.jpeg,.png,.pdf"
+                               class="w-full rounded-lg border border-slate-300 px-3.5 py-2 text-sm text-slate-800 file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-brand-700 hover:file:bg-brand-100 @error('bukti') !border-red-400 @enderror">
+                        @error('bukti')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
+                        <p class="mt-1.5 text-xs text-slate-400">
+                            <i class="fa-solid fa-paperclip mr-1"></i>
+                            Format: JPG, PNG, PDF. Maksimal 2MB.
+                            @if($buktiPath)
+                                <br>Upload file baru akan mengganti bukti lama.
+                            @endif
+                        </p>
+                    </div>
+
+                    {{-- Buttons --}}
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600">
+                            <i class="fa-solid fa-save"></i> Simpan Perubahan
+                        </button>
+                        <a href="{{ route('wali-siswa.presensi.riwayat-izin', $presensi->siswa_id) }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                            <i class="fa-solid fa-arrow-left"></i> Batal
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

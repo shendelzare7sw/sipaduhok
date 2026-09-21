@@ -227,6 +227,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Anak yang relasinya memberi hak melihat presensi/rapor dan mengajukan izin.
+     */
+    public function academicChildren()
+    {
+        return $this->children()->wherePivot('can_access_academic', true);
+    }
+
+    /**
+     * Anak yang relasinya memberi tanggung jawab pembayaran.
+     */
+    public function financialChildren()
+    {
+        return $this->children()->wherePivot('is_financial_responsible', true);
+    }
+
+    /**
      * Relasi ke tabel student_parents (untuk query detail parent-student relationship)
      */
     public function studentParents()

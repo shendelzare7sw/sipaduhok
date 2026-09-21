@@ -425,6 +425,11 @@ class SITClosureDomainIntegrationTest extends TestCase
             'is_financial_responsible' => true,
             'can_access_academic' => true,
         ]);
+        $context['siswa']->update([
+            'validasi_rapor_wali' => true,
+            'validasi_rapor_ketua' => true,
+            'validasi_rapor_bendahara' => true,
+        ]);
 
         $waliUser = $this->makeUser('wali_kelas');
         $wali = TenagaPendidik::create([
@@ -488,6 +493,38 @@ class SITClosureDomainIntegrationTest extends TestCase
             ->get(route('wali-siswa.presensi.anak', $context['siswa']->id))
             ->assertRedirect(route('wali-siswa.dashboard'))
             ->assertSessionHas('error', 'Anda tidak memiliki akses ke data siswa ini.');
+    }
+
+    public function test_wali_siswa_tidak_bisa_meminta_download_rapor_saat_akses_belum_terbuka(): void
+    {
+        $context = $this->makeAcademicContext();
+        $parent = $this->makeUser('orang_tua');
+        $context['siswa']->parents()->attach($parent->id, [
+            'relationship' => 'ayah',
+            'is_primary' => true,
+            'is_financial_responsible' => true,
+            'can_access_academic' => true,
+        ]);
+
+        $rapor = Rapor::create([
+            'siswa_id' => $context['siswa']->id,
+            'kelas_id' => $context['kelas']->id,
+            'tahun_ajaran_id' => $context['tahun']->id,
+            'semester' => 'ganjil',
+            'jenis_rapor' => 'akhir_semester',
+            'status' => 'diterbitkan',
+        ]);
+
+        $this->actingAs($parent)->withoutMiddleware()
+            ->from('/wali-siswa/rapor/detail/'.$rapor->id)
+            ->post(route('wali-siswa.rapor.request-download', $rapor->id), ['alasan' => 'Arsip keluarga'])
+            ->assertRedirect('/wali-siswa/rapor/detail/'.$rapor->id)
+            ->assertSessionHas('error', 'Akses rapor belum dibuka. Rapor harus divalidasi oleh Bendahara, Wali Kelas, dan Ketua PKBM.');
+
+        $this->assertDatabaseMissing('request_download_rapor', [
+            'rapor_id' => $rapor->id,
+            'user_id' => $parent->id,
+        ]);
     }
 
     private function makeAcademicContext(): array

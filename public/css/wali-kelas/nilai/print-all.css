@@ -58,7 +58,7 @@
 
         /* ── Print: sembunyikan ctrl-bar ── */
         @media print {
-            @page { size: A4 landscape; margin: 6mm; }
+            @page { size: A4 landscape; margin: 0; }
             .ctrl-bar { display: none !important; }
             body { background: white; padding: 0; font-size: 8.5pt; }
             #scaleWrapper { display: block; padding: 0; }

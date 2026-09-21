@@ -3,64 +3,64 @@
 @section('title', 'Riwayat Presensi - ' . $siswa->nama_lengkap)
 @section('page-title', 'Riwayat Presensi')
 
-
-@section('styles')
-    @vite(['resources/css/wali-siswa/presensi/riwayat-presensi.css'])
-@endsection
-
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y attendance-history-page">
-    <div class="history-heading d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+<div class="min-w-0 w-full space-y-4">
+
+    {{-- Page Header --}}
+    <div class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
-            <div class="history-title">Riwayat Presensi</div>
-            <p class="text-muted mb-0">
-                <i class="fas fa-user-graduate me-1"></i>{{ $siswa->nama_lengkap }}
-                <span class="mx-2">|</span>
-                <i class="fas fa-school me-1"></i>{{ $siswa->kelas->nama_kelas ?? 'Belum ada kelas' }}
+            <h4 class="text-lg font-extrabold text-slate-800">Riwayat Presensi</h4>
+            <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">
+                <i class="fa-solid fa-user-graduate mr-1"></i>{{ $siswa->nama_lengkap }}
+                <span class="mx-1">·</span>
+                <i class="fa-solid fa-school mr-1"></i>{{ $siswa->kelas->nama_kelas ?? 'Belum ada kelas' }}
             </p>
         </div>
-        <div class="history-actions">
-            <a href="{{ route('wali-siswa.presensi.ajukan-izin', $siswa->id) }}" class="btn btn-warning text-white fw-bold">
-                <i class="fas fa-file-medical me-1"></i>Ajukan Izin / Sakit
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('wali-siswa.presensi.ajukan-izin', $siswa->id) }}" class="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-white transition hover:bg-amber-600">
+                <i class="fa-solid fa-file-medical"></i> Ajukan Izin / Sakit
             </a>
-            <a href="{{ route('wali-siswa.presensi.anak', $siswa->id) }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i>Kembali
+            <a href="{{ route('wali-siswa.presensi.anak', $siswa->id) }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                <i class="fa-solid fa-arrow-left"></i> Kembali
             </a>
         </div>
     </div>
 
-    <div class="summary-grid">
-        <div class="summary-card summary-hadir">
-            <div class="summary-label">Hadir</div>
-            <div class="summary-number">{{ $rekap['hadir'] }}</div>
-        </div>
-        <div class="summary-card summary-sakit">
-            <div class="summary-label">Sakit</div>
-            <div class="summary-number">{{ $rekap['sakit'] }}</div>
-        </div>
-        <div class="summary-card summary-izin">
-            <div class="summary-label">Izin</div>
-            <div class="summary-number">{{ $rekap['izin'] }}</div>
-        </div>
-        <div class="summary-card summary-alpha">
-            <div class="summary-label">Alpha</div>
-            <div class="summary-number">{{ $rekap['alpha'] }}</div>
-        </div>
+    {{-- Summary Cards --}}
+    @php
+        $summaryStats = [
+            ['label' => 'Hadir', 'value' => $rekap['hadir'], 'color' => 'emerald'],
+            ['label' => 'Sakit', 'value' => $rekap['sakit'], 'color' => 'amber'],
+            ['label' => 'Izin',  'value' => $rekap['izin'],  'color' => 'blue'],
+            ['label' => 'Alpha', 'value' => $rekap['alpha'], 'color' => 'red'],
+        ];
+        $borderColors = ['emerald' => 'border-l-emerald-500', 'amber' => 'border-l-amber-500', 'blue' => 'border-l-blue-500', 'red' => 'border-l-red-500'];
+    @endphp
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        @foreach($summaryStats as $s)
+            <div class="relative overflow-hidden rounded-xl border border-slate-200 border-l-4 {{ $borderColors[$s['color']] }} bg-white p-3 shadow-sm sm:p-4">
+                <div class="text-[11px] font-extrabold uppercase tracking-wide text-slate-500">{{ $s['label'] }}</div>
+                <div class="mt-1 text-xl font-extrabold text-slate-800 sm:text-2xl">{{ $s['value'] }}</div>
+            </div>
+        @endforeach
     </div>
 
-    <div class="history-filter mb-4">
-        <form action="{{ route('wali-siswa.presensi.riwayat-presensi', $siswa->id) }}" method="GET" class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label fw-bold small">Dari Tanggal</label>
-                <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}" class="form-control">
+    {{-- Filter --}}
+    <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm">
+        <form action="{{ route('wali-siswa.presensi.riwayat-presensi', $siswa->id) }}" method="GET" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 items-end">
+            <div>
+                <label class="mb-1 block text-xs font-bold text-slate-600">Dari Tanggal</label>
+                <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}"
+                       class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
             </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold small">Sampai Tanggal</label>
-                <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" class="form-control">
+            <div>
+                <label class="mb-1 block text-xs font-bold text-slate-600">Sampai Tanggal</label>
+                <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}"
+                       class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
             </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold small">Status</label>
-                <select name="status" class="form-select">
+            <div>
+                <label class="mb-1 block text-xs font-bold text-slate-600">Status</label>
+                <select name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                     <option value="">Semua Status</option>
                     <option value="hadir" {{ request('status') === 'hadir' ? 'selected' : '' }}>Hadir</option>
                     <option value="sakit" {{ request('status') === 'sakit' ? 'selected' : '' }}>Sakit</option>
@@ -68,120 +68,118 @@
                     <option value="alpha" {{ request('status') === 'alpha' ? 'selected' : '' }}>Alpha</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <div class="filter-actions d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-fill">
-                        <i class="fas fa-search me-1"></i>Filter
-                    </button>
-                    <a href="{{ route('wali-siswa.presensi.riwayat-presensi', $siswa->id) }}" class="btn btn-light border flex-fill">
-                        <i class="fas fa-sync-alt me-1"></i>Reset
-                    </a>
-                </div>
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700">
+                    <i class="fa-solid fa-search mr-1"></i> Filter
+                </button>
+                <a href="{{ route('wali-siswa.presensi.riwayat-presensi', $siswa->id) }}" class="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-center text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                    <i class="fa-solid fa-sync-alt mr-1"></i> Reset
+                </a>
             </div>
         </form>
     </div>
 
-    <div class="history-table-card">
-        <div class="table-responsive">
-            <table class="table table-hover table-history mb-0">
+    {{-- Table --}}
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
                 <thead>
-                    <tr>
-                        <th class="ps-4">Tanggal</th>
-                        <th>Hari</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Validasi</th>
-                        <th>Keterangan</th>
+                    <tr class="border-b border-slate-200 bg-slate-50">
+                        <th class="px-4 py-2.5 text-left text-[11px] font-extrabold uppercase tracking-wide text-slate-500">Tanggal</th>
+                        <th class="px-4 py-2.5 text-left text-[11px] font-extrabold uppercase tracking-wide text-slate-500">Hari</th>
+                        <th class="px-4 py-2.5 text-center text-[11px] font-extrabold uppercase tracking-wide text-slate-500">Status</th>
+                        <th class="px-4 py-2.5 text-center text-[11px] font-extrabold uppercase tracking-wide text-slate-500">Validasi</th>
+                        <th class="px-4 py-2.5 text-left text-[11px] font-extrabold uppercase tracking-wide text-slate-500">Keterangan</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-slate-100">
                     @forelse($riwayat as $item)
                         @php
-                            $statusMap = [
-                                'hadir' => ['class' => 'success', 'label' => 'Hadir'],
-                                'sakit' => ['class' => 'warning', 'label' => 'Sakit'],
-                                'izin' => ['class' => 'info', 'label' => 'Izin'],
-                                'alpha' => ['class' => 'danger', 'label' => 'Alpha'],
+                            $statusBadgeMap = [
+                                'hadir' => 'bg-emerald-100 text-emerald-700',
+                                'sakit' => 'bg-amber-100 text-amber-700',
+                                'izin'  => 'bg-blue-100 text-blue-700',
+                                'alpha' => 'bg-red-100 text-red-700',
                             ];
-                            $status = $statusMap[$item->status] ?? ['class' => 'secondary', 'label' => ucfirst($item->status)];
+                            $badgeCls = $statusBadgeMap[$item->status] ?? 'bg-slate-100 text-slate-600';
+
+                            $validasiBadge = match($item->status_validasi) {
+                                'disetujui' => 'bg-emerald-100 text-emerald-700',
+                                'ditolak'   => 'bg-red-100 text-red-700',
+                                'pending'   => 'bg-amber-100 text-amber-700',
+                                default     => 'bg-slate-100 text-slate-500',
+                            };
+                            $validasiLabel = match($item->status_validasi) {
+                                'disetujui' => 'Disetujui',
+                                'ditolak'   => 'Ditolak',
+                                'pending'   => 'Menunggu',
+                                default     => '-',
+                            };
+
                             $buktiPath = $item->bukti_file;
                             $buktiUrl = $buktiPath ? asset('storage/' . $buktiPath) : null;
                             $buktiExtension = $buktiPath ? strtolower(pathinfo($buktiPath, PATHINFO_EXTENSION)) : null;
                             $isBuktiImage = in_array($buktiExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
                             $isBuktiPdf = $buktiExtension === 'pdf';
                         @endphp
-                        <tr>
-                            <td data-label="Tanggal" class="ps-4 fw-bold">
-                                {{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('j F Y') }}
+                        <tr class="hover:bg-slate-50 transition" x-data="{ showBukti: false }">
+                            <td class="px-4 py-2.5 font-bold text-slate-800">{{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('j F Y') }}</td>
+                            <td class="px-4 py-2.5 text-slate-500">{{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('l') }}</td>
+                            <td class="px-4 py-2.5 text-center">
+                                <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold {{ $badgeCls }}">{{ ucfirst($item->status) }}</span>
                             </td>
-                            <td data-label="Hari" class="text-muted">
-                                {{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('l') }}
+                            <td class="px-4 py-2.5 text-center">
+                                <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold {{ $validasiBadge }}">{{ $validasiLabel }}</span>
                             </td>
-                            <td data-label="Status" class="text-center">
-                                <span class="badge bg-{{ $status['class'] }} rounded-pill px-3 py-2">
-                                    {{ $status['label'] }}
-                                </span>
-                            </td>
-                            <td data-label="Validasi" class="text-center">
-                                @if($item->status_validasi === 'disetujui')
-                                    <span class="badge bg-success rounded-pill">Disetujui</span>
-                                @elseif($item->status_validasi === 'ditolak')
-                                    <span class="badge bg-danger rounded-pill">Ditolak</span>
-                                @elseif($item->status_validasi === 'pending')
-                                    <span class="badge bg-warning rounded-pill">Menunggu</span>
-                                @else
-                                    <span class="badge bg-label-secondary rounded-pill">-</span>
-                                @endif
-                            </td>
-                            <td data-label="Keterangan">
-                                <div class="small text-muted">{{ $item->keterangan ?: 'Tidak ada catatan' }}</div>
+                            <td class="px-4 py-2.5 text-sm text-slate-500">
+                                <div>{{ $item->keterangan ?: 'Tidak ada catatan' }}</div>
                                 @if($buktiPath)
-                                    <button type="button"
-                                            class="btn btn-outline-primary btn-sm mt-2"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#buktiPresensiModal{{ $item->id }}">
-                                        <i class="fas fa-paperclip me-1"></i>Lihat Bukti
+                                    <button type="button" @click="showBukti = true"
+                                            class="mt-1 inline-flex items-center gap-1 rounded-lg border border-brand-300 px-2.5 py-1 text-[11px] font-semibold text-brand-700 transition hover:bg-brand-50">
+                                        <i class="fa-solid fa-paperclip"></i> Lihat Bukti
                                     </button>
+
+                                    {{-- Alpine Dialog --}}
+                                    <template x-teleport="body">
+                                        <div x-show="showBukti" x-cloak
+                                             class="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4"
+                                             @keydown.escape.window="showBukti = false">
+                                            <div @click.outside="showBukti = false"
+                                                 x-show="showBukti" x-transition
+                                                 class="relative w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl">
+                                                <div class="flex items-center justify-between border-b border-slate-200 px-5 py-3">
+                                                    <h5 class="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                                                        <i class="fa-solid fa-paperclip text-brand-600"></i> Lampiran Bukti
+                                                    </h5>
+                                                    <button @click="showBukti = false" class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                </div>
+                                                <div>
+                                                    @if($isBuktiImage)
+                                                        <div class="p-4 text-center">
+                                                            <img src="{{ $buktiUrl }}" alt="Lampiran bukti presensi {{ $siswa->nama_lengkap }}" class="mx-auto max-h-[75vh] rounded-lg object-contain">
+                                                        </div>
+                                                    @elseif($isBuktiPdf)
+                                                        <iframe src="{{ $buktiUrl }}" title="Lampiran bukti presensi {{ $siswa->nama_lengkap }}" class="h-[75vh] w-full border-0"></iframe>
+                                                    @else
+                                                        <div class="px-5 py-12 text-center">
+                                                            <i class="fa-solid fa-file text-5xl text-slate-300"></i>
+                                                            <p class="mt-3 text-sm text-slate-500">Format lampiran tidak dapat dipreview.</p>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
                                 @endif
                             </td>
                         </tr>
-
-                        @if($buktiPath)
-                            <div class="modal fade" id="buktiPresensiModal{{ $item->id }}" tabindex="-1" aria-labelledby="buktiPresensiModalLabel{{ $item->id }}" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-xl">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="buktiPresensiModalLabel{{ $item->id }}">
-                                                <i class="fas fa-paperclip me-2"></i>Lampiran Bukti
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-                                        </div>
-                                        <div class="modal-body p-0">
-                                            @if($isBuktiImage)
-                                                <div class="text-center p-3">
-                                                    <img src="{{ $buktiUrl }}"
-                                                         alt="Lampiran bukti presensi {{ $siswa->nama_lengkap }}"
-                                                         class="img-fluid rounded attendance-proof-image">
-                                                </div>
-                                            @elseif($isBuktiPdf)
-                                                <iframe src="{{ $buktiUrl }}"
-                                                        title="Lampiran bukti presensi {{ $siswa->nama_lengkap }}"
-                                                        class="attendance-proof-frame"></iframe>
-                                            @else
-                                                <div class="text-center p-5">
-                                                    <i class="fas fa-file fa-3x text-muted mb-3"></i>
-                                                    <p class="text-muted mb-0">Format lampiran tidak dapat dipreview.</p>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
-                                <i class="fas fa-calendar-times fa-2x d-block mb-2"></i>
-                                Tidak ada data presensi ditemukan.
+                            <td colspan="5" class="px-5 py-8 text-center">
+                                <i class="fa-solid fa-calendar-times mb-2 block text-3xl text-slate-300"></i>
+                                <p class="text-sm text-slate-500">Tidak ada data presensi ditemukan.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -189,10 +187,11 @@
             </table>
         </div>
         @if($riwayat->hasPages())
-            <div class="card-footer bg-light border-top">
+            <div class="border-t border-slate-200 bg-slate-50 px-5 py-3">
                 {{ $riwayat->links() }}
             </div>
         @endif
     </div>
+
 </div>
 @endsection

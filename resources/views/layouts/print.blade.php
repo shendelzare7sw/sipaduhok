@@ -17,7 +17,7 @@
         <button type="button" data-print-page class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white hover:bg-brand-700"><i class="fas fa-print" aria-hidden="true"></i><span class="hidden sm:inline">Cetak</span></button>
     </header>
 
-    <main class="min-w-0 w-full overflow-x-auto p-3 print:overflow-visible print:p-0 sm:p-5">
+    <main class="min-w-0 w-full overflow-x-auto p-3 print:overflow-visible print:p-[12mm] sm:p-5">
         <article class="@yield('document-width', 'min-w-[900px]') w-full bg-white p-6 shadow-sm print:min-w-0 print:max-w-none print:p-0 print:shadow-none sm:p-8">
             @hasSection('document-header')
                 @yield('document-header')

@@ -3,11 +3,6 @@
 @section('title', 'Pembayaran Tagihan')
 @section('page-title', 'Pembayaran Tagihan')
 
-
-@section('styles')
-    @vite(['resources/css/wali-siswa/pembayaran/digital.css'])
-@endsection
-
 @section('content')
 @php
     $isPending = $pembayaran->status_validasi === 'pending';
@@ -34,80 +29,117 @@
         $paymentNoticeType ??= 'info';
     }
 
-    $paymentNoticeIcon = match ($paymentNoticeType) {
-        'success' => 'fas fa-check-circle',
-        'danger' => 'fas fa-times-circle',
-        'warning' => 'fas fa-exclamation-triangle',
-        default => 'fas fa-info-circle',
-    };
+    $alertColorMap = [
+        'success' => 'border-emerald-200 bg-emerald-50 text-emerald-800',
+        'danger'  => 'border-red-200 bg-red-50 text-red-800',
+        'warning' => 'border-amber-200 bg-amber-50 text-amber-800',
+        'info'    => 'border-blue-200 bg-blue-50 text-blue-800',
+    ];
+    $alertIconMap = [
+        'success' => 'fa-check-circle',
+        'danger'  => 'fa-times-circle',
+        'warning' => 'fa-exclamation-triangle',
+        'info'    => 'fa-info-circle',
+    ];
+    $alertColors = $alertColorMap[$paymentNoticeType] ?? $alertColorMap['info'];
+    $alertIcon = $alertIconMap[$paymentNoticeType] ?? $alertIconMap['info'];
+
+    $heroBg = $isPaid ? 'from-emerald-600 to-emerald-700' : ($isPending && !$expired ? 'from-brand-600 to-brand-700' : 'from-slate-600 to-slate-700');
+    $heroTitle = $isPaid ? 'Pembayaran Berhasil' : ($isPending && !$expired ? 'Selesaikan Pembayaran' : ($expired ? 'Pembayaran Kedaluwarsa' : 'Pembayaran Tidak Aktif'));
+    $statusLabel = $isPaid ? 'Lunas' : ($isPending && !$expired ? 'Menunggu Pembayaran' : ($expired ? 'Kedaluwarsa' : 'Dibatalkan / Gagal'));
+    $statusBg = $isPaid ? 'bg-emerald-100 text-emerald-700' : ($isPending ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700');
 @endphp
 
-<div class="container-xxl flex-grow-1 container-p-y digital-payment-page">
-    <div class="mb-4">
-        <a href="{{ route('wali-siswa.tagihan.anak', $pembayaran->siswa_id) }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Kembali ke Tagihan
+<div class="min-w-0 w-full space-y-5">
+
+    {{-- Back Button --}}
+    <div>
+        <a href="{{ route('wali-siswa.tagihan.anak', $pembayaran->siswa_id) }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Tagihan
         </a>
     </div>
 
-    <div class="row justify-content-center g-4">
-        <div class="col-xl-8">
-            <div class="card border-0 shadow-sm overflow-hidden">
-                <div class="digital-payment-hero">
-                    <div>
-                        <span class="digital-payment-eyebrow">TAGIHAN SEKOLAH</span>
-                        <h3 class="mb-2 text-white">{{ $isPaid ? 'Pembayaran Berhasil' : ($isPending && !$expired ? 'Selesaikan Pembayaran' : ($expired ? 'Pembayaran Kedaluwarsa' : 'Pembayaran Tidak Aktif')) }}</h3>
-                        <p class="mb-0">Nomor transaksi {{ $pembayaran->order_id }}</p>
+    <div class="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        {{-- Main Card --}}
+        <div class="xl:col-span-2">
+            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                @if($errors->any())
+                    <div class="mx-5 mt-5 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                        <i class="fa-solid fa-circle-exclamation mt-0.5 shrink-0"></i>
+                        <div>
+                            <p class="font-bold">Kanal pembayaran belum dapat diterapkan.</p>
+                            <ul class="mt-1 list-disc pl-4">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                     </div>
-                    <span class="badge rounded-pill px-3 py-2 {{ $isPaid ? 'bg-success' : ($isPending ? 'bg-warning text-dark' : 'bg-danger') }}">
-                        {{ $isPaid ? 'Lunas' : ($isPending && !$expired ? 'Menunggu Pembayaran' : ($expired ? 'Kedaluwarsa' : 'Dibatalkan / Gagal')) }}
-                    </span>
+                @endif
+
+                {{-- Hero --}}
+                <div class="flex items-center justify-between bg-gradient-to-r {{ $heroBg }} px-6 py-5 text-white">
+                    <div>
+                        <span class="!text-white/80 text-[11px] font-bold uppercase tracking-widest">TAGIHAN SEKOLAH</span>
+                        <h3 class="mt-1 !text-white text-xl font-bold">{{ $heroTitle }}</h3>
+                        <p class="mt-0.5 !text-white/80 text-sm">Nomor transaksi {{ $pembayaran->order_id }}</p>
+                    </div>
+                    <span class="rounded-full px-3 py-1 text-xs font-bold {{ $statusBg }}">{{ $statusLabel }}</span>
                 </div>
 
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3">Rincian Tagihan</h6>
-                    <div class="digital-item-list mb-4">
-                        @foreach($allPayments as $item)
-                            <div class="digital-item-row">
-                                <div>
-                                    <div class="fw-semibold">{{ $item->tagihan->keterangan ?: ucwords(str_replace('_', ' ', $item->tagihan->jenis_tagihan)) }}</div>
-                                    <small class="text-muted">{{ $item->kode_pembayaran }}</small>
+                <div class="p-5 space-y-5">
+                    {{-- Rincian Tagihan --}}
+                    <div>
+                        <h6 class="mb-3 text-sm font-bold text-slate-700">Rincian Tagihan</h6>
+                        <div class="divide-y divide-slate-100 rounded-lg border border-slate-200">
+                            @foreach($allPayments as $item)
+                                <div class="flex items-center justify-between px-4 py-3">
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">{{ $item->tagihan->keterangan ?: ucwords(str_replace('_', ' ', $item->tagihan->jenis_tagihan)) }}</div>
+                                        <div class="mt-0.5 text-xs text-slate-400">{{ $item->kode_pembayaran }}</div>
+                                    </div>
+                                    <strong class="text-sm text-slate-800">Rp {{ number_format($item->jumlah_bayar, 0, ',', '.') }}</strong>
                                 </div>
-                                <strong>Rp {{ number_format($item->jumlah_bayar, 0, ',', '.') }}</strong>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
 
-                    <div class="digital-total-box">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Jumlah tagihan</span>
-                            <strong>Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong>
+                    {{-- Total Box --}}
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-600">Jumlah tagihan</span>
+                            <strong class="text-slate-800">Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong>
                         </div>
                         @if($fee > 0)
-                            <div class="d-flex justify-content-between mb-2 text-muted">
+                            <div class="mt-2 flex items-center justify-between text-sm text-slate-500">
                                 <span>Biaya kanal pembayaran</span>
                                 <span>Rp {{ number_format($fee, 0, ',', '.') }}</span>
                             </div>
                         @endif
-                        <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-2">
-                            <span class="fw-bold">Total pembayaran</span>
-                            <strong class="fs-4 text-primary">Rp {{ number_format($gatewayTotal, 0, ',', '.') }}</strong>
+                        <div class="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
+                            <span class="text-sm font-bold text-slate-700">Total pembayaran</span>
+                            <strong class="text-xl text-brand-600">Rp {{ number_format($gatewayTotal, 0, ',', '.') }}</strong>
                         </div>
                     </div>
 
-                    <div class="alert alert-{{ $paymentNoticeType }} mt-4 mb-0" role="status">
-                        <i class="{{ $paymentNoticeIcon }} me-2"></i>{{ $paymentNotice }}
+                    {{-- Notice --}}
+                    <div class="flex items-start gap-3 rounded-lg border {{ $alertColors }} p-4 text-sm">
+                        <i class="fa-solid {{ $alertIcon }} mt-0.5 shrink-0"></i>
+                        <span>{{ $paymentNotice }}</span>
                     </div>
 
+                    {{-- Pay Button --}}
                     @if($isPending && $pembayaran->payment_url && !$expired)
-                        <a href="{{ $pembayaran->payment_url }}" class="btn btn-primary btn-lg w-100 mt-4 digital-pay-button" rel="noopener">
-                            <i class="fas fa-lock me-2"></i>Selesaikan Pembayaran
+                        <a href="{{ $pembayaran->payment_url }}" rel="noopener"
+                           class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3.5 text-base font-bold text-white shadow-lg shadow-brand-600/25 transition hover:bg-brand-700">
+                            <i class="fa-solid fa-lock"></i> Selesaikan Pembayaran
                         </a>
-                        <p class="small text-muted text-center mt-3 mb-0">Anda dapat menutup halaman ini dan melanjutkan pembayaran kembali dari riwayat tagihan.</p>
+                        <p class="text-center text-xs text-slate-400">Anda dapat menutup halaman ini dan melanjutkan pembayaran kembali dari riwayat tagihan.</p>
                     @elseif($isPending)
-                        <form action="{{ route('wali-siswa.pembayaran.continue', $pembayaran) }}" method="POST" class="mt-3" data-payment-submit>
+                        <form action="{{ route('wali-siswa.pembayaran.continue', $pembayaran) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-rotate me-2"></i>Coba Buat Kanal Lagi
+                            <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-700">
+                                <i class="fa-solid fa-rotate"></i> Coba Buat Kanal Lagi
                             </button>
                         </form>
                     @endif
@@ -115,74 +147,84 @@
             </div>
         </div>
 
-        <div class="col-xl-4">
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3">Informasi Transaksi</h6>
-                    <dl class="digital-meta mb-0">
-                        <div><dt>Siswa</dt><dd>{{ $pembayaran->siswa->nama_lengkap }}</dd></div>
-                        <div><dt>Kanal</dt><dd>{{ $pembayaran->payment_channel_label }}</dd></div>
-                        @if($pembayaran->payment_expires_at)
-                            <div><dt>Berlaku hingga</dt><dd>{{ $pembayaran->payment_expires_at->format('d M Y H:i') }} WIB</dd></div>
-                        @endif
-                    </dl>
-                </div>
+        {{-- Sidebar --}}
+        <div class="space-y-5">
+            {{-- Transaction Info --}}
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h6 class="mb-3 text-sm font-bold text-slate-700">Informasi Transaksi</h6>
+                <dl class="space-y-3 text-sm">
+                    <div class="flex items-center justify-between">
+                        <dt class="text-slate-500">Siswa</dt>
+                        <dd class="font-semibold text-slate-800">{{ $pembayaran->siswa->nama_lengkap }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <dt class="text-slate-500">Kanal</dt>
+                        <dd class="font-semibold text-slate-800">{{ $pembayaran->payment_channel_label }}</dd>
+                    </div>
+                    @if($pembayaran->payment_expires_at)
+                        <div class="flex items-center justify-between">
+                            <dt class="text-slate-500">Berlaku hingga</dt>
+                            <dd class="font-semibold text-slate-800">{{ $pembayaran->payment_expires_at->format('d M Y H:i') }} WIB</dd>
+                        </div>
+                    @endif
+                </dl>
             </div>
 
-            <form action="{{ route('wali-siswa.pembayaran.sync', $pembayaran) }}" method="POST" class="d-grid gap-2">
-                @csrf
-                <button type="submit" class="btn btn-outline-primary">
-                    <i class="fas fa-sync-alt me-2"></i>Cek Status Pembayaran
-                </button>
-                <a href="{{ route('wali-siswa.pembayaran.invoice', $pembayaran) }}" target="_blank" class="btn btn-outline-secondary">
-                    <i class="fas fa-file-invoice me-2"></i>Lihat Invoice
+            {{-- Action Buttons --}}
+            <div class="space-y-2">
+                <form action="{{ route('wali-siswa.pembayaran.sync', $pembayaran) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
+                        <i class="fa-solid fa-sync-alt"></i> Cek Status Pembayaran
+                    </button>
+                </form>
+                <a href="{{ route('wali-siswa.pembayaran.invoice', $pembayaran) }}" target="_blank"
+                   class="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                    <i class="fa-solid fa-file-invoice"></i> Lihat Invoice
                 </a>
-            </form>
+            </div>
 
+            {{-- Change Channel --}}
             @if($isPending && !$expired && count($paymentMethods) > 0)
-                <div class="card border-0 shadow-sm mt-4">
-                    <div class="card-body p-4">
-                        <h6 class="fw-bold mb-1">Ganti Kanal Pembayaran</h6>
-                        <p class="small text-muted mb-3">Transaksi lama akan dibatalkan dengan aman sebelum kanal baru dibuat.</p>
+                <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <h6 class="text-sm font-bold text-slate-700">Ganti Kanal Pembayaran</h6>
+                    <p class="mt-0.5 mb-3 text-xs text-slate-500">Transaksi lama akan dibatalkan dengan aman sebelum kanal baru dibuat.</p>
 
-                        <form action="{{ route('wali-siswa.pembayaran.change-method', $pembayaran) }}" method="POST" data-payment-submit>
-                            @csrf
-                            <div class="digital-channel-list">
-                                @foreach($paymentMethods as $method)
-                                    @php
-                                        $id = 'changeMethod'.preg_replace('/[^A-Za-z0-9]/', '', $method['code']);
-                                        $feeParts = [];
-                                        if ($method['fee_percent_bps'] > 0) {
-                                            $feeParts[] = number_format($method['fee_percent_bps'] / 100, 2, ',', '.').'%';
-                                        }
-                                        if ($method['fee_flat'] > 0) {
-                                            $feeParts[] = 'Rp '.number_format($method['fee_flat'], 0, ',', '.');
-                                        }
-                                    @endphp
-                                    <input type="radio" class="btn-check" name="payment_method"
-                                        id="{{ $id }}" value="{{ $method['code'] }}"
-                                        @checked($pembayaran->payment_type === $method['code']) required>
-                                    <label class="digital-channel-choice" for="{{ $id }}">
-                                        <span>
-                                            <strong>{{ $method['name'] }}</strong>
-                                            <small>{{ $feeParts ? 'Biaya '.implode(' + ', $feeParts) : 'Biaya ditampilkan saat memilih bank' }}</small>
-                                        </span>
-                                        <i class="fas fa-circle-check"></i>
-                                    </label>
-                                @endforeach
-                            </div>
-                            <button type="submit" class="btn btn-outline-primary w-100 mt-3">
-                                <i class="fas fa-arrows-rotate me-2"></i>Terapkan Kanal Pilihan
-                            </button>
-                        </form>
-                    </div>
+                    <form action="{{ route('wali-siswa.pembayaran.change-method', $pembayaran) }}" method="POST" class="space-y-2">
+                        @csrf
+                        @foreach($paymentMethods as $method)
+                            @php
+                                $id = 'changeMethod' . preg_replace('/[^A-Za-z0-9]/', '', $method['code']);
+                                $feeParts = [];
+                                if ($method['fee_percent_bps'] > 0) {
+                                    $feeParts[] = number_format($method['fee_percent_bps'] / 100, 2, ',', '.') . '%';
+                                }
+                                if ($method['fee_flat'] > 0) {
+                                    $feeParts[] = 'Rp ' . number_format($method['fee_flat'], 0, ',', '.');
+                                }
+                            @endphp
+                            <label class="relative block cursor-pointer">
+                                <input type="radio" name="payment_method" value="{{ $method['code'] }}"
+                                       @checked($pembayaran->payment_type === $method['code']) required class="peer sr-only">
+                                <div class="flex items-center justify-between rounded-lg border-2 border-slate-200 pl-4 pr-12 py-3 transition peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:ring-2 peer-checked:ring-brand-500/20 hover:border-slate-300">
+                                    <div>
+                                        <div class="text-sm font-bold text-slate-800">{{ $method['name'] }}</div>
+                                        <div class="text-[11px] text-slate-500">{{ $feeParts ? 'Biaya ' . implode(' + ', $feeParts) : 'Biaya ditampilkan saat memilih bank' }}</div>
+                                    </div>
+                                </div>
+                                    <span class="absolute right-4 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-brand-600 text-white opacity-0 transition peer-checked:opacity-100" aria-hidden="true">
+                                        <i class="fa-solid fa-check text-[10px]"></i>
+                                    </span>
+                            </label>
+                        @endforeach
+                        <button type="submit" class="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
+                            <i class="fa-solid fa-arrows-rotate"></i> Terapkan Kanal Pilihan
+                        </button>
+                    </form>
                 </div>
             @endif
         </div>
     </div>
-</div>
-@endsection
 
-@section('scripts')
-    @vite(['resources/js/wali-siswa/pembayaran/digital.js'])
+</div>
 @endsection

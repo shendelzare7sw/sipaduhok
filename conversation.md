@@ -369,3 +369,29 @@ Migrasi admin dan fondasi global sudah selesai. Urutan kerja berikutnya:
 5. Wali Kelas — selesai untuk alur aktif; 30 view, 0 aset CSS/JS halaman kerja, tanpa Bootstrap Icons CDN. Rapor index/edit dan tiga dokumen Nilai lolos audit browser 390/1440 px; route cetak PTS/PAS serta Nilai siswa ganjil/genap ekuivalen-piksel. Pertahankan enam CSS dan lima JS public dokumen yang aktif untuk kontrak visual cetak; tidak ada alasan menghapusnya tanpa pengganti yang terbukti identik.
 6. Guru, Siswa, dan Wali Siswa setelah pola LMS serta kartu mobile dikunci.
 7. Setelah setiap role selesai, audit lintas-role dan baru kurangi Bootstrap/Sneat dari bridge global ketika tidak ada consumer tersisa.
+
+## 14. Pembaruan 21 September 2026 - Wali Siswa dan audit dokumen cetak
+
+Progress role Wali Siswa/orang tua:
+
+- Presensi mobile memakai toolbar 2x2 pada viewport kecil dan kembali menjadi baris pada desktop.
+- Tagihan memakai kartu detail di mobile, tabel tetap terstruktur di desktop, checkbox diperbesar, pilihan channel Paywuz memiliki indikator aktif, dan tombol `Bayar Sekarang` mengikuti item tagihan yang benar-benar dipilih.
+- Pembayaran digital menampilkan judul/nomor transaksi dengan kontras putih yang eksplisit serta menampilkan error validasi ketika channel pembayaran gagal diganti.
+- Invoice Wali Siswa memiliki zoom `-`, `+`, dan `Fit`, metadata invoice lebih stabil, serta mode print mereset transformasi agar PDF tidak ikut tercetak dalam keadaan zoom.
+- Controller Orang Tua membatasi rapor hanya pada status diterbitkan dan capability anak akademik, membatasi perubahan presensi pada pengaju asli, serta mencegah penggantian request milik pengguna lain.
+- Pembayaran digital dan transaksi terkait sudah diberi scope `siswa_id`; penggantian channel juga menolak transaksi tanpa `order_id`.
+- Aset CSS/JS khusus Wali Siswa yang sudah tidak direferensikan telah dihapus setelah audit referensi. Invoice tetap menjadi dokumen standalone dengan CSS/JS inline karena perlu mempertahankan layout print dan kontrol zoom.
+
+Audit dokumen cetak:
+
+- `layouts.print` sekarang mencetak dengan ruang isi `12mm` dan tidak lagi mengandalkan margin halaman browser.
+- Basis cetak bersama `public/css/shared/print-base.css` memakai `@page { margin: 0 }`. Ini menghilangkan ruang header/footer browser berupa tanggal, URL, dan nomor halaman pada Chrome/Edge print preview; ruang isi tetap disediakan oleh wrapper dokumen.
+- Template cetak standalone yang masih memakai margin halaman nonzero telah disamakan ke margin nol: Nilai Wali Kelas, jadwal LMS Siswa, Kalender Sekretaris, Nilai/Rapor Wali Kelas, dan Invoice Wali Siswa.
+- Route kwitansi Admin dan Bendahara sama-sama memakai `admin.keuangan.pembayaran.cetak-kwitansi`, sehingga perubahan `layouts.print` otomatis berlaku pada keduanya.
+- Audit berikutnya wajib membuka print preview A4 sungguhan pada setiap route cetak, memastikan header/footer browser tidak muncul, tidak ada halaman kosong, overflow, kolom terpotong, atau toolbar ikut tercetak.
+
+Validasi terakhir sebelum batch ini:
+
+- `php artisan view:cache`, `npm run build`, `git diff --check`, dan test terfokus role Orang Tua lulus pada batch sebelumnya.
+- Full suite memiliki dua kegagalan baseline yang tidak terkait role Orang Tua: fixture lama import siswa yang kurang `nama_kelas`/`agama`, serta assertion lama URL asset dev pada UI Wali Kelas.
+- Perubahan audit cetak harus divalidasi ulang dengan Blade cache, build produksi, dan suite terfokus sebelum push branch `cleanflow`.
