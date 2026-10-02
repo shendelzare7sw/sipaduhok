@@ -335,16 +335,7 @@ function populateModelSelector(models) {
     const forcedDefaultId = backendDefault ? backendDefault.id : (fallbackDefault ? fallbackDefault.id : models[0]?.id);
     
     chatbotState.selectedModel = forcedDefaultId;
-    
-    const savedModel = localStorage.getItem('selectedChatModel');
-    if (savedModel && models.some(m => m.id === savedModel)) {
-        const savedModelInfo = models.find(m => m.id === savedModel);
-        if (savedModelInfo && savedModelInfo.provider === 'groq') {
-            chatbotState.selectedModel = savedModel;
-        } else {
-            localStorage.removeItem('selectedChatModel');
-        }
-    }
+    chatbotState.modelTeksPilihan = forcedDefaultId;
 }
 
 // ==================== Open/Close Chat Window ====================
@@ -515,13 +506,10 @@ function selaraskanModelDenganLampiran() {
     const berkas = chatbotState.attachedFiles;
     const adaPdf = berkas.some(f => f.file.type === 'application/pdf');
     const adaGambar = berkas.some(f => f.file.type.startsWith('image/'));
-    const selector = document.getElementById('modelSelector');
-
-    const pakai = (model, pesan) => {
+    // Pergantian model berlangsung diam-diam; nama model tidak ditampilkan ke pengguna.
+    const pakai = (model) => {
         if (!model || chatbotState.selectedModel === model.id) return;
         chatbotState.selectedModel = model.id;
-        if (selector) selector.value = model.id;
-        if (pesan) showToastChatbot('info', pesan);
     };
 
     if (!adaPdf && !adaGambar) {
@@ -529,9 +517,7 @@ function selaraskanModelDenganLampiran() {
         const modelTeks = chatbotState.availableModels.find(m => m.id === chatbotState.modelTeksPilihan)
             || chatbotState.availableModels.find(m => !m.supports_vision)
             || chatbotState.availableModels[0];
-        pakai(modelTeks, modelTeks && modelTeks.id !== chatbotState.selectedModel
-            ? `Kembali ke ${modelTeks.name}`
-            : null);
+        pakai(modelTeks);
         return;
     }
 
@@ -551,7 +537,7 @@ function selaraskanModelDenganLampiran() {
             || chatbotState.availableModels.find(m => m.supports_vision);
 
         if (modelGambar) {
-            pakai(modelGambar, `Beralih ke ${modelGambar.name} untuk membaca gambar.`);
+            pakai(modelGambar);
         } else {
             showToastChatbot('error', 'Tidak ada model yang bisa membaca gambar. Cek Pengaturan AI.');
         }
@@ -867,9 +853,7 @@ async function sendMessageToApi(message, attachedFiles) {
             const modelPdf = chatbotState.availableModels.find(m => m.supports_pdf);
             if (modelPdf) {
                 chatbotState.selectedModel = modelPdf.id;
-                const selector = document.getElementById('modelSelector');
-                if (selector) selector.value = modelPdf.id;
-                showToastChatbot('info', `PDF hasil scan — beralih ke ${modelPdf.name}. Mengirim ulang...`);
+                showToastChatbot('info', 'PDF hasil scan, sedang dibaca ulang. Mengirim ulang...');
                 return await sendMessageToApi(message, attachedFiles);
             }
         }
@@ -881,10 +865,22 @@ async function sendMessageToApi(message, attachedFiles) {
 }
 
 // ==================== Render Structured Response Template ====================
+/**
+ * Markdown inline ringan untuk jawaban AI: **tebal**, *miring*, `kode`, baris baru.
+ * Teks di-escape lebih dulu, jadi hanya tag yang dibuat di sini yang menjadi HTML.
+ */
+function formatTeksInline(teks) {
+    return escapeHtml(String(teks))
+        .replace(/\*\*([^*\n]+?)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>')
+        .replace(/(^|[\s(])\*([^*\s][^*\n]*?)\*(?=[\s.,;:!?)]|$)/g, '$1<em>$2</em>')
+        .replace(/`([^`\n]+)`/g, '<code class="rounded bg-slate-100 px-1 py-0.5 text-[0.85em]">$1</code>')
+        .replace(/\n/g, '<br>');
+}
+
 function renderStructuredResponse(structured) {
     if (!structured || !structured.text) return '';
     let html = '';
-    const textHtml = escapeHtml(structured.text).replace(/\n/g, '<br>');
+    const textHtml = formatTeksInline(structured.text);
     html += `<div class="text-[13px] leading-6 text-slate-800">${textHtml}</div>`;
     if (structured.callout) {
         html += `<div class="mt-2.5 flex items-start gap-2 rounded-r-lg border-l-[3px] border-amber-500 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800"><i class="fas fa-info-circle mt-0.5 shrink-0"></i><span>${escapeHtml(structured.callout)}</span></div>`;
@@ -927,7 +923,8 @@ function addMessage(role, content, attachments = null, saveToHistory = true, isH
     } else if (isHtml) {
         bubbleContent = content;
     } else {
-        bubbleContent = escapeHtml(content).replace(/\n/g, '<br>');
+        // Pesan pengguna ditampilkan apa adanya; jawaban AI boleh memakai **tebal** dll.
+        bubbleContent = isUser ? escapeHtml(content).replace(/\n/g, '<br>') : formatTeksInline(content);
     }
     const avatarIcon = !isUser
         ? '<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs text-white"><i class="fas fa-headset"></i></div>'
@@ -1065,35 +1062,13 @@ function scrollToBottom() {
 // ==================== Restore Chat State ====================
 function restoreChatState() {
     // NOTE: Chatbot always starts CLOSED on page navigation.
-    // Only restore model preference, not open/close state.
-    const savedModel = localStorage.getItem('selectedChatModel');
-    if (savedModel) {
-        chatbotState.selectedModel = savedModel;
-        chatbotState.modelTeksPilihan = savedModel;
-    }
+    // Model tidak lagi bisa dipilih pengguna (selalu default server + pergantian
+    // otomatis), jadi buang preferensi model lama yang mungkin masih tersimpan.
+    try { localStorage.removeItem('selectedChatModel'); } catch (e) { /* storage diblokir */ }
 }
 
 // ==================== Setup Event Listeners ====================
 function setupEventListeners() {
-    const modelSelector = document.getElementById('modelSelector');
-    if (modelSelector) {
-        modelSelector.addEventListener('change', (e) => {
-            chatbotState.selectedModel = e.target.value;
-            const selectedModelInfo = chatbotState.availableModels.find(m => m.id === e.target.value);
-
-            // Kalau pengguna memilih sendiri model TEKS, jadikan itu pilihan
-            // yang dipulihkan setelah selesai memakai model gambar/PDF.
-            if (selectedModelInfo && !selectedModelInfo.supports_vision) {
-                chatbotState.modelTeksPilihan = e.target.value;
-            }
-
-            if (selectedModelInfo && selectedModelInfo.provider === 'groq') {
-                localStorage.setItem('selectedChatModel', e.target.value);
-            } else if (selectedModelInfo && selectedModelInfo.provider === 'gemini') {
-                // Don't save Gemini as default preference
-            }
-        });
-    }
     const fileInput = document.getElementById('fileAttachment');
     if (fileInput) fileInput.addEventListener('change', handleFileAttachment);
     const chatInput = document.getElementById('chatInput');

@@ -136,8 +136,7 @@ class AiChatbotController extends Controller
                     'success' => true,
                     'response' => $result['response'],
                     'structured' => $result['structured'] ?? null,
-                    'model' => $result['model'],
-                    'provider' => $result['provider'] ?? 'unknown',
+                    // Nama/penyedia model sengaja tidak dikirim; pergantian model otomatis di server.
                 ]);
             } else {
                 return response()->json([
@@ -162,7 +161,7 @@ class AiChatbotController extends Controller
 
             return response()->json([
                 'success' => false,
-                'error' => 'Terjadi kesalahan server: ' . $e->getMessage(),
+                'error' => 'Asisten belum bisa menjawab saat ini. Silakan coba lagi.',
             ], 500);
         }
     }

@@ -196,7 +196,7 @@ class AiChatbotService
 
                     return [
                         'success' => false,
-                        'error' => 'PDF ini hasil scan sehingga perlu dibaca Gemini. Silakan beralih ke Gemini 2.5 Flash.',
+                        'error' => 'PDF ini hasil scan sehingga perlu dibaca ulang. Mengirim ulang otomatis...',
                         'model' => $selectedModel,
                         'switch_to_gemini' => true, // Signal to frontend
                     ];
@@ -218,6 +218,15 @@ class AiChatbotService
                 $result['structured'] = $this->parseStructuredResponse($result['response'], $userRole);
             }
 
+            if (!$result['success']) {
+                // Detail teknis (nama model, respons API) hanya ke log; pengguna cukup pesan netral.
+                Log::warning('Chatbot gagal menjawab: ' . ($result['error'] ?? '-'));
+                $sibuk = preg_match('/rate limit|quota|429|too many|capacity|503|tpm/i', (string) ($result['error'] ?? ''));
+                $result['error'] = $sibuk
+                    ? 'Asisten sedang sibuk. Tunggu sekitar satu menit lalu coba lagi.'
+                    : 'Asisten belum bisa menjawab saat ini. Silakan coba lagi.';
+            }
+
             return $result;
 
         } catch (Exception $e) {
@@ -228,7 +237,7 @@ class AiChatbotService
 
             return [
                 'success' => false,
-                'error' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'error' => 'Asisten belum bisa menjawab saat ini. Silakan coba lagi.',
                 'model' => $selectedModel,
             ];
         }
@@ -870,9 +879,14 @@ PROMPT;
 
             if (!empty($this->geminiApiKey)) {
                 Log::warning('All Groq models exhausted, falling back to Gemini.');
-                $geminiResult = $this->callGeminiApi($messages, config('ai-models.default_text.gemini', 'gemini-2.5-flash'));
-                if ($geminiResult['success']) {
-                    $geminiResult['fallback_used'] = true;
+                // Coba setiap model Gemini yang tersedia (default lebih dulu).
+                foreach (ai_rantai_model('gemini', config('ai-models.default_text.gemini')) as $kandidat) {
+                    $geminiResult = $this->callGeminiApi($messages, $kandidat);
+                    if ($geminiResult['success']) {
+                        $geminiResult['fallback_used'] = true;
+                        return $geminiResult;
+                    }
+                    Log::warning("Chatbot: Gemini {$kandidat} gagal, mencoba model berikutnya.", ['error' => $geminiResult['error'] ?? null]);
                 }
                 return $geminiResult;
             }
