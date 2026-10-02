@@ -119,7 +119,9 @@
         <section id="generatedQuestionsSection" class="hidden border-t border-slate-200 pt-5">
             <h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fa-solid fa-circle-check text-emerald-600" aria-hidden="true"></i>Soal yang di-generate (<span id="generatedCount">0</span>)</h3>
             <div id="generatedQuestionsList" class="mt-3 space-y-3"></div>
-            <div class="sticky bottom-0 mt-4 flex justify-end gap-2 bg-white py-2">
+            {{-- Sticky menempel di tepi dalam padding panel scroll; offset negatif + padding sendiri
+                 menutup celah padding bawah/samping agar soal tidak terlihat di bawah tombol. --}}
+            <div class="sticky bottom-[calc(max(1rem,env(safe-area-inset-bottom))*-1)] -mx-4 mt-4 flex justify-end gap-2 border-t border-slate-200 bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:-mx-6 sm:px-6">
                 <button type="button" id="regenerateBtn" class="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i>Regenerate</button>
                 <button type="button" id="addSelectedBtn" class="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"><i class="fa-solid fa-circle-plus" aria-hidden="true"></i>Tambahkan (<span id="selectedCount">0</span>)</button>
             </div>
