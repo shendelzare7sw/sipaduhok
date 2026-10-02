@@ -51,7 +51,7 @@ class GuruLmsMeetingController extends Controller
             ->with('kelas')
             ->get();
 
-        return view('guru.lms.meeting.create', [
+        return view('guru.lms.meeting.form', [
             'kelas' => $kelasModel,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
@@ -129,7 +129,7 @@ class GuruLmsMeetingController extends Controller
             ->with('kelas')
             ->get();
 
-        return view('guru.lms.meeting.edit', [
+        return view('guru.lms.meeting.form', [
             'kelas' => $kelasModel,
             'mapel' => $mataPelajaran,
             'meeting' => $meetingModel,

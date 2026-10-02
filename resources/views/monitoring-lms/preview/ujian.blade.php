@@ -8,7 +8,7 @@
     $totalBobot = $soalList->sum('bobot_nilai');
 @endphp
 
-@extends('monitoring-lms.preview.wrapper', compact('previewTitle', 'kontenLabel'))
+@extends($previewWrapper ?? 'monitoring-lms.preview.wrapper', compact('previewTitle', 'kontenLabel'))
 
 @section('preview-content')
     <header class="border-b border-slate-200 pb-5">

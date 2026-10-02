@@ -31,30 +31,20 @@ class AiGradingService
             $this->apiKey = $settings['gemini_api_key'] ?? null;
         }
 
-        $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile';
-
-        // GRADING PRIORITY: Always prefer Llama for grading (stable JSON output)
-        // Qwen3 has <think> mode that breaks grading JSON, so we use it only as fallback
-        if ($this->provider === 'groq' && str_contains($this->model, 'qwen')) {
-            Log::info("AiGradingService: Configured model is {$this->model}, switching to llama-3.3-70b-versatile for stable grading.");
-            $this->model = 'llama-3.3-70b-versatile';
-        }
-
         // Ganti otomatis model yang sudah dimatikan penyedianya (config/ai-models.php).
-        $this->model = ai_model_aktif($this->model, $this->provider);
+        // Penilaian teks memakai model teks; penalaran model (gpt-oss/qwen) disembunyikan
+        // lewat ai_groq_payload() sehingga content selalu JSON murni.
+        $this->model = ai_model_aktif($settings['ai_model'] ?? null, $this->provider);
 
         // CRITICAL: Validate model compatibility with provider
-        $isGeminiModel = str_contains($this->model, 'gemini');
-        $isGroqModel = str_contains($this->model, 'llama') || str_contains($this->model, 'qwen') || str_contains($this->model, 'mixtral') || str_contains($this->model, 'allam') || str_contains($this->model, 'gpt-oss') || str_contains($this->model, 'compound');
+        $isGeminiModel = str_starts_with($this->model, 'gemini');
 
         if ($this->provider === 'groq' && $isGeminiModel) {
-            // Provider is Groq but model is Gemini → fallback to Groq model
-            Log::warning("Model mismatch: Provider=groq but model={$this->model}. Fallback to llama-3.3-70b-versatile");
-            $this->model = 'llama-3.3-70b-versatile';
-        } elseif ($this->provider === 'gemini' && $isGroqModel) {
-            // Provider is Gemini but model is Groq → fallback to Gemini model
-            Log::warning("Model mismatch: Provider=gemini but model={$this->model}. Fallback to gemini-2.5-flash");
-            $this->model = 'gemini-2.5-flash';
+            $this->model = config('ai-models.default_text.groq');
+            Log::warning("Model mismatch: Provider=groq but model Gemini. Fallback to {$this->model}");
+        } elseif ($this->provider === 'gemini' && ! $isGeminiModel) {
+            $this->model = config('ai-models.default_text.gemini');
+            Log::warning("Model mismatch: Provider=gemini but model Groq. Fallback to {$this->model}");
         }
 
         // Model pembaca gambar (analisis jawaban tugas berupa foto/PDF scan).
@@ -91,11 +81,13 @@ class AiGradingService
                     $isQuotaError = strpos($errorMsg, 'rate limit') !== false ||
                                     strpos($errorMsg, 'quota') !== false ||
                                     strpos($errorMsg, '429') !== false;
+                    // Model dicabut/dipindah paket oleh Groq: perlakukan sama seperti kuota habis.
+                    $isModelMissing = ai_model_tidak_ditemukan(null, $errorMsg);
 
-                    if ($isQuotaError) {
+                    if ($isQuotaError || $isModelMissing) {
                         // Determine alternative Groq model
                         $altModel = ai_model_cadangan($this->model);
-                        Log::warning("Groq quota exceeded for {$this->model} during grading, trying alternative model {$altModel}");
+                        Log::warning("Groq gagal untuk {$this->model} saat penilaian (".($isModelMissing ? 'model tidak tersedia' : 'kuota').'), mencoba model '.$altModel);
                         
                         // Temporarily change model and retry
                         $originalModel = $this->model;
@@ -221,7 +213,9 @@ class AiGradingService
         4. Output WAJIB JSON: {\"score\": int, \"feedback\": string} tanpa markdown ```json";
 
         // Use v1 API for Gemini 2.0+ models
-        $url = "https://generativelanguage.googleapis.com/v1/models/{$this->model}:generateContent?key={$this->apiKey}";
+        // Saat dipanggil sebagai cadangan dari Groq, $this->model masih nama model Groq.
+        $geminiModel = str_starts_with($this->model, 'gemini') ? $this->model : config('ai-models.default_text.gemini', 'gemini-2.5-flash');
+        $url = "https://generativelanguage.googleapis.com/v1/models/{$geminiModel}:generateContent?key={$this->apiKey}";
         
         $response = Http::withOptions([
             'verify' => false,
@@ -270,19 +264,12 @@ class AiGradingService
         3. Berikan feedback singkat (maksimal 3 kalimat) dalam Bahasa Indonesia.
         4. Output WAJIB berupa JSON valid dengan format: {\"score\": int, \"feedback\": string}. Jangan ada teks lain.";
 
-        $response = Http::withOptions([
-            'verify' => false,
-        ])->withHeaders([
-            'Authorization' => 'Bearer ' . $this->apiKey,
-            'Content-Type' => 'application/json',
-        ])->post('https://api.groq.com/openai/v1/chat/completions', [
+        $response = $this->postGroq([
             'model' => $this->model,
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => str_contains($this->model, 'qwen')
-                        ? "/no_think\nAnda adalah sistem penilaian otomatis yang outputnya SELALU berupa JSON murni. JANGAN gunakan tag <think>. Langsung output JSON saja."
-                        : 'Anda adalah sistem penilaian otomatis yang outputnya selalu berupa JSON valid.'
+                    'content' => 'Anda adalah sistem penilaian otomatis yang outputnya SELALU berupa JSON valid {"score": int, "feedback": string} tanpa teks lain.'
                 ],
                 [
                     'role' => 'user',
@@ -290,7 +277,8 @@ class AiGradingService
                 ]
             ],
             'temperature' => 0.2,
-            'max_tokens' => 1024
+            'max_tokens' => 1024,
+            'response_format' => ['type' => 'json_object'],
         ]);
 
         if ($response->failed()) {
@@ -306,6 +294,34 @@ class AiGradingService
             'feedback' => $result['feedback'] ?? 'Tidak ada feedback dari AI.',
             'error' => false
         ];
+    }
+
+    /**
+     * Kirim permintaan chat/completions ke Groq. Bila Groq menolak keluaran yang
+     * gagal validasi JSON mode (400 json_validate_failed — sesekali terjadi pada
+     * model bernalar), ulangi sekali tanpa response_format; cleanAndParseJson()
+     * sudah sanggup mengambil JSON dari teks bebas.
+     */
+    protected function postGroq(array $payload): \Illuminate\Http\Client\Response
+    {
+        $kirim = fn (array $isi) => Http::withOptions(['verify' => false])
+            ->withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])
+            ->timeout(90)
+            ->post('https://api.groq.com/openai/v1/chat/completions', ai_groq_payload($isi));
+
+        $response = $kirim($payload);
+
+        if ($response->failed() && isset($payload['response_format'])
+            && str_contains($response->body(), 'json_validate_failed')) {
+            Log::warning("Groq {$payload['model']} gagal validasi JSON mode saat penilaian, mengulang tanpa response_format.");
+            unset($payload['response_format']);
+            $response = $kirim($payload);
+        }
+
+        return $response;
     }
 
     /**
@@ -369,12 +385,7 @@ class AiGradingService
             5. Output WAJIB JSON valid: {\"score\": int, \"feedback\": string}";
 
             try {
-                $response = Http::withOptions([
-                    'verify' => false,
-                ])->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type' => 'application/json',
-                ])->post('https://api.groq.com/openai/v1/chat/completions', [
+                $response = $this->postGroq([
                     'model' => $this->visionModel,
                     'messages' => [
                         [
@@ -386,7 +397,8 @@ class AiGradingService
                         ]
                     ],
                     'temperature' => 0.2,
-                    'max_tokens' => 1024
+                    'max_tokens' => 1024,
+                    'response_format' => ['type' => 'json_object'],
                 ]);
 
                 if ($response->failed()) {
@@ -408,8 +420,8 @@ class AiGradingService
                                 strpos($errorMsg, 'quota') !== false ||
                                 strpos($errorMsg, '429') !== false;
 
-                if ($isQuotaError) {
-                    Log::warning("Groq Vision quota exceeded, falling back to Gemini: " . $e->getMessage());
+                if ($isQuotaError || ai_model_tidak_ditemukan(null, $errorMsg)) {
+                    Log::warning("Groq Vision gagal (kuota/model tidak tersedia), falling back to Gemini: " . $e->getMessage());
                     $settings = \App\Models\AppSetting::where('key', 'gemini_api_key')->first();
                     if ($settings && !empty($settings->value)) {
                         $this->apiKey = $settings->value; // Swap API key to Gemini
@@ -443,7 +455,7 @@ class AiGradingService
         // Use configured text model for Gemini (2.5 Flash supports vision natively)
         // Or explicitly use vision model setting if different, but usually gemini-2.5-flash is both.
         // Let's use $this->model because Gemini models are multimodal by default.
-        $model = str_contains($this->model, 'gemini') ? $this->model : 'gemini-2.5-flash';
+        $model = str_starts_with($this->model, 'gemini') ? $this->model : config('ai-models.default_text.gemini', 'gemini-2.5-flash');
 
         // Use v1 API for Gemini 2.0+ models
         $url = "https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$this->apiKey}";

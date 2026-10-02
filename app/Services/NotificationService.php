@@ -321,6 +321,48 @@ class NotificationService
     }
 
     /**
+     * Beri tahu wali kelas bahwa guru mapel mengubah nilai yang sudah pernah direvisi wali.
+     * Nilai aktif/rapor tetap milik wali; perubahan guru tersimpan sebagai snapshot dan
+     * dapat dibandingkan/disinkronkan wali dari halaman nilai siswa.
+     *
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Siswa>  $siswaList
+     */
+    public function notifyNilaiDiperbaruiGuru($kelas, $mapel, $guruNama, $siswaList, string $semester): void
+    {
+        if (! $kelas || $siswaList->isEmpty()) {
+            return;
+        }
+
+        $penerima = \App\Models\WaliKelasAssignment::where('kelas_id', $kelas->id)
+            ->with('tenagaPendidik.user')
+            ->get()
+            ->map(fn ($assignment) => $assignment->tenagaPendidik?->user)
+            ->filter(fn ($user) => $user && $user->role === 'wali_kelas')
+            ->unique('id');
+
+        if ($penerima->isEmpty()) {
+            return;
+        }
+
+        $jumlah = $siswaList->count();
+        $nama = $siswaList->pluck('nama_lengkap')->take(3)->implode(', ').($jumlah > 3 ? ' dan '.($jumlah - 3).' lainnya' : '');
+        $link = $jumlah === 1
+            ? route('wali.nilai.show', ['siswa' => $siswaList->first()->id, 'semester' => $semester])
+            : route('wali.nilai.index', ['semester' => $semester]);
+
+        foreach ($penerima as $user) {
+            $this->create(
+                $user->id,
+                Notification::TIPE_NILAI,
+                'Nilai '.($mapel->nama_mapel ?? 'mapel').' diperbarui guru',
+                ($guruNama ?: 'Guru mapel').' mengubah nilai yang sudah Anda revisi untuk '.$nama.' (Kelas '.$kelas->nama_kelas.', semester '.$semester.'). Nilai rapor belum berubah; bandingkan lalu sinkronkan bila perlu.',
+                $link,
+                ['kelas_id' => $kelas->id, 'mata_pelajaran_id' => $mapel->id ?? null, 'siswa_ids' => $siswaList->pluck('id')->values()->all(), 'semester' => $semester]
+            );
+        }
+    }
+
+    /**
      * Notify wali siswa about izin status update
      */
     public function notifyIzinStatus($presensi)

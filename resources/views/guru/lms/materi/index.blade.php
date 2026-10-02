@@ -8,152 +8,94 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
-@push('styles')
-    @vite(['resources/css/guru/lms/materi/index.css'])
-@endpush
-
 @section('content')
-<div class="guru-lms-materi-page">
-    <div class="card-custom mb-4">
-        <div class="card-body p-3 p-md-4">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-md-items-center gap-3">
-                <div>
-                    <h4 class="mb-0 fs-5 fs-md-4"><i class="fas fa-book me-2"></i>Daftar Materi</h4>
-                    <p class="text-muted small mb-0">Kelola materi pembelajaran untuk kelas ini</p>
-                </div>
-                <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
-                    <form action="" method="GET" class="d-flex gap-2 flex-grow-1">
-                        <input type="date" name="tanggal" class="form-control form-control-sm" value="{{ request('tanggal') }}" data-auto-submit>
-                        @if(request('tanggal'))
-                            <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary" title="Reset Filter"><i class="fas fa-times"></i></a>
-                        @endif
-                    </form>
-                    <a href="{{ route('guru.lms.materi.create', [$kelas->id, $mapel->id]) }}" class="btn btn-primary btn-sm w-100 w-sm-auto">
-                        <i class="fas fa-plus-circle me-1"></i><span class="d-sm-inline">Tambah Materi</span>
-                    </a>
-                </div>
-            </div>
+@php
+    $args = [$kelas->id, $mapel->id];
+    $fileIcons = [
+        'pdf' => 'fa-file-pdf bg-rose-50 text-rose-600',
+        'ppt' => 'fa-file-powerpoint bg-amber-50 text-amber-600',
+        'doc' => 'fa-file-word bg-blue-50 text-blue-600',
+        'video' => 'fa-file-video bg-cyan-50 text-cyan-600',
+        'link' => 'fa-link bg-slate-100 text-slate-600',
+    ];
+@endphp
+
+<div class="min-w-0 w-full space-y-5" x-data="{ hapusUrl: '', hapusJudul: '', bukaHapus(el) { this.hapusUrl = el.dataset.url; this.hapusJudul = el.dataset.judul; this.$refs.terkait.checked = false; this.$refs.hapusDialog.showModal(); } }">
+    <header class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-5 md:flex-row md:items-center md:justify-between">
+        <div class="min-w-0">
+            <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fa-solid fa-book text-indigo-600" aria-hidden="true"></i>Daftar materi</h2>
+            <p class="mt-0.5 text-xs text-slate-500">Kelola materi pembelajaran untuk kelas ini.</p>
         </div>
-    </div>
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <form method="GET" x-data class="flex items-center gap-2">
+                <label class="sr-only" for="filter-tanggal">Filter tanggal upload</label>
+                <input id="filter-tanggal" type="date" name="tanggal" value="{{ request('tanggal') }}" @change="$el.form.submit()" class="h-10 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100">
+                @if(request('tanggal'))
+                    <a href="{{ url()->current() }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-500 no-underline hover:bg-slate-50" title="Reset filter" aria-label="Reset filter"><i class="fa-solid fa-xmark" aria-hidden="true"></i></a>
+                @endif
+            </form>
+            <a href="{{ route('guru.lms.materi.create', $args) }}" class="inline-flex min-h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-indigo-600 px-4 text-xs font-bold text-white no-underline shadow-sm hover:bg-indigo-700"><i class="fa-solid fa-circle-plus" aria-hidden="true"></i>Tambah materi</a>
+        </div>
+    </header>
 
     @if($materiList->count() > 0)
-        @php
-            // Group by Date for "Timeline" view
-            $groupedMateri = $materiList->groupBy(function($item) {
-                return $item->tanggal_upload->format('Y-m-d');
-            });
-        @endphp
+        @foreach($materiList->groupBy(fn ($item) => $item->tanggal_upload->format('Y-m-d')) as $date => $materis)
+            <section class="min-w-0">
+                <div class="mb-3 flex items-center gap-3">
+                    <span class="shrink-0 rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-bold text-white shadow-sm">{{ \Carbon\Carbon::parse($date)->locale('id')->isoFormat('dddd, D MMMM Y') }}</span>
+                    <span class="hidden h-px flex-1 bg-slate-200 sm:block" aria-hidden="true"></span>
+                </div>
 
-        <div class="timeline-container">
-            @foreach($groupedMateri as $date => $materis)
-                <div class="position-relative mb-4">
-                    <div class="d-flex align-items-center mb-3 flex-wrap gap-2">
-                        <div class="bg-primary text-white rounded-pill px-2 px-sm-3 py-1 small fw-bold shadow-sm date-pill">
-                            {{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y') }}
-                        </div>
-                        <div class="flex-grow-1 d-none d-sm-block border-bottom"></div>
-                    </div>
-
-                    <div class="row g-2 g-md-4">
-                        @foreach($materis as $materi)
-                        <div class="col-12 col-sm-6 col-lg-4">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                                <div class="card-body d-flex flex-column p-3 p-md-4">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div class="d-flex align-items-start gap-2 gap-md-3 flex-shrink-1 min-w-0">
-                                            @php
-                                                $iconClass = match($materi->tipe_file) {
-                                                    'pdf' => 'fa-file-pdf text-danger',
-                                                    'ppt' => 'fa-file-powerpoint text-warning',
-                                                    'doc' => 'fa-file-word text-primary',
-                                                    'video' => 'fa-file-video text-info',
-                                                    'link' => 'fa-link text-secondary',
-                                                    default => 'fa-file'
-                                                };
-                                            @endphp
-                                            <i class="fas {{ $iconClass }} fa-lg fa-md-2x flex-shrink-0 mt-1"></i>
-                                            <div class="min-w-0">
-                                                <h6 class="fw-bold mb-0 text-dark text-truncate fs-6" title="{{ $materi->judul_materi }}">{{ $materi->judul_materi }}</h6>
-                                                <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
-                                                    <span class="badge bg-light text-dark border file-badge">{{ strtoupper($materi->tipe_file) }}</span>
-                                                    <small class="text-muted time-meta">
-                                                        <i class="far fa-clock me-1"></i> {{ $materi->created_at->format('H:i') }}
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <p class="text-muted small mb-3 mb-md-4 flex-grow-1 materi-description">
-                                        {{ $materi->deskripsi ?? '' }}
+                <div class="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    @foreach($materis as $materi)
+                        @php [$iconName, $iconTone] = explode(' ', $fileIcons[$materi->tipe_file] ?? 'fa-file bg-slate-100 text-slate-600', 2); @endphp
+                        <article class="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                            <div class="flex min-w-0 items-start gap-3">
+                                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl {{ $iconTone }}"><i class="fa-solid {{ $iconName }}" aria-hidden="true"></i></span>
+                                <div class="min-w-0">
+                                    <h3 class="truncate text-sm font-extrabold text-slate-900" title="{{ $materi->judul_materi }}">{{ $materi->judul_materi }}</h3>
+                                    <p class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                                        @if($materi->tipe_file)<span class="rounded-md bg-slate-100 px-2 py-0.5 font-bold uppercase text-slate-600">{{ $materi->tipe_file }}</span>@endif
+                                        <span><i class="fa-regular fa-clock mr-1" aria-hidden="true"></i>{{ $materi->created_at->format('H:i') }}</span>
+                                        @if($materi->kategori === 'modul_ajar')<span class="rounded-md bg-violet-50 px-2 py-0.5 font-bold text-violet-700">Modul ajar</span>@endif
                                     </p>
-
-                                    <div class="d-flex justify-content-end gap-2 mt-auto pt-2 pt-md-3 border-top">
-                                        <a href="{{ route('guru.lms.materi.edit', [$kelas->id, $mapel->id, $materi->id]) }}"
-                                           class="btn btn-sm btn-outline-warning px-2 px-md-3 rounded-pill">
-                                            <i class="fas fa-edit me-md-1"></i> <span class="d-none d-sm-inline">Edit</span>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger px-2 px-md-3 rounded-pill"
-                                            data-delete-url="{{ route('guru.lms.materi.destroy', [$kelas->id, $mapel->id, $materi->id]) }}">
-                                            <i class="fas fa-trash me-md-1"></i> <span class="d-none d-sm-inline">Hapus</span>
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        @endforeach
-                    </div>
+                            <p class="mt-3 line-clamp-3 flex-1 text-xs leading-5 text-slate-500">{{ $materi->deskripsi ?? '' }}</p>
+                            <div class="mt-4 flex justify-end gap-2 border-t border-slate-100 pt-3">
+                                <a href="{{ route('guru.lms.materi.edit', [...$args, $materi->id]) }}" class="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-amber-50 px-3 text-xs font-bold text-amber-700 no-underline ring-1 ring-inset ring-amber-100 hover:bg-amber-100"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>Edit</a>
+                                <button type="button" data-url="{{ route('guru.lms.materi.destroy', [...$args, $materi->id]) }}" data-judul="{{ $materi->judul_materi }}" @click="bukaHapus($el)" class="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-rose-50 px-3 text-xs font-bold text-rose-700 ring-1 ring-inset ring-rose-100 hover:bg-rose-100"><i class="fa-solid fa-trash" aria-hidden="true"></i>Hapus</button>
+                            </div>
+                        </article>
+                    @endforeach
                 </div>
-            @endforeach
-        </div>
+            </section>
+        @endforeach
 
-        <div class="mt-5 d-flex justify-content-center">
-            {{ $materiList->appends(request()->query())->links() }}
-        </div>
+        <div>{{ $materiList->appends(request()->query())->links() }}</div>
     @else
-        <div class="card-custom text-center py-5 border-0 shadow-sm">
-            <div class="mb-3">
-                <i class="fas fa-folder-open text-muted empty-icon"></i>
-            </div>
-            <h5 class="text-muted">Belum ada materi</h5>
-            <p class="text-muted small">Mulai dengan menambahkan materi baru untuk kelas ini.</p>
-        </div>
+        <section class="rounded-2xl border border-slate-200 bg-white px-5 py-14 text-center shadow-sm">
+            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></span>
+            <h3 class="mt-4 font-extrabold text-slate-900">Belum ada materi</h3>
+            <p class="mt-1 text-sm text-slate-500">Mulai dengan menambahkan materi baru untuk kelas ini.</p>
+        </section>
     @endif
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Apakah Anda yakin ingin menghapus materi ini?
-                </div>
-                <div class="modal-footer">
-                    <form id="deleteForm" method="POST" class="delete-form w-100 m-0">
-                        @csrf
-                        @method('DELETE')
-                        <div class="form-check mb-3 text-start">
-                            <input class="form-check-input" type="checkbox" name="hapus_terkait" value="1" id="hapusTerkaitCheck">
-                            <label class="form-check-label small text-danger" for="hapusTerkaitCheck">
-                                Hapus juga materi ini dari kelas lain? (Jika ada duplikat)
-                            </label>
-                        </div>
-                        <div class="d-flex gap-2 justify-content-end">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-danger">Hapus</button>
-                        </div>
-                    </form>
-                </div>
+    <dialog x-ref="hapusDialog" @click.self="$el.close()" class="w-[calc(100%-2rem)] max-w-md rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50">
+        <form method="POST" :action="hapusUrl" data-confirmed="true" class="px-5 py-5">
+            @csrf
+            @method('DELETE')
+            <h3 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fa-solid fa-triangle-exclamation text-rose-600" aria-hidden="true"></i>Hapus materi?</h3>
+            <p class="mt-2 text-sm leading-6 text-slate-600">Materi <strong x-text="hapusJudul"></strong> akan dihapus dan tidak dapat dikembalikan.</p>
+            <label class="mt-4 flex cursor-pointer items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800">
+                <input type="checkbox" name="hapus_terkait" value="1" x-ref="terkait" class="mt-0.5 h-4 w-4 rounded border-rose-300 text-rose-600 focus:ring-rose-500">
+                Hapus juga materi ini dari kelas lain (jika ada duplikat).
+            </label>
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button" @click="$refs.hapusDialog.close()" class="min-h-10 rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50">Batal</button>
+                <button type="submit" class="min-h-10 rounded-xl bg-rose-600 px-4 text-xs font-bold text-white hover:bg-rose-700">Ya, hapus</button>
             </div>
-        </div>
-    </div>
-
+        </form>
+    </dialog>
 </div>
 @endsection
-
-@push('scripts')
-    @vite(['resources/js/guru/lms/materi/index.js'])
-@endpush

@@ -70,7 +70,7 @@ class GuruMateriController extends Controller
             ->with('kelas')
             ->get();
 
-        return view('guru.lms.materi.create', [
+        return view('guru.lms.materi.form', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
@@ -187,7 +187,7 @@ class GuruMateriController extends Controller
             ->with('kelas')
             ->get();
 
-        return view('guru.lms.materi.edit', [
+        return view('guru.lms.materi.form', [
             'materi' => $materi,
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,

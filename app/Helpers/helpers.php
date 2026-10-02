@@ -174,7 +174,9 @@ if (! function_exists('ai_model_aktif')) {
             return $default;
         }
 
-        $pengganti = config('ai-models.retired.' . $model);
+        // Nama model mengandung titik (llama-3.3-…, gemini-2.5-…), jadi JANGAN pakai
+        // notasi titik config('ai-models.retired.'.$model) — selalu gagal cocok.
+        $pengganti = config('ai-models.retired', [])[$model] ?? null;
         if ($pengganti) {
             \Illuminate\Support\Facades\Log::warning(
                 "Model AI '{$model}' sudah dimatikan penyedianya, dialihkan ke '{$pengganti}'."
@@ -194,14 +196,14 @@ if (! function_exists('ai_model_cadangan')) {
      */
     function ai_model_cadangan(string $modelUtama): string
     {
-        $kandidat = array_keys(config('ai-models.available.groq', []));
+        $tersedia = config('ai-models.available.groq', []);
 
-        foreach ($kandidat as $model) {
+        foreach ($tersedia as $model => $info) {
             // Lewati model yang sama & model vision (lebih mahal untuk tugas teks).
             if ($model === $modelUtama) {
                 continue;
             }
-            if (config("ai-models.available.groq.{$model}.vision")) {
+            if ($info['vision'] ?? false) {
                 continue;
             }
 
@@ -209,6 +211,45 @@ if (! function_exists('ai_model_cadangan')) {
         }
 
         return config('ai-models.default_text.groq');
+    }
+}
+
+if (! function_exists('ai_groq_payload')) {
+    /**
+     * Lengkapi payload chat/completions Groq dengan parameter khusus model
+     * (config('ai-models.groq_params')): penalaran disembunyikan dari content
+     * dan anggaran max_tokens ditambah untuk token penalaran model bernalar.
+     * Semua pemanggil Groq wajib lewat sini agar pergantian model cukup diatur di config.
+     */
+    function ai_groq_payload(array $payload): array
+    {
+        $aturan = config('ai-models.groq_params', [])[$payload['model'] ?? ''] ?? [];
+
+        foreach ($aturan['params'] ?? [] as $kunci => $nilai) {
+            $payload[$kunci] = $nilai;
+        }
+
+        if (! empty($aturan['extra_tokens']) && isset($payload['max_tokens'])) {
+            $payload['max_tokens'] = (int) $payload['max_tokens'] + (int) $aturan['extra_tokens'];
+        }
+
+        return $payload;
+    }
+}
+
+if (! function_exists('ai_model_tidak_ditemukan')) {
+    /**
+     * True bila respons error Groq/OpenAI-compatible menyatakan model tidak ada
+     * atau tidak bisa diakses API key ini (contoh: model dipindah ke paket Enterprise).
+     */
+    function ai_model_tidak_ditemukan(?int $status, ?string $body): bool
+    {
+        $body = strtolower((string) $body);
+
+        return $status === 404
+            || str_contains($body, 'model_not_found')
+            || str_contains($body, 'model_decommissioned')
+            || str_contains($body, 'does not exist or you do not have access');
     }
 }
 

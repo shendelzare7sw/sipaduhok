@@ -580,6 +580,100 @@ class KnowledgeBaseLoader
         return array_key_exists($routeName, $map);
     }
 
+    /**
+     * Versi hemat token dari getForRole() untuk provider berkuota kecil (Groq paket
+     * gratis: 7–8 ribu token per menit). Peta menu selalu dikirim; bagian detail
+     * per menu hanya yang paling cocok dengan pertanyaan, sampai batas $budget karakter.
+     */
+    public function getRelevantForRole(string $role, string $query, int $budget = 6000): string
+    {
+        $knowledge = $this->getForRole($role);
+        if (mb_strlen($knowledge) <= $budget) {
+            return $knowledge;
+        }
+
+        // Pisah per sub-bagian "### " — semua teks sebelum sub-bagian pertama adalah inti (peta menu).
+        $bagian = preg_split('/^(?=###\s)/m', $knowledge);
+        $inti = array_shift($bagian);
+        if (mb_strlen($inti) > $budget) {
+            return mb_substr($inti, 0, $budget)."\n[... knowledge base dipotong ...]";
+        }
+
+        $kataKunci = $this->kataKunci($query);
+        $skor = [];
+        foreach ($bagian as $i => $isi) {
+            $judul = mb_strtolower(strtok($isi, "\n"));
+            $teks = mb_strtolower($isi);
+            $nilai = 0;
+            foreach ($kataKunci as $kata) {
+                // Kecocokan di judul jauh lebih berarti daripada di isi.
+                $nilai += (str_contains($judul, $kata) ? 5 : 0) + min(3, substr_count($teks, $kata));
+            }
+            if ($nilai > 0) {
+                $skor[$i] = $nilai;
+            }
+        }
+        arsort($skor);
+
+        $sisa = $budget - mb_strlen($inti);
+        $terpilih = [];
+        foreach (array_keys($skor) as $i) {
+            $panjang = mb_strlen($bagian[$i]);
+            if ($panjang <= $sisa) {
+                $terpilih[] = $i;
+                $sisa -= $panjang;
+            }
+        }
+        sort($terpilih);
+
+        $hasil = $inti;
+        foreach ($terpilih as $i) {
+            $hasil .= $bagian[$i];
+        }
+
+        return rtrim($hasil)."\n\n[Detail menu lain tidak disertakan; jika perlu, arahkan user ke menu terkait di PETA MENU.]";
+    }
+
+    /**
+     * Tabel kepemilikan lintas-role versi ringkas: semua topik tetap disebut beserta
+     * pemiliknya, tetapi deskripsi panjang hanya untuk topik yang cocok dengan pertanyaan.
+     */
+    public function getOwnershipPromptRingkas(string $role, string $query): string
+    {
+        $query = mb_strtolower($query);
+        $lines = [];
+        foreach (self::FEATURE_OWNERSHIP as $keywords => $entry) {
+            $owners = $entry['owner'];
+            if (in_array($role, $owners, true)) {
+                continue;
+            }
+            $kwLabel = explode('|', $keywords)[0];
+            $ownerLabel = implode(' / ', array_map(fn ($r) => $this->roleLabel($r), $owners));
+            $cocok = collect(explode('|', $keywords))->contains(fn ($kw) => $kw !== '' && str_contains($query, $kw));
+            $lines[] = "- '{$kwLabel}' → {$ownerLabel}".($cocok ? ". {$entry['description']}" : '');
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Kata bermakna (≥4 huruf, bukan kata tugas) dari pertanyaan user.
+     */
+    protected function kataKunci(string $query): array
+    {
+        $abaikan = ['bagaimana', 'cara', 'yang', 'untuk', 'dengan', 'dari', 'saya', 'apakah', 'bisa', 'tidak',
+            'mana', 'kenapa', 'mengapa', 'tolong', 'jelaskan', 'singkat', 'jawab', 'ingin', 'mau', 'buat',
+            'membuat', 'dimana', 'kapan', 'siapa', 'adalah', 'atau', 'pada', 'akan', 'sudah', 'belum', 'menu',
+            'halaman', 'fitur', 'sipaduhok', 'gimana', 'kalau', 'agar', 'supaya', 'baru', 'semua', 'lihat'];
+
+        $kata = preg_split('/[^\p{L}\p{N}]+/u', mb_strtolower($query), -1, PREG_SPLIT_NO_EMPTY);
+
+        return array_values(array_unique(array_filter(
+            $kata,
+            fn ($k) => mb_strlen($k) >= 4 && ! in_array($k, $abaikan, true)
+        )));
+    }
+
     public function resolveRouteUrl(string $routeName): ?string
     {
         try {

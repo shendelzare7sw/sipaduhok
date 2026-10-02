@@ -132,7 +132,7 @@ class AiChatbotService
             $fallback = config('ai-models.default_text.groq');
             $models[] = [
                 'id' => $fallback,
-                'name' => 'Llama 3.3 70B (Belum dikonfigurasi)',
+                'name' => (config('ai-models.available.groq', [])[$fallback]['label'] ?? $fallback).' (Belum dikonfigurasi)',
                 'provider' => 'groq',
                 'supports_vision' => false,
                 'supports_pdf' => false,
@@ -237,10 +237,15 @@ class AiChatbotService
     /**
      * Build system prompt with knowledge base injected from docs/flow/{role}.md
      */
-    private function buildSystemPrompt(string $userRole): string
+    private function buildSystemPrompt(string $userRole, ?string $queryRingkas = null): string
     {
         $strict = isContextRestrictionEnabled();
-        $knowledge = $this->kb->getForRole($userRole);
+        // $queryRingkas diisi untuk Groq: kuota paket gratisnya (7–8 ribu token/menit)
+        // tidak cukup untuk knowledge base penuh, jadi hanya bagian relevan yang dikirim.
+        $ringkas = $queryRingkas !== null;
+        $knowledge = $ringkas
+            ? $this->kb->getRelevantForRole($userRole, $queryRingkas)
+            : $this->kb->getForRole($userRole);
         $landingPages = $this->kb->getLandingPagesPrompt();
         $menuSnapshot = $this->kb->getMenuSnapshotForRole($userRole ?: 'guest');
 
@@ -263,7 +268,9 @@ class AiChatbotService
             : "MODE TERBUKA AKTIF: Boleh menjawab pertanyaan umum di luar SIPADUHOK. Untuk pertanyaan umum, jawab langsung secara natural dalam Bahasa Indonesia dan jangan memaksakan KNOWLEDGE BASE, OWNERSHIP TABLE, button, atau related. Jika riwayat chat lama berisi penolakan karena batasan konteks, abaikan penolakan itu dan ikuti mode terbuka saat ini. Untuk pertanyaan yang memang terkait SIPADUHOK, tetap prioritaskan konteks SIPADUHOK jika relevan.";
 
         $roleLabel = $this->kb->roleLabel($userRole ?: 'guest');
-        $ownershipPrompt = $this->kb->getOwnershipPromptForRole($userRole ?: 'guest');
+        $ownershipPrompt = $ringkas
+            ? $this->kb->getOwnershipPromptRingkas($userRole ?: 'guest', $queryRingkas)
+            : $this->kb->getOwnershipPromptForRole($userRole ?: 'guest');
         $ownershipTitle = $strict
             ? '🔴 LANGKAH PERTAMA WAJIB: CEK OWNERSHIP TABLE 🔴'
             : 'PANDUAN ROLE UNTUK PERTANYAAN SIPADUHOK';
@@ -742,7 +749,7 @@ PROMPT;
             'role' => 'system',
             'content' => $openGeneralMode
                 ? $this->buildGeneralOpenPrompt($userRole)
-                : $this->buildSystemPrompt($userRole),
+                : $this->buildSystemPrompt($userRole, $provider === 'groq' ? (string) $userMessage : null),
         ];
 
         // Add conversation history (trim to last 10 messages = 5 user + 5 assistant exchanges)
@@ -766,8 +773,16 @@ PROMPT;
 
         // Add image/file parts
         if (!empty($files)) {
+            // Model vision Groq membatasi jumlah gambar per permintaan (config/ai-models.php).
+            $batasGambar = $provider === 'groq' ? (int) config('ai-models.groq_max_images', 3) : PHP_INT_MAX;
+            $jumlahGambar = 0;
             foreach ($files as $file) {
+                if (in_array($file['mime'], ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']) && $jumlahGambar >= $batasGambar) {
+                    $contentParts[0]['text'] .= "\n\n[Gambar {$file['name']} tidak dianalisis: model hanya menerima {$batasGambar} gambar per pesan]";
+                    continue;
+                }
                 if (in_array($file['mime'], ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])) {
+                    $jumlahGambar++;
                     // Image file - convert to base64 data URL
                     $base64Image = base64_encode(file_get_contents($file['path']));
                     $dataUrl = "data:{$file['mime']};base64,{$base64Image}";
@@ -847,15 +862,15 @@ PROMPT;
                     return $result;
                 }
                 $lastResult = $result;
-                if (!$this->isQuotaError($result['error'] ?? '')) {
+                if (!$this->isQuotaError($result['error'] ?? '') && empty($result['model_missing'])) {
                     break;
                 }
-                Log::warning("Groq model {$model} hit quota, trying next in fallback chain.");
+                Log::warning("Groq model {$model} gagal (kuota/model tidak tersedia), mencoba model berikutnya.", ['error' => $result['error'] ?? null]);
             }
 
             if (!empty($this->geminiApiKey)) {
                 Log::warning('All Groq models exhausted, falling back to Gemini.');
-                $geminiResult = $this->callGeminiApi($messages, 'gemini-2.5-flash');
+                $geminiResult = $this->callGeminiApi($messages, config('ai-models.default_text.gemini', 'gemini-2.5-flash'));
                 if ($geminiResult['success']) {
                     $geminiResult['fallback_used'] = true;
                 }
@@ -944,12 +959,12 @@ PROMPT;
                     'Content-Type' => 'application/json',
                 ])
                 ->timeout(120) // Increase timeout for longer responses
-                ->post('https://api.groq.com/openai/v1/chat/completions', [
+                ->post('https://api.groq.com/openai/v1/chat/completions', ai_groq_payload([
                     'model' => $model,
                     'messages' => $messages,
                     'temperature' => 0.4,
                     'max_tokens' => 900,
-                ]);
+                ]));
 
             if (!$response->successful()) {
                 $statusCode = $response->status();
@@ -970,11 +985,21 @@ PROMPT;
                     'error' => "API Error {$statusCode}: " . substr($errorBody, 0, 200),
                     'status_code' => $statusCode,
                     'model' => $model,
+                    'model_missing' => ai_model_tidak_ditemukan($statusCode, $errorBody),
                 ];
             }
 
             $data = $response->json();
             $content = $data['choices'][0]['message']['content'] ?? '';
+
+            if (trim((string) $content) === '') {
+                return [
+                    'success' => false,
+                    'error' => 'Respons kosong dari model (finish_reason: '.($data['choices'][0]['finish_reason'] ?? '-').')',
+                    'model' => $model,
+                    'model_missing' => false,
+                ];
+            }
 
             return [
                 'success' => true,
@@ -1084,14 +1109,18 @@ PROMPT;
             }
 
             // Determine Gemini model
-            $geminiModel = str_contains($model, 'gemini') ? $model : 'gemini-2.5-flash';
+            $geminiModel = str_starts_with($model, 'gemini')
+                ? ai_model_aktif($model, 'gemini')
+                : config('ai-models.default_text.gemini', 'gemini-2.5-flash');
             $url = "https://generativelanguage.googleapis.com/v1/models/{$geminiModel}:generateContent?key={$this->geminiApiKey}";
 
             $payload = [
                 'contents' => $contents,
                 'generationConfig' => [
                     'temperature' => 0.4,
-                    'maxOutputTokens' => 1500,
+                    // Gemini 2.5 selalu "berpikir" di endpoint v1 dan token berpikirnya
+                    // dihitung ke batas ini; 1500 membuat JSON jawaban terpotong.
+                    'maxOutputTokens' => 4096,
                 ],
             ];
 
@@ -1132,11 +1161,13 @@ PROMPT;
      */
     private function detectProvider(string $modelId): string
     {
-        if (str_contains($modelId, 'gemini')) {
+        if (str_starts_with($modelId, 'gemini')) {
             return 'gemini';
         }
 
-        if (str_contains($modelId, 'llama') || str_contains($modelId, 'qwen')) {
+        // Model Groq aktif maupun yang sudah dipensiunkan (akan dialihkan ai_model_aktif()).
+        if (array_key_exists($modelId, config('ai-models.available.groq', []))
+            || array_key_exists($modelId, config('ai-models.retired', []))) {
             return 'groq';
         }
 

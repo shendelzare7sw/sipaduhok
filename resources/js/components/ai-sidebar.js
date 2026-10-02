@@ -1,32 +1,6 @@
 (() => {
 document.addEventListener('DOMContentLoaded', function() {
-// Difficulty hints
-const difficultyHints = {
-    easy: 'Fakta dasar & hafalan',
-    medium: 'Aplikasi konsep & perhitungan',
-    hard: 'Analisis & problem solving'
-};
-
-// Estimated time based on count
-const estimatedTimes = {
-    3: '10-15',
-    5: '15-20',
-    7: '20-25',
-    10: '25-30'
-};
-
-// Update difficulty hint
-document.querySelectorAll('input[name="difficulty"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        document.getElementById('difficultyHint').textContent = difficultyHints[this.value];
-    });
-});
-
-// Update estimated time
-document.getElementById('aiQuestionCount').addEventListener('change', function() {
-    document.getElementById('estimatedTime').textContent = estimatedTimes[this.value];
-});
-
+// Petunjuk tingkat kesulitan & estimasi waktu kini dikelola Alpine di components/ai-sidebar.blade.php.
 
 document.addEventListener('click', function(event) {
     if (!event.target.closest('[data-close-ai-sidebar]')) {

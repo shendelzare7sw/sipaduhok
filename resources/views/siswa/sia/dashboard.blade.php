@@ -4,371 +4,241 @@
 @section('page-title', 'Sistem Informasi Akademik')
 @section('page-subtitle', 'Selamat datang, ' . $siswa->nama_lengkap)
 
-
-@push('styles')
-    @vite(['resources/css/siswa/sia/dashboard.css'])
-@endpush
-
 @section('content')
-    <div class="sia-dashboard-page"
-        data-sia-dashboard
-        data-chart-enabled="{{ $siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']) ? 'true' : 'false' }}"
-        data-chart-completed="{{ $performa['tugas']['selesai'] ?? 0 }}"
-        data-chart-total="{{ $performa['tugas']['total'] ?? 0 }}"
-        data-flyer-user-id="{{ auth()->id() }}">
+@php
+    $lmsAktif = $lmsAktif ?? false;
 
-    <!-- Profile Banner -->
-    <div class="profile-banner">
-        <div class="profile-avatar">
-            @if(auth()->user()->foto_profil)
-                <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="user">
-            @elseif($siswa->foto)
-                <img src="{{ asset('storage/' . $siswa->foto) }}" alt="user">
-            @else
-                {{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}
-            @endif
-        </div>
-        <div class="profile-info">
-            <div class="profile-name">Halo, {{ explode(' ', $siswa->nama_lengkap)[0] }}!</div>
-            <div class="profile-meta">
-                <span><i class="fas fa-school"></i> {{ $siswa->kelas->nama_kelas ?? '-' }}</span>
-                <span><i class="fas fa-calendar-alt"></i> {{ $siswa->kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</span>
-                <span><i class="fas fa-id-card"></i> {{ $siswa->nis ?? '-' }}</span>
-            </div>
-        </div>
-    </div>
+    $statCards = [
+        ['label' => 'Hadir', 'value' => $absensi['hadir'] ?? 0, 'icon' => 'fa-circle-check', 'tone' => 'bg-emerald-50 text-emerald-600'],
+        ['label' => 'Sakit', 'value' => $absensi['sakit'] ?? 0, 'icon' => 'fa-notes-medical', 'tone' => 'bg-amber-50 text-amber-600'],
+        ['label' => 'Izin', 'value' => $absensi['izin'] ?? 0, 'icon' => 'fa-envelope-open-text', 'tone' => 'bg-sky-50 text-sky-600'],
+        ['label' => 'Alpha', 'value' => $absensi['alpha'] ?? 0, 'icon' => 'fa-circle-xmark', 'tone' => 'bg-rose-50 text-rose-600'],
+    ];
 
-    {{-- Pengumuman --}}
-    @if(isset($pengumuman) && $pengumuman->count() > 0)
-        <div class="announcement-banner">
-            <div class="announcement-title">
-                <i class="fas fa-bullhorn"></i> Pengumuman
-            </div>
-            <div class="row g-2">
-                @foreach($pengumuman->take(2) as $item)
-                    <div class="col-md-6">
-                        <div class="announcement-item">
-                            <h6>{{ $item->judul }}</h6>
-                            <p>{{ Str::limit($item->isi_pengumuman, 100) }}</p>
-                            <small><i class="far fa-calendar-alt me-1"></i>{{ $item->tanggal_pengumuman->format('d M Y') }}</small>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
+    $tugasTotal = (int) ($performa['tugas']['total'] ?? 0);
+    $tugasSelesai = (int) ($performa['tugas']['selesai'] ?? 0);
+    $tugasBelum = max($tugasTotal - $tugasSelesai, 0);
+    $tugasPersen = $tugasTotal > 0 ? min(100, round($tugasSelesai / $tugasTotal * 100)) : 0;
+@endphp
 
-    <!-- Attendance Stats -->
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-            <div class="s-card">
-                <div class="stat-widget">
-                    <div class="stat-icon-box stat-icon-success">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-details">
-                        <div class="stat-value">{{ $absensi['hadir'] ?? 0 }}</div>
-                        <div class="stat-label">Hadir</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="s-card">
-                <div class="stat-widget">
-                    <div class="stat-icon-box stat-icon-primary">
-                        <i class="fas fa-notes-medical"></i>
-                    </div>
-                    <div class="stat-details">
-                        <div class="stat-value">{{ $absensi['sakit'] ?? 0 }}</div>
-                        <div class="stat-label">Sakit</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="s-card">
-                <div class="stat-widget">
-                    <div class="stat-icon-box stat-icon-warning">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div class="stat-details">
-                        <div class="stat-value">{{ $absensi['izin'] ?? 0 }}</div>
-                        <div class="stat-label">Izin</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="s-card">
-                <div class="stat-widget">
-                    <div class="stat-icon-box stat-icon-danger">
-                        <i class="fas fa-times-circle"></i>
-                    </div>
-                    <div class="stat-details">
-                        <div class="stat-value">{{ $absensi['alpha'] ?? 0 }}</div>
-                        <div class="stat-label">Alpha</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Layout -->
-    <div class="row g-4 mb-4">
-        <!-- Left: Jadwal + Tugas -->
-        <div class="col-lg-8 d-flex flex-column gap-4">
-
-            <!-- Jadwal Hari Ini -->
-            <div class="s-card">
-                <div class="s-card-header">
-                    <h5 class="s-card-title">
-                        <i class="fas fa-clock text-warning"></i> Jadwal Hari Ini
-                        <span class="badge bg-label-primary ms-1 badge-xs-md">{{ now()->locale('id')->translatedFormat('l') }}</span>
-                    </h5>
-                    @if($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']))
-                        <a href="{{ route('siswa.lms.jadwal') }}" class="text-primary fw-semibold text-decoration-none link-small">
-                            Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
-                        </a>
-                    @endif
-                </div>
-                @if(isset($jadwalHariIni) && $jadwalHariIni->count() > 0)
-                    <ul class="jadwal-list">
-                        @foreach($jadwalHariIni as $jadwal)
-                            <li class="jadwal-item">
-                                <div class="jadwal-time">
-                                    {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}
-                                </div>
-                                <div class="jadwal-dot"></div>
-                                <div class="jadwal-body">
-                                    <div class="jadwal-mapel">{{ $jadwal->mataPelajaran->nama_mapel }}</div>
-                                    <div class="jadwal-guru">{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}</div>
-                                </div>
-                                @if($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']))
-                                    <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}"
-                                       class="btn btn-sm btn-outline-primary px-3 btn-sia-action">
-                                        Masuk
-                                    </a>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
+<div class="min-w-0 w-full space-y-5">
+    <section class="overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-blue-600 to-cyan-500 text-white shadow-lg shadow-brand-900/15">
+        <div class="flex items-center gap-4 p-5 sm:p-6">
+            <div class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/20 text-2xl font-extrabold text-white ring-2 ring-white/40 sm:h-20 sm:w-20">
+                @if(auth()->user()->foto_profil)
+                    <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="Foto profil" class="h-full w-full object-cover">
+                @elseif($siswa->foto)
+                    <img src="{{ asset('storage/' . $siswa->foto) }}" alt="Foto siswa" class="h-full w-full object-cover">
                 @else
-                    <div class="empty-state">
-                        <i class="fas fa-coffee d-block"></i>
-                        <div class="empty-state-title">Tidak Ada Jadwal</div>
-                        <div class="empty-state-desc">Tidak ada pelajaran hari ini. Selamat istirahat!</div>
-                    </div>
+                    {{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}
                 @endif
             </div>
-
-            {{-- Tugas & Nilai (LMS only) --}}
-            @if($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']))
-
-                <div class="row g-4 flex-grow-1">
-                    <!-- Tugas & Deadline -->
-                    <div class="col-md-6 d-flex">
-                        <div class="s-card d-flex flex-column w-100">
-                            <div class="s-card-header">
-                                <h5 class="s-card-title">
-                                    <i class="fas fa-tasks text-danger"></i> Tugas
-                                </h5>
-                            </div>
-                            @if($tugasList->count() > 0)
-                                <ul class="tugas-list flex-grow-1">
-                                    @foreach($tugasList as $tugas)
-                                        @php
-                                            $deadline = \Carbon\Carbon::parse($tugas->tanggal_deadline);
-                                            $diffDays = now()->diffInDays($deadline, false);
-                                            $isUrgent = $diffDays <= 1;
-                                            $isWarning = $diffDays > 1 && $diffDays <= 3;
-                                            $tugasTone = $isUrgent ? 'danger' : ($isWarning ? 'warning' : 'primary');
-                                        @endphp
-                                        <li class="tugas-item">
-                                            <div class="tugas-icon tugas-icon-{{ $tugasTone }}">
-                                                <i class="fas {{ $isUrgent ? 'fa-exclamation-triangle' : ($isWarning ? 'fa-clock' : 'fa-file-alt') }}"></i>
-                                            </div>
-                                            <div class="tugas-body">
-                                                <div class="tugas-title">{{ $tugas->judul_tugas }}</div>
-                                                <div class="tugas-meta">
-                                                    {{ $tugas->mataPelajaran->nama_mapel }} - {{ $deadline->locale('id')->isoFormat('D MMM') }}
-                                                    @if($isUrgent)
-                                                        <span class="badge bg-danger ms-1 badge-xxs">Urgent</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <a href="{{ route('siswa.lms.mapel.show', $tugas->mata_pelajaran_id) }}"
-                                               class="btn btn-sm btn-outline-primary btn-sia-mini">
-                                                Lihat
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <div class="empty-state flex-grow-1 d-flex flex-column justify-content-center">
-                                    <i class="fas fa-check-circle d-block text-success"></i>
-                                    <div class="empty-state-title text-success">Semua Selesai!</div>
-                                    <div class="empty-state-desc">Tidak ada tugas yang harus dikerjakan.</div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Nilai Terbaru -->
-                    <div class="col-md-6 d-flex">
-                        <div class="s-card d-flex flex-column w-100">
-                            <div class="s-card-header">
-                                <h5 class="s-card-title">
-                                    <i class="fas fa-trophy text-warning"></i> Nilai Terbaru
-                                </h5>
-                                <a href="{{ route('siswa.sia.penilaian') }}" class="text-primary fw-semibold text-decoration-none link-small">
-                                    Semua <i class="fas fa-arrow-right ms-1"></i>
-                                </a>
-                            </div>
-                            @if($nilaiTerbaru->count() > 0)
-                                <ul class="tugas-list flex-grow-1">
-                                    @foreach($nilaiTerbaru as $nilai)
-                                        <li class="tugas-item">
-                                            <div class="tugas-icon tugas-icon-warning">
-                                                <i class="fas fa-star"></i>
-                                            </div>
-                                            <div class="tugas-body">
-                                                <div class="tugas-title">{{ $nilai->mataPelajaran->nama_mapel }}</div>
-                                                <div class="tugas-meta">
-                                                    @if($nilai->jenis_penilaian == 'tugas')
-                                                        <span class="badge bg-info badge-xxs">Tugas</span>
-                                                    @elseif($nilai->jenis_penilaian == 'uts')
-                                                        <span class="badge bg-warning badge-xxs">UTS</span>
-                                                    @elseif($nilai->jenis_penilaian == 'uas')
-                                                        <span class="badge bg-danger badge-xxs">UAS</span>
-                                                    @else
-                                                        <span class="badge bg-secondary badge-xxs">{{ ucfirst($nilai->jenis_penilaian) }}</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <span class="fw-bold score-value">{{ $nilai->nilai ?? '-' }}</span>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <div class="empty-state flex-grow-1 d-flex flex-column justify-content-center">
-                                    <i class="fas fa-file-alt d-block"></i>
-                                    <div class="empty-state-title">Belum Ada Nilai</div>
-                                    <div class="empty-state-desc">Nilai akan muncul setelah guru menilai tugas Anda.</div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-            @endif
-
-        </div>
-
-        <!-- Right: Quick Links + LMS -->
-        <div class="col-lg-4 d-flex flex-column gap-4">
-
-            <!-- Quick Links -->
-            <div class="s-card">
-                <div class="s-card-header">
-                    <h5 class="s-card-title">
-                        <i class="fas fa-bolt text-warning"></i> Akses Cepat
-                    </h5>
-                </div>
-                <div class="quick-links-grid">
-                    <a href="{{ route('siswa.sia.presensi.index') }}" class="quick-link-item">
-                        <i class="fas fa-user-check text-primary"></i>
-                        <span class="quick-link-text">Presensi</span>
-                    </a>
-                    <a href="{{ route('siswa.sia.penilaian') }}" class="quick-link-item">
-                        <i class="fas fa-chart-line text-success"></i>
-                        <span class="quick-link-text">Nilai</span>
-                    </a>
-                    @if($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']))
-                        <a href="{{ route('siswa.lms.dashboard') }}" class="quick-link-item">
-                            <i class="fas fa-graduation-cap text-info"></i>
-                            <span class="quick-link-text">LMS</span>
-                        </a>
-                    @else
-                        <a href="{{ route('siswa.sia.dashboard') }}" class="quick-link-item">
-                            <i class="fas fa-home text-info"></i>
-                            <span class="quick-link-text">Home</span>
-                        </a>
-                    @endif
+            <div class="min-w-0">
+                <p class="text-xs font-bold text-blue-100">Semester {{ $semester }}</p>
+                <h2 class="mt-0.5 truncate text-xl font-extrabold !text-white sm:text-2xl">Halo, {{ explode(' ', $siswa->nama_lengkap)[0] }}!</h2>
+                <div class="mt-3 flex flex-wrap gap-2 text-[10px] font-bold">
+                    <span class="rounded-full bg-white/15 px-3 py-1.5 ring-1 ring-inset ring-white/20"><i class="fa-solid fa-school mr-1.5" aria-hidden="true"></i>{{ $siswa->kelas->nama_kelas ?? '-' }}</span>
+                    <span class="rounded-full bg-white/15 px-3 py-1.5 ring-1 ring-inset ring-white/20"><i class="fa-solid fa-calendar-days mr-1.5" aria-hidden="true"></i>{{ $siswa->kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</span>
+                    <span class="rounded-full bg-white/15 px-3 py-1.5 ring-1 ring-inset ring-white/20"><i class="fa-solid fa-id-card mr-1.5" aria-hidden="true"></i>{{ $siswa->nis ?? '-' }}</span>
                 </div>
             </div>
-
-            @if($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']))
-                <!-- LMS Banner -->
-                <div class="lms-banner">
-                    <div class="lms-banner-info">
-                        <i class="fas fa-graduation-cap lms-banner-icon d-none d-sm-block"></i>
-                        <div>
-                            <h6>HOK-LMS</h6>
-                            <p>Kerjakan tugas & materi online hari ini.</p>
-                        </div>
-                    </div>
-                    <a href="{{ route('siswa.lms.dashboard') }}" class="btn-lms-enter">
-                        MASUK LMS
-                    </a>
-                </div>
-            @endif
-
-            <!-- Progres Belajar -->
-            @if($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']))
-                <div class="s-card flex-grow-1">
-                    <div class="s-card-header">
-                        <h5 class="s-card-title">
-                            <i class="fas fa-chart-pie text-purple"></i> Progres Belajar
-                        </h5>
-                    </div>
-                    <div class="p-3">
-                        <div class="chart-box">
-                            <canvas id="performaChart"></canvas>
-                        </div>
-                        <div class="row text-center mt-3 g-0">
-                            <div class="col-4 border-end">
-                                <div class="progress-label progress-label-success">LULUS</div>
-                                <div class="progress-value">{{ $performa['tugas']['selesai'] ?? 0 }}</div>
-                            </div>
-                            <div class="col-4 border-end">
-                                <div class="progress-label progress-label-warning">PROSES</div>
-                                <div class="progress-value">{{ ($performa['tugas']['total'] ?? 0) - ($performa['tugas']['selesai'] ?? 0) }}</div>
-                            </div>
-                            <div class="col-4">
-                                <div class="progress-label progress-label-danger">TUNDA</div>
-                                <div class="progress-value">0</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
         </div>
-    </div>
+    </section>
 
-    {{-- Flyer Popup --}}
-    @if(isset($flyers) && $flyers->count() > 0)
-        <div class="modal-flyer" id="flyerModal">
-            <div class="modal-flyer-content shadow-lg">
-                <span class="flyer-close" data-flyer-close><i class="fas fa-times"></i></span>
-                @foreach($flyers->take(1) as $flyer)
-                    <img src="{{ $flyer->gambar_url }}" class="flyer-image" alt="{{ $flyer->judul }}">
-                    <div class="p-4 text-center">
-                        <h5 class="fw-bold text-primary mb-2">{{ $flyer->judul }}</h5>
-                        <p class="small text-muted mb-3">{{ $flyer->deskripsi }}</p>
-                        @if($flyer->link_url)
-                            <a href="{{ $flyer->link_url }}" target="_blank" class="btn btn-primary btn-sm px-4 rounded-pill fw-bold">LIHAT SELENGKAPNYA</a>
-                        @endif
-                    </div>
+    @if(isset($pengumuman) && $pengumuman->count() > 0)
+        <section class="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
+            <h2 class="flex items-center gap-2 text-sm font-extrabold text-amber-900"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i>Pengumuman</h2>
+            <div class="mt-3 grid gap-3 md:grid-cols-2">
+                @foreach($pengumuman->take(2) as $item)
+                    <article class="min-w-0 rounded-xl border border-amber-100 bg-white p-4">
+                        <h3 class="truncate text-sm font-extrabold text-slate-900" title="{{ $item->judul }}">{{ $item->judul }}</h3>
+                        <p class="mt-1 text-xs leading-5 text-slate-600">{{ Str::limit($item->isi_pengumuman, 100) }}</p>
+                        <p class="mt-2 text-[11px] font-semibold text-slate-500"><i class="fa-regular fa-calendar mr-1" aria-hidden="true"></i>{{ $item->tanggal_pengumuman->format('d M Y') }}</p>
+                    </article>
                 @endforeach
             </div>
-        </div>
+        </section>
     @endif
 
-    </div>
-@endsection
+    <section class="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4" aria-label="Rekap presensi bulan ini">
+        @foreach($statCards as $stat)
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-xl font-extrabold text-slate-900 sm:text-2xl">{{ number_format($stat['value']) }}</p>
+                        <p class="mt-1 text-[10px] font-bold uppercase leading-4 tracking-wide text-slate-500">{{ $stat['label'] }} bulan ini</p>
+                    </div>
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $stat['tone'] }}"><i class="fa-solid {{ $stat['icon'] }}" aria-hidden="true"></i></span>
+                </div>
+            </article>
+        @endforeach
+    </section>
 
-@push('scripts')
-    @vite(['resources/js/siswa/sia/dashboard.js'])
-@endpush
+    <div class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(19rem,1fr)]">
+        <div class="min-w-0 space-y-5">
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <header class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 sm:p-5">
+                    <div class="min-w-0">
+                        <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fa-solid fa-clock text-brand-600" aria-hidden="true"></i>Jadwal hari ini</h2>
+                        <p class="mt-1 text-xs text-slate-500">{{ now()->locale('id')->translatedFormat('l, d F Y') }}</p>
+                    </div>
+                    @if($lmsAktif)
+                        <a href="{{ route('siswa.lms.jadwal') }}" class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-bold text-brand-700 no-underline hover:text-brand-800">Lihat semua<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                    @endif
+                </header>
+
+                @forelse($jadwalHariIni ?? [] as $jadwal)
+                    <article class="flex min-w-0 items-center gap-3 border-b border-slate-100 p-4 last:border-b-0 hover:bg-slate-50 sm:gap-4">
+                        <span class="w-12 shrink-0 text-center text-sm font-extrabold tabular-nums text-brand-700">{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}</span>
+                        <span class="h-10 w-1 shrink-0 rounded-full bg-brand-200" aria-hidden="true"></span>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="truncate text-sm font-extrabold text-slate-900" title="{{ $jadwal->mataPelajaran->nama_mapel }}">{{ $jadwal->mataPelajaran->nama_mapel }}</h3>
+                            <p class="mt-0.5 truncate text-xs text-slate-500">{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}</p>
+                        </div>
+                        @if($lmsAktif)
+                            <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 px-3 text-xs font-bold text-brand-700 no-underline ring-1 ring-inset ring-brand-100 hover:bg-brand-100">Masuk</a>
+                        @endif
+                    </article>
+                @empty
+                    <div class="px-5 py-12 text-center">
+                        <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400"><i class="fa-solid fa-mug-hot" aria-hidden="true"></i></span>
+                        <h3 class="mt-4 font-extrabold text-slate-900">Tidak ada jadwal</h3>
+                        <p class="mt-1 text-sm text-slate-500">Tidak ada pelajaran hari ini. Selamat beristirahat!</p>
+                    </div>
+                @endforelse
+            </section>
+
+            @if($lmsAktif)
+                <div class="grid min-w-0 gap-5 lg:grid-cols-2">
+                    <section class="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <header class="border-b border-slate-200 p-4 sm:p-5">
+                            <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fa-solid fa-list-check text-rose-500" aria-hidden="true"></i>Tugas mendatang</h2>
+                        </header>
+
+                        @forelse($tugasList as $tugas)
+                            @php
+                                $deadline = \Carbon\Carbon::parse($tugas->tanggal_deadline);
+                                $diffDays = now()->diffInDays($deadline, false);
+                                $isUrgent = $diffDays <= 1;
+                                $isWarning = $diffDays > 1 && $diffDays <= 3;
+                                $tugasTone = $isUrgent ? 'bg-rose-50 text-rose-600' : ($isWarning ? 'bg-amber-50 text-amber-600' : 'bg-sky-50 text-sky-600');
+                                $tugasIcon = $isUrgent ? 'fa-triangle-exclamation' : ($isWarning ? 'fa-clock' : 'fa-file-lines');
+                            @endphp
+                            <article class="flex min-w-0 items-center gap-3 border-b border-slate-100 p-4 last:border-b-0 hover:bg-slate-50">
+                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tugasTone }}"><i class="fa-solid {{ $tugasIcon }}" aria-hidden="true"></i></span>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="truncate text-sm font-extrabold text-slate-900" title="{{ $tugas->judul_tugas }}">{{ $tugas->judul_tugas }}</h3>
+                                    <p class="mt-0.5 flex min-w-0 items-center gap-2 text-[11px] text-slate-500">
+                                        <span class="truncate">{{ $tugas->mataPelajaran->nama_mapel }} · {{ $deadline->locale('id')->isoFormat('D MMM') }}</span>
+                                        @if($isUrgent)<span class="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 text-[9px] font-extrabold text-rose-700">URGENT</span>@endif
+                                    </p>
+                                </div>
+                                <a href="{{ route('siswa.lms.mapel.show', $tugas->mata_pelajaran_id) }}" class="inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 px-3 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200">Lihat</a>
+                            </article>
+                        @empty
+                            <div class="flex flex-1 flex-col items-center justify-center px-5 py-12 text-center">
+                                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+                                <h3 class="mt-4 font-extrabold text-slate-900">Semua selesai</h3>
+                                <p class="mt-1 text-sm text-slate-500">Tidak ada tugas yang harus dikerjakan.</p>
+                            </div>
+                        @endforelse
+                    </section>
+
+                    <section class="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <header class="flex items-center justify-between gap-3 border-b border-slate-200 p-4 sm:p-5">
+                            <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fa-solid fa-trophy text-amber-500" aria-hidden="true"></i>Nilai terbaru</h2>
+                            <a href="{{ route('siswa.sia.penilaian') }}" class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-bold text-brand-700 no-underline hover:text-brand-800">Semua<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                        </header>
+
+                        @forelse($nilaiTerbaru as $nilai)
+                            <article class="flex min-w-0 items-center gap-3 border-b border-slate-100 p-4 last:border-b-0 hover:bg-slate-50">
+                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600"><i class="fa-solid fa-star" aria-hidden="true"></i></span>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="truncate text-sm font-extrabold text-slate-900" title="{{ $nilai->mataPelajaran->nama_mapel }}">{{ $nilai->mataPelajaran->nama_mapel }}</h3>
+                                    <span class="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-extrabold uppercase text-slate-600">Semester {{ $nilai->semester }}</span>
+                                </div>
+                                <strong class="shrink-0 text-lg font-extrabold tabular-nums {{ is_null($nilai->nilai_akhir) ? 'text-slate-400' : 'text-slate-900' }}" title="Nilai akhir">{{ is_null($nilai->nilai_akhir) ? '-' : number_format($nilai->nilai_akhir, 1) }}</strong>
+                            </article>
+                        @empty
+                            <div class="flex flex-1 flex-col items-center justify-center px-5 py-12 text-center">
+                                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></span>
+                                <h3 class="mt-4 font-extrabold text-slate-900">Belum ada nilai</h3>
+                                <p class="mt-1 text-sm text-slate-500">Nilai akan muncul setelah guru menilai tugas Anda.</p>
+                            </div>
+                        @endforelse
+                    </section>
+                </div>
+            @endif
+        </div>
+
+        <aside class="min-w-0 space-y-5">
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <header class="border-b border-slate-200 px-4 py-4 sm:px-5"><h2 class="flex items-center gap-2 font-extrabold text-slate-950"><i class="fa-solid fa-bolt text-amber-500" aria-hidden="true"></i>Akses cepat</h2></header>
+                <div class="grid grid-cols-2 gap-3 p-4">
+                    @foreach([
+                        ['route' => route('siswa.sia.presensi.index'), 'icon' => 'fa-calendar-check', 'label' => 'Presensi', 'tone' => 'text-blue-700 bg-blue-50'],
+                        ['route' => route('siswa.sia.penilaian'), 'icon' => 'fa-chart-line', 'label' => 'Data penilaian', 'tone' => 'text-emerald-700 bg-emerald-50'],
+                    ] as $link)
+                        <a href="{{ $link['route'] }}" class="group flex min-h-24 min-w-0 flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 p-3 text-center no-underline transition hover:border-brand-300 hover:bg-blue-50/50">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-xl {{ $link['tone'] }}"><i class="fa-solid {{ $link['icon'] }}" aria-hidden="true"></i></span>
+                            <span class="text-xs font-bold leading-5 text-slate-700 group-hover:text-brand-700">{{ $link['label'] }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+
+            @if($lmsAktif)
+                <section class="flex items-center gap-4 overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 p-5 text-white shadow-lg shadow-indigo-900/15">
+                    <span class="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15 text-xl sm:flex"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i></span>
+                    <div class="min-w-0 flex-1">
+                        <h2 class="text-base font-extrabold !text-white">HOK-LMS</h2>
+                        <p class="mt-0.5 text-xs leading-5 text-indigo-50">Kerjakan tugas dan materi online hari ini.</p>
+                    </div>
+                    <a href="{{ route('siswa.lms.dashboard') }}" class="inline-flex min-h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-white px-4 text-xs font-extrabold text-indigo-700 no-underline shadow-sm transition hover:bg-indigo-50">Masuk LMS</a>
+                </section>
+
+                <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <header class="border-b border-slate-200 px-4 py-4 sm:px-5"><h2 class="flex items-center gap-2 font-extrabold text-slate-950"><i class="fa-solid fa-chart-pie text-violet-500" aria-hidden="true"></i>Progres tugas</h2></header>
+                    <div class="flex items-center gap-5 p-5">
+                        <div class="relative h-28 w-28 shrink-0">
+                            <svg viewBox="0 0 36 36" class="h-full w-full -rotate-90" role="img" aria-label="{{ $tugasPersen }} persen tugas selesai">
+                                <circle cx="18" cy="18" r="16" pathLength="100" class="fill-none stroke-slate-200 stroke-[3.5]" />
+                                @if($tugasPersen > 0)
+                                    <circle cx="18" cy="18" r="16" pathLength="100" stroke-dasharray="{{ $tugasPersen }} 100" stroke-linecap="round" class="fill-none stroke-emerald-500 stroke-[3.5]" />
+                                @endif
+                            </svg>
+                            <span class="absolute inset-0 flex items-center justify-center text-xl font-extrabold tabular-nums text-slate-900">{{ $tugasPersen }}%</span>
+                        </div>
+                        <dl class="min-w-0 flex-1 space-y-3">
+                            <div class="flex items-center justify-between gap-3"><dt class="flex items-center gap-2 text-xs font-bold text-slate-500"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500" aria-hidden="true"></span>Selesai</dt><dd class="text-sm font-extrabold tabular-nums text-slate-900">{{ $tugasSelesai }}</dd></div>
+                            <div class="flex items-center justify-between gap-3"><dt class="flex items-center gap-2 text-xs font-bold text-slate-500"><span class="h-2.5 w-2.5 rounded-full bg-slate-300" aria-hidden="true"></span>Belum</dt><dd class="text-sm font-extrabold tabular-nums text-slate-900">{{ $tugasBelum }}</dd></div>
+                            <div class="flex items-center justify-between gap-3 border-t border-slate-100 pt-3"><dt class="text-xs font-bold text-slate-500">Total tugas</dt><dd class="text-sm font-extrabold tabular-nums text-slate-900">{{ $tugasTotal }}</dd></div>
+                        </dl>
+                    </div>
+                </section>
+            @endif
+        </aside>
+    </div>
+
+    @if(isset($flyers) && $flyers->count() > 0)
+        @php $flyer = $flyers->first(); @endphp
+        <div x-data="{ open: false, key: 'flyerShown_{{ auth()->id() }}', init() { try { if (!localStorage.getItem(this.key)) setTimeout(() => this.open = true, 1200); } catch (e) {} }, close() { this.open = false; try { localStorage.setItem(this.key, 'true'); } catch (e) {} } }" @keydown.escape.window="close()">
+            <template x-teleport="body">
+                <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" @click.self="close()" role="dialog" aria-modal="true" aria-label="{{ $flyer->judul }}">
+                    <div class="relative max-h-full w-full max-w-md overflow-y-auto rounded-2xl bg-white shadow-2xl">
+                        <button type="button" @click="close()" class="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-600 shadow ring-1 ring-slate-200 hover:bg-white hover:text-slate-900" aria-label="Tutup"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                        <img src="{{ $flyer->gambar_url }}" alt="{{ $flyer->judul }}" class="max-h-[60vh] w-full object-cover">
+                        <div class="p-5 text-center">
+                            <h3 class="text-base font-extrabold text-brand-700">{{ $flyer->judul }}</h3>
+                            @if($flyer->deskripsi)<p class="mt-2 text-sm leading-6 text-slate-600">{{ $flyer->deskripsi }}</p>@endif
+                            @if($flyer->link_url)
+                                <a href="{{ $flyer->link_url }}" target="_blank" rel="noopener" class="mt-4 inline-flex min-h-10 items-center justify-center rounded-full bg-brand-600 px-5 text-xs font-extrabold text-white no-underline hover:bg-brand-700">Lihat selengkapnya</a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    @endif
+</div>
+@endsection

@@ -4,90 +4,53 @@
 @section('page-title', 'Daftar Kelas')
 @section('page-subtitle', 'Pilih kelas untuk mengelola pembelajaran')
 
-
-@section('styles')
-    @vite(['resources/css/guru/kelas/index.css'])
-@endsection
-
 @section('content')
-    <div class="guru-kelas-page">
-        <div class="container-fluid px-0">
+<div class="min-w-0 w-full space-y-5">
+    <header class="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-5">
+        <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-700">Tugas mengajar</p>
+        <h1 class="mt-1 flex items-center gap-2 text-lg font-extrabold text-slate-900"><i class="fa-solid fa-chalkboard-user text-brand-600" aria-hidden="true"></i>Kelas yang Anda ajar</h1>
+    </header>
 
-            <div class="card shadow-sm mb-4 border-start border-primary border-4">
-                <div class="card-body">
-                    <h4 class="mb-0 fw-bold text-gray-800">
-                        <i class="fas fa-chalkboard-teacher me-2 text-primary"></i>Kelas yang Anda Ajar
-                    </h4>
-                </div>
-            </div>
-
-            @if($dataKelas && count($dataKelas) > 0)
-                <div class="row">
-                    @foreach($dataKelas as $item)
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100 shadow-sm border-0 card-kelas">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
-                                            <h5 class="fw-bold text-primary mb-0 fs-4">
-                                                {{ $item['kelas']->nama_kelas }}
-                                            </h5>
-                                            <span class="text-muted text-uppercase">Jenjang: {{ $item['kelas']->jenjang }}</span>
-                                        </div>
-                                        <div class="bg-light p-2 rounded">
-                                            <i class="fas fa-school text-primary"></i>
-                                        </div>
-                                    </div>
-
-                                    <hr class="my-3">
-
-                                    <div class="row mb-3 g-0">
-                                        <div class="col-6 border-end text-center">
-                                            <div class="fw-bold text-gray-500 text-uppercase">Siswa</div>
-                                            <div class="h5 fw-bold mb-0 text-gray-800">{{ $item['jumlah_siswa'] }}</div>
-                                        </div>
-                                        <div class="col-6 text-center">
-                                            <div class="fw-bold text-gray-500 text-uppercase">Mapel</div>
-                                            <div class="h5 fw-bold mb-0 text-gray-800">{{ $item['jumlah_mapel'] }}</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-4">
-                                        <p class="fw-bold text-gray-600 mb-2">MATA PELAJARAN:</p>
-                                        <div class="mapel-badge-list">
-                                            @foreach($item['mapel'] as $mapel)
-                                                <span class="badge bg-light border text-primary badge-mapel">
-                                                    {{ $mapel->nama_mapel }}
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    </div>
-
-                                    <a href="{{ route('guru.kelas.mapel', $item['kelas']->id) }}"
-                                        class="btn btn-primary w-100 shadow-sm fw-bold py-2">
-                                        Kelola Kelas <i class="fas fa-arrow-right ms-2"></i>
-                                    </a>
-                                </div>
-                            </div>
+    @if($dataKelas && count($dataKelas) > 0)
+        <div class="grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
+            @foreach($dataKelas as $item)
+                <article class="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <h2 class="truncate text-xl font-extrabold text-brand-700" title="{{ $item['kelas']->nama_kelas }}">{{ $item['kelas']->nama_kelas }}</h2>
+                            <p class="mt-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">Jenjang {{ $item['kelas']->jenjang }}</p>
                         </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="card shadow mb-4 border-0">
-                    <div class="card-body text-center py-5">
-                        <div class="mb-4">
-                            <i class="fas fa-folder-open fa-5x text-gray-200"></i>
-                        </div>
-                        <h4 class="text-gray-800 fw-bold">Belum Ada Kelas</h4>
-                        <p class="text-gray-600 mb-4">Anda belum memiliki tugas mengajar di tahun ajaran aktif.</p>
-                        <div class="alert alert-info d-inline-block small">
-                            <i class="fas fa-info-circle me-2"></i>Mencari konten kelas tahun ajaran lalu? Buka menu
-                            <a href="{{ route('guru.lms.arsip.index') }}">Arsip LMS</a>. Jika Anda merasa ini kesalahan
-                            untuk TA aktif, silakan hubungi bagian Akademik atau Admin.
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><i class="fa-solid fa-school" aria-hidden="true"></i></span>
+                    </div>
+
+                    <dl class="mt-4 grid grid-cols-2 divide-x divide-slate-200 rounded-xl border border-slate-200 bg-slate-50 py-3 text-center">
+                        <div><dt class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Siswa</dt><dd class="mt-0.5 text-lg font-extrabold text-slate-900">{{ $item['jumlah_siswa'] }}</dd></div>
+                        <div><dt class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Mapel</dt><dd class="mt-0.5 text-lg font-extrabold text-slate-900">{{ $item['jumlah_mapel'] }}</dd></div>
+                    </dl>
+
+                    <div class="mt-4 flex-1">
+                        <p class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Mata pelajaran</p>
+                        <div class="mt-2 flex flex-wrap gap-1.5">
+                            @foreach($item['mapel'] as $mapel)
+                                <span class="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-brand-700 ring-1 ring-inset ring-brand-100">{{ $mapel->nama_mapel }}</span>
+                            @endforeach
                         </div>
                     </div>
-                </div>
-            @endif
+
+                    <a href="{{ route('guru.kelas.mapel', $item['kelas']->id) }}" class="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-extrabold text-white no-underline shadow-sm transition hover:bg-brand-700">Kelola kelas<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                </article>
+            @endforeach
         </div>
-    </div>
+    @else
+        <section class="rounded-2xl border border-slate-200 bg-white px-5 py-14 text-center shadow-sm">
+            <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></span>
+            <h2 class="mt-4 text-lg font-extrabold text-slate-900">Belum ada kelas</h2>
+            <p class="mt-1 text-sm text-slate-500">Anda belum memiliki tugas mengajar di tahun ajaran aktif.</p>
+            <p class="mx-auto mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-left text-xs leading-5 text-sky-900">
+                <i class="fa-solid fa-circle-info mt-0.5" aria-hidden="true"></i>
+                <span>Mencari konten kelas tahun ajaran lalu? Buka menu <a href="{{ route('guru.lms.arsip.index') }}" class="font-bold text-brand-700 underline">Arsip LMS</a>. Jika Anda merasa ini kesalahan untuk TA aktif, silakan hubungi bagian Akademik atau Admin.</span>
+            </p>
+        </section>
+    @endif
+</div>
 @endsection

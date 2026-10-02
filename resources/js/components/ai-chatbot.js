@@ -15,10 +15,10 @@ const chatbotState = {
     isWaitingResponse: false,
     quickActionsLoaded: false,
     modelsLoaded: false,
-    selectedModel: 'llama-3.3-70b-versatile',
+    selectedModel: 'openai/gpt-oss-120b',
     // Model TEKS pilihan pengguna. Disimpan terpisah supaya setelah meminjam
     // model gambar/PDF untuk sebuah lampiran, percakapan bisa balik ke sini.
-    modelTeksPilihan: 'llama-3.3-70b-versatile',
+    modelTeksPilihan: 'openai/gpt-oss-120b',
     attachedFiles: [],
     availableModels: [],
     fabPosition: { right: 104 },
@@ -316,9 +316,9 @@ async function loadAvailableModels() {
         // Daftar darurat kalau server tidak bisa dihubungi. Hanya berisi model
         // yang masih hidup - lihat config/ai-models.php sebagai sumber utamanya.
         const defaultModels = [
-            { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B (Direkomendasikan)', provider: 'groq', supports_vision: false, supports_pdf: false, default: true },
-            { id: 'openai/gpt-oss-120b', name: 'GPT OSS 120B', provider: 'groq', supports_vision: false, supports_pdf: false, default: false },
-            { id: 'qwen/qwen3.6-27b', name: 'Qwen 3.6 27B (Multimodal)', provider: 'groq', supports_vision: true, supports_pdf: false, default: false },
+            { id: 'openai/gpt-oss-120b', name: 'GPT OSS 120B (Direkomendasikan)', provider: 'groq', supports_vision: false, supports_pdf: false, default: true },
+            { id: 'openai/gpt-oss-20b', name: 'GPT OSS 20B (Cepat)', provider: 'groq', supports_vision: false, supports_pdf: false, default: false },
+            { id: 'qwen/qwen3.8-27b', name: 'Qwen 3.8 27B (Multimodal)', provider: 'groq', supports_vision: true, supports_pdf: false, default: false },
             { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (PDF + Gambar)', provider: 'gemini', supports_vision: true, supports_pdf: true, default: false }
         ];
         chatbotState.availableModels = defaultModels;
@@ -329,9 +329,9 @@ async function loadAvailableModels() {
 
 // ==================== Populate Model Selector (Logic Only) ====================
 function populateModelSelector(models) {
-    // Prioritize backend default, fallback to Llama
+    // Prioritize backend default, fallback to GPT OSS 120B
     const backendDefault = models.find(m => m.default === true);
-    const fallbackDefault = models.find(m => m.id === 'llama-3.3-70b-versatile');
+    const fallbackDefault = models.find(m => m.id === 'openai/gpt-oss-120b');
     const forcedDefaultId = backendDefault ? backendDefault.id : (fallbackDefault ? fallbackDefault.id : models[0]?.id);
     
     chatbotState.selectedModel = forcedDefaultId;

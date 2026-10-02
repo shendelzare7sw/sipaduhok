@@ -72,54 +72,6 @@
         color: rgb(224 242 254 / 0.9) !important;
     }
 
-    .cleanflow-lms-nav {
-        @apply space-y-1;
-    }
-
-    .cleanflow-lms-nav .nav-section-title {
-        @apply mb-1 mt-5 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-sky-200 first:mt-0;
-    }
-
-    .cleanflow-lms-nav .nav-link {
-        @apply flex min-h-11 items-center gap-3 rounded-xl border border-white/10 bg-slate-950/10 px-3 py-2.5 text-sm font-semibold no-underline backdrop-blur-sm transition;
-        color: rgb(248 250 252 / 0.96) !important;
-    }
-
-    .cleanflow-lms-nav .nav-link:hover {
-        @apply border-sky-100/30 bg-white/[0.12];
-        color: white !important;
-    }
-
-    .cleanflow-lms-nav .nav-link.active {
-        @apply border-sky-100/50 bg-white/[0.18] shadow-lg shadow-slate-950/20;
-        color: white !important;
-    }
-
-    .cleanflow-lms-nav .nav-link > i {
-        @apply w-5 shrink-0 text-center text-sm;
-    }
-
-    .cleanflow-lms-nav .badge-notif,
-    .cleanflow-lms-nav .badge {
-        @apply ml-auto rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white;
-    }
-
-    .cleanflow-lms-nav .lms-teaching-context {
-        @apply mb-4 rounded-xl bg-white/10 p-3 ring-1 ring-white/10;
-    }
-
-    .cleanflow-lms-nav .lms-teaching-context-label {
-        @apply text-[10px] font-bold uppercase tracking-wide text-blue-100/70;
-    }
-
-    .cleanflow-lms-nav .lms-teaching-context-subject {
-        @apply mt-1 truncate text-sm font-bold text-white;
-    }
-
-    .cleanflow-lms-nav .lms-teaching-context-class {
-        @apply mt-0.5 truncate text-xs text-blue-100/75;
-    }
-
     #aiQuestionSidebar.active {
         @apply translate-x-0;
     }
@@ -132,9 +84,6 @@
         @apply visible opacity-100;
     }
 
-    #aiQuestionSidebar .question-card {
-        @apply mb-4 border-l-4 border-cyan-500 transition hover:shadow-md;
-    }
 }
 
 [x-cloak] {

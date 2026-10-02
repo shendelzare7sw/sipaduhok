@@ -66,15 +66,16 @@ class GuruLmsArsipController extends Controller
 
         $konten = $this->resolveKonten($type, $id, $guruId);
 
-        // Reuse view monitoring-lms preview, dengan parameter khusus arsip-mode
+        // Isi pratinjau memakai view monitoring-lms yang sama; hanya pembungkusnya khusus mode arsip.
         $previewView = match ($type) {
-            'materi' => 'guru.lms.arsip.preview-materi',
-            'tugas' => 'guru.lms.arsip.preview-tugas',
-            'ujian', 'latihan' => 'guru.lms.arsip.preview-ujian',
+            'materi' => 'monitoring-lms.preview.materi',
+            'tugas' => 'monitoring-lms.preview.tugas',
+            'ujian', 'latihan' => 'monitoring-lms.preview.ujian',
             default => abort(404),
         };
 
         return view($previewView, [
+            'previewWrapper' => 'guru.lms.arsip.preview-wrapper',
             'konten' => $konten,
             'kontenType' => $type,
             'kontenId' => $id,

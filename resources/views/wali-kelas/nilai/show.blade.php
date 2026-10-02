@@ -8,6 +8,10 @@
 @php
     $isKelasAkhir = $kelas->isTingkatAkhir();
     $score = fn ($value, $decimals = 1) => $value === null ? '—' : number_format((float) $value, $decimals, ',', '.');
+    // Sama dengan halaman edit: guru menyimpan versi baru setelah revisi terakhir wali.
+    $guruBaru = fn ($nilai) => $nilai && $nilai->hasGuruUpdate() && $nilai->guru_terakhir_simpan_at
+        && (! $nilai->wali_terakhir_edit_at || $nilai->guru_terakhir_simpan_at->gt($nilai->wali_terakhir_edit_at));
+    $mapelGuruBaru = $mataPelajaranList->filter(fn ($mapel) => $guruBaru($nilaiData[$mapel->id] ?? null));
 @endphp
 <div class="min-w-0 w-full space-y-4">
     <header class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -24,6 +28,19 @@
             </div>
         </div>
     </header>
+
+    @if($mapelGuruBaru->isNotEmpty())
+        <section class="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between" role="status">
+            <div class="flex min-w-0 items-start gap-3">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-amber-700 ring-1 ring-amber-200"><i class="fas fa-user-pen" aria-hidden="true"></i></span>
+                <div class="min-w-0 text-xs leading-5 text-amber-950">
+                    <p class="text-sm font-extrabold">Guru mapel mengubah nilai yang sudah Anda revisi</p>
+                    <p>{{ $mapelGuruBaru->pluck('nama_mapel')->implode(', ') }}. Nilai di halaman ini dan rapor masih versi Anda; bandingkan lalu sinkronkan jika setuju.</p>
+                </div>
+            </div>
+            <a href="{{ route('wali.nilai.edit', ['siswa' => $siswa->id, 'semester' => $semester]) }}" class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-amber-500 px-3 text-xs font-bold text-white hover:bg-amber-600"><i class="fas fa-code-compare" aria-hidden="true"></i>Bandingkan &amp; sinkronkan</a>
+        </section>
+    @endif
 
     <section class="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="Ringkasan nilai">
         <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"><p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Mapel bernilai</p><p class="mt-1 text-xl font-extrabold text-slate-900">{{ $totalNilai }}<span class="ml-1 text-xs font-medium text-slate-500">/ {{ $mataPelajaranList->count() }}</span></p></div>
@@ -50,7 +67,7 @@
                             $isTuntas = $hasFinal && $nilai->nilai_akhir >= 70;
                         @endphp
                         <tr>
-                            <th scope="row" class="px-3 py-3 font-bold text-slate-900">{{ $mapel->nama_mapel }}<span class="block text-[11px] font-normal text-slate-500">{{ $mapel->kode_mapel }}</span></th>
+                            <th scope="row" class="px-3 py-3 font-bold text-slate-900">{{ $mapel->nama_mapel }}@if($guruBaru($nilai))<span class="ml-1.5 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800 ring-1 ring-amber-200">Update guru</span>@endif<span class="block text-[11px] font-normal text-slate-500">{{ $mapel->kode_mapel }}</span></th>
                             <td class="px-2 py-3 text-center">{{ $counts['tugas'] }}/5</td><td class="px-2 py-3 text-center">{{ $score($nilai?->rata_tugas) }}</td>
                             <td class="px-2 py-3 text-center">{{ $counts['latihan'] }}/5</td><td class="px-2 py-3 text-center">{{ $score($nilai?->rata_latihan) }}</td>
                             <td class="px-2 py-3 text-center">{{ $counts['uh'] }}/5</td><td class="px-2 py-3 text-center">{{ $score($nilai?->rata_uh) }}</td>
@@ -79,7 +96,7 @@
                 @endphp
                 <details class="group px-4 py-3">
                     <summary class="flex cursor-pointer list-none items-center justify-between gap-3">
-                        <span class="min-w-0"><span class="block text-sm font-bold text-slate-900">{{ $mapel->nama_mapel }}</span><span class="text-[11px] text-slate-500">{{ $mapel->kode_mapel }} · {{ !$hasFinal ? 'Belum ada nilai akhir' : ($isTuntas ? 'Tuntas' : 'Belum tuntas') }}</span></span>
+                        <span class="min-w-0"><span class="block text-sm font-bold text-slate-900">{{ $mapel->nama_mapel }}@if($guruBaru($nilai))<span class="ml-1.5 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800 ring-1 ring-amber-200">Update guru</span>@endif</span><span class="text-[11px] text-slate-500">{{ $mapel->kode_mapel }} · {{ !$hasFinal ? 'Belum ada nilai akhir' : ($isTuntas ? 'Tuntas' : 'Belum tuntas') }}</span></span>
                         <span class="flex shrink-0 items-center gap-2"><span class="text-sm font-extrabold text-sky-800">{{ $score($nilai?->nilai_akhir, 2) }}</span><i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform group-open:rotate-180" aria-hidden="true"></i></span>
                     </summary>
                     <dl class="mt-3 grid grid-cols-2 gap-2 text-xs">

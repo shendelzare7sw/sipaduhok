@@ -69,7 +69,7 @@ class GuruTugasController extends Controller
             ->with('kelas')
             ->get();
 
-        return view('guru.lms.tugas.create', [
+        return view('guru.lms.tugas.form', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
@@ -171,7 +171,7 @@ class GuruTugasController extends Controller
             ->with('kelas')
             ->get();
 
-        return view('guru.lms.tugas.edit', [
+        return view('guru.lms.tugas.form', [
             'tugas' => $tugas,
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,

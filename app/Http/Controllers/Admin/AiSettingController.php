@@ -28,12 +28,16 @@ class AiSettingController extends Controller
                 'orang_tua' => false,
             ];
 
+        $provider = $settings['ai_provider'] ?? 'groq';
+
         return view('admin.ai-settings.index', [
             'groqApiKey' => $settings['groq_api_key'] ?? '',
             'geminiApiKey' => $settings['gemini_api_key'] ?? '',
-            'model' => $settings['ai_model'] ?? 'llama-3.3-70b-versatile',
-            'visionModel' => $settings['ai_vision_model'] ?? 'gemini-2.5-flash',
-            'provider' => $settings['ai_provider'] ?? 'groq',
+            // Nilai lama yang modelnya sudah dipensiunkan dipetakan ke penggantinya
+            // (config/ai-models.php) agar dropdown menampilkan model yang benar-benar dipakai.
+            'model' => ai_model_aktif($settings['ai_model'] ?? null, $provider),
+            'visionModel' => ai_model_aktif($settings['ai_vision_model'] ?? null, $provider, true),
+            'provider' => $provider,
             'chatbotEnabledRoles' => $chatbotEnabledRoles,
             'contextRestrictionEnabled' => isContextRestrictionEnabled(),
             'aiQuestionGeneratorEnabled' => isset($settings['ai_question_generator_enabled']) ? filter_var($settings['ai_question_generator_enabled'], FILTER_VALIDATE_BOOLEAN) : true,
@@ -74,8 +78,8 @@ class AiSettingController extends Controller
         $settings = [
             'groq_api_key' => $request->groq_api_key ?? '',
             'gemini_api_key' => $request->gemini_api_key ?? '',
-            'ai_model' => $request->ai_model,
-            'ai_vision_model' => $request->ai_vision_model,
+            'ai_model' => ai_model_aktif($request->ai_model, $request->ai_provider),
+            'ai_vision_model' => ai_model_aktif($request->ai_vision_model, $request->ai_provider, true),
             'ai_provider' => $request->ai_provider,
             'chatbot_enabled_roles' => json_encode($chatbotEnabledRoles),
             'context_restriction_enabled' => $request->boolean('context_restriction_enabled') ? '1' : '0',
@@ -116,19 +120,25 @@ class AiSettingController extends Controller
                 ])->withHeaders([
                     'Authorization' => 'Bearer ' . $apiKey,
                     'Content-Type' => 'application/json',
-                ])->timeout(15)->post('https://api.groq.com/openai/v1/chat/completions', [
+                ])->timeout(30)->post('https://api.groq.com/openai/v1/chat/completions', ai_groq_payload([
                     'model' => $model,
                     'messages' => [
                         ['role' => 'user', 'content' => 'Test connection. Reply with "OK".']
                     ],
-                    'max_tokens' => 5
-                ]);
+                    // Model bernalar (gpt-oss) memakai token untuk berpikir; helper menambah anggarannya.
+                    'max_tokens' => 16,
+                ]));
 
                 if ($response->successful()) {
                     return response()->json(['success' => true, 'message' => 'Koneksi ke Groq API berhasil! Model: ' . $model]);
-                } else {
-                    return response()->json(['success' => false, 'message' => 'Gagal terhubung ke Groq API. Periksa API Key atau model yang dipilih.']);
                 }
+
+                $pesan = $response->json('error.message') ?? substr($response->body(), 0, 200);
+                $saran = ai_model_tidak_ditemukan($response->status(), $response->body())
+                    ? ' Model ini tidak tersedia untuk API key Anda (dipensiunkan atau khusus paket Enterprise). Pilih model lain dari daftar.'
+                    : ($response->status() === 401 ? ' API key tidak valid.' : '');
+
+                return response()->json(['success' => false, 'message' => '❌ Groq API Error ('.$response->status().'): '.$pesan.$saran]);
             } catch (\Exception $e) {
                 return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
             }
@@ -152,7 +162,8 @@ class AiSettingController extends Controller
                         ]
                     ],
                     'generationConfig' => [
-                        'maxOutputTokens' => 10,
+                        // Token "berpikir" Gemini 2.5 ikut dihitung; 10 membuat jawaban kosong.
+                        'maxOutputTokens' => 256,
                         'temperature' => 0.1
                     ]
                 ]);

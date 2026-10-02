@@ -1,66 +1,29 @@
-{{-- Context Info --}}
-<div class="lms-teaching-context">
-    <div class="lms-teaching-context-label">Anda Mengajar:</div>
-    <div class="lms-teaching-context-subject">{{ $mapel->nama_mapel ?? 'N/A' }}</div>
-    <div class="lms-teaching-context-class">Kelas {{ $kelas->nama_kelas ?? 'N/A' }}</div>
+{{-- Navigasi LMS Guru (HOK Teaching) per kelas + mata pelajaran. --}}
+@php
+    $lmsArgs = [$kelas->id, $mapel->id];
+    $sectionClass = 'px-3 pb-1 pt-5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400';
+@endphp
+
+<div class="mb-3 overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-4 text-white shadow-lg shadow-indigo-600/25">
+    <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-indigo-100">Anda mengajar</p>
+    <p class="mt-1 truncate text-base font-extrabold !text-white" title="{{ $mapel->nama_mapel ?? '-' }}">{{ $mapel->nama_mapel ?? 'N/A' }}</p>
+    <p class="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold text-white"><i class="fa-solid fa-chalkboard" aria-hidden="true"></i>Kelas {{ $kelas->nama_kelas ?? 'N/A' }}</p>
 </div>
 
-<div class="nav-section-title">UTAMA</div>
-<a href="{{ route('guru.lms.dashboard', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.dashboard') ? 'active' : '' }}">
-    <i class="fas fa-home"></i>
-    <span>Beranda</span>
-</a>
+<p class="{{ $sectionClass }}">Utama</p>
+<x-cleanflow.lms-nav-link :href="route('guru.lms.dashboard', $lmsArgs)" icon="fa-house" :active="request()->routeIs('guru.lms.dashboard')">Beranda kelas</x-cleanflow.lms-nav-link>
 
-<div class="nav-section-title">PEMBELAJARAN</div>
-<a href="{{ route('guru.lms.materi.index', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.materi.*') ? 'active' : '' }}">
-    <i class="fas fa-book"></i>
-    <span>Materi</span>
-</a>
+<p class="{{ $sectionClass }}">Pembelajaran</p>
+<x-cleanflow.lms-nav-link :href="route('guru.lms.materi.index', $lmsArgs)" icon="fa-book" :active="request()->routeIs('guru.lms.materi.*')">Materi</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('guru.lms.tugas.index', $lmsArgs)" icon="fa-list-check" :active="request()->routeIs('guru.lms.tugas.*')" :badge="($tugasBelumDikoreksi ?? 0) > 0 ? $tugasBelumDikoreksi : null">Tugas</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('guru.lms.latihan.index', $lmsArgs)" icon="fa-pencil-ruler" :active="request()->routeIs('guru.lms.latihan.*')">Latihan</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('guru.lms.ujian.index', $lmsArgs)" icon="fa-file-lines" :active="request()->routeIs('guru.lms.ujian.*')">Ujian</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('guru.lms.forum.index', $lmsArgs)" icon="fa-comments" :active="request()->routeIs('guru.lms.forum.*')">Forum diskusi</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('guru.lms.meeting.index', $lmsArgs)" icon="fa-video" :active="request()->routeIs('guru.lms.meeting.*')">Kelas virtual</x-cleanflow.lms-nav-link>
 
-<a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.tugas.*') ? 'active' : '' }}">
-    <i class="fas fa-tasks"></i>
-    <span>Tugas</span>
-    @if(isset($tugasBelumDikoreksi) && $tugasBelumDikoreksi > 0)
-        <span class="badge-notif">{{ $tugasBelumDikoreksi }}</span>
-    @endif
-</a>
+<p class="{{ $sectionClass }}">Penilaian</p>
+<x-cleanflow.lms-nav-link :href="route('guru.lms.nilai.index', $lmsArgs)" icon="fa-chart-line" :active="request()->routeIs('guru.lms.nilai.*')">Nilai siswa</x-cleanflow.lms-nav-link>
 
-<a href="{{ route('guru.lms.latihan.index', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.latihan.*') ? 'active' : '' }}">
-    <i class="fas fa-pencil-ruler"></i>
-    <span>Latihan</span>
-</a>
-
-<a href="{{ route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.ujian.*') ? 'active' : '' }}">
-    <i class="fas fa-file-alt"></i>
-    <span>Ujian</span>
-</a>
-
-<a href="{{ route('guru.lms.forum.index', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.forum.*') ? 'active' : '' }}">
-    <i class="fas fa-comments"></i>
-    <span>Forum Diskusi</span>
-</a>
-
-<a href="{{ route('guru.lms.meeting.index', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.meeting.*') ? 'active' : '' }}">
-    <i class="fas fa-video"></i>
-    <span>Kelas Virtual</span>
-</a>
-
-<div class="nav-section-title">PENILAIAN</div>
-<a href="{{ route('guru.lms.nilai.index', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.nilai.*') ? 'active' : '' }}">
-    <i class="fas fa-chart-line"></i>
-    <span>Nilai Siswa</span>
-</a>
-
-<div class="nav-section-title">NAVIGASI</div>
-<a href="{{ route('guru.dashboard') }}" class="nav-link">
-    <i class="fas fa-arrow-left"></i>
-    <span>Kembali ke Dashboard</span>
-</a>
+<p class="{{ $sectionClass }}">Navigasi</p>
+<x-cleanflow.lms-nav-link :href="route('guru.kelas.mapel', $kelas->id)" icon="fa-layer-group">Ganti mata pelajaran</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('guru.dashboard')" icon="fa-arrow-left">Kembali ke SIA</x-cleanflow.lms-nav-link>

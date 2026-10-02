@@ -1,47 +1,31 @@
-<!-- Kembali ke SIA -->
-<a href="{{ route('siswa.sia.dashboard') }}" class="nav-link">
-    <i class="bi bi-arrow-left-circle-fill"></i> Kembali ke SIA
-</a>
-
-<div class="nav-section-title">BERANDA</div>
-<a href="{{ route('siswa.lms.dashboard') }}" class="nav-link {{ request()->routeIs('siswa.lms.dashboard') ? 'active' : '' }}">
-    <i class="bi bi-house-door-fill"></i> Beranda
-</a>
-
-{{-- MATA PELAJARAN - Prioritas Utama --}}
-<div class="nav-section-title">MATA PELAJARAN</div>
+{{-- Navigasi LMS Siswa (HOK Learning). --}}
 @php
+    $sectionClass = 'px-3 pb-1 pt-5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400';
     $siswa = auth()->user()->siswa;
-    $mataPelajaran = \App\Models\JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+    $mataPelajaran = \App\Models\JadwalPelajaran::whereHas('kelas', function ($q) use ($siswa) {
             $q->where('kelas.id', $siswa->kelas_id ?? 0);
         })
         ->with('mataPelajaran')
         ->get()
         ->pluck('mataPelajaran')
-        ->filter(fn($mapel) => $mapel && $siswa && $siswa->canAccessMapel($mapel))
+        ->filter(fn ($mapel) => $mapel && $siswa && $siswa->canAccessMapel($mapel))
         ->unique('id')
         ->sortBy('nama_mapel');
 @endphp
 
+<x-cleanflow.lms-nav-link :href="route('siswa.sia.dashboard')" icon="fa-arrow-left">Kembali ke SIA</x-cleanflow.lms-nav-link>
+
+<p class="{{ $sectionClass }}">Beranda</p>
+<x-cleanflow.lms-nav-link :href="route('siswa.lms.dashboard')" icon="fa-house" :active="request()->routeIs('siswa.lms.dashboard')">Beranda</x-cleanflow.lms-nav-link>
+
+<p class="{{ $sectionClass }}">Mata pelajaran</p>
 @forelse($mataPelajaran as $mapel)
-<a href="{{ route('siswa.lms.mapel.show', $mapel->id) }}" 
-   class="nav-link {{ request()->is('siswa/lms/mata-pelajaran/' . $mapel->id . '*') ? 'active' : '' }}">
-    <i class="bi bi-book"></i> {{ $mapel->nama_mapel }}
-</a>
+    <x-cleanflow.lms-nav-link :href="route('siswa.lms.mapel.show', $mapel->id)" icon="fa-book" :active="request()->is('siswa/lms/mata-pelajaran/'.$mapel->id.'*')" title="{{ $mapel->nama_mapel }}">{{ $mapel->nama_mapel }}</x-cleanflow.lms-nav-link>
 @empty
-<div class="nav-link text-muted opacity-50 pe-none">
-    <i class="bi bi-info-circle"></i> Belum ada mata pelajaran
-</div>
+    <x-cleanflow.lms-nav-link icon="fa-circle-info" muted>Belum ada mata pelajaran</x-cleanflow.lms-nav-link>
 @endforelse
 
-{{-- MENU AKADEMIK --}}
-<div class="nav-section-title">AKADEMIK</div>
-<a href="{{ route('siswa.lms.kalender') }}" class="nav-link {{ request()->routeIs('siswa.lms.kalender*') ? 'active' : '' }}">
-    <i class="bi bi-calendar3"></i> Kalender Akademik
-</a>
-<a href="{{ route('siswa.lms.jadwal') }}" class="nav-link {{ request()->routeIs('siswa.lms.jadwal') ? 'active' : '' }}">
-    <i class="bi bi-clock-history"></i> Jadwal Pelajaran
-</a>
-<a href="{{ route('siswa.lms.guru') }}" class="nav-link {{ request()->routeIs('siswa.lms.guru') ? 'active' : '' }}">
-    <i class="bi bi-person-video3"></i> Daftar Guru
-</a>
+<p class="{{ $sectionClass }}">Akademik</p>
+<x-cleanflow.lms-nav-link :href="route('siswa.lms.kalender')" icon="fa-calendar-days" :active="request()->routeIs('siswa.lms.kalender*')">Kalender akademik</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('siswa.lms.jadwal')" icon="fa-clock-rotate-left" :active="request()->routeIs('siswa.lms.jadwal')">Jadwal pelajaran</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('siswa.lms.guru')" icon="fa-chalkboard-user" :active="request()->routeIs('siswa.lms.guru')">Daftar guru</x-cleanflow.lms-nav-link>

@@ -5,115 +5,106 @@
 @section('page-subtitle', 'Akses arsip akademik Anda')
 
 @section('sidebar-menu')
-    {{-- Sidebar minimal alumni: hanya dashboard, riwayat, logout --}}
-    <li class="menu-item active">
-        <a href="{{ route('siswa.sia.dashboard') }}" class="menu-link">
-            <i class="menu-icon fas fa-graduation-cap"></i>
-            <div>Dashboard Alumni</div>
-        </a>
-    </li>
-    <li class="menu-item">
-        <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
-            @csrf
-            <button type="submit" class="menu-link border-0 bg-transparent w-100 text-start"
-                    data-confirm-submit="Yakin ingin logout?">
-                <i class="menu-icon fas fa-sign-out-alt"></i>
-                <div>Logout</div>
-            </button>
-        </form>
+    {{-- Sidebar minimal alumni: hanya dashboard dan keluar --}}
+    <li class="mb-5">
+        <div class="mb-2 px-3">
+            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-blue-100/90">Alumni</p>
+        </div>
+        <ul class="space-y-1">
+            <li class="menu-item active">
+                <a href="{{ route('siswa.sia.dashboard') }}" class="menu-link group flex min-h-11 w-full items-center gap-3 rounded-xl !border-0 !ring-0 !bg-white/25 px-3 py-2.5 text-left text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition">
+                    <i class="fa-solid fa-graduation-cap w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
+                    <span class="min-w-0 flex-1">
+                        <span class="block truncate">Dashboard Alumni</span>
+                        <span class="mt-0.5 block truncate text-[10px] font-medium text-sky-50">Profil dan rapor terakhir</span>
+                    </span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <form method="POST" action="{{ route('logout') }}" data-confirm="logout" class="m-0 p-0">
+                    @csrf
+                    <button type="submit" class="menu-link group flex min-h-11 w-full items-center gap-3 rounded-xl !border-0 !ring-0 !bg-white/[0.07] px-3 py-2.5 text-left text-sm font-semibold text-blue-50/90 transition hover:!bg-white/15 hover:text-white">
+                        <i class="fa-solid fa-right-from-bracket w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
+                        <span class="min-w-0 flex-1">
+                            <span class="block truncate">Keluar</span>
+                            <span class="mt-0.5 block truncate text-[10px] font-medium text-sky-100/80 group-hover:text-white">Akhiri sesi Anda</span>
+                        </span>
+                    </button>
+                </form>
+            </li>
+        </ul>
     </li>
 @endsection
 
-@push('styles')
-    @vite(['resources/css/siswa/alumni/dashboard.css'])
-@endpush
-
-@push('scripts')
-    @vite(['resources/js/siswa/alumni/dashboard.js'])
-@endpush
-
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-
-    <div class="alumni-hero">
-        <div class="d-flex align-items-center gap-3">
-            <i class="fas fa-graduation-cap fa-2x"></i>
-            <div>
-                <div class="greeting">Selamat, {{ $siswa->nama_lengkap }}!</div>
-                <div class="subtext">
-                    Anda telah dinyatakan <strong>LULUS</strong> dari PKBM.
-                </div>
+<div class="min-w-0 w-full space-y-5">
+    <section class="overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-blue-600 to-cyan-500 text-white shadow-lg shadow-brand-900/15">
+        <div class="flex items-center gap-4 p-5 sm:p-6">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-2xl text-white ring-2 ring-white/40"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i></span>
+            <div class="min-w-0">
+                <p class="text-xs font-bold text-blue-100">Selamat!</p>
+                <h2 class="mt-0.5 break-words text-xl font-extrabold !text-white sm:text-2xl">{{ $siswa->nama_lengkap }}</h2>
+                <p class="mt-1 text-xs leading-5 text-blue-50/90 sm:text-sm">Anda telah dinyatakan <strong class="font-extrabold text-white">LULUS</strong> dari PKBM.</p>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="alumni-grid">
-        <form method="POST" action="{{ route('logout') }}" class="m-0">
-            @csrf
-            <button type="submit" class="alumni-action-card w-100 border-0 text-start"
-                    data-confirm-submit="Yakin ingin logout?">
-                <div class="icon-circle icon-circle-danger"><i class="fas fa-sign-out-alt"></i></div>
-                <div>
-                    <div class="label">Logout</div>
-                    <div class="desc">Keluar dari sistem</div>
-                </div>
-            </button>
-        </form>
-    </div>
-
-    <div class="info-card">
-        <h5 class="fw-bold mb-2"><i class="fas fa-id-card me-2 text-primary"></i>Profil Saya</h5>
-        <div class="row g-3">
-            <div class="col-md-3">
-                <img src="{{ $siswa->foto ? asset('storage/' . $siswa->foto) : asset('img/logo.png') }}"
-                     alt="Foto" class="rounded shadow-sm alumni-photo">
-            </div>
-            <div class="col-md-9">
-                <table class="table table-sm">
-                    <tr><td class="text-muted alumni-profile-label">Nama Lengkap</td><td><strong>{{ $siswa->nama_lengkap }}</strong></td></tr>
-                    <tr><td class="text-muted">NISN</td><td>{{ $siswa->nisn ?? '-' }}</td></tr>
-                    <tr><td class="text-muted">NIS</td><td>{{ $siswa->nis ?? '-' }}</td></tr>
-                    <tr><td class="text-muted">Jenis Kelamin</td><td>{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td></tr>
-                    <tr><td class="text-muted">Status</td><td><span class="badge bg-success">ALUMNI</span></td></tr>
-                </table>
-            </div>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 px-4 py-4 sm:px-5">
+            <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fa-solid fa-id-card text-brand-600" aria-hidden="true"></i>Profil saya</h2>
+        </header>
+        <div class="flex flex-col gap-5 p-4 sm:flex-row sm:p-5">
+            <img src="{{ $siswa->foto ? asset('storage/' . $siswa->foto) : asset('img/logo.png') }}" alt="Foto {{ $siswa->nama_lengkap }}" class="h-32 w-28 shrink-0 rounded-xl border border-slate-200 bg-slate-50 object-cover shadow-sm">
+            <dl class="grid min-w-0 flex-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+                <div class="min-w-0"><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Nama lengkap</dt><dd class="mt-0.5 break-words font-extrabold text-slate-900">{{ $siswa->nama_lengkap }}</dd></div>
+                <div class="min-w-0"><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-500">NISN</dt><dd class="mt-0.5 font-semibold text-slate-800">{{ $siswa->nisn ?? '-' }}</dd></div>
+                <div class="min-w-0"><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-500">NIS</dt><dd class="mt-0.5 font-semibold text-slate-800">{{ $siswa->nis ?? '-' }}</dd></div>
+                <div class="min-w-0"><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Jenis kelamin</dt><dd class="mt-0.5 font-semibold text-slate-800">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</dd></div>
+                <div class="min-w-0"><dt class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Status</dt><dd class="mt-1"><span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700 ring-1 ring-inset ring-emerald-200">ALUMNI</span></dd></div>
+            </dl>
         </div>
+    </section>
+
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 px-4 py-4 sm:px-5">
+            <h2 class="flex items-center gap-2 text-base font-extrabold text-slate-900"><i class="fa-solid fa-file-lines text-brand-600" aria-hidden="true"></i>Rapor terakhir</h2>
+        </header>
 
         @if($raporTerakhir)
-            <h6 class="fw-bold mt-3 mb-1"><i class="fas fa-file-alt me-2 text-primary"></i>Rapor Terakhir</h6>
-            <div class="rapor-summary">
-                <div class="field">
-                    <div class="label">Tahun Ajaran</div>
-                    <div class="value">{{ $raporTerakhir->tahunAjaran?->nama_tahun_ajaran ?? '-' }}</div>
+            <dl class="grid grid-cols-2 gap-3 p-4 sm:p-5 lg:grid-cols-4">
+                <div class="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <dt class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Tahun ajaran</dt>
+                    <dd class="mt-1 truncate text-sm font-extrabold text-slate-900">{{ $raporTerakhir->tahunAjaran?->nama_tahun_ajaran ?? '-' }}</dd>
                 </div>
-                <div class="field">
-                    <div class="label">Semester / Jenis</div>
-                    <div class="value">Semester {{ $raporTerakhir->semester }} - {{ $raporTerakhir->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS' }}</div>
+                <div class="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <dt class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Semester / jenis</dt>
+                    <dd class="mt-1 truncate text-sm font-extrabold text-slate-900">Semester {{ $raporTerakhir->semester }} - {{ $raporTerakhir->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS' }}</dd>
                 </div>
-                <div class="field">
-                    <div class="label">Status</div>
-                    <div class="value">
+                <div class="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <dt class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Status</dt>
+                    <dd class="mt-1">
                         @if($raporTerakhir->status === 'diterbitkan')
-                            <span class="badge bg-success">Diterbitkan</span>
+                            <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700 ring-1 ring-inset ring-emerald-200">Diterbitkan</span>
                         @else
-                            <span class="badge bg-secondary">{{ ucfirst($raporTerakhir->status) }}</span>
+                            <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-extrabold text-slate-600 ring-1 ring-inset ring-slate-200">{{ ucfirst($raporTerakhir->status) }}</span>
                         @endif
-                    </div>
+                    </dd>
                 </div>
-                <div class="field">
-                    <div class="label">Tanggal Terbit</div>
-                    <div class="value">{{ $raporTerakhir->tanggal_terbit ? $raporTerakhir->tanggal_terbit->locale('id')->translatedFormat('d M Y') : '-' }}</div>
+                <div class="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <dt class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Tanggal terbit</dt>
+                    <dd class="mt-1 truncate text-sm font-extrabold text-slate-900">{{ $raporTerakhir->tanggal_terbit ? $raporTerakhir->tanggal_terbit->locale('id')->translatedFormat('d M Y') : '-' }}</dd>
                 </div>
-            </div>
-            <div class="text-muted small mt-2">
-                <i class="fas fa-info-circle me-1"></i>
-                Untuk akses rapor lengkap (download/cetak), silakan hubungi wali siswa atau wali Anda. Akun wali siswa tetap memiliki akses penuh.
-            </div>
+            </dl>
+            <p class="flex items-start gap-2 border-t border-slate-100 bg-slate-50/60 px-4 py-3 text-xs text-slate-500 sm:px-5">
+                <i class="fa-solid fa-circle-info mt-0.5 text-sky-600" aria-hidden="true"></i>
+                <span>Untuk akses rapor lengkap (unduh/cetak), silakan hubungi wali siswa Anda. Akun wali siswa tetap memiliki akses penuh.</span>
+            </p>
         @else
-            <div class="alert alert-warning mt-3 mb-0">
-                <i class="fas fa-exclamation-triangle me-1"></i>Belum ada rapor yang tercatat untuk Anda.
-            </div>
+            <p class="m-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:m-5">
+                <i class="fa-solid fa-triangle-exclamation mt-0.5" aria-hidden="true"></i>
+                <span>Belum ada rapor yang tercatat untuk Anda.</span>
+            </p>
         @endif
-    </div>
+    </section>
 </div>
 @endsection

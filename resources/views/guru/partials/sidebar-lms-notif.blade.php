@@ -1,30 +1,13 @@
-{{-- Guru LMS Notification Sidebar
-     Simple sidebar for the /notifications page when accessed from LMS context.
-     Does NOT require $kelas or $mapel variables. --}}
+{{-- Navigasi halaman notifikasi dalam konteks LMS Guru (tanpa $kelas/$mapel). --}}
+@php
+    $sectionClass = 'px-3 pb-1 pt-5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 first:pt-0';
+@endphp
 
-<div class="nav-section-title">NOTIFIKASI</div>
-<a href="{{ route('notifications.index', ['ctx' => 'lms-guru']) }}"
-    class="nav-link {{ !request('filter') ? 'active' : '' }}">
-    <i class="fas fa-bell"></i>
-    <span>Semua Notifikasi</span>
-</a>
-<a href="{{ route('notifications.index', ['ctx' => 'lms-guru', 'filter' => 'unread']) }}"
-    class="nav-link {{ request('filter') === 'unread' ? 'active' : '' }}">
-    <i class="fas fa-envelope"></i>
-    <span>Belum Dibaca</span>
-</a>
-<a href="{{ route('notifications.index', ['ctx' => 'lms-guru', 'filter' => 'read']) }}"
-    class="nav-link {{ request('filter') === 'read' ? 'active' : '' }}">
-    <i class="fas fa-envelope-open"></i>
-    <span>Sudah Dibaca</span>
-</a>
+<p class="{{ $sectionClass }}">Notifikasi</p>
+<x-cleanflow.lms-nav-link :href="route('notifications.index', ['ctx' => 'lms-guru'])" icon="fa-bell" :active="! request('filter')">Semua notifikasi</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('notifications.index', ['ctx' => 'lms-guru', 'filter' => 'unread'])" icon="fa-envelope" :active="request('filter') === 'unread'">Belum dibaca</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('notifications.index', ['ctx' => 'lms-guru', 'filter' => 'read'])" icon="fa-envelope-open" :active="request('filter') === 'read'">Sudah dibaca</x-cleanflow.lms-nav-link>
 
-<div class="nav-section-title">NAVIGASI</div>
-<a href="{{ route('guru.dashboard') }}" class="nav-link">
-    <i class="fas fa-tachometer-alt"></i>
-    <span>Dashboard Guru</span>
-</a>
-<a href="{{ route('guru.kelas.index') }}" class="nav-link">
-    <i class="fas fa-chalkboard-teacher"></i>
-    <span>Daftar Kelas LMS</span>
-</a>
+<p class="{{ $sectionClass }}">Navigasi</p>
+<x-cleanflow.lms-nav-link :href="route('guru.dashboard')" icon="fa-gauge">Dashboard guru</x-cleanflow.lms-nav-link>
+<x-cleanflow.lms-nav-link :href="route('guru.kelas.index')" icon="fa-chalkboard-user">Daftar kelas LMS</x-cleanflow.lms-nav-link>

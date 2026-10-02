@@ -1,639 +1,483 @@
+import '../../../components/ai-question-generator.js';
 import '../../../components/ai-sidebar.js';
 
+/**
+ * Editor Kelola Soal (Guru LMS).
+ *
+ * Tetap berupa modul JS karena AI Question Generator menyuntikkan soal melalui
+ * window.addQuestion dan membaca DOM #soalAccordion secara langsung. Tampilan
+ * sepenuhnya utility Tailwind; tidak ada lagi ketergantungan Bootstrap
+ * (collapse/modal/toast diganti toggle sendiri, <dialog>, dan SweetAlert).
+ */
 (() => {
-        /**
-         * Ambil huruf opsi (A-E) dari sebuah kunci jawaban, apa pun bentuknya.
-         * AI bisa mengirim "a", "D. Kebijakan fiskal", atau " c ". Radio/checkbox
-         * di form bernilai huruf besar, dan selector CSS case-sensitive - tanpa
-         * penyeragaman ini kunci jawaban gagal tercentang lalu tersimpan kosong.
-         * Mengembalikan '' kalau tidak ada huruf A-E yang bisa dikenali.
-         */
-        function normalizeKunciHuruf(nilai) {
-            if (nilai === null || nilai === undefined) return '';
-            const cocok = String(nilai).match(/[A-Ea-e]/);
-            return cocok ? cocok[0].toUpperCase() : '';
+    /**
+     * Ambil huruf opsi (A-E) dari sebuah kunci jawaban, apa pun bentuknya.
+     * AI bisa mengirim "a", "D. Kebijakan fiskal", atau " c ". Radio/checkbox
+     * di form bernilai huruf besar, dan selector CSS case-sensitive - tanpa
+     * penyeragaman ini kunci jawaban gagal tercentang lalu tersimpan kosong.
+     */
+    function normalizeKunciHuruf(nilai) {
+        if (nilai === null || nilai === undefined) return '';
+        const cocok = String(nilai).match(/[A-Ea-e]/);
+        return cocok ? cocok[0].toUpperCase() : '';
+    }
+
+    function showLmsToast(type, message) {
+        const icon = type === 'error' || type === 'danger' ? 'error' : (type === 'success' ? 'success' : (type === 'warning' ? 'warning' : 'info'));
+
+        if (window.Swal) {
+            window.Swal.fire({ toast: true, position: 'top-end', icon, title: message, showConfirmButton: false, timer: 3500, timerProgressBar: true });
+            return;
         }
 
-// === Global LMS Toast Notification ===
-        function showLmsToast(type, message) {
-            let container = document.getElementById('lmsToastContainer');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'lmsToastContainer';
-                container.className = 'toast-container position-fixed top-0 end-0 p-3';
-                container.style.zIndex = '9999';
-                document.body.appendChild(container);
+        window.alert(message);
+    }
+
+    const optionInputClass = 'block h-9 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const page = document.querySelector('.guru-lms-ujian-manage-soal-page');
+
+        if (!page) {
+            return;
+        }
+
+        const container = document.getElementById('soalAccordion');
+        const templateEl = document.getElementById('soalTemplate');
+        const bsTemplateEl = document.getElementById('bsRowTemplate');
+
+        if (!container || !templateEl || !bsTemplateEl) {
+            console.error('Templates or Container not found!');
+            return;
+        }
+
+        const template = templateEl.innerHTML;
+        const bsTemplate = bsTemplateEl.innerHTML;
+
+        // Penghitung global agar indeks nama field tidak bertabrakan saat soal dihapus/ditambah.
+        let questionCounter = 0;
+        const bsRowCounters = {};
+
+        const existingData = JSON.parse(document.getElementById('soalDataTemplate')?.content?.textContent || '[]');
+
+        const toggleSoal = (item, open) => {
+            const body = item.querySelector('.soal-body');
+            const button = item.querySelector('[data-toggle-soal]');
+            const shouldOpen = open ?? body.classList.contains('hidden');
+
+            body.classList.toggle('hidden', !shouldOpen);
+            button?.setAttribute('aria-expanded', String(shouldOpen));
+            item.querySelector('[data-soal-chevron]')?.classList.toggle('rotate-180', shouldOpen);
+            item.classList.toggle('ring-2', shouldOpen);
+            item.classList.toggle('ring-indigo-200', shouldOpen);
+        };
+
+        window.addQuestion = function (data = null) {
+            const index = questionCounter++;
+            const number = document.querySelectorAll('.soal-item').length + 1;
+            const contentRaw = data ? (data.pertanyaan || '') : '';
+
+            const html = template
+                .replace(/{INDEX}/g, index)
+                .replace(/{NUMBER}/g, number)
+                .replace(/{ID}/g, data ? data.id : '')
+                .replace(/{PERTANYAAN}/g, '')
+                .replace(/{IMAGE_PATH}/g, data && data.image_path ? data.image_path : '');
+
+            container.insertAdjacentHTML('beforeend', html);
+            const el = container.lastElementChild;
+
+            el.querySelector('.question-input').value = contentRaw;
+
+            if (data && data.narasi) {
+                el.querySelector('.narasi-input').value = data.narasi;
             }
 
-            const bgClass = type === 'error' || type === 'danger' ? 'bg-danger' : type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning text-dark' : 'bg-info';
-            const icon = type === 'error' || type === 'danger' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
-            const closeClass = type === 'warning' ? 'btn-close' : 'btn-close btn-close-white';
+            if (data && data.image_path) {
+                const previewContainer = el.querySelector('#imagePreview' + index);
+                previewContainer.querySelector('.preview-img').src = `${page.dataset.storageBaseUrl}/${data.image_path}`;
+                previewContainer.classList.remove('hidden');
+            }
 
-            const toastHtml = `
-                <div class="toast align-items-center text-white ${bgClass} border-0 shadow-lg" role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="fas ${icon} me-2"></i>${message}
-                        </div>
-                        <button type="button" class="${closeClass} me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>
-            `;
+            if (data) {
+                el.querySelector('.type-select').value = data.tipe_soal;
+                el.querySelector('input[name="soal[' + index + '][bobot_nilai]"]').value = data.bobot_nilai;
+                window.changeType(el.querySelector('.type-select'));
+                window.populateSectionData(el, index, data);
+            } else {
+                window.initDefaultPgOptions(el, index, 'pilgan', 5);
+                window.initDefaultPgOptions(el, index, 'kompleks', 5);
+                window.addBsRow(el.querySelector('[data-add-bs-row]'));
+                toggleSoal(el, true);
+            }
 
-            container.insertAdjacentHTML('beforeend', toastHtml);
-            const toastEl = container.lastElementChild;
-            const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
-            toast.show();
-            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
-        }
+            window.updateTotalBadge();
+            window.updatePreview(el.querySelector('.question-input'));
+        };
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const page = document.querySelector('.guru-lms-ujian-manage-soal-page');
+        let itemToDelete = null;
+        const deleteDialog = document.getElementById('deleteQuestionDialog');
 
-            if (!page) {
+        window.removeQuestion = function (e, btn) {
+            e.stopPropagation();
+            itemToDelete = btn.closest('.soal-item');
+
+            // Soal baru (belum punya ID) dihapus langsung tanpa konfirmasi.
+            const idInput = itemToDelete.querySelector('input[name*="[id]"]');
+            if (!idInput || !idInput.value) {
+                itemToDelete.remove();
+                window.renumberQuestions();
+                window.updateTotalBadge();
+                itemToDelete = null;
                 return;
             }
 
-            const loadAiQuestionGenerator = (() => {
-                let scriptPromise = null;
+            deleteDialog?.showModal();
+        };
 
-                return () => {
-                    const src = page.dataset.aiGeneratorSrc;
+        window.confirmRemoveVal = function () {
+            if (itemToDelete) {
+                itemToDelete.remove();
+                window.renumberQuestions();
+                window.updateTotalBadge();
+                itemToDelete = null;
+            }
+            deleteDialog?.close();
+        };
 
-                    if (!src || window.openAiSidebar) {
-                        return Promise.resolve();
+        window.renumberQuestions = function () {
+            document.querySelectorAll('.soal-item').forEach((item, idx) => {
+                item.querySelector('.soal-number').textContent = idx + 1;
+            });
+        };
+
+        window.changeType = function (select) {
+            const item = select.closest('.soal-item');
+            item.querySelector('.soal-type-badge').textContent = select.options[select.selectedIndex].text;
+            item.querySelectorAll('.type-section').forEach((section) => section.classList.add('hidden'));
+            item.querySelector('.section-' + select.value)?.classList.remove('hidden');
+        };
+
+        window.updatePreview = function (textarea) {
+            const val = textarea.value;
+            textarea.closest('.soal-item').querySelector('.preview-text').textContent = val ? '(' + val.substring(0, 40) + '...)' : '(Masukkan pertanyaan...)';
+        };
+
+        window.updateTotalBadge = function () {
+            document.getElementById('totalSoalBadge').textContent = document.querySelectorAll('.soal-item').length + ' Soal';
+        };
+
+        window.addBsRow = function (btn) {
+            const tbody = btn.previousElementSibling.querySelector('tbody');
+            const index = btn.closest('.soal-item').getAttribute('data-index');
+
+            if (typeof bsRowCounters[index] === 'undefined') {
+                bsRowCounters[index] = 0;
+            }
+            const rowIdx = bsRowCounters[index]++;
+
+            tbody.insertAdjacentHTML('beforeend', bsTemplate.replace(/{INDEX}/g, index).replace(/{ROW}/g, rowIdx));
+        };
+
+        window.populateSectionData = function (el, index, data) {
+            const type = data.tipe_soal;
+
+            if (type === 'pilihan_ganda') {
+                const opts = data.pilihan_jawaban || {};
+                const optKeys = Object.keys(opts).filter((k) => /^[A-E]$/.test(k));
+                const count = Math.min(Math.max(optKeys.length, 3), 5);
+
+                window.initDefaultPgOptions(el, index, 'pilgan', count);
+
+                if (typeof opts === 'object' && opts !== null) {
+                    for (const k in opts) {
+                        const input = el.querySelector(`input[name="soal[${index}][pilihan_jawaban_pilgan][${k}]"]`);
+                        if (input) input.value = opts[k];
                     }
-
-                    if (scriptPromise) {
-                        return scriptPromise;
+                }
+                if (data.kunci_jawaban) {
+                    const huruf = normalizeKunciHuruf(data.kunci_jawaban);
+                    if (huruf) {
+                        const radio = el.querySelector(`input[name="soal[${index}][kunci_jawaban_pilgan]"][value="${huruf}"]`);
+                        if (radio) radio.checked = true;
                     }
+                }
+            } else if (type === 'pilihan_ganda_kompleks') {
+                const opts = data.pilihan_jawaban || {};
+                const optKeys = Object.keys(opts).filter((k) => /^[A-E]$/.test(k));
+                const count = Math.min(Math.max(optKeys.length, 3), 5);
 
-                    scriptPromise = new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = src;
-                        script.onload = resolve;
-                        script.onerror = () => reject(new Error('AI Question Generator gagal dimuat'));
-                        document.body.appendChild(script);
+                window.initDefaultPgOptions(el, index, 'kompleks', count);
+
+                if (typeof opts === 'object' && opts !== null) {
+                    for (const k in opts) {
+                        const input = el.querySelector(`input[name="soal[${index}][pilihan_jawaban_kompleks][${k}]"]`);
+                        if (input) input.value = opts[k];
+                    }
+                }
+                let keys = data.kunci_jawaban || [];
+                if (typeof keys === 'string') {
+                    try { keys = JSON.parse(keys); } catch (e) { keys = []; }
+                }
+                if (typeof keys === 'string') {
+                    keys = keys.split(',');
+                }
+                if (Array.isArray(keys)) {
+                    keys.forEach((k) => {
+                        const huruf = normalizeKunciHuruf(k);
+                        if (!huruf) return;
+                        const cb = el.querySelector(`input[name="soal[${index}][kunci_jawaban_kompleks][]"][value="${huruf}"]`);
+                        if (cb) cb.checked = true;
                     });
-
-                    return scriptPromise;
-                };
-            })();
-
-            loadAiQuestionGenerator().catch(() => showLmsToast('warning', 'AI Question Generator gagal dimuat.'));
-            // Variables initialized after DOM load
-            const container = document.getElementById('soalAccordion');
-            let templateEl = document.getElementById('soalTemplate');
-            let bsTemplateEl = document.getElementById('bsRowTemplate');
-
-            if (!container || !templateEl || !bsTemplateEl) {
-                console.error("Templates or Container not found!");
-                return;
-            }
-
-            const template = templateEl.innerHTML;
-            const bsTemplate = bsTemplateEl.innerHTML;
-
-            // Global counters to prevent index collisions on delete/add
-            let questionCounter = 0;
-            let bsRowCounters = {};
-
-            // Existing Data
-            const existingData = JSON.parse(document.getElementById('soalDataTemplate')?.content?.textContent || '[]');
-
-            // Expose functions globally for onclick handlers
-            window.addQuestion = function (data = null) {
-                let index = questionCounter++;
-                let number = document.querySelectorAll('.soal-item').length + 1;
-
-                let contentRaw = data ? (data.pertanyaan || '') : '';
-
-                let html = template
-                    .replace(/{INDEX}/g, index)
-                    .replace(/{NUMBER}/g, number)
-                    .replace(/{ID}/g, data ? data.id : '')
-                    .replace(/{PERTANYAAN}/g, '') // We set value via JS to be safe
-                    .replace(/{IMAGE_PATH}/g, data && data.image_path ? data.image_path : '');
-
-                // Insert HTML
-                container.insertAdjacentHTML('beforeend', html);
-
-                // Get the newly added element
-                let el = container.lastElementChild;
-
-                // Set Pertanyaan safely
-                el.querySelector('.question-input').value = contentRaw;
-
-                // Set Narasi if exists
-                if (data && data.narasi) {
-                    el.querySelector('.narasi-input').value = data.narasi;
                 }
+                window.initDefaultPgOptions(el, index, 'pilgan', count);
+            } else if (type === 'benar_salah') {
+                window.initDefaultPgOptions(el, index, 'pilgan', 5);
+                window.initDefaultPgOptions(el, index, 'kompleks', 5);
 
-                // Set Image Preview if exists
-                if (data && data.image_path) {
-                    const previewContainer = el.querySelector('#imagePreview' + index);
-                    const previewImg = previewContainer.querySelector('.preview-img');
-                    previewImg.src = `${page.dataset.storageBaseUrl}/${data.image_path}`;
-                    previewContainer.style.display = 'block';
-                }
+                const rows = data.pilihan_jawaban && data.pilihan_jawaban.pernyataan ? data.pilihan_jawaban.pernyataan : [];
+                const tbody = el.querySelector('.bs-tbody');
 
-                if (data) {
-                    // Set fields
-                    el.querySelector('.type-select').value = data.tipe_soal;
-                    el.querySelector('input[name="soal[' + index + '][bobot_nilai]"]').value = data.bobot_nilai;
-
-                    // Trigger type change to show correct section
-                    changeType(el.querySelector('.type-select'));
-
-                    // Populate Section Data (this will create the option rows from data)
-                    populateSectionData(el, index, data);
+                if (rows.length > 0) {
+                    rows.forEach((row, rIdx) => {
+                        tbody.insertAdjacentHTML('beforeend', bsTemplate.replace(/{INDEX}/g, index).replace(/{ROW}/g, rIdx));
+                        const rowEl = tbody.lastElementChild;
+                        rowEl.querySelector('input').value = row.pernyataan || row.text || '';
+                        rowEl.querySelector('select').value = (row.benar === true || row.kunci === 'B') ? 'B' : 'S';
+                    });
+                    // Lanjutkan penomoran baris setelah data lama agar baris baru tidak menimpa indeks.
+                    bsRowCounters[index] = rows.length;
                 } else {
-                    // New question: initialize default 5 options for PG and PGK
-                    initDefaultPgOptions(el, index, 'pilgan', 5);
-                    initDefaultPgOptions(el, index, 'kompleks', 5);
-                    // Default 1 BS row if new
                     window.addBsRow(el.querySelector('[data-add-bs-row]'));
                 }
+            } else if (type === 'isian_singkat' || type === 'uraian') {
+                window.initDefaultPgOptions(el, index, 'pilgan', 5);
+                window.initDefaultPgOptions(el, index, 'kompleks', 5);
 
-                updateTotalBadge();
-                updatePreview(el.querySelector('.question-input'));
-            };
-
-            let itemToDelete = null;
-
-            window.removeQuestion = function (e, btn) {
-                e.stopPropagation(); // Prevent accordion toggle
-                
-                // Allow direct removal if it's a new question without ID to save clicks
-                itemToDelete = btn.closest('.soal-item');
-                let idInput = itemToDelete.querySelector('input[name*="[id]"]');
-                if (!idInput || !idInput.value) {
-                    itemToDelete.remove();
-                    renumberQuestions();
-                    updateTotalBadge();
-                    itemToDelete = null;
-                    return;
+                if (type === 'isian_singkat') {
+                    el.querySelector(`input[name="soal[${index}][kunci_jawaban_isian]"]`).value = data.kunci_jawaban || '';
                 }
+            }
+        };
 
-                var deleteModal = new bootstrap.Modal(document.getElementById('deleteQuestionModal'));
-                deleteModal.show();
-            };
+        const allLetters = ['A', 'B', 'C', 'D', 'E'];
 
-            window.confirmRemoveVal = function() {
-                if (itemToDelete) {
-                    itemToDelete.remove();
-                    renumberQuestions();
-                    updateTotalBadge();
-                    itemToDelete = null;
-                }
-                var modalEl = document.getElementById('deleteQuestionModal');
-                var modal = bootstrap.Modal.getInstance(modalEl);
-                modal.hide();
-            };
+        function createPgOptionHtml(index, letter, mode) {
+            const inputType = mode === 'pilgan' ? 'radio' : 'checkbox';
+            const namePrefix = mode === 'pilgan' ? 'pilihan_jawaban_pilgan' : 'pilihan_jawaban_kompleks';
+            const keyName = mode === 'pilgan' ? `soal[${index}][kunci_jawaban_pilgan]` : `soal[${index}][kunci_jawaban_kompleks][]`;
+            const checkClass = mode === 'pilgan' ? 'border-slate-300' : 'rounded border-slate-300';
 
-            window.renumberQuestions = function () {
-                let items = document.querySelectorAll('.soal-item');
-                items.forEach((item, idx) => {
-                    let newNum = idx + 1;
-                    item.querySelector('.soal-number').textContent = newNum;
-                });
-            };
+            return `<div class="pg-option-row flex items-center gap-2" data-letter="${letter}">
+                <label class="flex h-9 w-14 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 text-xs font-extrabold text-slate-700 has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50 has-[:checked]:text-emerald-700" title="Tandai ${letter} sebagai kunci">
+                    <input type="${inputType}" name="${keyName}" value="${letter}" class="h-3.5 w-3.5 ${checkClass} text-emerald-600 focus:ring-emerald-500">${letter}
+                </label>
+                <input type="text" name="soal[${index}][${namePrefix}][${letter}]" class="${optionInputClass}" placeholder="Opsi ${letter}">
+            </div>`;
+        }
 
-            window.changeType = function (select) {
-                let item = select.closest('.soal-item');
-                let type = select.value;
+        window.initDefaultPgOptions = function (el, index, mode, count) {
+            const optionContainer = el.querySelector(mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container');
+            if (!optionContainer) return;
 
-                // Update Badge
-                let badge = item.querySelector('.soal-type-badge');
-                badge.textContent = select.options[select.selectedIndex].text;
+            optionContainer.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                optionContainer.insertAdjacentHTML('beforeend', createPgOptionHtml(index, allLetters[i], mode));
+            }
+        };
 
-                // Show/Hide Sections
-                item.querySelectorAll('.type-section').forEach(el => el.style.display = 'none');
-                item.querySelector('.section-' + type).style.display = 'block';
-            };
+        window.addPgOption = function (btn, mode) {
+            const item = btn.closest('.soal-item');
+            const optionContainer = item.querySelector(mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container');
+            const currentCount = optionContainer.querySelectorAll('.pg-option-row').length;
 
-            window.updatePreview = function (textarea) {
-                let val = textarea.value;
-                let item = textarea.closest('.soal-item');
-                let preview = item.querySelector('.preview-text');
-                preview.textContent = val ? '(' + val.substring(0, 40) + '...)' : '(Masukan pertanyaan...)';
-            };
-
-            window.updateTotalBadge = function () {
-                let count = document.querySelectorAll('.soal-item').length;
-                document.getElementById('totalSoalBadge').textContent = count + ' Soal';
-            };
-
-            window.addBsRow = function (btn) {
-                let tbody = btn.previousElementSibling.querySelector('tbody');
-                let item = btn.closest('.soal-item');
-                let index = item.getAttribute('data-index');
-                
-                if (typeof bsRowCounters[index] === 'undefined') {
-                    bsRowCounters[index] = 0;
-                }
-                let rowIdx = bsRowCounters[index]++;
-
-                let html = bsTemplate
-                    .replace(/{INDEX}/g, index)
-                    .replace(/{ROW}/g, rowIdx);
-
-                tbody.insertAdjacentHTML('beforeend', html);
-            };
-
-            window.populateSectionData = function (el, index, data) {
-                let type = data.tipe_soal;
-
-                if (type === 'pilihan_ganda') {
-                    let opts = data.pilihan_jawaban || {};
-                    // Filter out non-letter keys like 'jawaban_benar'
-                    let optKeys = Object.keys(opts).filter(k => /^[A-E]$/.test(k));
-                    let count = Math.max(optKeys.length, 3); // at least 3
-                    count = Math.min(count, 5); // at most 5
-
-                    // Initialize option rows
-                    initDefaultPgOptions(el, index, 'pilgan', count);
-
-                    // Fill values
-                    if (typeof opts === 'object' && opts !== null) {
-                        for (let k in opts) {
-                            let input = el.querySelector(`input[name="soal[${index}][pilihan_jawaban_pilgan][${k}]"]`);
-                            if (input) input.value = opts[k];
-                        }
-                    }
-                    if (data.kunci_jawaban) {
-                        // Nilai radio selalu huruf besar A-E. Kunci dari AI kadang
-                        // huruf kecil ("d") atau lengkap ("D. Kebijakan fiskal"),
-                        // dan selector atribut CSS itu case-sensitive - kalau tidak
-                        // diseragamkan, radio tidak pernah tercentang dan kunci
-                        // jawaban tersimpan kosong.
-                        let huruf = normalizeKunciHuruf(data.kunci_jawaban);
-                        if (huruf) {
-                            let radio = el.querySelector(`input[name="soal[${index}][kunci_jawaban_pilgan]"][value="${huruf}"]`);
-                            if (radio) radio.checked = true;
-                        }
-                    }
-                }
-                else if (type === 'pilihan_ganda_kompleks') {
-                    let opts = data.pilihan_jawaban || {};
-                    let optKeys = Object.keys(opts).filter(k => /^[A-E]$/.test(k));
-                    let count = Math.max(optKeys.length, 3);
-                    count = Math.min(count, 5);
-
-                    initDefaultPgOptions(el, index, 'kompleks', count);
-
-                    if (typeof opts === 'object' && opts !== null) {
-                        for (let k in opts) {
-                            let input = el.querySelector(`input[name="soal[${index}][pilihan_jawaban_kompleks][${k}]"]`);
-                            if (input) input.value = opts[k];
-                        }
-                    }
-                    let keys = data.kunci_jawaban || [];
-                    if (typeof keys === 'string') {
-                        try { keys = JSON.parse(keys); } catch(e) { keys = []; }
-                    }
-                    if (typeof keys === 'string') {
-                        keys = keys.split(',');
-                    }
-                    if (Array.isArray(keys)) {
-                        keys.forEach(k => {
-                            let huruf = normalizeKunciHuruf(k);
-                            if (!huruf) return;
-                            let cb = el.querySelector(`input[name="soal[${index}][kunci_jawaban_kompleks][]"][value="${huruf}"]`);
-                            if (cb) cb.checked = true;
-                        });
-                    }
-                    // Also init PG defaults for when user switches type
-                    initDefaultPgOptions(el, index, 'pilgan', count);
-                }
-                else if (type === 'benar_salah') {
-                    // Init default PG/PGK options for type switching
-                    initDefaultPgOptions(el, index, 'pilgan', 5);
-                    initDefaultPgOptions(el, index, 'kompleks', 5);
-
-                    let rows = [];
-                    if (data.pilihan_jawaban && data.pilihan_jawaban.pernyataan) {
-                        rows = data.pilihan_jawaban.pernyataan;
-                    }
-
-                    let tbody = el.querySelector('.bs-tbody');
-                    if (rows.length > 0) {
-                        rows.forEach((row, rIdx) => {
-                            let text = row.pernyataan || row.text || '';
-                            let isTrue = row.benar === true || row.kunci === 'B';
-                            let keyChar = isTrue ? 'B' : 'S';
-
-                            let html = bsTemplate
-                                .replace(/{INDEX}/g, index)
-                                .replace(/{ROW}/g, rIdx);
-                            tbody.insertAdjacentHTML('beforeend', html);
-
-                            let rowEl = tbody.lastElementChild;
-                            rowEl.querySelector('input').value = text;
-                            rowEl.querySelector('select').value = keyChar;
-                        });
-                    } else {
-                        window.addBsRow(el.querySelector('[data-add-bs-row]'));
-                    }
-                }
-                else if (type === 'isian_singkat' || type === 'uraian') {
-                    // Init default PG/PGK options for type switching
-                    initDefaultPgOptions(el, index, 'pilgan', 5);
-                    initDefaultPgOptions(el, index, 'kompleks', 5);
-
-                    if (type === 'isian_singkat') {
-                        let val = data.kunci_jawaban || '';
-                        el.querySelector(`input[name="soal[${index}][kunci_jawaban_isian]"]`).value = val;
-                    }
-                }
-            };
-
-            // === DYNAMIC PG OPTION FUNCTIONS ===
-            const allLetters = ['A', 'B', 'C', 'D', 'E'];
-
-            /**
-             * Create a single PG option row HTML
-             */
-            function createPgOptionHtml(index, letter, mode) {
-                let inputType = mode === 'pilgan' ? 'radio' : 'checkbox';
-                let namePrefix = mode === 'pilgan' ? 'pilihan_jawaban_pilgan' : 'pilihan_jawaban_kompleks';
-                let keyName = mode === 'pilgan'
-                    ? `soal[${index}][kunci_jawaban_pilgan]`
-                    : `soal[${index}][kunci_jawaban_kompleks][]`;
-
-                return `<div class="input-group input-group-sm mb-2 pg-option-row" data-letter="${letter}">
-                    <div class="input-group-text">
-                        <input class="form-check-input mt-0" type="${inputType}"
-                            name="${keyName}" value="${letter}">
-                        <span class="ms-2 fw-bold">${letter}</span>
-                    </div>
-                    <input type="text" name="soal[${index}][${namePrefix}][${letter}]"
-                        class="form-control" placeholder="Opsi ${letter}">
-                </div>`;
+            if (currentCount >= 5) {
+                showLmsToast('warning', 'Maksimal 5 opsi jawaban (A-E).');
+                return;
             }
 
-            /**
-             * Initialize default PG options for a question
-             */
-            window.initDefaultPgOptions = function(el, index, mode, count) {
-                let containerClass = mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container';
-                let container = el.querySelector(containerClass);
-                if (!container) return;
+            optionContainer.insertAdjacentHTML('beforeend', createPgOptionHtml(item.getAttribute('data-index'), allLetters[currentCount], mode));
+        };
 
-                // Clear existing
-                container.innerHTML = '';
+        window.removePgOption = function (btn, mode) {
+            const optionContainer = btn.closest('.soal-item').querySelector(mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container');
+            const rows = optionContainer.querySelectorAll('.pg-option-row');
 
-                // Add options
-                for (let i = 0; i < count; i++) {
-                    container.insertAdjacentHTML('beforeend', createPgOptionHtml(index, allLetters[i], mode));
-                }
-            };
+            if (rows.length <= 3) {
+                showLmsToast('warning', 'Minimal 3 opsi jawaban (A-C).');
+                return;
+            }
 
-            /**
-             * Add a PG/PGK option (max 5)
-             */
-            window.addPgOption = function(btn, mode) {
-                let item = btn.closest('.soal-item');
-                let index = item.getAttribute('data-index');
-                let containerClass = mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container';
-                let container = item.querySelector(containerClass);
-                let currentCount = container.querySelectorAll('.pg-option-row').length;
+            rows[rows.length - 1].remove();
+        };
 
-                if (currentCount >= 5) {
-                    showLmsToast('warning', 'Maksimal 5 opsi jawaban (A-E).');
+        window.previewImage = function (input, index) {
+            const previewContainer = document.getElementById('imagePreview' + index);
+            const previewImg = previewContainer.querySelector('.preview-img');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                if (file.size > 2 * 1024 * 1024) {
+                    showLmsToast('error', 'Ukuran gambar terlalu besar! Maksimal 2MB.');
+                    input.value = '';
                     return;
                 }
 
-                let nextLetter = allLetters[currentCount];
-                container.insertAdjacentHTML('beforeend', createPgOptionHtml(index, nextLetter, mode));
-            };
-
-            /**
-             * Remove last PG/PGK option (min 3)
-             */
-            window.removePgOption = function(btn, mode) {
-                let item = btn.closest('.soal-item');
-                let containerClass = mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container';
-                let container = item.querySelector(containerClass);
-                let rows = container.querySelectorAll('.pg-option-row');
-
-                if (rows.length <= 3) {
-                    showLmsToast('warning', 'Minimal 3 opsi jawaban (A-C).');
+                if (!['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(file.type)) {
+                    showLmsToast('error', 'Format gambar tidak valid! Gunakan JPG, PNG, atau GIF.');
+                    input.value = '';
                     return;
                 }
 
-                // Remove last row
-                rows[rows.length - 1].remove();
-            };
-
-            page.addEventListener('click', async function(event) {
-                const addButton = event.target.closest('[data-add-question]');
-                const removeButton = event.target.closest('[data-remove-question]');
-                const confirmRemoveButton = event.target.closest('[data-confirm-remove]');
-                const syncButton = event.target.closest('[data-sync-action]');
-                const aiButton = event.target.closest('[data-open-ai-sidebar]');
-                const removeImageButton = event.target.closest('[data-remove-image]');
-                const addPgButton = event.target.closest('[data-add-pg-option]');
-                const removePgButton = event.target.closest('[data-remove-pg-option]');
-                const addBsButton = event.target.closest('[data-add-bs-row]');
-
-                if (addButton) {
-                    event.preventDefault();
-                    window.addQuestion();
-                    return;
-                }
-
-                if (removeButton) {
-                    event.preventDefault();
-                    window.removeQuestion(event, removeButton);
-                    return;
-                }
-
-                if (confirmRemoveButton) {
-                    event.preventDefault();
-                    window.confirmRemoveVal();
-                    return;
-                }
-
-                if (syncButton) {
-                    event.preventDefault();
-                    window.confirmSyncAction(syncButton.dataset.syncForm, syncButton.dataset.syncTitle, syncButton.dataset.syncMessage);
-                    return;
-                }
-
-                if (aiButton) {
-                    event.preventDefault();
-                    try {
-                        await loadAiQuestionGenerator();
-                        if (window.openAiSidebar) {
-                            window.openAiSidebar();
-                        }
-                    } catch (error) {
-                        showLmsToast('warning', 'AI Question Generator gagal dimuat.');
-                    }
-                    return;
-                }
-
-                if (removeImageButton) {
-                    event.preventDefault();
-                    window.removeImage(removeImageButton.dataset.removeImage);
-                    return;
-                }
-
-                if (addPgButton) {
-                    event.preventDefault();
-                    window.addPgOption(addPgButton, addPgButton.dataset.addPgOption);
-                    return;
-                }
-
-                if (removePgButton) {
-                    event.preventDefault();
-                    window.removePgOption(removePgButton, removePgButton.dataset.removePgOption);
-                    return;
-                }
-
-                if (addBsButton) {
-                    event.preventDefault();
-                    window.addBsRow(addBsButton);
-                }
-            });
-
-            page.addEventListener('change', function(event) {
-                const target = event.target;
-
-                if (target.matches('.type-select')) {
-                    window.changeType(target);
-                    return;
-                }
-
-                if (target.matches('.image-upload')) {
-                    window.previewImage(target, target.dataset.previewImage);
-                }
-            });
-
-            page.addEventListener('input', function(event) {
-                if (event.target.matches('.question-input')) {
-                    window.updatePreview(event.target);
-                }
-            });
-            // Initialize
-            if (existingData && existingData.length > 0) {
-                existingData.forEach((soal, idx) => {
-                    window.addQuestion(soal);
-                });
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
             } else {
-                window.addQuestion();
+                previewContainer.classList.add('hidden');
+            }
+        };
+
+        window.removeImage = function (index) {
+            const soalItem = document.querySelector(`.soal-item[data-index="${index}"]`);
+            if (!soalItem) return;
+
+            const fileInput = soalItem.querySelector('.image-upload');
+            const existingImageInput = soalItem.querySelector('.existing-image-path');
+            if (fileInput) fileInput.value = '';
+            if (existingImageInput) existingImageInput.value = '';
+            document.getElementById('imagePreview' + index)?.classList.add('hidden');
+        };
+
+        // --- Aksi sinkron (Simpan semua / Rilis-Tarik) ---
+        let targetFormId = null;
+        const relatedCount = Number(page.dataset.relatedCount || 0);
+        const syncDialog = document.getElementById('syncConfirmDialog');
+
+        window.confirmSyncAction = function (formId, title, message) {
+            targetFormId = formId;
+
+            // Tanpa kelas terkait: langsung kirim seperti perilaku sebelumnya.
+            if (relatedCount === 0) {
+                document.getElementById(formId).submit();
+                return;
             }
 
-            // --- SYNC ACTIONS LOGIC ---
-            let targetFormId = null;
-            let relatedCount = Number(page.dataset.relatedCount || 0);
+            document.getElementById('syncModalTitle').textContent = title;
+            document.getElementById('syncModalMessage').textContent = message || 'Lanjutkan aksi ini?';
+            const cb = document.getElementById('syncConfirmCheckbox');
+            if (cb) cb.checked = true;
+            syncDialog?.showModal();
+        };
 
-            window.confirmSyncAction = function(formId, title, message) {
-                targetFormId = formId;
-                
-                // If no related classes, just submit directly
-                if (relatedCount === 0) {
-                    document.getElementById(formId).submit();
-                    return;
-                }
+        document.getElementById('btnConfirmSync')?.addEventListener('click', () => {
+            if (!targetFormId) return;
 
-                // Show Modal
-                document.getElementById('syncModalTitle').textContent = title;
-                document.getElementById('syncModalMessage').textContent = message || "Lanjutkan aksi ini?";
-                
-                // Reset checkbox default to true
-                let cb = document.getElementById('syncConfirmCheckbox');
-                if(cb) cb.checked = true;
+            const cb = document.getElementById('syncConfirmCheckbox');
+            const inputId = { mainForm: 'sync_kelas_main', toggleStatusForm: 'sync_kelas_status', toggleResultForm: 'sync_kelas_result' }[targetFormId];
+            const input = inputId ? document.getElementById(inputId) : null;
+            if (input) input.value = cb && cb.checked ? 1 : 0;
 
-                var syncModal = new bootstrap.Modal(document.getElementById('syncConfirmModal'));
-                syncModal.show();
-            };
-
-            document.getElementById('btnConfirmSync').addEventListener('click', function() {
-                if (!targetFormId) return;
-
-                let form = document.getElementById(targetFormId);
-                let cb = document.getElementById('syncConfirmCheckbox');
-                let shouldSync = cb && cb.checked ? 1 : 0;
-
-                // Find the specific hidden input for this form
-                let inputName = '';
-                if (targetFormId === 'mainForm') inputName = 'sync_kelas_main';
-                else if (targetFormId === 'toggleStatusForm') inputName = 'sync_kelas_status';
-                else if (targetFormId === 'toggleResultForm') inputName = 'sync_kelas_result';
-                
-                let input = document.getElementById(inputName);
-                if (input) input.value = shouldSync;
-
-                // Submit
-                form.submit();
-                
-                // Close modal
-                var modalEl = document.getElementById('syncConfirmModal');
-                var modal = bootstrap.Modal.getInstance(modalEl);
-                modal.hide();
-            });
-
-            // --- IMAGE HANDLING FUNCTIONS ---
-
-            /**
-             * Preview image when file is selected
-             */
-            window.previewImage = function(input, index) {
-                const previewContainer = document.getElementById('imagePreview' + index);
-                const previewImg = previewContainer.querySelector('.preview-img');
-
-                if (input.files && input.files[0]) {
-                    const file = input.files[0];
-
-                    // Validate file size (max 2MB)
-                    if (file.size > 2 * 1024 * 1024) {
-                        showLmsToast('error', 'Ukuran gambar terlalu besar! Maksimal 2MB.');
-                        input.value = '';
-                        return;
-                    }
-
-                    // Validate file type
-                    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-                    if (!validTypes.includes(file.type)) {
-                        showLmsToast('error', 'Format gambar tidak valid! Gunakan JPG, PNG, atau GIF.');
-                        input.value = '';
-                        return;
-                    }
-
-                    // Read and preview image
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewImg.src = e.target.result;
-                        previewContainer.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    previewContainer.style.display = 'none';
-                }
-            };
-
-            /**
-             * Remove image preview and clear file input
-             */
-            window.removeImage = function(index) {
-                const soalItem = document.querySelector(`.soal-item[data-index="${index}"]`);
-                if (!soalItem) return;
-
-                const fileInput = soalItem.querySelector('.image-upload');
-                const existingImageInput = soalItem.querySelector('.existing-image-path');
-                const previewContainer = document.getElementById('imagePreview' + index);
-
-                // Clear file input
-                if (fileInput) fileInput.value = '';
-
-                // Clear existing image path (to delete on save)
-                if (existingImageInput) existingImageInput.value = '';
-
-                // Hide preview
-                if (previewContainer) previewContainer.style.display = 'none';
-            };
-
+            syncDialog?.close();
+            document.getElementById(targetFormId).submit();
         });
+
+        // --- Delegasi event ---
+        document.addEventListener('click', async (event) => {
+            const target = event.target;
+
+            const openDialog = target.closest('[data-open-dialog]');
+            if (openDialog) {
+                document.getElementById(openDialog.dataset.openDialog)?.showModal();
+                return;
+            }
+
+            const closeDialog = target.closest('[data-close-dialog]');
+            if (closeDialog) {
+                closeDialog.closest('dialog')?.close();
+                return;
+            }
+
+            if (target.matches('dialog')) {
+                target.close();
+                return;
+            }
+
+            if (target.closest('[data-open-ai-sidebar]')) {
+                event.preventDefault();
+                if (typeof window.openAiSidebar === 'function') {
+                    window.openAiSidebar();
+                } else {
+                    showLmsToast('warning', 'AI Question Generator gagal dimuat.');
+                }
+                return;
+            }
+
+            if (!page.contains(target) && !container.contains(target)) {
+                return;
+            }
+
+            const addButton = target.closest('[data-add-question]');
+            const removeButton = target.closest('[data-remove-question]');
+            const toggleButton = target.closest('[data-toggle-soal]');
+            const confirmRemoveButton = target.closest('[data-confirm-remove]');
+            const syncButton = target.closest('[data-sync-action]');
+            const removeImageButton = target.closest('[data-remove-image]');
+            const addPgButton = target.closest('[data-add-pg-option]');
+            const removePgButton = target.closest('[data-remove-pg-option]');
+            const addBsButton = target.closest('[data-add-bs-row]');
+
+            if (addButton) {
+                event.preventDefault();
+                window.addQuestion();
+            } else if (removeButton) {
+                event.preventDefault();
+                window.removeQuestion(event, removeButton);
+            } else if (toggleButton) {
+                event.preventDefault();
+                toggleSoal(toggleButton.closest('.soal-item'));
+            } else if (confirmRemoveButton) {
+                event.preventDefault();
+                window.confirmRemoveVal();
+            } else if (syncButton) {
+                event.preventDefault();
+                window.confirmSyncAction(syncButton.dataset.syncForm, syncButton.dataset.syncTitle, syncButton.dataset.syncMessage);
+            } else if (removeImageButton) {
+                event.preventDefault();
+                window.removeImage(removeImageButton.dataset.removeImage);
+            } else if (addPgButton) {
+                event.preventDefault();
+                window.addPgOption(addPgButton, addPgButton.dataset.addPgOption);
+            } else if (removePgButton) {
+                event.preventDefault();
+                window.removePgOption(removePgButton, removePgButton.dataset.removePgOption);
+            } else if (addBsButton) {
+                event.preventDefault();
+                window.addBsRow(addBsButton);
+            }
+        });
+
+        page.addEventListener('change', (event) => {
+            if (event.target.matches('.type-select')) {
+                window.changeType(event.target);
+            } else if (event.target.matches('.image-upload')) {
+                window.previewImage(event.target, event.target.dataset.previewImage);
+            }
+        });
+
+        page.addEventListener('input', (event) => {
+            if (event.target.matches('.question-input')) {
+                window.updatePreview(event.target);
+            }
+        });
+
+        if (existingData && existingData.length > 0) {
+            existingData.forEach((soal) => window.addQuestion(soal));
+        } else {
+            window.addQuestion();
+        }
+    });
 })();

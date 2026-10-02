@@ -1,6 +1,6 @@
 # CleanFlow Admin UI Migration
 
-Pembaruan terakhir: 17 September 2026.
+Pembaruan terakhir: 2 Oktober 2026.
 
 ## Definisi status
 
@@ -64,6 +64,10 @@ Role **Waka selesai**. Sidebar, dashboard, Data Kelas, Jadwal Pelajaran, Guru Pe
 
 Role **Wali Kelas selesai untuk alur aktif**. Semua halaman kerja—sidebar, dashboard, pilih kelas, jadwal, Presensi, Nilai, Rapor, Promosi, Validasi Akses, Template Capaian, dan Arsip—memakai Tailwind + Alpine/dialog native tanpa aset CSS/JS halaman atau Bootstrap khusus role. Alias route jadwal lama tetap dilayani controller aktif. Bug riwayat Presensi yang mengirim POST ke route PUT telah diperbaiki; status kehadiran dipisahkan dari keputusan validasi izin, dengan guard server untuk permintaan pending dan keputusan berulang. Daftar Rapor menempatkan Generate/Upload atau menu Aksi di pojok kanan atas baris pada mobile maupun desktop. Inventaris akhir: **30 view, 0 `@vite` halaman kerja, 4 `@vite` dokumen Rapor, dan 1 `@vite` dokumen Nilai siswa**; **11 aset public dokumen cetak yang masih direferensikan** (6 CSS, 5 JS) serta dua Tailwind entry dokumen. CSS khusus tabel/watermark/geometri halaman pada dokumen lain dan JS preview zoom tetap aktif untuk menjaga desain cetak; ini bukan aset yatim. Dua template rapor generik yang tidak dipakai beserta asetnya sudah dihapus. Bootstrap Icons CDN pada tiga dokumen Nilai diganti SVG lokal; tidak ada lagi marker Bootstrap di view Wali Kelas.
 
+Role **Siswa — shell SIA selesai** (2 Oktober 2026). Sidebar, Dashboard SIA, Presensi, Data Penilaian, dan Dashboard Alumni memakai Tailwind + Alpine/dialog native tanpa aset CSS/JS halaman (5 view, 0 `@vite`, 0 `<style>`/style inline). Sidebar kini hanya berisi Dashboard, HOK-LMS (mengikuti `lms_allowed_jenjang`), Presensi, dan Data Penilaian. Pembayaran dan Rapor **bukan hak siswa** (keduanya milik Wali Siswa): empat route `siswa.sia.pembayaran.*`, `SiaPembayaranController`, `SiaRaporController`, dan view pembayaran/rapor siswa dicabut dari rute; URL langsung menghasilkan 404 dan dikunci tes. Dashboard memakai satu flag `lmsAktif` dari controller (sebelumnya `SMP/SMA` hard-coded, tidak sama dengan sidebar dan middleware `lms.access`); kartu "Nilai terbaru" kini membaca `nilai_akhir`/`semester` (kolom `nilai` dan `jenis_penilaian` yang dipakai sebelumnya tidak ada di tabel), grafik Chart.js via CDN diganti donut SVG tanpa JS, dan bukti presensi memakai satu dialog Alpine (bukan satu modal per baris). **Aset yatim berikut sudah dihapus atas izin pengguna (2 Oktober 2026):** `resources/css/siswa/sia`, `resources/js/siswa/sia`, `resources/css/siswa/alumni`, `resources/js/siswa/alumni`, `resources/views/siswa/sia/pembayaran`, `resources/views/siswa/sia/rapor`, `SiaPembayaranController.php`, `SiaRaporController.php`. **Belum dikerjakan:** shell LMS, Latihan, dan Ujian Siswa — wajib dikerjakan terpisah (Latihan/Ujian ekuivalen-piksel).
+
+Role **Guru — shell SIA selesai** (2 Oktober 2026): sidebar, Dashboard, Jadwal Mengajar, Daftar Kelas, Pilih Mapel, Arsip LMS (index, salin, preview), dan Catatan Monitoring (10 view) memakai Tailwind + Alpine tanpa aset halaman. Preview Arsip kini memakai isi `monitoring-lms.preview.*` bersama dengan pembungkus khusus arsip. Perbaikan: Jadwal Guru tidak lagi memakai `FIELD()` khusus MySQL. **LMS Guru juga selesai** (25 view, tema LMS indigo terpisah dari SIA); satu-satunya aset JS halaman yang tersisa adalah modul editor Kelola Soal yang dipakai AI Question Generator (lihat `conversation.md` bagian 18). Aset yatim batch Siswa/Guru SIA sudah dihapus. Fitur AI Guru (generator lima tipe soal, koreksi teks/gambar, chatbot) diaudit dan disesuaikan ke model Groq/Gemini yang aktif per 2 Oktober 2026; detail di `conversation.md` bagian 20.
+
 Inventaris awal sebelum migrasi role non-admin (marker legacy adalah temuan kasar untuk menentukan urutan, bukan jumlah halaman gagal):
 
 | Role | View awal | Referensi Vite awal | Aset awal | Status saat ini |
@@ -71,13 +75,13 @@ Inventaris awal sebelum migrasi role non-admin (marker legacy adalah temuan kasa
 | Sekretaris | 12 | 17 | 17 + 2 dashboard | **Selesai — 0 aset UI lokal** |
 | Ketua PKBM | 20 | 15 | 19 + 1 dashboard | **Selesai — 0 aset UI lokal** |
 | Bendahara | 26 | 28 | 31 (audit final) | **Selesai — 0 aset UI lokal** |
-| Wali Siswa | 12 | 15 | 16 | Belum |
+| Wali Siswa | 12 | 15 | 16 | **Selesai untuk alur aktif** (lihat `conversation.md` bagian 14) |
 | Wali Kelas | 33 | 21 | 41 | **Selesai — 30 view aktif, 0 aset halaman, 11 aset public cetak aktif + 2 Tailwind entry dokumen** |
-| Guru | 44 | 40 | 40 | Belum |
-| Siswa | 42 | 48 | 43 | Belum |
+| Guru | 44 | 40 | 40 | **Selesai — SIA 10 view + LMS 25 view; 1 modul JS editor soal (pengecualian sadar), 0 CSS**  |
+| Siswa | 42 | 48 | 43 | **SIA selesai (5 view, 0 aset halaman)**; LMS, Latihan, Ujian belum |
 | Waka | 51 | 57 | 55 | **Selesai — 2 view khusus, 0 `@vite` halaman, 0 aset UI lokal** |
 
-Urutan berikutnya adalah Guru/Siswa/Wali Siswa; Wali Kelas masuk pemeliharaan regresi. Guru/Siswa wajib diaudit per konteks shell: SIA dan LMS sama-sama full Tailwind tetapi identitas visual dan temanya tetap dibedakan, sedangkan Latihan/Ujian hanya dikonversi ke Tailwind secara visual-ekuivalen tanpa perubahan tata letak, warna, hirarki, atau interaksi. Angka aset tidak boleh langsung dianggap aman dihapus karena beberapa file dapat dipakai silang oleh layout atau view shared.
+Urutan berikutnya adalah LMS Siswa lalu Latihan/Ujian Siswa (ekuivalen-piksel); Wali Kelas dan Wali Siswa masuk pemeliharaan regresi. Guru/Siswa wajib diaudit per konteks shell: SIA dan LMS sama-sama full Tailwind tetapi identitas visual dan temanya tetap dibedakan, sedangkan Latihan/Ujian hanya dikonversi ke Tailwind secara visual-ekuivalen tanpa perubahan tata letak, warna, hirarki, atau interaksi. Angka aset tidak boleh langsung dianggap aman dihapus karena beberapa file dapat dipakai silang oleh layout atau view shared.
 
 Validasi batch pertama Wali Kelas 16 September 2026: cache Blade, build produksi, Pint, dan `git diff --check` berhasil. Tujuh tes terfokus lulus dengan 125 assertion, termasuk keadaan tanpa penugasan, pemilihan kelas, alias jadwal lama, cetak, shell lintas-role, dan guard IDOR Presensi/Rapor/Validasi. Audit browser pada 1440x900 dan 390x844 memeriksa 10 kombinasi route/viewport: seluruhnya HTTP 200, overflow 0 px, marker Bootstrap 0, aset Wali lama 0, dan error JavaScript 0. Screenshot pilih kelas dan jadwal ditinjau; dashboard terukur saat notifikasi sukses memilih kelas sedang tampil. Akun, dua kelas, enam screenshot, skrip audit sementara, dan enam folder aset yang kosong sudah dibersihkan.
 

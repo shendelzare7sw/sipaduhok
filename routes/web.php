@@ -44,7 +44,6 @@ use App\Http\Controllers\Siswa\LmsMateriController;
 use App\Http\Controllers\Siswa\LmsTugasController;
 use App\Http\Controllers\Siswa\LmsUjianController;
 use App\Http\Controllers\Siswa\SiaDashboardController;
-use App\Http\Controllers\Siswa\SiaPembayaranController;
 use App\Http\Controllers\Siswa\SiaPresensiController;
 // Guru Pengajar Controllers
 use App\Http\Controllers\Siswa\SiswaDashboardController;
@@ -57,7 +56,6 @@ use App\Http\Controllers\WakilKepalaSekolah\WakilKepalaSekolahController;
 use App\Http\Controllers\WakilKepalaSekolah\WaliKelasController as WakaWaliKelasController;
 use App\Http\Controllers\WaliKelas\JadwalPelajaranController;
 use App\Http\Controllers\WaliKelas\NilaiController as WaliKelasNilaiController;
-// use App\Http\Controllers\Siswa\SiaRaporController; // Disabled - Siswa tidak berhak akses rapor
 use App\Http\Controllers\WaliKelas\PilihKelasController;
 // Wali Siswa Controllers
 use App\Http\Controllers\WaliKelas\PresensiController;
@@ -1359,22 +1357,8 @@ Route::middleware(['auth'])->group(function () {
             // Penilaian Harian
             Route::get('/penilaian', [SiaDashboardController::class, 'penilaian'])->name('penilaian');
 
-            // Pembayaran
-            Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
-                Route::get('/', [SiaPembayaranController::class, 'index'])->name('index');
-                Route::post('/bayar', [SiaPembayaranController::class, 'prosesBayar'])->name('bayar');
-                Route::get('/riwayat', [SiaPembayaranController::class, 'riwayat'])->name('riwayat');
-                Route::get('/cetak/{pembayaran}', [SiaPembayaranController::class, 'cetakBukti'])->name('cetak');
-                // Pembayaran digital hanya dilakukan wali siswa.
-            });
-
-            // Rapor - DISABLED: Siswa tidak berhak mengelola rapor, hanya wali siswa
-            // Route::prefix('rapor')->name('rapor.')->group(function () {
-            //     Route::get('/', [SiaRaporController::class, 'index'])->name('index');
-            //     Route::get('/tengah-semester/{rapor}', [SiaRaporController::class, 'tengahSemester'])->name('tengah-semester');
-            //     Route::get('/akhir-semester/{rapor}', [SiaRaporController::class, 'akhirSemester'])->name('akhir-semester');
-            //     Route::get('/download/{rapor}', [SiaRaporController::class, 'download'])->name('download');
-            // });
+            // Pembayaran dan Rapor sengaja tidak tersedia untuk siswa:
+            // keduanya hanya diakses melalui Wali Siswa (wali-siswa.tagihan.* dan wali-siswa.rapor.*).
         });
 
         /*

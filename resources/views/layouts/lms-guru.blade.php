@@ -6,6 +6,5 @@
     'backUrl' => route('guru.dashboard'),
     'backLabel' => 'Kembali ke Dashboard',
     'notificationContext' => 'lms-guru',
-    'legacyLayoutCss' => 'resources/css/layouts/lms-guru.css',
     'showChatbot' => true,
 ])

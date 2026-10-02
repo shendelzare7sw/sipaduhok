@@ -1,6 +1,19 @@
 @extends('layouts.lms-guru')
 
-@section('title', 'Kelola Soal Ujian')
+@php
+    $isLatihan = request()->routeIs('guru.lms.latihan.*');
+    $prefix = $isLatihan ? 'guru.lms.latihan' : 'guru.lms.ujian';
+    $args = [$kelas->id, $mapel->id, $ujian->id];
+    $tipeTone = [
+        'pilihan_ganda' => 'bg-indigo-50 text-indigo-700',
+        'pilihan_ganda_kompleks' => 'bg-cyan-50 text-cyan-700',
+        'benar_salah' => 'bg-amber-50 text-amber-700',
+        'isian_singkat' => 'bg-emerald-50 text-emerald-700',
+        'uraian' => 'bg-slate-100 text-slate-700',
+    ];
+@endphp
+
+@section('title', 'Kelola Soal ' . ($isLatihan ? 'Latihan' : 'Ujian'))
 @section('page-title', 'Kelola Soal: ' . $ujian->judul_ujian)
 @section('page-subtitle', $mapel->nama_mapel . ' - ' . $kelas->nama_kelas)
 
@@ -9,119 +22,51 @@
 @endsection
 
 @section('content')
-<div class="guru-lms-ujian-soal-page">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <a href="{{ route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}" class="btn btn-outline-secondary mb-2">
-                <i class="fas fa-arrow-left me-1"></i>Kembali ke Daftar Ujian
-            </a>
-            <h4 class="mb-0">
-                <i class="fas fa-list-ol me-2"></i>Daftar Soal
-                <span class="badge bg-primary ms-2">{{ $soalList->count() }} Soal</span>
-            </h4>
-        </div>
-
-        <div class="d-flex gap-2">
-            <a href="{{ route('guru.lms.ujian.soal.create', [$kelas->id, $mapel->id, $ujian->id]) }}"
-                class="btn btn-success">
-                <i class="fas fa-plus-circle me-1"></i>Tambah Soal Baru
-            </a>
-            <!-- Optional: Button for importing questions -->
+<div class="min-w-0 w-full space-y-5">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <a href="{{ route($prefix.'.index', [$kelas->id, $mapel->id]) }}" class="inline-flex min-h-10 w-fit items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-700 no-underline shadow-sm hover:bg-slate-50"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i>Kembali ke daftar {{ $isLatihan ? 'latihan' : 'ujian' }}</a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route($prefix.'.soal.manage', $args) }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 text-xs font-bold text-indigo-700 no-underline hover:bg-indigo-100"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>Editor soal lengkap</a>
+            <a href="{{ route($prefix.'.soal.create', $args) }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-indigo-600 px-4 text-xs font-bold text-white no-underline shadow-sm hover:bg-indigo-700"><i class="fa-solid fa-circle-plus" aria-hidden="true"></i>Tambah soal</a>
         </div>
     </div>
 
     @if($soalList->count() > 0)
-        <div class="card-custom">
-            <div class="p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th width="5%" class="text-center">No</th>
-                                <th width="15%">Tipe Soal</th>
-                                <th width="45%">Pertanyaan</th>
-                                <th width="10%" class="text-center">Bobot</th>
-                                <th width="25%" class="text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($soalList as $index => $soal)
-                                            <tr>
-                                                <td class="text-center fw-bold">{{ $soal->urutan }}</td>
-                                                <td>
-                                                    <span class="badge {{ match ($soal->tipe_soal) {
-                                    'pilihan_ganda' => 'bg-primary',
-                                    'pilihan_ganda_kompleks' => 'bg-info text-dark',
-                                    'benar_salah' => 'bg-warning text-dark',
-                                    'isian_singkat' => 'bg-success',
-                                    'uraian' => 'bg-secondary',
-                                    default => 'bg-light text-dark'
-                                } }}">
-                                                        {{ ucwords(str_replace('_', ' ', $soal->tipe_soal)) }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="max-w-[400px] text-truncate">
-                                                        {{ strip_tags($soal->pertanyaan) }}
-                                                    </div>
-                                                </td>
-                                                <td class="text-center">{{ $soal->bobot }}</td>
-                                                <td class="text-center">
-                                                    <div class="d-flex justify-content-center gap-2">
-                                                        <a href="{{ route('guru.lms.ujian.soal.edit', [$kelas->id, $mapel->id, $ujian->id, $soal->id]) }}"
-                                                            class="btn btn-sm btn-warning" title="Edit Soal">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <button type="button" class="btn btn-sm btn-danger" title="Hapus Soal"
-                                                            data-delete-url="{{ route('guru.lms.ujian.soal.destroy', [$kelas->id, $mapel->id, $ujian->id, $soal->id]) }}">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <header class="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 sm:px-5">
+                <h2 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fa-solid fa-list-ol text-indigo-600" aria-hidden="true"></i>Daftar soal</h2>
+                <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-extrabold text-indigo-700">{{ $soalList->count() }} soal</span>
+            </header>
+            <div class="divide-y divide-slate-100">
+                @foreach($soalList as $soal)
+                    <article class="flex min-w-0 items-start gap-3 px-4 py-3 sm:items-center sm:px-5">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-extrabold text-slate-700">{{ $soal->urutan }}</span>
+                        <div class="min-w-0 flex-1">
+                            <p class="line-clamp-2 text-sm text-slate-800 sm:truncate">{{ strip_tags($soal->pertanyaan) }}</p>
+                            <p class="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
+                                <span class="rounded-full px-2 py-0.5 font-bold {{ $tipeTone[$soal->tipe_soal] ?? 'bg-slate-100 text-slate-600' }}">{{ ucwords(str_replace('_', ' ', $soal->tipe_soal)) }}</span>
+                                <span class="text-slate-500">Bobot {{ $soal->bobot_nilai }}</span>
+                            </p>
+                        </div>
+                        <div class="flex shrink-0 gap-1.5">
+                            <x-cleanflow.table-action :href="route($prefix.'.soal.edit', [...$args, $soal->id])" tone="edit" icon="fa-solid fa-pen-to-square" label="Edit soal {{ $soal->urutan }}" />
+                            <form method="POST" action="{{ route($prefix.'.soal.destroy', [...$args, $soal->id]) }}" data-confirm-title="Hapus soal {{ $soal->urutan }}?" data-confirm-message="Soal ini akan dihapus permanen." data-confirm-text="Ya, hapus">
+                                @csrf
+                                @method('DELETE')
+                                <x-cleanflow.table-action type="submit" tone="delete" icon="fa-solid fa-trash" label="Hapus soal {{ $soal->urutan }}" />
+                            </form>
+                        </div>
+                    </article>
+                @endforeach
             </div>
-        </div>
+        </section>
     @else
-        <div class="card-custom text-center py-5">
-            <i class="fas fa-clipboard-list text-muted text-[64px] opacity-20"></i>
-            <h5 class="mt-3 text-muted">Belum ada soal ujian</h5>
-            <p class="text-muted mb-4">Mulai tambahkan soal untuk ujian ini</p>
-            <a href="{{ route('guru.lms.ujian.soal.create', [$kelas->id, $mapel->id, $ujian->id]) }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Buat Soal Pertama
-            </a>
-        </div>
+        <section class="rounded-2xl border border-slate-200 bg-white px-5 py-14 text-center shadow-sm">
+            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i></span>
+            <h3 class="mt-4 font-extrabold text-slate-900">Belum ada soal</h3>
+            <p class="mt-1 text-sm text-slate-500">Mulai tambahkan soal untuk {{ $isLatihan ? 'latihan' : 'ujian' }} ini.</p>
+            <a href="{{ route($prefix.'.soal.create', $args) }}" class="mt-4 inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-indigo-600 px-4 text-xs font-bold text-white no-underline hover:bg-indigo-700"><i class="fa-solid fa-plus" aria-hidden="true"></i>Buat soal pertama</a>
+        </section>
     @endif
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Apakah Anda yakin ingin menghapus soal ini?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="deleteForm" method="POST" class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">Hapus</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 @endsection
-
-@push('scripts')
-    @vite(['resources/js/guru/lms/ujian/soal.js'])
-@endpush

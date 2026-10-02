@@ -14,6 +14,8 @@ use App\Models\Nilai;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Services\NilaiSyncService;
+use App\Services\NotificationService;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\Guru\NilaiSiswaImport;
@@ -160,6 +162,7 @@ class GuruNilaiController extends Controller
         $nilaiData = $request->input('nilai', []);
         $updatedCount = 0;
         $skipPrimaryCount = 0;
+        $berubahSetelahRevisiWali = new EloquentCollection;
 
         $allowedFields = ['pts', 'pas', 'to_1', 'to_2', 'to_3', 'upk', 'ujian_praktek'];
         foreach (range(1, 5) as $i) {
@@ -207,6 +210,7 @@ class GuruNilaiController extends Controller
                 $dataToUpdate = array_merge($dataToUpdate, $newValues);
             } elseif ($snapshotChanged) {
                 $skipPrimaryCount++;
+                $berubahSetelahRevisiWali->push($nilai);
             }
 
             $nilai->update($dataToUpdate);
@@ -219,11 +223,23 @@ class GuruNilaiController extends Controller
 
         $message = "Berhasil menyimpan nilai {$updatedCount} siswa.";
         if ($skipPrimaryCount > 0) {
-            $message .= " {$skipPrimaryCount} siswa hanya disimpan ke snapshot guru karena wali kelas sudah mengedit nilainya - wali perlu sinkronisasi manual.";
+            $message .= " {$skipPrimaryCount} siswa sudah direvisi wali kelas: nilai Anda tersimpan sebagai versi guru dan wali kelas telah diberi notifikasi untuk meninjau/menyinkronkan ke rapor.";
+
+            // Wali kelas pemegang keputusan akhir nilai rapor: beri tahu agar bisa membandingkan & menyinkronkan.
+            $berubahSetelahRevisiWali->load('siswa');
+            app(NotificationService::class)->notifyNilaiDiperbaruiGuru(
+                Kelas::find($kelasId),
+                MataPelajaran::find($mapelId),
+                $tenagaPendidik->nama_lengkap,
+                $berubahSetelahRevisiWali->pluck('siswa')->filter()->values(),
+                (string) ($berubahSetelahRevisiWali->first()->semester ?? Nilai::getCurrentSemester()),
+            );
         }
 
+        $semester = in_array($request->input('semester'), ['ganjil', 'genap'], true) ? $request->input('semester') : null;
+
         return redirect()
-            ->route('guru.lms.nilai.index', [$kelasId, $mapelId])
+            ->route('guru.lms.nilai.index', array_filter([$kelasId, $mapelId, 'semester' => $semester]))
             ->with('success', $message);
     }
     

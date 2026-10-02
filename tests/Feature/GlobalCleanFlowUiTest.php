@@ -310,14 +310,19 @@ JSON;
             $this->assertStringContainsString('rounded-lg border px-3', $source);
         }
 
-        foreach ([
-            resource_path('views/layouts/app.blade.php'),
-            resource_path('views/layouts/partials/cleanflow-lms-shell.blade.php'),
-        ] as $layout) {
-            $source = File::get($layout);
-            $this->assertStringContainsString('from-[#245f91] via-[#176fa8] to-[#0f5688]', $source);
-            $this->assertStringContainsString('from-blue-700 via-sky-600 to-cyan-500', $source);
-            $this->assertStringContainsString('rounded-xl bg-transparent', $source);
-        }
+        $sia = File::get(resource_path('views/layouts/app.blade.php'));
+        $this->assertStringContainsString('from-[#245f91] via-[#176fa8] to-[#0f5688]', $sia);
+        $this->assertStringContainsString('from-blue-700 via-sky-600 to-cyan-500', $sia);
+        $this->assertStringContainsString('rounded-xl bg-transparent', $sia);
+
+        // LMS sengaja memakai identitas visual berbeda dari SIA: sidebar terang beraksen indigo/violet.
+        $lms = File::get(resource_path('views/layouts/partials/cleanflow-lms-shell.blade.php'));
+        $this->assertStringContainsString('border-r border-slate-200 bg-white', $lms);
+        $this->assertStringContainsString('from-indigo-600 to-violet-600', $lms);
+        $this->assertStringNotContainsString('from-[#245f91]', $lms);
+
+        $lmsLink = File::get(resource_path('views/components/cleanflow/lms-nav-link.blade.php'));
+        $this->assertStringContainsString('bg-indigo-600 text-white', $lmsLink);
+        $this->assertStringNotContainsString('border border-', $lmsLink);
     }
 }

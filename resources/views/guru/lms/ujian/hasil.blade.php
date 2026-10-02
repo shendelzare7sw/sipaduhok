@@ -3,6 +3,21 @@
 @php
     $isLatihan = request()->routeIs('guru.lms.latihan.*');
     $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
+    $prefix = $isLatihan ? 'guru.lms.latihan' : 'guru.lms.ujian';
+    $selesai = $hasilUjian->where('status', 'selesai');
+    $statusMap = [
+        'belum_mulai' => ['Belum mulai', 'bg-slate-100 text-slate-600'],
+        'sedang_mengerjakan' => ['Sedang mengerjakan', 'bg-amber-50 text-amber-700'],
+        'selesai' => ['Selesai', 'bg-emerald-50 text-emerald-700'],
+        'dinilai' => ['Sudah dinilai', 'bg-indigo-50 text-indigo-700'],
+    ];
+    $stats = [
+        ['label' => 'Total peserta', 'value' => $hasilUjian->count(), 'tone' => 'text-indigo-700', 'icon' => 'fa-users'],
+        ['label' => 'Selesai', 'value' => $selesai->count(), 'tone' => 'text-emerald-700', 'icon' => 'fa-circle-check'],
+        ['label' => 'Nilai rata-rata', 'value' => number_format($selesai->avg('nilai') ?? 0, 1), 'tone' => 'text-amber-700', 'icon' => 'fa-chart-simple'],
+        ['label' => 'Nilai tertinggi', 'value' => number_format($selesai->max('nilai') ?? 0, 1), 'tone' => 'text-rose-700', 'icon' => 'fa-trophy'],
+    ];
+    $peringkat = [0 => 'fa-trophy text-amber-500', 1 => 'fa-medal text-slate-400', 2 => 'fa-award text-orange-500'];
 @endphp
 
 @section('title', 'Hasil ' . $tipeLabel)
@@ -13,158 +28,65 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
-@push('styles')
-    @vite(['resources/css/guru/lms/ujian/hasil.css'])
-@endpush
-
 @section('content')
-<div class="guru-lms-ujian-hasil-page">
-    @php
-        $isLatihan = request()->routeIs('guru.lms.latihan.*');
-        $backRoute = $isLatihan ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index';
-    @endphp
-
-    <div class="mb-3">
-        <a href="{{ route($backRoute, [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i>Kembali
-        </a>
-        @if(!$isLatihan)
-            <a href="{{ route('guru.lms.ujian.pengawasan', [$kelas->id, $mapel->id, $ujian->id]) }}" class="btn btn-outline-primary btn-sm ms-1">
-                <i class="fas fa-desktop me-1"></i>Pengawasan
-            </a>
-        @endif
+<div class="min-w-0 w-full space-y-5">
+    <div class="flex flex-wrap gap-2">
+        <a href="{{ route($prefix.'.index', [$kelas->id, $mapel->id]) }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-700 no-underline shadow-sm hover:bg-slate-50"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i>Kembali</a>
+        @unless($isLatihan)
+            <a href="{{ route('guru.lms.ujian.pengawasan', [$kelas->id, $mapel->id, $ujian->id]) }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 text-xs font-bold text-indigo-700 no-underline hover:bg-indigo-100"><i class="fa-solid fa-desktop" aria-hidden="true"></i>Pengawasan</a>
+        @endunless
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-            <div class="card-custom summary-card summary-card-total">
-                <div class="p-3 text-center">
-                    <div class="fs-4 fw-bold text-primary">{{ $hasilUjian->count() }}</div>
-                    <small class="text-muted">Total Peserta</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card-custom summary-card summary-card-finished">
-                <div class="p-3 text-center">
-                    <div class="fs-4 fw-bold text-success">
-                        {{ $hasilUjian->where('status', 'selesai')->count() }}
+    <section class="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
+        @foreach($stats as $stat)
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-xl font-extrabold tabular-nums sm:text-2xl {{ $stat['tone'] }}">{{ $stat['value'] }}</p>
+                        <p class="mt-1 text-[10px] font-bold uppercase leading-4 tracking-wide text-slate-500">{{ $stat['label'] }}</p>
                     </div>
-                    <small class="text-muted">Selesai</small>
+                    <i class="fa-solid {{ $stat['icon'] }} text-slate-300" aria-hidden="true"></i>
                 </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card-custom summary-card summary-card-average">
-                <div class="p-3 text-center">
-                    <div class="fs-4 fw-bold text-warning">
-                        {{ number_format($hasilUjian->where('status', 'selesai')->avg('nilai') ?? 0, 1) }}
-                    </div>
-                    <small class="text-muted">Nilai Rata-rata</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card-custom summary-card summary-card-highest">
-                <div class="p-3 text-center">
-                    <div class="fs-4 fw-bold text-danger">
-                        {{ number_format($hasilUjian->where('status', 'selesai')->max('nilai') ?? 0, 1) }}
-                    </div>
-                    <small class="text-muted">Nilai Tertinggi</small>
-                </div>
-            </div>
-        </div>
-    </div>
+            </article>
+        @endforeach
+    </section>
 
-    <div class="card-custom">
-        <div class="card-header-custom">
-            <i class="fas fa-chart-bar me-2"></i>Hasil {{ $tipeLabel }} Siswa
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 px-4 py-3 sm:px-5"><h2 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fa-solid fa-chart-column text-indigo-600" aria-hidden="true"></i>Hasil {{ strtolower($tipeLabel) }} siswa</h2></header>
+
+        <div class="hidden grid-cols-[4rem_minmax(0,1fr)_9rem_9rem_9rem_6rem_7rem_7rem] gap-3 bg-slate-50 px-5 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-500 xl:grid">
+            <span class="text-center">Rank</span><span>Nama siswa</span><span class="text-center">Mulai</span><span class="text-center">Selesai</span><span class="text-center">Status</span><span class="text-center">Terakhir</span><span class="text-center">Terbaik</span><span class="text-center">Aksi</span>
         </div>
-        <div class="table-responsive hasil-table-responsive">
-            <table class="table table-hover align-middle mb-0 hasil-table">
-                <thead class="table-light">
-                    <tr>
-                        <th>Peringkat</th>
-                        <th>Nama Siswa</th>
-                        <th class="text-center">Waktu Mulai</th>
-                        <th class="text-center">Waktu Selesai</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Nilai Terakhir</th>
-                        <th class="text-center">Nilai Terbaik</th>
-                        <th class="text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($hasilUjian as $index => $hasil)
-                    <tr>
-                        <td class="text-center hasil-rank-cell" data-label="Peringkat">
-                            @if($index == 0 && $hasil->nilai)
-                                <i class="fas fa-trophy text-warning fs-5"></i>
-                            @elseif($index == 1 && $hasil->nilai)
-                                <i class="fas fa-medal text-secondary fs-5"></i>
-                            @elseif($index == 2 && $hasil->nilai)
-                                <i class="fas fa-award text-danger fs-5"></i>
-                            @else
-                                {{ $index + 1 }}
-                            @endif
-                        </td>
-                        <td class="hasil-student-cell" data-label="Nama Siswa"><strong>{{ $hasil->siswa->nama_lengkap ?? 'Siswa Tidak Ditemukan (ID: '.$hasil->siswa_id.')' }}</strong></td>
-                        <td class="text-center" data-label="Waktu Mulai">
-                            {{ $hasil->waktu_mulai ? $hasil->waktu_mulai->format('d M Y H:i') : '-' }}
-                        </td>
-                        <td class="text-center" data-label="Waktu Selesai">
-                            {{ $hasil->waktu_selesai ? $hasil->waktu_selesai->format('d M Y H:i') : '-' }}
-                        </td>
-                        <td class="text-center hasil-status-cell" data-label="Status">
-                            @if($hasil->status == 'belum_mulai')
-                                <span class="badge bg-secondary">Belum Mulai</span>
-                            @elseif($hasil->status == 'sedang_mengerjakan')
-                                <span class="badge bg-warning">Sedang Mengerjakan</span>
-                            @elseif($hasil->status == 'selesai')
-                                <span class="badge bg-success">Selesai</span>
-                            @elseif($hasil->status == 'dinilai')
-                                <span class="badge bg-primary">Sudah Dinilai</span>
-                            @endif
-                        </td>
-                        <td class="text-center" data-label="Nilai Terakhir">
-                            @if($hasil->nilai !== null)
-                                <strong class="fs-6 text-secondary">{{ number_format($hasil->nilai, 1) }}</strong>
-                            @else
-                                <span class="text-muted">-</span>
-                            @endif
-                        </td>
-                        <td class="text-center" data-label="Nilai Terbaik">
-                            @if($hasil->nilai_terbaik !== null)
-                                <strong class="fs-5 text-primary">{{ number_format($hasil->nilai_terbaik, 1) }}/100</strong>
-                            @else
-                                <span class="text-muted">-</span>
-                            @endif
-                        </td>
-                        <td class="text-center hasil-action-cell" data-label="Aksi">
+        <div class="divide-y divide-slate-100">
+            @forelse($hasilUjian as $index => $hasil)
+                @php [$statusLabel, $statusTone] = $statusMap[$hasil->status] ?? [ucfirst((string) $hasil->status), 'bg-slate-100 text-slate-600']; @endphp
+                <article class="grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-5 xl:grid-cols-[4rem_minmax(0,1fr)_9rem_9rem_9rem_6rem_7rem_7rem]">
+                    <span class="flex justify-center text-sm font-extrabold text-slate-600">
+                        @if(isset($peringkat[$index]) && $hasil->nilai)<i class="fa-solid {{ $peringkat[$index] }} text-lg" aria-label="Peringkat {{ $index + 1 }}"></i>@else{{ $index + 1 }}@endif
+                    </span>
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-extrabold text-slate-900">{{ $hasil->siswa->nama_lengkap ?? 'Siswa tidak ditemukan (ID: '.$hasil->siswa_id.')' }}</p>
+                        <p class="mt-0.5 text-[11px] text-slate-500 xl:hidden">{{ $hasil->waktu_mulai ? $hasil->waktu_mulai->format('d M Y H:i') : 'Belum mulai' }}@if($hasil->waktu_selesai) → {{ $hasil->waktu_selesai->format('H:i') }}@endif</p>
+                    </div>
+                    <span class="hidden whitespace-nowrap text-center text-xs text-slate-600 xl:block">{{ $hasil->waktu_mulai ? $hasil->waktu_mulai->format('d M Y H:i') : '-' }}</span>
+                    <span class="hidden whitespace-nowrap text-center text-xs text-slate-600 xl:block">{{ $hasil->waktu_selesai ? $hasil->waktu_selesai->format('d M Y H:i') : '-' }}</span>
+                    <span class="justify-self-end xl:justify-self-center"><span class="whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-extrabold {{ $statusTone }}">{{ $statusLabel }}</span></span>
+                    <div class="col-span-3 flex flex-wrap items-center justify-between gap-2 xl:contents">
+                        <span class="text-xs text-slate-500 xl:text-center xl:text-sm"><span class="xl:hidden">Terakhir: </span><strong class="font-extrabold tabular-nums text-slate-700">{{ $hasil->nilai !== null ? number_format($hasil->nilai, 1) : '-' }}</strong></span>
+                        <span class="text-xs text-slate-500 xl:text-center xl:text-sm"><span class="xl:hidden">Terbaik: </span><strong class="font-extrabold tabular-nums text-indigo-700">{{ $hasil->nilai_terbaik !== null ? number_format($hasil->nilai_terbaik, 1).'/100' : '-' }}</strong></span>
+                        <span class="xl:text-center">
                             @if(in_array($hasil->status, ['selesai', 'dinilai']))
-                                @php
-                                    $isLatihan = request()->routeIs('guru.lms.latihan.*');
-                                    $koreksiRoute = $isLatihan ? 'guru.lms.latihan.koreksi.show' : 'guru.lms.ujian.koreksi.show';
-                                @endphp
-                                <a href="{{ route($koreksiRoute, [$kelas->id, $mapel->id, $ujian->id, $hasil->id]) }}" 
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-edit me-1"></i> Koreksi
-                                </a>
+                                <a href="{{ route($prefix.'.koreksi.show', [$kelas->id, $mapel->id, $ujian->id, $hasil->id]) }}" class="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-lg bg-indigo-600 px-3 text-xs font-bold text-white no-underline hover:bg-indigo-700"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>Koreksi</a>
                             @else
-                                <span class="text-muted small">-</span>
+                                <span class="text-xs text-slate-400">-</span>
                             @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr class="hasil-empty-row">
-                        <td colspan="8" class="text-center text-muted py-4 hasil-empty-cell">
-                            Belum ada siswa yang mengerjakan {{ strtolower($tipeLabel) }}
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                        </span>
+                    </div>
+                </article>
+            @empty
+                <p class="px-5 py-10 text-center text-sm text-slate-500">Belum ada siswa yang mengerjakan {{ strtolower($tipeLabel) }}.</p>
+            @endforelse
         </div>
-    </div>
+    </section>
 </div>
 @endsection

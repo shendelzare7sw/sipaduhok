@@ -59,7 +59,7 @@
             </button>
         </div>
 
-        <nav class="min-h-0 flex-1 overflow-y-auto px-3 py-5" aria-label="Navigasi utama">
+        <nav class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-3 py-5" aria-label="Navigasi utama">
             <ul class="cleanflow-nav min-w-0">
                 @if(trim($__env->yieldContent('sidebar-menu')))
                     @yield('sidebar-menu')

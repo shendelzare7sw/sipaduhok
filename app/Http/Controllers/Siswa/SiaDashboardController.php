@@ -73,8 +73,10 @@ class SiaDashboardController extends Controller
         $setting = \App\Models\AppSetting::where('key', 'lms_allowed_jenjang')->first();
         $allowedJenjang = $setting ? json_decode($setting->value, true) : [];
 
+        $lmsAktif = $siswa->kelas && in_array($siswa->kelas->jenjang, (array) $allowedJenjang);
+
         $tugasList = collect();
-        if ($siswa->kelas && in_array($siswa->kelas->jenjang, $allowedJenjang)) {
+        if ($lmsAktif) {
             $tugasList = Tugas::where('kelas_id', $siswa->kelas_id)
                 ->where('tanggal_deadline', '>=', now())
                 ->with(['mataPelajaran', 'guru'])
@@ -91,9 +93,6 @@ class SiaDashboardController extends Controller
             ->limit(4)
             ->get();
 
-        // Show LMS Button
-        $showLmsButton = true;
-
         // Determine Semester
         $bulan = now()->month;
         $semester = ($bulan >= 7 && $bulan <= 12) ? 'Ganjil' : 'Genap';
@@ -107,7 +106,7 @@ class SiaDashboardController extends Controller
             'jadwalHariIni' => $jadwalHariIni,
             'tugasList' => $tugasList,
             'nilaiTerbaru' => $nilaiTerbaru,
-            'showLmsButton' => $showLmsButton,
+            'lmsAktif' => $lmsAktif,
             'semester' => $semester
         ]);
     }

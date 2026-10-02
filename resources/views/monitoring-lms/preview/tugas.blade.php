@@ -1,7 +1,7 @@
 @php
     $tugas = $konten;
     $previewTitle = $tugas->judul_tugas ?? '-';
-    $kontenLabel = 'Tugas';
+    $kontenLabel = ($tugas->jenis_tugas ?? null) === 'latihan' ? 'Latihan' : 'Tugas';
     $extension = $tugas->file_tugas ? strtolower(pathinfo($tugas->file_tugas, PATHINFO_EXTENSION)) : null;
     $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
     $isPdf = $extension === 'pdf';
@@ -9,12 +9,12 @@
     $filePreviewUrl = preview_url($tugas->file_tugas);
 @endphp
 
-@extends('monitoring-lms.preview.wrapper', compact('previewTitle', 'kontenLabel'))
+@extends($previewWrapper ?? 'monitoring-lms.preview.wrapper', compact('previewTitle', 'kontenLabel'))
 
 @section('preview-content')
     <header class="border-b border-slate-200 pb-5">
         <h1 class="flex items-start gap-3 text-xl font-extrabold text-slate-950 sm:text-2xl"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700"><i class="fas fa-tasks" aria-hidden="true"></i></span><span class="pt-1">{{ $tugas->judul_tugas }}</span></h1>
-        <div class="mt-4 flex flex-wrap gap-2 text-xs text-slate-600"><span class="rounded-lg bg-amber-50 px-3 py-2 font-bold text-amber-700">Tugas</span>
+        <div class="mt-4 flex flex-wrap gap-2 text-xs text-slate-600"><span class="rounded-lg bg-amber-50 px-3 py-2 font-bold text-amber-700">{{ $kontenLabel }}</span>
             @foreach([[optional($tugas->guru)->nama_lengkap, 'fa-user-tie'], [optional($tugas->mataPelajaran)->nama_mapel, 'fa-book'], [optional($tugas->kelas)->nama_kelas, 'fa-school'], [$tugas->tanggal_mulai?->locale('id')->translatedFormat('d M Y'), 'fa-play-circle'], [$tugas->tanggal_deadline?->locale('id')->translatedFormat('d M Y'), 'fa-flag-checkered']] as [$value, $icon])
                 @if($value)<span class="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2"><i class="fas {{ $icon }} text-slate-400" aria-hidden="true"></i>{{ $value }}</span>@endif
             @endforeach

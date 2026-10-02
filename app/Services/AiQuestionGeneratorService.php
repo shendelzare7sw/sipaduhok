@@ -30,7 +30,7 @@ class AiQuestionGeneratorService
         ])->pluck('value', 'key');
 
         $this->provider = $settings['ai_provider'] ?? 'groq';
-        $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile';
+        $this->model = $settings['ai_model'] ?? config('ai-models.default_text.groq');
 
         // Ganti otomatis model yang sudah dimatikan penyedianya (daftar di
         // config/ai-models.php), supaya setting lama di database tidak bikin
@@ -691,7 +691,28 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
     ): array {
         // Try Groq first if API key is available
         if ($this->useGroq) {
-            $groqResponse = $this->callGroqApi($model, $systemPrompt, $userPrompt, $temperature, $maxTokens);
+            $groqResponse = $this->callGroqApi($model, $systemPrompt, $userPrompt, $temperature, $maxTokens, $useJsonObjectMode);
+
+            // Model tidak ada / tidak bisa diakses key ini (mis. dipindah ke Enterprise):
+            // coba model default dari config sebelum menyerah, agar fitur tidak mati diam-diam.
+            if (!$groqResponse['success'] && !empty($groqResponse['model_missing'])) {
+                $modelDefault = config('ai-models.default_text.groq');
+                if ($modelDefault && $modelDefault !== $model) {
+                    Log::warning("Model {$model} tidak tersedia di Groq, mencoba model default {$modelDefault}");
+                    $groqResponse = $this->callGroqApi($modelDefault, $systemPrompt, $userPrompt, $temperature, $maxTokens, $useJsonObjectMode);
+                }
+                if (!$groqResponse['success'] && !empty($this->geminiApiKey)) {
+                    return $this->callGeminiApi($systemPrompt, $userPrompt, $temperature);
+                }
+            }
+
+            // Groq menolak keluaran yang gagal validasi JSON mode (400 json_validate_failed),
+            // sesekali terjadi pada model bernalar. Ulangi tanpa JSON mode — parser kita
+            // sudah toleran terhadap teks pembungkus/code fence.
+            if (!$groqResponse['success'] && str_contains($groqResponse['error'] ?? '', 'json_validate_failed')) {
+                Log::warning("Groq {$model} gagal validasi JSON mode, mengulang tanpa response_format.");
+                $groqResponse = $this->callGroqApi($model, $systemPrompt, $userPrompt, $temperature, $maxTokens, false);
+            }
 
             // Check if Groq quota exceeded (HTTP 429) or rate limit
             if (!$groqResponse['success']) {
@@ -751,7 +772,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
             ])->withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
-            ])->timeout(90)->post('https://api.groq.com/openai/v1/chat/completions', array_filter([
+            ])->timeout(120)->post('https://api.groq.com/openai/v1/chat/completions', ai_groq_payload(array_filter([
                 'model' => $model,
                 'messages' => [
                     ['role' => 'system', 'content' => $systemPrompt],
@@ -761,7 +782,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
                 'max_tokens' => $maxTokens,
                 // Only use json_object mode when flag is true AND we're not using nested arrays
                 'response_format' => $useJsonObjectMode ? ['type' => 'json_object'] : null,
-            ]));
+            ])));
 
             if (!$response->successful()) {
                 $statusCode = $response->status();
@@ -786,6 +807,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
                     'success' => false,
                     'error' => "API Error {$statusCode}: " . substr($errorBody, 0, 200),
                     'status_code' => $statusCode,
+                    'model_missing' => ai_model_tidak_ditemukan($statusCode, $errorBody),
                 ];
             }
 
@@ -793,7 +815,8 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
             $content = $data['choices'][0]['message']['content'] ?? '';
 
             if (empty($content)) {
-                throw new \Exception('Empty response from Groq API');
+                $finish = $data['choices'][0]['finish_reason'] ?? '-';
+                throw new \Exception("Empty response from Groq API (finish_reason: {$finish})");
             }
 
             return [
@@ -829,11 +852,12 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         try {
             $combinedPrompt = $systemPrompt . "\n\n" . $userPrompt;
             $combinedPrompt .= "\n\nIMPORTANT: Output harus berupa JSON array yang valid. Jangan tambahkan teks lain di luar JSON.";
+            $geminiModel = config('ai-models.default_text.gemini', 'gemini-2.5-flash');
 
             $response = Http::withOptions([
                 'verify' => false,
-            ])->timeout(90)->post(
-                "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={$this->geminiApiKey}",
+            ])->timeout(120)->post(
+                "https://generativelanguage.googleapis.com/v1/models/{$geminiModel}:generateContent?key={$this->geminiApiKey}",
                 [
                     'contents' => [
                         [
@@ -844,7 +868,8 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
                     ],
                     'generationConfig' => [
                         'temperature' => $temperature,
-                        'maxOutputTokens' => 2048,
+                        // Gemini 2.5 menghitung token "thinking" ke batas ini; 2048 bisa memotong JSON 10 soal + narasi.
+                        'maxOutputTokens' => 8192,
                     ]
                 ]
             );
@@ -870,7 +895,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
             return [
                 'success' => true,
                 'content' => $content,
-                'model' => 'gemini-2.5-flash',
+                'model' => $geminiModel,
                 'provider' => 'gemini',
             ];
 

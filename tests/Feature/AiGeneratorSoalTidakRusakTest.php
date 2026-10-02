@@ -177,22 +177,56 @@ class AiGeneratorSoalTidakRusakTest extends TestCase
         // guru hanya melihat "Gagal terhubung ke Groq API. Periksa API Key"
         // padahal API key-nya sehat.
         $this->assertSame(
-            'llama-3.3-70b-versatile',
+            'openai/gpt-oss-120b',
             ai_model_aktif('qwen/qwen3-32b', 'groq'),
             'Model teks pensiun harus dialihkan'
         );
 
         $this->assertSame(
-            'qwen/qwen3.6-27b',
+            'qwen/qwen3.8-27b',
             ai_model_aktif('meta-llama/llama-4-scout-17b-16e-instruct', 'groq', true),
             'Model vision pensiun harus dialihkan'
         );
 
+        // Nama bertitik dulu lolos tanpa dialihkan karena config() membaca titik
+        // sebagai pemisah kunci — penyebab error 404 "llama-3.3-70b-versatile does not exist".
+        $this->assertSame('openai/gpt-oss-120b', ai_model_aktif('llama-3.3-70b-versatile', 'groq'));
+        $this->assertSame('qwen/qwen3.8-27b', ai_model_aktif('qwen/qwen3.6-27b', 'groq', true));
+        $this->assertSame('gemini-2.5-flash', ai_model_aktif('gemini-2.5-pro', 'gemini'));
+
         // Model yang masih hidup tidak boleh diubah-ubah.
-        $this->assertSame(
-            'llama-3.3-70b-versatile',
-            ai_model_aktif('llama-3.3-70b-versatile', 'groq')
-        );
+        foreach (['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'gemini-2.5-flash'] as $aktif) {
+            $this->assertSame($aktif, ai_model_aktif($aktif, 'groq'));
+        }
+    }
+
+    public function test_payload_groq_memuat_parameter_khusus_model(): void
+    {
+        $gptOss = ai_groq_payload(['model' => 'openai/gpt-oss-120b', 'max_tokens' => 900]);
+        $this->assertSame('low', $gptOss['reasoning_effort']);
+        $this->assertFalse($gptOss['include_reasoning']);
+        $this->assertSame(1924, $gptOss['max_tokens'], 'Token penalaran harus diberi anggaran tambahan');
+
+        // qwen3.8 bertitik: parameter mode instruct wajib terkirim agar content bersih dari <think>.
+        $qwen = ai_groq_payload(['model' => 'qwen/qwen3.8-27b', 'max_tokens' => 900]);
+        $this->assertSame('none', $qwen['reasoning_effort']);
+        $this->assertSame('hidden', $qwen['reasoning_format']);
+        $this->assertSame(900, $qwen['max_tokens']);
+
+        $this->assertSame('openai/gpt-oss-20b', ai_model_cadangan('openai/gpt-oss-120b'));
+        $this->assertNotSame('qwen/qwen3.8-27b', ai_model_cadangan('openai/gpt-oss-20b'), 'Cadangan teks tidak boleh model vision');
+    }
+
+    public function test_knowledge_base_ringkas_untuk_groq_tetap_memuat_bagian_relevan(): void
+    {
+        $kb = app(\App\Services\Chatbot\KnowledgeBaseLoader::class);
+        $penuh = $kb->getForRole('guru_pengajar');
+        $ringkas = $kb->getRelevantForRole('guru_pengajar', 'Bagaimana cara membuat ujian baru?');
+
+        $this->assertLessThan(mb_strlen($penuh), mb_strlen($ringkas));
+        $this->assertLessThanOrEqual(6200, mb_strlen($ringkas), 'Melebihi anggaran kuota token Groq paket gratis');
+        $this->assertStringContainsString('Peta Menu', $ringkas);
+        $this->assertStringContainsString('Ujian', $ringkas);
     }
 
     public function test_daftar_model_pilihan_tidak_memuat_model_pensiun(): void

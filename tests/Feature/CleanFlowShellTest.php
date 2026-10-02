@@ -32,6 +32,8 @@ class CleanFlowShellTest extends TestCase
         $this->assertStringContainsString('bg-[#17699f]', $html);
         $this->assertStringContainsString('from-[#245f91]', $html);
         $this->assertStringContainsString('cleanflow-nav', $html);
+        $this->assertStringContainsString('[&::-webkit-scrollbar]:hidden', $html);
+        $this->assertStringContainsString('[scrollbar-width:none]', $html);
         $this->assertStringContainsString('admin-notification-panel', $html);
         $this->assertStringContainsString('Halaman Keuangan', $html);
         $this->assertStringContainsString('data-scroll-to-top', $html);
@@ -62,8 +64,25 @@ class CleanFlowShellTest extends TestCase
         BLADE);
 
         $this->assertStringContainsString('HOK Teaching', $html);
-        $this->assertStringContainsString('cleanflow-lms-nav', $html);
+        $this->assertStringContainsString('border-r border-slate-200 bg-white', $html);
+        $this->assertStringContainsString('[&::-webkit-scrollbar]:hidden', $html);
         $this->assertStringContainsString('data-sidebar-open', $html);
         $this->assertStringNotContainsString('logoutModal', $html);
+    }
+
+    public function test_guru_sidebar_uses_button_toggles_with_a_full_chevron(): void
+    {
+        $user = User::factory()->create(['role' => 'guru_pengajar', 'is_active' => true]);
+        $this->actingAs($user);
+
+        $html = view('guru.partials.sidebar')->render();
+
+        $this->assertStringContainsString('data-menu-toggle', $html);
+        $this->assertStringContainsString('data-menu-chevron', $html);
+        $this->assertStringContainsString('aria-controls="guru-info-akademik"', $html);
+        $this->assertStringContainsString(route('guru.jadwal.index'), $html);
+        $this->assertStringContainsString(route('guru.lms.arsip.index'), $html);
+        $this->assertStringNotContainsString('menu-icon', $html);
+        $this->assertStringNotContainsString('badge bg-', $html);
     }
 }
