@@ -689,64 +689,45 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         int $maxTokens,
         bool $useJsonObjectMode = true
     ): array {
-        // Try Groq first if API key is available
+        $hasil = null;
+
+        // Groq: coba setiap model yang tersedia berurutan (kuota tiap model terpisah)
+        // sampai ada yang berhasil — kuota habis, model dicabut, atau server sibuk
+        // tidak boleh membuat fitur gagal selama masih ada model lain.
         if ($this->useGroq) {
-            $groqResponse = $this->callGroqApi($model, $systemPrompt, $userPrompt, $temperature, $maxTokens, $useJsonObjectMode);
+            foreach (ai_rantai_model('groq', $model) as $kandidat) {
+                $hasil = $this->callGroqApi($kandidat, $systemPrompt, $userPrompt, $temperature, $maxTokens, $useJsonObjectMode);
 
-            // Model tidak ada / tidak bisa diakses key ini (mis. dipindah ke Enterprise):
-            // coba model default dari config sebelum menyerah, agar fitur tidak mati diam-diam.
-            if (!$groqResponse['success'] && !empty($groqResponse['model_missing'])) {
-                $modelDefault = config('ai-models.default_text.groq');
-                if ($modelDefault && $modelDefault !== $model) {
-                    Log::warning("Model {$model} tidak tersedia di Groq, mencoba model default {$modelDefault}");
-                    $groqResponse = $this->callGroqApi($modelDefault, $systemPrompt, $userPrompt, $temperature, $maxTokens, $useJsonObjectMode);
+                // Groq menolak keluaran yang gagal validasi JSON mode (400 json_validate_failed),
+                // sesekali terjadi pada model bernalar. Ulangi tanpa JSON mode — parser kita
+                // sudah toleran terhadap teks pembungkus/code fence.
+                if (!$hasil['success'] && $useJsonObjectMode && str_contains($hasil['error'] ?? '', 'json_validate_failed')) {
+                    Log::warning("Groq {$kandidat} gagal validasi JSON mode, mengulang tanpa response_format.");
+                    $hasil = $this->callGroqApi($kandidat, $systemPrompt, $userPrompt, $temperature, $maxTokens, false);
                 }
-                if (!$groqResponse['success'] && !empty($this->geminiApiKey)) {
-                    return $this->callGeminiApi($systemPrompt, $userPrompt, $temperature);
+
+                if ($hasil['success']) {
+                    return $hasil;
                 }
+
+                Log::warning("Generator soal: Groq {$kandidat} gagal, mencoba model berikutnya.", ['error' => $hasil['error'] ?? null]);
             }
-
-            // Groq menolak keluaran yang gagal validasi JSON mode (400 json_validate_failed),
-            // sesekali terjadi pada model bernalar. Ulangi tanpa JSON mode — parser kita
-            // sudah toleran terhadap teks pembungkus/code fence.
-            if (!$groqResponse['success'] && str_contains($groqResponse['error'] ?? '', 'json_validate_failed')) {
-                Log::warning("Groq {$model} gagal validasi JSON mode, mengulang tanpa response_format.");
-                $groqResponse = $this->callGroqApi($model, $systemPrompt, $userPrompt, $temperature, $maxTokens, false);
-            }
-
-            // Check if Groq quota exceeded (HTTP 429) or rate limit
-            if (!$groqResponse['success']) {
-                $errorMsg = strtolower($groqResponse['error'] ?? '');
-                $isQuotaError = strpos($errorMsg, 'rate limit') !== false ||
-                                strpos($errorMsg, 'quota') !== false ||
-                                strpos($errorMsg, '429') !== false;
-
-                if ($isQuotaError) {
-                    // Determine alternative Groq model
-                    $altModel = ai_model_cadangan($model);
-                    Log::warning("Groq quota exceeded for {$model}, trying alternative model {$altModel}");
-                    
-                    // Try alternative model
-                    $altResponse = $this->callGroqApi($altModel, $systemPrompt, $userPrompt, $temperature, $maxTokens, $useJsonObjectMode);
-                    
-                    if ($altResponse['success']) {
-                        return $altResponse;
-                    }
-                    
-                    // If alternative also fails, fallback to Gemini
-                    if (!empty($this->geminiApiKey)) {
-                        Log::warning('Alternative Groq model also failed, falling back to Gemini');
-                        return $this->callGeminiApi($systemPrompt, $userPrompt, $temperature);
-                    }
-                }
-            }
-
-            return $groqResponse;
         }
 
-        // Fallback to Gemini if Groq not available
+        // Gemini: model default lebih dulu, lalu model Gemini lain yang tersedia.
         if (!empty($this->geminiApiKey)) {
-            return $this->callGeminiApi($systemPrompt, $userPrompt, $temperature);
+            foreach (ai_rantai_model('gemini', config('ai-models.default_text.gemini')) as $kandidat) {
+                $hasil = $this->callGeminiApi($systemPrompt, $userPrompt, $temperature, $kandidat);
+                if ($hasil['success']) {
+                    return $hasil;
+                }
+
+                Log::warning("Generator soal: Gemini {$kandidat} gagal, mencoba model berikutnya.", ['error' => $hasil['error'] ?? null]);
+            }
+        }
+
+        if ($hasil) {
+            return $hasil;
         }
 
         return [
@@ -847,12 +828,13 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
     private function callGeminiApi(
         string $systemPrompt,
         string $userPrompt,
-        float $temperature
+        float $temperature,
+        ?string $geminiModel = null
     ): array {
         try {
             $combinedPrompt = $systemPrompt . "\n\n" . $userPrompt;
             $combinedPrompt .= "\n\nIMPORTANT: Output harus berupa JSON array yang valid. Jangan tambahkan teks lain di luar JSON.";
-            $geminiModel = config('ai-models.default_text.gemini', 'gemini-2.5-flash');
+            $geminiModel ??= config('ai-models.default_text.gemini', 'gemini-2.5-flash');
 
             $response = Http::withOptions([
                 'verify' => false,

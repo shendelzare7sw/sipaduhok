@@ -14,9 +14,7 @@
 --}}
 
 @php
-    $aiProvider = \App\Models\AppSetting::where('key', 'ai_provider')->value('value') ?? 'groq';
-    $currentModel = ai_model_aktif(\App\Models\AppSetting::where('key', 'ai_model')->value('value'), $aiProvider);
-    $modelShortName = trim(preg_replace('/\s*\(.*\)$/', '', config("ai-models.available.{$aiProvider}", [])[$currentModel]['label'] ?? $currentModel));
+    // Nama model sengaja tidak ditampilkan; pemilihan & pergantian model otomatis di server.
     $field = 'mt-1 block w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100';
 @endphp
 
@@ -37,12 +35,6 @@
     </div>
 
     <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pt-6">
-        <div class="flex flex-wrap items-center gap-2 text-xs" id="aiModelStatusContainer">
-            <span class="text-slate-500"><i class="fa-solid fa-microchip mr-1" aria-hidden="true"></i>Model:</span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-800 px-2.5 py-1 font-bold text-white" id="aiModelStatusBadge" title="{{ $currentModel }}"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span>{{ $modelShortName }}</span>
-            <span class="hidden rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold text-amber-800" id="aiModelSwitchInfo"></span>
-        </div>
-
         <form id="aiGeneratorForm" class="space-y-4" @reset="$nextTick(() => { tingkat = 'medium'; jumlah = '5'; })">
             <label for="aiTopic" class="block text-xs font-bold text-slate-700"><i class="fa-solid fa-book-open mr-1 text-indigo-600" aria-hidden="true"></i>Topik/materi soal <span class="text-rose-600">*</span>
                 <input type="text" id="aiTopic" name="topic" required maxlength="200" placeholder="Contoh: Persamaan Kuadrat, Siklus Air, Struktur Teks Berita" class="{{ $field }}">

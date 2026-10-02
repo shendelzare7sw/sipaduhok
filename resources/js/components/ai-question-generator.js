@@ -124,40 +124,6 @@ const init = () => {
         if (addSelectedBtn) addSelectedBtn.disabled = selectedQuestions.size === 0;
     };
 
-    const updateModelStatus = (modelUsed, provider) => {
-        const badge = document.getElementById('aiModelStatusBadge');
-        const switchInfo = document.getElementById('aiModelSwitchInfo');
-        if (!badge) return;
-
-        const modelNames = {
-            'openai/gpt-oss-120b': 'GPT OSS 120B',
-            'openai/gpt-oss-20b': 'GPT OSS 20B',
-            'qwen/qwen3.8-27b': 'Qwen 3.8 27B',
-            'gemini-2.5-flash': 'Gemini 2.5 Flash',
-            'gemini-3.5-flash-lite': 'Gemini 3.5 Flash Lite',
-        };
-
-        const friendlyName = modelNames[modelUsed] || modelUsed;
-        badge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span>${escapeHtml(friendlyName)}`;
-        badge.title = modelUsed;
-
-        if (!switchInfo) return;
-
-        if (provider === 'gemini') {
-            switchInfo.textContent = 'Otomatis beralih dari Groq';
-            switchInfo.classList.remove('hidden');
-            return;
-        }
-
-        const configuredModel = badge.dataset.originalModel || '';
-        if (configuredModel && modelUsed !== configuredModel) {
-            switchInfo.textContent = `Beralih dari ${modelNames[configuredModel] || configuredModel}`;
-            switchInfo.classList.remove('hidden');
-        } else {
-            switchInfo.classList.add('hidden');
-        }
-    };
-
     const createQuestionCard = (question, index, type) => {
         const wrapper = document.createElement('label');
         wrapper.className = 'flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-indigo-300 has-[:checked]:border-indigo-400 has-[:checked]:ring-2 has-[:checked]:ring-indigo-100';
@@ -235,15 +201,8 @@ const init = () => {
             generatedQuestions = result.questions || [];
             displayGeneratedQuestions(generatedQuestions, data.type);
 
-            if (result.metadata) {
-                updateModelStatus(result.metadata.model_used, result.metadata.provider);
-            }
-
-            let successMsg = result.message || `Berhasil generate ${generatedQuestions.length} soal!`;
-            if (result.metadata && result.metadata.provider === 'gemini') {
-                successMsg += ' (via Gemini - Groq tidak tersedia)';
-            }
-            showToast('success', successMsg);
+            // Nama/penyedia model tidak ditampilkan ke guru; pergantian model terjadi otomatis di server.
+            showToast('success', result.message || `Berhasil generate ${generatedQuestions.length} soal!`);
 
             selectedQuestions = new Set(generatedQuestions.map((_, idx) => idx));
             updateSelectedCount();

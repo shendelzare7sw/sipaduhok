@@ -217,6 +217,22 @@ class AiGeneratorSoalTidakRusakTest extends TestCase
         $this->assertNotSame('qwen/qwen3.8-27b', ai_model_cadangan('openai/gpt-oss-20b'), 'Cadangan teks tidak boleh model vision');
     }
 
+    public function test_rantai_model_mencoba_semua_model_tersedia_berurutan(): void
+    {
+        // Model pilihan dulu, lalu model teks lain, lalu model vision; tanpa duplikat.
+        $this->assertSame(
+            ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'],
+            ai_rantai_model('groq', 'openai/gpt-oss-120b')
+        );
+        $this->assertSame(
+            ['openai/gpt-oss-20b', 'openai/gpt-oss-120b', 'qwen/qwen3.8-27b'],
+            ai_rantai_model('groq', 'openai/gpt-oss-20b')
+        );
+        // Setting lama yang sudah pensiun tetap menghasilkan rantai model aktif.
+        $this->assertSame('openai/gpt-oss-120b', ai_rantai_model('groq', 'llama-3.3-70b-versatile')[0]);
+        $this->assertSame(['gemini-2.5-flash', 'gemini-3.5-flash-lite'], ai_rantai_model('gemini', 'gemini-2.5-flash'));
+    }
+
     public function test_knowledge_base_ringkas_untuk_groq_tetap_memuat_bagian_relevan(): void
     {
         $kb = app(\App\Services\Chatbot\KnowledgeBaseLoader::class);

@@ -214,6 +214,24 @@ if (! function_exists('ai_model_cadangan')) {
     }
 }
 
+if (! function_exists('ai_rantai_model')) {
+    /**
+     * Urutan model yang dicoba bila model sebelumnya gagal (kuota habis, model dicabut,
+     * server sibuk): model pilihan lebih dulu, lalu model teks lain dari config, lalu
+     * model vision (tetap bisa mengerjakan teks). Semua kuota per model terpisah.
+     */
+    function ai_rantai_model(string $provider, ?string $mulai = null): array
+    {
+        $tersedia = config("ai-models.available.{$provider}", []);
+        $teks = array_keys(array_filter($tersedia, fn ($info) => ! ($info['vision'] ?? false)));
+        $vision = array_keys(array_filter($tersedia, fn ($info) => $info['vision'] ?? false));
+
+        $awal = ai_model_aktif($mulai, $provider);
+
+        return array_values(array_unique(array_merge([$awal], $teks, $vision)));
+    }
+}
+
 if (! function_exists('ai_groq_payload')) {
     /**
      * Lengkapi payload chat/completions Groq dengan parameter khusus model

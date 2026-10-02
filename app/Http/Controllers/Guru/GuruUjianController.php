@@ -1295,16 +1295,22 @@ class GuruUjianController extends Controller
             );
 
             if (!$result['success']) {
+                // Detail teknis (nama model, respons API) hanya ke log; guru cukup pesan yang bisa ditindaklanjuti.
+                \Log::warning('AI Question Generation gagal: ' . ($result['error'] ?? '-'));
+                $sibuk = preg_match('/rate limit|quota|429|too many|capacity|503/i', (string) ($result['error'] ?? ''));
+
                 return response()->json([
                     'success' => false,
-                    'message' => $result['error'] ?? 'Gagal generate soal.',
+                    'message' => $sibuk
+                        ? 'Layanan AI sedang sibuk. Tunggu sekitar satu menit lalu coba lagi.'
+                        : 'AI belum berhasil membuat soal. Silakan coba lagi atau perjelas topiknya.',
                 ], 500);
             }
 
+            // Nama/penyedia model sengaja tidak dikirim ke browser; pergantian model otomatis di server.
             return response()->json([
                 'success' => true,
                 'questions' => $result['questions'],
-                'metadata' => $result['metadata'] ?? [],
                 'message' => 'Berhasil generate ' . count($result['questions']) . ' soal!',
             ]);
 
@@ -1312,7 +1318,7 @@ class GuruUjianController extends Controller
             \Log::error('AI Question Generation Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'message' => 'Terjadi kesalahan saat menghubungi AI. Silakan coba lagi.',
             ], 500);
         }
     }

@@ -74,44 +74,45 @@ class AiGradingService
 
         try {
             if ($this->provider === 'groq') {
-                try {
-                    return $this->evaluateWithGroq($question, $studentAnswer, $correctAnswer, $maxScore);
-                } catch (\Exception $e) {
-                    $errorMsg = strtolower($e->getMessage());
-                    $isQuotaError = strpos($errorMsg, 'rate limit') !== false ||
-                                    strpos($errorMsg, 'quota') !== false ||
-                                    strpos($errorMsg, '429') !== false;
-                    // Model dicabut/dipindah paket oleh Groq: perlakukan sama seperti kuota habis.
-                    $isModelMissing = ai_model_tidak_ditemukan(null, $errorMsg);
+                // Coba setiap model Groq yang tersedia berurutan, lalu model Gemini, sampai
+                // ada yang berhasil (kuota habis/model dicabut/server sibuk tidak menggagalkan koreksi).
+                $modelAsal = $this->model;
+                $galatTerakhir = null;
 
-                    if ($isQuotaError || $isModelMissing) {
-                        // Determine alternative Groq model
-                        $altModel = ai_model_cadangan($this->model);
-                        Log::warning("Groq gagal untuk {$this->model} saat penilaian (".($isModelMissing ? 'model tidak tersedia' : 'kuota').'), mencoba model '.$altModel);
-                        
-                        // Temporarily change model and retry
-                        $originalModel = $this->model;
-                        $this->model = $altModel;
-                        
+                try {
+                    foreach (ai_rantai_model('groq', $modelAsal) as $kandidat) {
+                        $this->model = $kandidat;
                         try {
-                            $result = $this->evaluateWithGroq($question, $studentAnswer, $correctAnswer, $maxScore);
-                            $this->model = $originalModel; // restore
-                            return $result;
-                        } catch (\Exception $e2) {
-                            $this->model = $originalModel; // restore
-                            Log::warning("Alternative Groq model also failed, falling back to Gemini: " . $e2->getMessage());
-                            
-                            // Fallback to Gemini
-                            $settings = AppSetting::where('key', 'gemini_api_key')->first();
-                            if ($settings && !empty($settings->value)) {
-                                $this->apiKey = $settings->value;
-                                return $this->evaluateWithGemini($question, $studentAnswer, $correctAnswer, $maxScore);
-                            }
-                            throw $e2; // If no Gemini key, throw alternative error
+                            return $this->evaluateWithGroq($question, $studentAnswer, $correctAnswer, $maxScore);
+                        } catch (\Exception $e) {
+                            $galatTerakhir = $e;
+                            Log::warning("Koreksi AI: Groq {$kandidat} gagal, mencoba model berikutnya: " . $e->getMessage());
                         }
                     }
-                    throw $e; // If not quota error, throw original error
+
+                    $geminiKey = AppSetting::where('key', 'gemini_api_key')->value('value');
+                    if (!empty($geminiKey)) {
+                        $groqKey = $this->apiKey;
+                        $this->apiKey = $geminiKey;
+                        try {
+                            foreach (ai_rantai_model('gemini', config('ai-models.default_text.gemini')) as $kandidat) {
+                                $this->model = $kandidat;
+                                try {
+                                    return $this->evaluateWithGemini($question, $studentAnswer, $correctAnswer, $maxScore);
+                                } catch (\Exception $e) {
+                                    $galatTerakhir = $e;
+                                    Log::warning("Koreksi AI: Gemini {$kandidat} gagal, mencoba model berikutnya: " . $e->getMessage());
+                                }
+                            }
+                        } finally {
+                            $this->apiKey = $groqKey;
+                        }
+                    }
+                } finally {
+                    $this->model = $modelAsal;
                 }
+
+                throw $galatTerakhir ?? new \Exception('Semua model AI sedang tidak tersedia.');
             } elseif ($this->provider === 'gemini') {
                 return $this->evaluateWithGemini($question, $studentAnswer, $correctAnswer, $maxScore);
             }
@@ -127,7 +128,8 @@ class AiGradingService
             Log::error('AI Grading Error: ' . $e->getMessage());
             return [
                 'score' => 0,
-                'feedback' => 'Terjadi kesalahan saat menghubungi AI: ' . $e->getMessage(),
+                // Detail teknis (nama model, respons API) hanya ke log.
+                'feedback' => 'Koreksi oleh AI belum berhasil. Silakan coba lagi beberapa saat lagi atau nilai secara manual.',
                 'error' => true
             ];
         }
@@ -415,27 +417,41 @@ class AiGradingService
                     'error' => false
                 ];
             } catch (\Exception $e) {
-                $errorMsg = strtolower($e->getMessage());
-                $isQuotaError = strpos($errorMsg, 'rate limit') !== false ||
-                                strpos($errorMsg, 'quota') !== false ||
-                                strpos($errorMsg, '429') !== false;
-
-                if ($isQuotaError || ai_model_tidak_ditemukan(null, $errorMsg)) {
-                    Log::warning("Groq Vision gagal (kuota/model tidak tersedia), falling back to Gemini: " . $e->getMessage());
-                    $settings = \App\Models\AppSetting::where('key', 'gemini_api_key')->first();
-                    if ($settings && !empty($settings->value)) {
-                        $this->apiKey = $settings->value; // Swap API key to Gemini
-                        return $this->evaluateImageWithGemini($question, $imagePath, $contextOrKey, $maxScore);
-                    }
+                // Groq hanya punya satu model vision; bila gagal karena apa pun, coba
+                // setiap model Gemini (semuanya multimodal) sebelum menyerah.
+                Log::warning('Groq Vision gagal, beralih ke Gemini: ' . $e->getMessage());
+                $geminiKey = \App\Models\AppSetting::where('key', 'gemini_api_key')->value('value');
+                if (empty($geminiKey)) {
+                    throw $e;
                 }
-                throw $e; // Throw original error if not quota or no Gemini fallback available
+
+                $groqKey = $this->apiKey;
+                $modelAsal = $this->model;
+                $this->apiKey = $geminiKey;
+                try {
+                    foreach (ai_rantai_model('gemini', config('ai-models.default_vision.gemini')) as $kandidat) {
+                        $this->model = $kandidat;
+                        try {
+                            return $this->evaluateImageWithGemini($question, $imagePath, $contextOrKey, $maxScore);
+                        } catch (\Exception $eGemini) {
+                            $e = $eGemini;
+                            Log::warning("Koreksi gambar: Gemini {$kandidat} gagal, mencoba model berikutnya: " . $eGemini->getMessage());
+                        }
+                    }
+                } finally {
+                    $this->apiKey = $groqKey;
+                    $this->model = $modelAsal;
+                }
+
+                throw $e;
             }
 
         } catch (\Exception $e) {
+            // Detail teknis (nama model, respons API) hanya ke log.
             Log::error('AI Vision Error: ' . $e->getMessage());
             return [
                 'score' => 0,
-                'feedback' => 'Gagal analisis gambar: ' . $e->getMessage(),
+                'feedback' => 'Analisis gambar oleh AI belum berhasil. Silakan coba lagi beberapa saat lagi atau nilai secara manual.',
                 'error' => true
             ];
         }
