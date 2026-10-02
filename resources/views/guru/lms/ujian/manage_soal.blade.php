@@ -159,7 +159,7 @@
             </div>
 
             <label class="block text-xs font-bold text-slate-700">Narasi / teks bacaan <span class="font-normal text-slate-500">(opsional)</span>
-                <textarea name="soal[{INDEX}][narasi]" rows="2" placeholder="Masukkan narasi/teks bacaan jika soal berbasis narasi..." class="narasi-input mt-1 {{ $smallField }}"></textarea>
+                <textarea name="soal[{INDEX}][narasi]" rows="2" data-autogrow placeholder="Masukkan narasi/teks bacaan jika soal berbasis narasi..." class="narasi-input mt-1 {{ $smallField }}"></textarea>
                 <span class="mt-1 block font-normal text-slate-500">Soal dengan narasi yang sama dikelompokkan saat ujian.</span>
             </label>
 
@@ -179,7 +179,7 @@
             </div>
 
             <label class="block text-xs font-bold text-slate-700">Pertanyaan
-                <textarea name="soal[{INDEX}][pertanyaan]" rows="3" placeholder="Tuliskan pertanyaan..." data-update-preview class="question-input mt-1 {{ $smallField }}">{PERTANYAAN}</textarea>
+                <textarea name="soal[{INDEX}][pertanyaan]" rows="3" placeholder="Tuliskan pertanyaan..." data-update-preview data-autogrow class="question-input mt-1 {{ $smallField }}">{PERTANYAAN}</textarea>
             </label>
 
             <div class="rounded-xl border border-slate-200 bg-white p-3">

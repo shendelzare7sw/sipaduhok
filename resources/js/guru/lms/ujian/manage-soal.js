@@ -113,6 +113,8 @@ import '../../../components/ai-sidebar.js';
 
             window.updateTotalBadge();
             window.updatePreview(el.querySelector('.question-input'));
+            // Tinggi textarea narasi/pertanyaan mengikuti isi yang baru diisi (admin.js → textarea-autogrow).
+            window.refreshAutogrow?.(el);
         };
 
         let itemToDelete = null;

@@ -68,7 +68,7 @@
             </div>
 
             <label class="block text-xs font-bold text-slate-700">Pertanyaan <span class="text-rose-600">*</span>
-                <textarea name="pertanyaan" rows="4" required class="{{ $input }}">{{ $soal->pertanyaan ?? old('pertanyaan') }}</textarea>
+                <textarea name="pertanyaan" rows="4" required data-autogrow class="{{ $input }}">{{ $soal->pertanyaan ?? old('pertanyaan') }}</textarea>
             </label>
 
             <section class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
