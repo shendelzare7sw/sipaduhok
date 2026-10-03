@@ -39,8 +39,8 @@
                         <col class="w-[16%]">
                         <col class="w-28">
                         <col>
-                        <col class="w-24">
-                        <col class="w-32">
+                        <col class="w-36">
+                        <col class="w-36">
                     </colgroup>
                     <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500">
                         <tr>
