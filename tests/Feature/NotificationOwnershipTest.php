@@ -36,7 +36,11 @@ class NotificationOwnershipTest extends TestCase
 
             $this->actingAs($penyerang);
 
-            $this->get(route('notifications.show', $notification->id))->assertNotFound();
+            // Halaman (GET) dialihkan dengan pesan "tidak ditemukan" — tidak membocorkan isi.
+            $this->get(route('notifications.show', $notification->id))
+                ->assertRedirect()
+                ->assertSessionHas('warning', \App\Support\NotFoundRedirector::PESAN);
+            $this->assertNull($notification->fresh()->read_at);
             $this->postJson(route('notifications.mark-read', $notification->id))->assertNotFound();
             $this->deleteJson(route('notifications.destroy', $notification->id))->assertNotFound();
 

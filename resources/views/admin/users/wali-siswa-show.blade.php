@@ -63,8 +63,8 @@
                 <div class="grid gap-1 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
                     <dt class="text-xs font-bold uppercase tracking-wide text-slate-400">WhatsApp</dt>
                     <dd class="text-sm font-semibold">
-                        @if($orangTua->phone)
-                            <a href="https://wa.me/{{ preg_replace('/^0/', '62', $orangTua->phone) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-emerald-700 no-underline hover:text-emerald-800"><i class="fab fa-whatsapp" aria-hidden="true"></i>{{ $orangTua->phone }}</a>
+                        @if($waOrtu = wa_link($orangTua->phone))
+                            <a href="{{ $waOrtu }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-emerald-700 no-underline hover:text-emerald-800"><i class="fab fa-whatsapp" aria-hidden="true"></i>{{ $orangTua->phone }}</a>
                         @else - @endif
                     </dd>
                 </div>

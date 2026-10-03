@@ -41,5 +41,26 @@ class AppServiceProvider extends ServiceProvider
 
         TugasSiswa::observe(TugasSiswaObserver::class);
         UjianSiswa::observe(UjianSiswaObserver::class);
+
+        // Konten LMS yang dihapus: hapus juga notifikasi semua penerima yang menunjuk ke kontennya,
+        // supaya tidak ada notifikasi yang berujung "tidak ditemukan".
+        $segmenNotifikasi = [
+            \App\Models\ForumDiskusi::class => ['forum'],
+            \App\Models\Tugas::class => ['tugas'],
+            \App\Models\Materi::class => ['materi'],
+            \App\Models\Ujian::class => ['ujian', 'latihan'],
+            \App\Models\Pengumuman::class => ['pengumuman'],
+        ];
+        foreach ($segmenNotifikasi as $model => $segmen) {
+            $model::deleted(function ($record) use ($segmen) {
+                \App\Models\Notification::where(function ($q) use ($segmen, $record) {
+                    foreach ($segmen as $s) {
+                        $q->orWhere('link', 'like', "%/{$s}/{$record->getKey()}")
+                            ->orWhere('link', 'like', "%/{$s}/{$record->getKey()}/%")
+                            ->orWhere('link', 'like', "%/{$s}/{$record->getKey()}?%");
+                    }
+                })->delete();
+            });
+        }
     }
 }

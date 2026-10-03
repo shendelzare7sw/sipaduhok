@@ -208,8 +208,8 @@
                         $adminWa = \App\Models\AppSetting::where('key', 'admin_wa_number')->value('value');
                     @endphp
                     Butuh bantuan? 
-                    @if($adminWa)
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $adminWa) }}" target="_blank" class="font-bold underline decoration-white/50 hover:decoration-white underline-offset-4 text-white">
+                    @if($adminWa && wa_link($adminWa))
+                        <a href="{{ wa_link($adminWa) }}" target="_blank" class="font-bold underline decoration-white/50 hover:decoration-white underline-offset-4 text-white">
                             Hubungi Administrator
                         </a>
                     @else

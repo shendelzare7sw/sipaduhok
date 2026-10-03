@@ -12,6 +12,13 @@
 @php
     $args = [$kelas->id, $mapel->id];
     $dariGuru = $forum->isFromTeacher();
+    // URL untuk partial balasan bersama (resources/views/lms/forum/reply-item.blade.php).
+    $isClosed = (bool) $forum->is_closed;
+    $forumUrls = [
+        'reply' => route('guru.lms.forum.reply', [...$args, $forum->id]),
+        'update' => fn ($replyId) => route('guru.lms.forum.reply.update', [...$args, $forum->id, $replyId]),
+        'destroy' => fn ($replyId) => route('guru.lms.forum.reply.destroy', [...$args, $forum->id, $replyId]),
+    ];
     $field = 'block h-10 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100';
 @endphp
 
@@ -69,9 +76,9 @@
         </div>
 
         <div data-post-content class="mt-4 break-words text-sm leading-7 text-slate-700">
-            {!! nl2br(e($forum->isi)) !!}
+            <x-lms.rich-text :text="$forum->isi" />
             @if($forum->lampiran && is_array($forum->lampiran) && count($forum->lampiran) > 0)
-                <div class="mt-3 space-y-3">@foreach($forum->lampiran as $lampiran)<x-lms.media-display :file="$lampiran" />@endforeach</div>
+                <div class="mt-3 flex flex-wrap gap-2 sm:gap-3">@foreach($forum->lampiran as $lampiran)<x-lms.media-display :file="$lampiran" group="topik-{{ $forum->id }}" />@endforeach</div>
             @endif
         </div>
 
@@ -93,9 +100,11 @@
         @endunless
     </article>
 
+    <x-lms.lightbox />
+
     <div class="space-y-3">
         @foreach($forum->replies->whereNull('parent_id') as $reply)
-            @include('guru.lms.forum.partials.reply-item-redesign', ['reply' => $reply, 'level' => 0])
+            @include('lms.forum.reply-item', ['reply' => $reply, 'level' => 0])
         @endforeach
     </div>
 </div>

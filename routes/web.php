@@ -182,9 +182,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-    // Admin Security Setup Routes (forced after login if not set)
-    Route::get('/admin/security-setup', [\App\Http\Controllers\Auth\AdminSecuritySetupController::class, 'showSetupForm'])->name('admin.security.setup');
-    Route::post('/admin/security-setup', [\App\Http\Controllers\Auth\AdminSecuritySetupController::class, 'store'])->name('admin.security.setup.store');
+    // Admin Security Setup Routes (forced after login if not set) — khusus role admin.
+    Route::get('/admin/security-setup', [\App\Http\Controllers\Auth\AdminSecuritySetupController::class, 'showSetupForm'])->middleware('role:admin')->name('admin.security.setup');
+    Route::post('/admin/security-setup', [\App\Http\Controllers\Auth\AdminSecuritySetupController::class, 'store'])->middleware('role:admin')->name('admin.security.setup.store');
 });
 
 /*

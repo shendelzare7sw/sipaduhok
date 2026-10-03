@@ -33,9 +33,13 @@ class NilaiSyncService
             return null;
         }
 
+        // nilai.guru_id wajib (NOT NULL). Bila kelas+mapel belum punya penugasan guru,
+        // pakai guru pembuat ujian/tugas mapel ini agar pengumpulan siswa tidak gagal (HTTP 500).
         $guruId = GuruPengajarKelas::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->value('tenaga_pendidik_id');
+            ->value('tenaga_pendidik_id')
+            ?? Ujian::where('kelas_id', $kelasId)->where('mata_pelajaran_id', $mapelId)->latest('id')->value('guru_id')
+            ?? Tugas::where('kelas_id', $kelasId)->where('mata_pelajaran_id', $mapelId)->latest('id')->value('guru_id');
 
         $nilai = Nilai::firstOrNew([
             'siswa_id' => $siswaId,
@@ -45,6 +49,10 @@ class NilaiSyncService
             'semester' => $semester,
         ]);
 
+        if (!$nilai->exists && !$guruId) {
+            // Tanpa guru sama sekali, baris nilai tidak dapat dibuat; jangan gagalkan pengumpulan.
+            return null;
+        }
         if (!$nilai->exists && $guruId) {
             $nilai->guru_id = $guruId;
         }

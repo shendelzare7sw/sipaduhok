@@ -327,6 +327,129 @@ class AiGradingService
     }
 
     /**
+     * Penilaian multimodal: gambar soal (lampiran guru) + jawaban teks dan/atau gambar jawaban siswa
+     * dalam SATU permintaan, dengan label eksplisit mana soal dan mana jawaban.
+     *
+     * Dibutuhkan untuk tugas seperti "apa nama logo di atas?" — tanpa gambar soal AI tidak bisa
+     * menilai. Bila tidak ada kunci jawaban, prompt menyatakannya (deskripsi tugas bukan kunci).
+     *
+     * @param  array<int,string>  $soalImages    path gambar lampiran soal
+     * @param  array<int,string>  $jawabanImages path gambar jawaban siswa
+     */
+    public function evaluateMultimodal(string $question, ?string $kunci, ?string $jawabanTeks, array $soalImages = [], array $jawabanImages = [], int $maxScore = 100): array
+    {
+        if (!$this->apiKey) {
+            return ['score' => 0, 'feedback' => 'Error: API Key AI belum dikonfigurasi.', 'error' => true];
+        }
+
+        // Kumpulkan gambar valid (JPG/PNG/WEBP ≤ 4MB). Groq vision menerima maks 3 gambar per permintaan.
+        $gambar = [];
+        foreach ([['soal', $soalImages], ['jawaban', $jawabanImages]] as [$peran, $daftar]) {
+            foreach ($daftar as $path) {
+                if (!is_string($path) || !is_file($path) || filesize($path) > 4 * 1024 * 1024) {
+                    continue;
+                }
+                $mime = mime_content_type($path);
+                if (in_array($mime, ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'], true)) {
+                    $gambar[] = ['peran' => $peran, 'mime' => $mime, 'data' => base64_encode(file_get_contents($path))];
+                }
+            }
+        }
+        $gambar = array_slice($gambar, 0, (int) config('ai-models.groq_max_images', 3));
+
+        $urutan = collect($gambar)->values()->map(fn ($g, $i) => 'Gambar ' . ($i + 1) . ' = ' . ($g['peran'] === 'soal' ? 'LAMPIRAN SOAL dari guru' : 'JAWABAN siswa'))->implode('; ');
+        $kunciTeks = trim((string) $kunci) !== ''
+            ? "Kunci/rubrik dari guru: \"{$kunci}\""
+            : 'Tidak ada kunci jawaban resmi. Nilailah kebenaran jawaban berdasarkan soal dan isi gambar soal menggunakan pengetahuan umum yang akurat.';
+        $jawabanBagian = trim((string) $jawabanTeks) !== '' ? "Jawaban teks siswa: \"{$jawabanTeks}\"" : 'Siswa tidak menulis jawaban teks.';
+
+        $prompt = "Anda asisten guru yang menilai jawaban tugas siswa secara adil dan teliti.\n\n"
+            . "Soal/tugas: \"{$question}\"\n"
+            . ($urutan !== '' ? "Gambar terlampir: {$urutan}.\n" : '')
+            . "{$kunciTeks}\n{$jawabanBagian}\n\n"
+            . "Instruksi:\n"
+            . "1. Pahami soal BERSAMA lampiran gambar soal (jika ada) — misalnya kenali logo/objek pada gambar soal.\n"
+            . "2. Bandingkan dengan jawaban siswa (teks dan/atau gambar jawaban).\n"
+            . "3. Beri nilai 0-{$maxScore}; jawaban benar walau singkat tetap layak nilai tinggi.\n"
+            . "4. Feedback konstruktif maksimal 3 kalimat Bahasa Indonesia, sebutkan jawaban yang benar bila siswa keliru.\n"
+            . "5. Output WAJIB JSON valid: {\"score\": int, \"feedback\": string}";
+
+        $hasilJson = function (?string $content) use ($maxScore) {
+            $result = $this->cleanAndParseJson((string) $content);
+            return [
+                'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
+                'feedback' => $result['feedback'] ?? 'Tidak ada feedback.',
+                'error' => false,
+            ];
+        };
+
+        try {
+            if ($this->provider === 'groq') {
+                try {
+                    $parts = [['type' => 'text', 'text' => $prompt]];
+                    foreach ($gambar as $g) {
+                        $parts[] = ['type' => 'image_url', 'image_url' => ['url' => "data:{$g['mime']};base64,{$g['data']}"]];
+                    }
+                    $response = $this->postGroq([
+                        'model' => $gambar ? $this->visionModel : $this->model,
+                        'messages' => [['role' => 'user', 'content' => $gambar ? $parts : $prompt]],
+                        'temperature' => 0.2,
+                        'max_tokens' => 1024,
+                        'response_format' => ['type' => 'json_object'],
+                    ]);
+                    if ($response->failed()) {
+                        throw new \Exception('Groq API Error: ' . $response->body());
+                    }
+                    return $hasilJson($response->json('choices.0.message.content'));
+                } catch (\Exception $e) {
+                    Log::warning('Koreksi multimodal: Groq gagal, beralih ke Gemini: ' . $e->getMessage());
+                    $geminiKey = AppSetting::where('key', 'gemini_api_key')->value('value');
+                    if (empty($geminiKey)) {
+                        throw $e;
+                    }
+                    return $this->multimodalGemini($geminiKey, $prompt, $gambar, $hasilJson);
+                }
+            }
+
+            return $this->multimodalGemini($this->apiKey, $prompt, $gambar, $hasilJson);
+        } catch (\Exception $e) {
+            Log::error('AI Multimodal Error: ' . $e->getMessage());
+            return [
+                'score' => 0,
+                'feedback' => 'Analisis AI belum berhasil. Silakan coba lagi beberapa saat lagi atau nilai secara manual.',
+                'error' => true,
+            ];
+        }
+    }
+
+    /**
+     * Gemini (semua model multimodal): coba setiap model Gemini yang tersedia berurutan.
+     */
+    protected function multimodalGemini(string $apiKey, string $prompt, array $gambar, callable $hasilJson): array
+    {
+        $parts = [['text' => $prompt]];
+        foreach ($gambar as $g) {
+            $parts[] = ['inline_data' => ['mime_type' => $g['mime'], 'data' => $g['data']]];
+        }
+
+        $galat = null;
+        foreach (ai_rantai_model('gemini', config('ai-models.default_vision.gemini')) as $model) {
+            $response = Http::withOptions(['verify' => false])->timeout(90)
+                ->post("https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$apiKey}", [
+                    'contents' => [['parts' => $parts]],
+                    'generationConfig' => ['temperature' => 0.2, 'maxOutputTokens' => 4096],
+                ]);
+            if ($response->successful()) {
+                return $hasilJson($response->json('candidates.0.content.parts.0.text'));
+            }
+            $galat = new \Exception('Gemini ' . $model . ': ' . $response->status());
+            Log::warning('Koreksi multimodal: ' . $galat->getMessage());
+        }
+
+        throw $galat ?? new \Exception('Gemini tidak tersedia.');
+    }
+
+    /**
      * Evaluate student answer with Image (Multimodal)
      */
     public function evaluateImage($question, $imagePath, $contextOrKey, $maxScore = 100)

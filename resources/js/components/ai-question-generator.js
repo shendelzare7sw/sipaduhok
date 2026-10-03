@@ -8,6 +8,11 @@
  * - menyediakan window.openAiSidebar / window.closeAiSidebar.
  */
 
+// SweetAlert diimpor langsung (bukan lewat window.Swal) agar dialog tidak pernah jatuh ke
+// alert/confirm bawaan browser bila urutan pemuatan modul berbeda.
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
 const escapeHtml = (unsafe) => {
     if (!unsafe) return '';
     return String(unsafe)
@@ -21,20 +26,15 @@ const escapeHtml = (unsafe) => {
 const showToast = (type, message) => {
     const icon = type === 'error' ? 'error' : (type === 'success' ? 'success' : 'warning');
 
-    if (window.Swal) {
-        window.Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon,
-            title: message,
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true,
-        });
-        return;
-    }
-
-    window.alert(message);
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon,
+        title: message,
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+    });
 };
 
 const getQuestionTypeLabel = (type) => ({
@@ -319,13 +319,17 @@ const init = () => {
     };
 
     const handleRegenerate = async () => {
-        const result = await (window.CleanFlow?.confirmAction
-            ? window.CleanFlow.confirmAction({
-                title: 'Generate ulang soal?',
-                text: 'Semua hasil generate sebelumnya akan digantikan.',
-                confirmText: 'Ya, generate ulang',
-            })
-            : Promise.resolve({ isConfirmed: window.confirm('Generate ulang dan mengganti hasil sebelumnya?') }));
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Generate ulang soal?',
+            text: 'Semua hasil generate sebelumnya akan digantikan.',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, generate ulang',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#4f46e5',
+            reverseButtons: true,
+            focusCancel: true,
+        });
 
         if (!result.isConfirmed) return;
 

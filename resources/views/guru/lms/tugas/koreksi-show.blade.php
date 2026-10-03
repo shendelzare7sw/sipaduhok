@@ -45,22 +45,60 @@
 
     <div class="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div class="min-w-0 space-y-5">
+            @php
+                $ekstensiMedia = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'm4v', 'mov', 'webm', 'ogg', 'ogv'];
+                $soalMedia = $tugas->file_tugas && in_array(strtolower(pathinfo($tugas->file_tugas, PATHINFO_EXTENSION)), $ekstensiMedia, true);
+                $jawabanMedia = $tugasSiswa->file_jawaban && in_array(strtolower(pathinfo($tugasSiswa->file_jawaban, PATHINFO_EXTENSION)), $ekstensiMedia, true);
+            @endphp
+            {{-- Teks lalu gambar/video di bawahnya. --}}
             <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
                 <h2 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fa-solid fa-file-lines text-indigo-600" aria-hidden="true"></i>Tugas: {{ $tugas->judul_tugas }}</h2>
-                <p class="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">{{ $tugas->deskripsi }}</p>
-                @if($tugas->file_tugas)
-                    <div class="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-600">File soal: <x-file-preview :path="$tugas->file_tugas" label="Lihat soal" /></div>
-                @endif
+                <div class="mt-3 grid items-start gap-4">
+                    <div class="flex min-w-0 flex-col gap-3">
+                        <div class="whitespace-pre-line break-words rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">{{ $tugas->deskripsi ?: 'Tidak ada deskripsi.' }}</div>
+                        @if($tugas->file_tugas && ! $soalMedia)
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
+                                <span class="flex items-center gap-2 text-xs font-extrabold text-slate-700"><i class="fa-solid fa-paperclip text-indigo-500" aria-hidden="true"></i>File soal</span>
+                                <x-file-preview :path="$tugas->file_tugas" :title="$tugas->judul_tugas" label="Lihat soal" />
+                            </div>
+                        @endif
+                    </div>
+                    @if($soalMedia)
+                        <div class="min-w-0 max-w-sm">
+                            <p class="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">File soal</p>
+                            <x-file-preview :path="$tugas->file_tugas" :title="$tugas->judul_tugas" label="Lihat soal" fill />
+                        </div>
+                    @endif
+                </div>
             </section>
 
             <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
                 <h2 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fa-solid fa-pen text-indigo-600" aria-hidden="true"></i>Jawaban siswa</h2>
-                @if($tugasSiswa->jawaban_text)
-                    <p class="mt-3 text-[11px] font-bold uppercase tracking-wide text-slate-500">Jawaban teks</p>
-                    <div class="mt-1 whitespace-pre-line break-words rounded-xl bg-slate-50 p-4 text-sm leading-7 text-slate-800">{{ $tugasSiswa->jawaban_text }}</div>
-                @endif
-                @if($tugasSiswa->file_jawaban)
-                    <div class="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-600">File jawaban: <x-file-preview :path="$tugasSiswa->file_jawaban" label="Lihat jawaban siswa" /></div>
+                @if($adaJawaban)
+                    <div class="mt-3 grid items-start gap-4">
+                        @if($tugasSiswa->jawaban_text || ($tugasSiswa->file_jawaban && ! $jawabanMedia))
+                            <div class="flex min-w-0 flex-col gap-3">
+                                @if($tugasSiswa->jawaban_text)
+                                    <div class="flex flex-col">
+                                        <p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Jawaban teks</p>
+                                        <div class="mt-1 whitespace-pre-line break-words rounded-xl bg-slate-50 p-4 text-sm leading-7 text-slate-800">{{ $tugasSiswa->jawaban_text }}</div>
+                                    </div>
+                                @endif
+                                @if($tugasSiswa->file_jawaban && ! $jawabanMedia)
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
+                                        <span class="flex items-center gap-2 text-xs font-extrabold text-slate-700"><i class="fa-solid fa-paperclip text-indigo-500" aria-hidden="true"></i>File jawaban</span>
+                                        <x-file-preview :path="$tugasSiswa->file_jawaban" title="Jawaban siswa" label="Lihat jawaban siswa" />
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+                        @if($jawabanMedia)
+                            <div class="min-w-0 max-w-sm">
+                                <p class="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">File jawaban</p>
+                                <x-file-preview :path="$tugasSiswa->file_jawaban" title="Jawaban siswa" label="Lihat jawaban siswa" fill />
+                            </div>
+                        @endif
+                    </div>
                 @endif
                 @unless($adaJawaban)
                     <div class="py-8 text-center text-sm text-slate-500"><i class="fa-solid fa-inbox mb-2 block text-2xl text-slate-300" aria-hidden="true"></i>Tidak ada jawaban</div>

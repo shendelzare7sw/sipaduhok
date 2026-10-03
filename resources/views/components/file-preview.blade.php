@@ -4,6 +4,7 @@
     'class' => null,
     'label' => null,
     'iconClass' => 'fas fa-eye',
+    'fill' => false,
 ])
 
 @if($path)
@@ -11,6 +12,8 @@
         $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
         $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
         $isPdf = $extension === 'pdf';
+        $videoMime = ['mp4' => 'video/mp4', 'm4v' => 'video/mp4', 'mov' => 'video/quicktime', 'webm' => 'video/webm', 'ogg' => 'video/ogg', 'ogv' => 'video/ogg'];
+        $isVideo = isset($videoMime[$extension]);
         $downloadUrl = asset('storage/' . $path);
         $previewUrl = preview_url($path);
         $dialogId = 'file-preview-' . md5($path . uniqid());
@@ -19,8 +22,33 @@
             : 'inline-flex min-h-9 items-center justify-center gap-2 rounded-lg bg-blue-50 px-3 text-xs font-bold text-blue-700 hover:bg-blue-100';
     @endphp
 
+    @if($isImage)
+        {{-- Gambar langsung tampil; klik untuk memperbesar di lightbox (bukan tab baru). --}}
+        {{-- fill: gambar mengisi lebar kolomnya (tata letak dua kolom), bukan selebar ukuran aslinya. --}}
+        <span x-data class="{{ $fill ? 'flex w-full' : 'inline-flex max-w-full' }} flex-col items-start gap-2 align-top">
+            <button type="button" x-on:click="$store.lightbox.buka($el.querySelector('img'))" class="group relative block {{ $fill ? 'w-full' : 'max-w-full' }} overflow-hidden rounded-xl border border-slate-200 bg-slate-50" aria-label="Perbesar {{ $title }}">
+                <img src="{{ $downloadUrl }}" alt="{{ $title }}" loading="lazy" data-lightbox="file-{{ md5($path) }}" class="{{ $fill ? 'mx-auto max-h-72 w-full' : 'max-h-80 max-w-full' }} cursor-zoom-in object-contain transition group-hover:opacity-95">
+                <span class="pointer-events-none absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/60 text-xs text-white opacity-80 transition group-hover:opacity-100"><i class="fas fa-expand" aria-hidden="true"></i></span>
+            </button>
+            <a href="{{ $downloadUrl }}" download class="inline-flex min-h-8 items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 text-[11px] font-bold text-slate-700 no-underline hover:bg-slate-200"><i class="fas fa-download" aria-hidden="true"></i>Unduh gambar</a>
+        </span>
+        @once
+            @push('modals')
+                <x-lms.lightbox />
+            @endpush
+        @endonce
+    @elseif($isVideo)
+        {{-- Video langsung diputar di halaman. --}}
+        <span class="inline-flex w-full {{ $fill ? '' : 'max-w-2xl' }} flex-col items-start gap-2 align-top">
+            <video controls playsinline preload="metadata" class="max-h-[420px] w-full rounded-xl border border-slate-200 bg-black">
+                <source src="{{ $downloadUrl }}" type="{{ $videoMime[$extension] }}">
+                Browser Anda tidak mendukung pemutaran video.
+            </video>
+            <a href="{{ $downloadUrl }}" download class="inline-flex min-h-8 items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 text-[11px] font-bold text-slate-700 no-underline hover:bg-slate-200"><i class="fas fa-download" aria-hidden="true"></i>Unduh video</a>
+        </span>
+    @else
     <span class="inline-flex flex-wrap items-center gap-2">
-        @if($isImage || $isPdf)
+        @if($isPdf)
             <button type="button" class="{{ $class ?? $defaultButton }}" data-dialog-open="{{ $dialogId }}">
                 <i class="{{ $iconClass }}" aria-hidden="true"></i>
                 {{ $label ?? ($isPdf ? 'Lihat PDF' : 'Lihat Gambar') }}
@@ -67,4 +95,5 @@
             </a>
         @endif
     </span>
+    @endif
 @endif

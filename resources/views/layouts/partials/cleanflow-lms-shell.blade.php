@@ -13,7 +13,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite(array_values(array_filter(['resources/css/admin.css', 'resources/js/admin.js', $legacyLayoutCss ?? null])))
+    {{-- bootstrapFree: shell yang seluruh halamannya sudah Tailwind memuat inti CleanFlow tanpa bridge Bootstrap. --}}
+    @if($bootstrapFree ?? false)
+        @vite(['resources/css/cleanflow.css', 'resources/js/cleanflow.js'])
+    @else
+        @vite(array_values(array_filter(['resources/css/admin.css', 'resources/js/admin.js', $legacyLayoutCss ?? null])))
+    @endif
     @stack('styles')
 </head>
 <body class="min-h-full bg-slate-50 font-sans text-slate-800 antialiased">

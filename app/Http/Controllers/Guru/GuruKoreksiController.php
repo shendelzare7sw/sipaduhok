@@ -169,105 +169,97 @@ class GuruKoreksiController extends Controller
         $submission = $this->authorizedSubmission($submissionId, $tugas);
 
         $aiService = new \App\Services\AiGradingService();
+        $tempFiles = [];
 
-        // Check if there is a file and process based on type
-        if ($submission->file_jawaban) {
-            $path = storage_path('app/public/' . $submission->file_jawaban);
-
-            // Check mime type
-            if (file_exists($path)) {
-                $mime = mime_content_type($path);
-
-                // Handle Image files
-                if (str_starts_with($mime, 'image/')) {
-                    $result = $aiService->evaluateImage(
-                        $tugas->judul_tugas . "\n\n" . $tugas->deskripsi,
-                        $path,
-                        $tugas->deskripsi
-                    );
-                    return response()->json($result);
-                }
-
-                // Handle PDF files
-                if ($mime === 'application/pdf') {
-                    try {
-                        // Strategy 1: Try extract text (Digital PDF)
-                        $binPath = config('services.pdftotext.bin_path') ?: null;
-                        $pdfText = Pdf::getText($path, $binPath);
-                        $pdfText = trim($pdfText);
-
-                        // If we got meaningful text (> 10 chars), use text grading
-                        if (strlen($pdfText) > 10) {
-                            $result = $aiService->evaluate(
-                                $tugas->judul_tugas . "\n\n" . $tugas->deskripsi,
-                                $pdfText,
-                                $tugas->deskripsi
-                            );
-                            return response()->json($result);
-                        }
-
-                        // Strategy 2: No text found → Scanned/Image PDF
-                        // Convert first page to image and use Vision AI.
-                        // Butuh ekstensi PHP Imagick + Ghostscript di server; kalau
-                        // tidak tersedia, jangan crash — minta guru nilai manual.
-                        if (!extension_loaded('imagick')) {
-                            return response()->json([
-                                'error' => true,
-                                'feedback' => 'File PDF ini sepertinya hasil scan/gambar (bukan teks digital) dan server belum mendukung analisis PDF hasil scan. Silakan nilai manual, atau minta siswa mengunggah ulang dalam format JPG/PNG agar bisa dianalisis AI.',
-                            ]);
-                        }
-
-                        $imagePath = storage_path('app/temp/' . uniqid('pdf_') . '.jpg');
-
-                        // Ensure temp directory exists
-                        if (!file_exists(storage_path('app/temp'))) {
-                            mkdir(storage_path('app/temp'), 0755, true);
-                        }
-
-                        $pdf = new PdfToImage($path);
-                        $pdf->setPage(1)
-                            ->setResolution(150)
-                            ->saveImage($imagePath);
-
-                        // Use Vision AI on the converted image
-                        $result = $aiService->evaluateImage(
-                            $tugas->judul_tugas . "\n\n" . $tugas->deskripsi,
-                            $imagePath,
-                            $tugas->deskripsi
-                        );
-
-                        // Clean up temp image
-                        if (file_exists($imagePath)) {
-                            unlink($imagePath);
-                        }
-
-                        return response()->json($result);
-
-                    } catch (\Exception $e) {
-                        \Log::error('PDF Processing Error: ' . $e->getMessage());
-                        return response()->json([
-                            'error' => true,
-                            'feedback' => 'Gagal memproses file PDF untuk dianalisis AI. Silakan nilai manual, atau minta siswa mengunggah ulang dalam format JPG/PNG.'
-                        ]);
-                    }
+        try {
+            // Soal = judul + deskripsi + lampiran guru. Lampiran gambar dikirim sebagai gambar
+            // (mis. "apa nama logo di atas?"), PDF digital diambil teksnya.
+            $question = trim($tugas->judul_tugas . "\n\n" . $tugas->deskripsi);
+            $soalImages = [];
+            if ($tugas->file_tugas) {
+                [$gambarSoal, $teksSoal] = $this->siapkanBerkasUntukAi(storage_path('app/public/' . $tugas->file_tugas), $tempFiles);
+                $soalImages = $gambarSoal;
+                if ($teksSoal !== '') {
+                    $question .= "\n\nIsi lampiran soal:\n" . $teksSoal;
                 }
             }
+
+            // Jawaban = teks + berkas jawaban (gambar, PDF digital, atau PDF hasil scan → gambar).
+            $jawabanTeks = trim((string) $submission->jawaban_text);
+            $jawabanImages = [];
+            if ($submission->file_jawaban) {
+                [$gambarJawaban, $teksJawaban, $pesanGagal] = $this->siapkanBerkasUntukAi(storage_path('app/public/' . $submission->file_jawaban), $tempFiles, true);
+                $jawabanImages = $gambarJawaban;
+                if ($teksJawaban !== '') {
+                    $jawabanTeks = trim($jawabanTeks . "\n\nIsi berkas jawaban:\n" . $teksJawaban);
+                }
+                if ($pesanGagal && $jawabanTeks === '' && empty($jawabanImages)) {
+                    return response()->json(['error' => true, 'feedback' => $pesanGagal]);
+                }
+            }
+
+            if ($jawabanTeks === '' && empty($jawabanImages)) {
+                return response()->json([
+                    'error' => true,
+                    'feedback' => 'Tidak ada jawaban teks atau gambar yang valid untuk dianalisis AI.',
+                ]);
+            }
+
+            return response()->json($aiService->evaluateMultimodal($question, null, $jawabanTeks, $soalImages, $jawabanImages));
+        } finally {
+            foreach ($tempFiles as $temp) {
+                @unlink($temp);
+            }
+        }
+    }
+
+    /**
+     * Ubah berkas menjadi bahan AI: [array path gambar, teks hasil ekstraksi, pesan gagal|null].
+     * Gambar dipakai langsung; PDF digital diekstrak teksnya; PDF hasil scan dikonversi halaman
+     * pertamanya ke gambar bila Imagick tersedia.
+     */
+    private function siapkanBerkasUntukAi(string $path, array &$tempFiles, bool $izinkanScan = false): array
+    {
+        if (!is_file($path)) {
+            return [[], '', null];
         }
 
-        // Fallback to text if no image or text-only submission
-        if ($submission->jawaban_text) {
-             $result = $aiService->evaluate(
-                $tugas->judul_tugas . "\n\n" . $tugas->deskripsi,
-                $submission->jawaban_text,
-                $tugas->deskripsi // Context
-            );
-            return response()->json($result);
+        $mime = mime_content_type($path);
+        if (str_starts_with($mime, 'image/')) {
+            return [[$path], '', null];
+        }
+        if ($mime !== 'application/pdf') {
+            return [[], '', 'Format berkas ini belum bisa dianalisis AI. Silakan nilai manual.'];
         }
 
-        return response()->json([
-            'error' => true,
-            'feedback' => 'Tidak ada jawaban teks atau gambar yang valid untuk dianalisis AI.'
-        ]);
+        try {
+            $binPath = config('services.pdftotext.bin_path') ?: null;
+            $teks = trim(Pdf::getText($path, $binPath));
+            if (strlen($teks) > 10) {
+                return [[], mb_substr($teks, 0, 4000), null];
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Ekstraksi teks PDF untuk AI gagal: ' . $e->getMessage());
+        }
+
+        if (!$izinkanScan || !extension_loaded('imagick')) {
+            return [[], '', 'File PDF ini sepertinya hasil scan/gambar dan server belum mendukung analisis PDF hasil scan. Silakan nilai manual, atau minta siswa mengunggah ulang dalam format JPG/PNG.'];
+        }
+
+        try {
+            if (!is_dir(storage_path('app/temp'))) {
+                mkdir(storage_path('app/temp'), 0755, true);
+            }
+            $imagePath = storage_path('app/temp/' . uniqid('pdf_') . '.jpg');
+            (new PdfToImage($path))->setPage(1)->setResolution(150)->saveImage($imagePath);
+            $tempFiles[] = $imagePath;
+
+            return [[$imagePath], '', null];
+        } catch (\Exception $e) {
+            \Log::error('PDF Processing Error: ' . $e->getMessage());
+
+            return [[], '', 'Gagal memproses file PDF untuk dianalisis AI. Silakan nilai manual, atau minta siswa mengunggah ulang dalam format JPG/PNG.'];
+        }
     }
 
     /**

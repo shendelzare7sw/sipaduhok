@@ -178,22 +178,54 @@ class LmsDashboardController extends Controller
     /**
      * Daftar Pengumuman
      */
-    public function pengumumanIndex()
+    public function pengumumanIndex(Request $request)
     {
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)->first();
-        
+
         if (!$siswa) {
             return redirect()->route('siswa.lms.dashboard');
         }
-        
-        $pengumumanList = Pengumuman::where('status', 'aktif')
-            ->where('tanggal_pengumuman', '<=', now()->toDateString())
-            ->orderBy('prioritas', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-        
-        return view('siswa.lms.pengumuman.index', compact('siswa', 'pengumumanList'));
+
+        // Filter dijalankan di server agar berlaku untuk seluruh data, bukan hanya halaman aktif.
+        $tanggal = function (?string $nilai) {
+            if (! $nilai || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $nilai)) {
+                return null;
+            }
+            try {
+                return Carbon::createFromFormat('Y-m-d', $nilai)->toDateString();
+            } catch (\Throwable) {
+                return null;
+            }
+        };
+        $filters = [
+            'q' => trim((string) $request->query('q', '')),
+            'prioritas' => in_array($request->query('prioritas'), ['biasa', 'penting', 'mendesak'], true) ? $request->query('prioritas') : '',
+            'from' => $tanggal($request->query('from')),
+            'to' => $tanggal($request->query('to')),
+            'sort' => in_array($request->query('sort'), ['terbaru', 'terlama'], true) ? $request->query('sort') : 'prioritas',
+        ];
+
+        $base = Pengumuman::where('status', 'aktif')
+            ->whereDate('tanggal_pengumuman', '<=', now()->toDateString())
+            ->when($filters['q'] !== '', fn ($q) => $q->where(fn ($w) => $w
+                ->where('judul', 'like', '%' . $filters['q'] . '%')
+                ->orWhere('isi_pengumuman', 'like', '%' . $filters['q'] . '%')))
+            ->when($filters['from'], fn ($q, $from) => $q->whereDate('tanggal_pengumuman', '>=', $from))
+            ->when($filters['to'], fn ($q, $to) => $q->whereDate('tanggal_pengumuman', '<=', $to));
+
+        $jumlahPrioritas = (clone $base)->selectRaw('prioritas, count(*) as total')->groupBy('prioritas')->pluck('total', 'prioritas');
+
+        $query = (clone $base)->when($filters['prioritas'] !== '', fn ($q) => $q->where('prioritas', $filters['prioritas']));
+        match ($filters['sort']) {
+            'terbaru' => $query->orderBy('tanggal_pengumuman', 'desc')->orderBy('created_at', 'desc'),
+            'terlama' => $query->orderBy('tanggal_pengumuman', 'asc')->orderBy('created_at', 'asc'),
+            default => $query->orderBy('prioritas', 'desc')->orderBy('created_at', 'desc'),
+        };
+
+        $pengumumanList = $query->paginate(20)->withQueryString();
+
+        return view('siswa.lms.pengumuman.index', compact('siswa', 'pengumumanList', 'filters', 'jumlahPrioritas'));
     }
 
     /**

@@ -110,6 +110,73 @@ if (! function_exists('jenis_kegiatan_class')) {
 }
 
 /**
+ * Normalisasi nomor telepon Indonesia ke format internasional WhatsApp (628xxxx).
+ * Menerima "0812-3456 789", "+62 812...", "62812...", "812..." → "62812...".
+ * Mengembalikan null bila tidak ada digit yang layak.
+ */
+if (! function_exists('wa_nomor')) {
+    function wa_nomor(?string $nomor): ?string
+    {
+        $digit = preg_replace('/\D+/', '', (string) $nomor);
+
+        if ($digit === '' || strlen($digit) < 8) {
+            return null;
+        }
+
+        if (str_starts_with($digit, '0')) {
+            $digit = '62' . ltrim($digit, '0');
+        } elseif (! str_starts_with($digit, '62')) {
+            // Nomor lokal tanpa awalan 0 (mis. 8123...) dianggap nomor Indonesia.
+            $digit = '62' . $digit;
+        }
+
+        return $digit;
+    }
+}
+
+/**
+ * Tautan direct chat WhatsApp (https://wa.me/628xxxx[?text=...]) atau null bila nomor tidak valid.
+ */
+if (! function_exists('wa_link')) {
+    function wa_link(?string $nomor, ?string $pesan = null): ?string
+    {
+        $digit = wa_nomor($nomor);
+
+        if ($digit === null) {
+            return null;
+        }
+
+        return 'https://wa.me/' . $digit . ($pesan !== null && $pesan !== '' ? '?text=' . rawurlencode($pesan) : '');
+    }
+}
+
+/**
+ * Warna solid (Tailwind) per jenis kegiatan kalender — palet yang sama dengan kalender
+ * Siswa lama. ['bg' => latar + teks chip, 'dot' => warna titik/penanda].
+ */
+if (! function_exists('jenis_kegiatan_tone')) {
+    function jenis_kegiatan_tone($jenisKegiatan): array
+    {
+        $tones = [
+            'field_trip' => ['bg' => 'bg-[#17a2b8] text-white', 'dot' => 'bg-[#17a2b8]'],
+            'outing' => ['bg' => 'bg-[#28a745] text-white', 'dot' => 'bg-[#28a745]'],
+            'live_in' => ['bg' => 'bg-[#6610f2] text-white', 'dot' => 'bg-[#6610f2]'],
+            'hokfest' => ['bg' => 'bg-[#fd7e14] text-white', 'dot' => 'bg-[#fd7e14]'],
+            'pts' => ['bg' => 'bg-[#ffc107] text-[#212529]', 'dot' => 'bg-[#ffc107]'],
+            'pas' => ['bg' => 'bg-[#dc3545] text-white', 'dot' => 'bg-[#dc3545]'],
+            'libur' => ['bg' => 'bg-[#6c757d] text-white', 'dot' => 'bg-[#6c757d]'],
+            'ujian' => ['bg' => 'bg-[#e83e8c] text-white', 'dot' => 'bg-[#e83e8c]'],
+            'acara_sekolah' => ['bg' => 'bg-[#20c997] text-white', 'dot' => 'bg-[#20c997]'],
+            'tugas' => ['bg' => 'bg-[#0891b2] text-white', 'dot' => 'bg-[#0891b2]'],
+            'deadline' => ['bg' => 'bg-[#2563eb] text-white', 'dot' => 'bg-[#2563eb]'],
+            'lainnya' => ['bg' => 'bg-[#007bff] text-white', 'dot' => 'bg-[#007bff]'],
+        ];
+
+        return $tones[$jenisKegiatan] ?? $tones['lainnya'];
+    }
+}
+
+/**
  * Redirect kembali ke URL list/halaman asal (termasuk nomor halaman & filter)
  * yang dikirim lewat hidden field `_return_url` (diisi dari url()->previous()
  * saat halaman edit/detail dirender). Dipakai supaya simpan/hapus di halaman

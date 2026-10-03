@@ -1204,6 +1204,26 @@ class GuruUjianController extends Controller
         }
         
         $aiService = new \App\Services\AiGradingService();
+
+        // Soal bergambar: kirim gambarnya agar AI memahami konteks visual (mis. "objek pada gambar di atas").
+        $gambarSoal = $soal->image_path ? storage_path('app/public/' . $soal->image_path) : null;
+        if ($gambarSoal && is_file($gambarSoal)) {
+            $pertanyaan = trim(($soal->narasi ? "Bacaan:
+{$soal->narasi}
+
+" : '') . $soal->pertanyaan);
+            $kunciAsli = $soal->kunci_jawaban ?? $soal->jawaban_benar;
+
+            return response()->json($aiService->evaluateMultimodal(
+                $pertanyaan,
+                is_string($kunciAsli) ? $kunciAsli : null,
+                (string) $request->answer,
+                [$gambarSoal],
+                [],
+                (int) $soal->bobot_nilai
+            ));
+        }
+
         $result = $aiService->evaluate(
             $soal->pertanyaan,
             $request->answer,

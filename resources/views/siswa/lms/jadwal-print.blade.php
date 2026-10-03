@@ -1,101 +1,77 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jadwal Pelajaran - {{ $kelas->nama_kelas }}</title>
-    @vite(['resources/css/siswa/lms/jadwal-print.css'])
-</head>
-<body class="siswa-lms-jadwal-print-page">
-    <!-- Tombol Print Manual -->
-    <button type="button" class="print-button no-print" data-print-button>
-        Cetak / Simpan PDF
-    </button>
+@php
+    // Dokumen murni Tailwind: lepas bridge Bootstrap di layouts.print.
+    $bootstrapFree = true;
+@endphp
+@extends('layouts.print')
 
-    <div class="header">
-        <h1>Jadwal Mata Pelajaran {{ strtoupper($kelas->jenjang) }}</h1>
-        <h2>PKBM House of Knowledge - Tahun Ajaran {{ $kelas->tahunAjaran->nama_tahun_ajaran }}</h2>
-    </div>
+@section('title', 'Jadwal Pelajaran - ' . $kelas->nama_kelas)
+@section('back-url', route('siswa.lms.jadwal'))
+@section('document-width', 'min-w-[720px]')
+@section('report-title', 'Jadwal Mata Pelajaran ' . strtoupper($kelas->jenjang))
 
-    <div class="info-box">
-        <div>
-            <strong>Kelas:</strong> {{ $kelas->nama_kelas }}
-        </div>
-        <div>
-            <strong>Jenjang:</strong> {{ strtoupper($kelas->jenjang) }}
-        </div>
-        <div>
-            <strong>Wali Kelas:</strong> {{ $kelas->waliKelas->nama_lengkap ?? '-' }}
-        </div>
+@section('report-meta')
+    <p class="mt-1 text-xs text-slate-600 print:text-[9pt]">Tahun Ajaran {{ $kelas->tahunAjaran->nama_tahun_ajaran }}</p>
+@endsection
+
+@section('report-content')
+    <div class="mb-4 grid grid-cols-3 gap-3 border border-slate-300 bg-slate-50 px-4 py-2.5 text-xs print:text-[9pt]">
+        <p><strong>Kelas:</strong> {{ $kelas->nama_kelas }}</p>
+        <p><strong>Jenjang:</strong> {{ strtoupper($kelas->jenjang) }}</p>
+        <p><strong>Wali Kelas:</strong> {{ $kelas->waliKelas->nama_lengkap ?? '-' }}</p>
     </div>
 
     @foreach($hariList as $hari)
-        <div class="day-section">
-            <div class="day-header">{{ $hari }}</div>
-
+        <section class="mb-5 break-inside-avoid print:mb-4">
+            <h2 class="bg-[#165fac] px-3 py-2 text-sm font-bold text-white print:text-[10pt]">{{ $hari }}</h2>
             @if($jadwalPerHari[$hari]->count() > 0)
-                <table>
-                    <thead>
+                <table class="w-full table-fixed border-collapse text-xs print:text-[9pt]">
+                    <colgroup><col class="w-12"><col class="w-32"><col><col class="w-28"><col></colgroup>
+                    <thead class="bg-slate-200">
                         <tr>
-                            <th class="col-number">No</th>
-                            <th class="col-time">Jam</th>
-                            <th>Mata Pelajaran</th>
-                            <th>Kode</th>
-                            <th>Guru Pengajar</th>
+                            <th class="border border-slate-300 px-2 py-1.5">No</th>
+                            <th class="border border-slate-300 px-2 py-1.5">Jam</th>
+                            <th class="border border-slate-300 px-2 py-1.5 text-left">Mata Pelajaran</th>
+                            <th class="border border-slate-300 px-2 py-1.5 text-left">Kode</th>
+                            <th class="border border-slate-300 px-2 py-1.5 text-left">Guru Pengajar</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($jadwalPerHari[$hari] as $index => $item)
                             @if($item['type'] === 'istirahat')
-                                @php
-                                    $istirahat = $item['data'];
-                                @endphp
-                                <tr class="break-row">
-                                    <td class="text-center">{{ $index + 1 }}</td>
-                                    <td>
-                                        {{ substr($istirahat->jam_mulai, 0, 5) }} -
-                                        {{ substr($istirahat->jam_selesai, 0, 5) }}
-                                    </td>
-                                    <td>
-                                        <strong>{{ $istirahat->nama_istirahat }}</strong>
-                                    </td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                <tr class="bg-amber-50 italic">
+                                    <td class="border border-slate-300 px-2 py-1.5 text-center">{{ $index + 1 }}</td>
+                                    <td class="border border-slate-300 px-2 py-1.5 text-center">{{ substr($item['data']->jam_mulai, 0, 5) }} – {{ substr($item['data']->jam_selesai, 0, 5) }}</td>
+                                    <td class="border border-slate-300 px-2 py-1.5 font-bold">{{ $item['data']->nama_istirahat }}</td>
+                                    <td class="border border-slate-300 px-2 py-1.5">-</td>
+                                    <td class="border border-slate-300 px-2 py-1.5">-</td>
                                 </tr>
                             @else
-                                @php
-                                    $jadwal = $item['data'];
-                                @endphp
+                                @php $jadwal = $item['data']; @endphp
                                 <tr>
-                                    <td class="text-center">{{ $index + 1 }}</td>
-                                    <td>
-                                        {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
-                                        {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
-                                    </td>
-                                    <td>
-                                        <strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong>
-                                    </td>
-                                    <td>{{ $jadwal->mataPelajaran->kode_mapel }}</td>
-                                    <td>{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}</td>
+                                    <td class="border border-slate-300 px-2 py-1.5 text-center">{{ $index + 1 }}</td>
+                                    <td class="border border-slate-300 px-2 py-1.5 text-center">{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} – {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}</td>
+                                    <td class="border border-slate-300 px-2 py-1.5 font-bold">{{ $jadwal->mataPelajaran->nama_mapel }}</td>
+                                    <td class="border border-slate-300 px-2 py-1.5">{{ $jadwal->mataPelajaran->kode_mapel }}</td>
+                                    <td class="border border-slate-300 px-2 py-1.5">{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}</td>
                                 </tr>
                             @endif
                         @endforeach
                     </tbody>
                 </table>
             @else
-                <div class="no-schedule">Tidak ada jadwal pelajaran</div>
+                <p class="border border-t-0 border-slate-300 px-3 py-3 text-center text-xs italic text-slate-500 print:text-[9pt]">Tidak ada jadwal pelajaran</p>
             @endif
-        </div>
+        </section>
     @endforeach
+@endsection
 
-    <div class="footer">
-        <div class="signature-box">
-            <div>Tangerang Selatan, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-            <div class="signature-role">Wali Kelas</div>
-            <div class="signature-line">{{ $kelas->waliKelas->nama_lengkap ?? '____________________' }}</div>
+@section('report-footer')
+    <footer class="mt-8 flex justify-end text-xs leading-5 print:mt-6 print:text-[9pt]">
+        <div class="w-64 text-center">
+            <p>Tangerang Selatan, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</p>
+            <p>Wali Kelas</p>
+            <div class="h-16"></div>
+            <p class="border-t border-slate-900 pt-1 font-bold">{{ $kelas->waliKelas->nama_lengkap ?? '____________________' }}</p>
         </div>
-    </div>
-
-    @vite(['resources/js/siswa/lms/jadwal-print.js'])
-</body>
-</html>
+    </footer>
+@endsection

@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    @vite(['resources/css/admin.css', 'resources/js/admin.js'])
+    {{-- View dokumen yang sudah murni Tailwind dapat men-set $bootstrapFree = true untuk melepas bridge Bootstrap. --}}
+    @if($bootstrapFree ?? false)
+        @vite(['resources/css/cleanflow.css', 'resources/js/cleanflow.js'])
+    @else
+        @vite(['resources/css/admin.css', 'resources/js/admin.js'])
+    @endif
 </head>
 <body class="m-0 min-h-screen bg-slate-100 font-sans text-slate-950 print:bg-white">
     @hasSection('page-content')

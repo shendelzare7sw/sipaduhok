@@ -52,183 +52,19 @@
     @endsection
 @endif
 
-@push('styles')
-    @vite(['resources/css/siswa/lms/mata-pelajaran/ujian/show.css'])
-@endpush
-
-@push('scripts')
-    @vite(['resources/js/siswa/lms/mata-pelajaran/ujian/show.js'])
-@endpush
-
 @section('content')
 
 @if(!$ujianSiswa || $ujianSiswa->status !== 'sedang_mengerjakan')
-    {{-- LAYOUT 1: START SCREEN / RESULT SCREEN --}}
-    <div class="siswa-lms-ujian-show-page">
-        <div class="container-fluid">
-
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                @if($ujianSiswa && in_array($ujianSiswa->status, ['selesai', 'dinilai']))
-                     <!-- RESULT SCREEN -->
-                     <div class="ujian-card text-center">
-                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-                        <h3 class="text-success mb-2">Ujian Selesai!</h3>
-                        <p class="text-muted mb-4">Semua jawaban Anda telah tersimpan.</p>
-
-                        <div class="alert alert-light border">
-                            <p class="mb-1 small text-muted">Diselesaikan pada:</p>
-                            <strong>{{ $ujianSiswa->waktu_selesai->format('d F Y, H:i') }} WIB</strong>
-                        </div>
-
-                        @if($ujian->tampilkan_nilai)
-                            @if($ujianSiswa->nilai !== null)
-                                <div class="my-4">
-                                    <h1 class="display-4 fw-bold text-primary">{{ number_format($ujianSiswa->nilai_terbaik ?? $ujianSiswa->nilai, 1) }}/100</h1>
-                                    <span class="text-muted">Nilai Terbaik Anda</span>
-                                    
-                                    @if(($ujianSiswa->pengulangan_ke ?? 1) > 1)
-                                    <div class="mt-2 text-muted small">
-                                        Nilai Percobaan Terakhir: {{ number_format($ujianSiswa->nilai, 1) }}
-                                    </div>
-                                    @endif
-                                </div>
-                            @else
-                                <div class="my-4">
-                                    <i class="fas fa-hourglass-half fa-3x text-warning mb-2"></i>
-                                    <h5 class="text-secondary">Menunggu Penilaian Guru</h5>
-                                </div>
-                            @endif
-                        @else
-                            <div class="my-4">
-                                <h5 class="text-secondary fw-medium">Terima Kasih Sudah Menyelesaikan {{ ucwords(str_replace('_', ' ', $ujian->tipe_ujian)) }}</h5>
-                            </div>
-                        @endif
-
-                        <div class="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
-                            @if($ujian->bisa_diulang && $ujian->isOngoing())
-                                @php
-                                    $sisaPengulangan = $ujian->batas_pengulangan ? max(0, $ujian->batas_pengulangan - (($ujianSiswa->pengulangan_ke ?? 1) - 1)) : null;
-                                @endphp
-                                @if($sisaPengulangan === null || $sisaPengulangan > 0)
-                                    <form id="form-retake" action="{{ route($routePrefix . 'retake', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="m-0">
-                                        @csrf
-                                        <button type="button" class="btn btn-warning px-4" data-confirm-retake>
-                                            <i class="fas fa-redo-alt me-2"></i> Kerjakan Ulang @if($sisaPengulangan !== null) (Sisa: {{ $sisaPengulangan }}) @endif
-                                        </button>
-                                    </form>
-                                @else
-                                    <button type="button" class="btn btn-secondary px-4 m-0" disabled>
-                                        <i class="fas fa-ban me-2"></i> Pengulangan Habis
-                                    </button>
-                                @endif
-                            @endif
-                            @if($ujian->tampilkan_riwayat)
-                                <a href="{{ route($routePrefix . 'review', [$mataPelajaran->id, $ujian->id]) }}" class="btn btn-outline-primary px-4 m-0">
-                                    <i class="fas fa-search me-2"></i> Lihat Pembahasan
-                                </a>
-                            @endif
-                            <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-primary px-4 m-0">
-                                <i class="fas fa-arrow-left me-2"></i> Kembali ke Mata Pelajaran
-                            </a>
-                        </div>
-                     </div>
-                @else
-                    <!-- START SCREEN -->
-                    <div class="ujian-card">
-                        <div class="text-center mb-4">
-                            <h3 class="fw-bold text-primary">{{ $ujian->judul_ujian }}</h3>
-                            <span class="badge bg-secondary">{{ strtoupper(str_replace('_', ' ', $ujian->tipe_ujian)) }}</span>
-                        </div>
-
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-3">
-                                <div class="info-box">
-                                    <i class="fas fa-clock text-warning"></i>
-                                    <h5>{{ $ujian->durasi_menit == 0 ? 'Tanpa Batas' : $ujian->durasi_menit . ' Menit' }}</h5>
-                                    <small class="text-muted">Durasi</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="info-box">
-                                    <i class="fas fa-list-ol text-info"></i>
-                                    <h5>{{ $soalList->count() }} Soal</h5>
-                                    <small class="text-muted">Jumlah Soal</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="info-box">
-                                    <i class="fas fa-calendar-alt text-success"></i>
-                                    <h5>{{ $ujian->tanggal_mulai->format('d M') }}</h5>
-                                    <small class="text-muted">Tanggal</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="info-box">
-                                    <i class="fas fa-redo-alt text-primary"></i>
-                                    @if($ujian->bisa_diulang)
-                                        @if($ujian->batas_pengulangan)
-                                            <h5>{{ max(0, $ujian->batas_pengulangan - ($ujianSiswa->pengulangan_ke ?? 0)) }} Kali</h5>
-                                        @else
-                                            <h5>Tak Terbatas</h5>
-                                        @endif
-                                        <small class="text-muted">Sisa Pengulangan</small>
-                                    @else
-                                        <h5>1 Kali</h5>
-                                        <small class="text-muted">Batas Ujian</small>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="alert alert-info">
-                            <strong><i class="fas fa-info-circle me-2"></i>Petunjuk:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>Berdoalah sebelum mengerjakan</li>
-                                <li>Waktu berjalan otomatis saat tombol "Mulai" diklik</li>
-                                <li>Tidak dapat mengulang ujian yang sudah disubmit</li>
-                                <li>Pastikan koneksi internet stabil</li>
-                            </ul>
-                        </div>
-
-                        @if(!$ujian->is_active)
-                            <div class="text-center mt-4">
-                                <button class="btn btn-secondary btn-lg" disabled>
-                                    <i class="fas fa-lock me-2"></i> Belum Dirilis
-                                </button>
-                            </div>
-                        @elseif($ujian->isOngoing())
-                             <div class="text-center mt-4">
-                                <form action="{{ route($routePrefix . 'mulai', [$mataPelajaran->id, $ujian->id]) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-play me-2"></i> Mulai Ujian Sekarang
-                                    </button>
-                                </form>
-                            </div>
-                        @elseif($ujian->tanggal_mulai->isFuture())
-                             <div class="text-center mt-4">
-                                <button class="btn btn-secondary btn-lg" disabled>
-                                    <i class="fas fa-hourglass-start me-2"></i> Belum Dimulai
-                                </button>
-                            </div>
-                        @else
-                             <div class="text-center mt-4">
-                                <button class="btn btn-secondary btn-lg" disabled>
-                                    <i class="fas fa-history me-2"></i> Ujian Sudah Berakhir
-                                </button>
-                            </div>
-                        @endif
-                    </div>
-                @endif
-            </div>
-        </div>
-        </div>
-    </div>
-
+    @include('siswa.lms.mata-pelajaran.ujian.partials.start-result', ['isLatihan' => $isLatihan, 'routePrefix' => $routePrefix])
 @else
-    {{-- LAYOUT 2: EXAM INTERFACE (FOCUS MODE) - Simple CBT Style --}}
-    <div class="siswa-lms-ujian-work-page"
+    {{-- MODE FOKUS UJIAN (CBT satu soal per layar). Ekuivalen-piksel dengan tampilan Bootstrap lama. --}}
+    @php
+        $btnNav = 'inline-block grow text-center whitespace-nowrap rounded-[6px] border border-[#0d6efd] bg-[#0d6efd] px-2 py-1.5 text-[11px] leading-[1.5] text-white transition hover:border-[#0a58ca] hover:bg-[#0b5ed7] disabled:pointer-events-none disabled:opacity-65 min-[576px]:min-w-[140px] min-[576px]:px-3 min-[576px]:py-2 min-[576px]:text-[0.85rem]';
+        $opsi = 'mb-[10px] flex cursor-pointer items-start rounded-[4px] border border-[#dee2e6] bg-white px-[15px] py-3 hover:bg-[#f8f9fa]';
+        $timerBox = 'rounded-[4px] border border-[#dee2e6] bg-[#f8f9fa] text-center';
+        $timerText = "font-['Courier_New',monospace] text-xl font-bold leading-[1.5] text-[#dc3545]";
+    @endphp
+    <div x-data="ujianWork"
         data-exam-type="{{ $ujian->tipe_ujian }}"
         data-total-questions="{{ $soalList->count() }}"
         data-duration-minutes="{{ $ujian->durasi_menit ?? 0 }}"
@@ -238,251 +74,215 @@
         data-csrf-token="{{ csrf_token() }}"
         data-storage-key="doubtState_{{ $ujianSiswa->id }}"
         data-question-meta="{{ $encodedQuestionMeta }}"
-        data-answers-state="{{ $encodedAnswersState }}">
-    <form action="{{ route($routePrefix . 'submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">
+        data-answers-state="{{ $encodedAnswersState }}"
+        class="min-h-screen bg-[#e9ecef]">
+    <form x-ref="examForm" action="{{ route($routePrefix . 'submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">
         @csrf
-        
-        <div class="container-fluid px-0">
-            <div class="row g-3 mx-0">
-                <!-- Left: Question Area (70%) -->
-                <div class="col-lg-9">
-                    <!-- Header -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="question-header">
-                            <strong>SOAL NO. <span id="q-no-display" class="badge bg-primary">1</span></strong>
-                        </div>
 
-                        <!-- Timer Mobile -->
-                        <div class="d-lg-none">
-                            <div class="timer-box d-inline-block px-3 py-2">
-                                <small class="d-block text-muted timer-label">SISA WAKTU</small>
-                                <span class="timer-badge mobile-timer">00:00:00</span>
-                            </div>
-                        </div>
+        <div class="grid grid-cols-1 gap-y-4 min-[992px]:grid-cols-[3fr_1fr]">
+            {{-- Kiri: area soal --}}
+            <div class="min-w-0 px-2">
+                <div class="mb-4 flex items-center justify-between">
+                    <div class="mb-5 inline-block rounded-[4px] bg-[#f8f9fa] px-5 py-3">
+                        <strong>SOAL NO. <span class="inline-block rounded-[6px] bg-[#0d6efd] px-[0.65em] py-[0.35em] text-[0.75em] font-bold leading-none text-white" x-text="current + 1">1</span></strong>
                     </div>
 
-                    <!-- Question Card -->
-                    <div class="question-card">
-                        @if($soalList->count() > 0)
-                            @foreach($soalList as $index => $soal)
-                                <div class="question-item {{ $index === 0 ? 'is-active' : '' }}" id="q-item-{{ $index }}">
-                                    @if($soal->narasi)
-                                        <div class="narasi-box mb-3">
-                                            <small class="text-muted fw-bold d-block mb-1"><i class="fas fa-book-open me-1"></i> Bacaan</small>
-                                            <div class="narasi-content">
-                                                {!! nl2br(e($soal->narasi)) !!}
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    @if($soal->image_path)
-                                        <div class="soal-image-box mb-3">
-                                            <div class="card border-0 shadow-sm">
-                                                <div class="card-body p-2 text-center">
-                                                    <img src="{{ asset('storage/' . $soal->image_path) }}"
-                                                         alt="Gambar Soal {{ $index + 1 }}"
-                                                         class="img-fluid rounded soal-image"
-                                                         data-bs-toggle="modal" data-bs-target="#imageModal{{$index}}">
-                                                    <small class="text-muted d-block mt-2">
-                                                        <i class="fas fa-search-plus me-1"></i> Klik gambar untuk memperbesar
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Image Modal -->
-                                        <div class="modal fade" id="imageModal{{$index}}" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg modal-dialog-centered">
-                                                <div class="modal-content bg-transparent border-0">
-                                                    <div class="modal-body text-center pt-2 pb-0">
-                                                        <img src="{{ asset('storage/' . $soal->image_path) }}" alt="Gambar Soal {{ $index + 1 }}" class="img-fluid rounded shadow-lg soal-modal-image">
-                                                    </div>
-                                                    <div class="modal-footer border-0 justify-content-center">
-                                                        <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Tutup Gambar</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    <!-- Question Text -->
-                                    <div class="question-text">
-                                        {!! nl2br(e($soal->pertanyaan)) !!}
-                                    </div>
-
-                                    <!-- Answers -->
-                                    <div>
-                                        @if($soal->tipe_soal === 'pilihan_ganda')
-                                            @php
-                                                $pilihan = $soal->pilihanJawabanForSiswa();
-                                            @endphp
-                                            @if(is_array($pilihan))
-                                                @foreach($pilihan as $key => $value)
-                                                    <label class="option-item">
-                                                        <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}"
-                                                            data-answer-choice data-index="{{ $index }}" data-soal-id="{{ $soal->id }}"
-                                                            {{ isset($existingAnswers[$soal->id]) && $existingAnswers[$soal->id] == $key ? 'checked' : '' }}>
-                                                        <span><strong>{{ $key }}.</strong> {{ $value }}</span>
-                                                    </label>
-                                                @endforeach
-                                            @endif
-
-                                        @elseif($soal->tipe_soal === 'pilihan_ganda_kompleks')
-                                            @php
-                                                $pilihan = $soal->pilihanJawabanForSiswa();
-                                            @endphp
-                                            <small class="text-muted mb-2 d-block"><i class="fas fa-info-circle me-1"></i>Pilih semua jawaban yang benar</small>
-                                            <input type="hidden" name="jawaban[{{ $soal->id }}]" id="kompleks-hidden-{{ $soal->id }}" value="{{ $existingAnswers[$soal->id] ?? '' }}">
-                                            @php
-                                                $ansRaw = $existingAnswers[$soal->id] ?? '';
-                                                $checkedKompleks = json_decode($ansRaw, true);
-                                                if (!is_array($checkedKompleks)) {
-                                                    $checkedKompleks = $ansRaw ? explode(',', $ansRaw) : [];
-                                                }
-                                            @endphp
-                                            @if(is_array($pilihan))
-                                                @foreach($pilihan as $key => $value)
-                                                    @if($key !== 'jawaban_benar')
-                                                        <label class="option-item">
-                                                            <input type="checkbox" class="kompleks-cb" data-soal-id="{{ $soal->id }}" data-index="{{ $index }}" value="{{ $key }}"
-                                                                {{ in_array($key, $checkedKompleks) ? 'checked' : '' }}>
-                                                            <span><strong>{{ $key }}.</strong> {{ $value }}</span>
-                                                        </label>
-                                                    @endif
-                                                @endforeach
-                                            @endif
-
-                                        @elseif($soal->tipe_soal === 'benar_salah')
-                                            @php
-                                                $pilihanData = $soal->pilihanJawabanForSiswa();
-                                                $pernyataanList = $pilihanData['pernyataan'] ?? [];
-                                            @endphp
-                                            <input type="hidden" name="jawaban[{{ $soal->id }}]" id="bs-hidden-{{ $soal->id }}" value="{{ $existingAnswers[$soal->id] ?? '' }}">
-                                            @php
-                                                $checkedBS = isset($existingAnswers[$soal->id]) ? json_decode($existingAnswers[$soal->id], true) : [];
-                                            @endphp
-                                            @foreach($pernyataanList as $pIdx => $item)
-                                                <div class="mb-3 p-3 border rounded bg-light">
-                                                    <p class="mb-2 fw-bold">{{ $item['text'] ?? $item['pernyataan'] ?? '' }}</p>
-                                                    <div class="d-flex gap-3">
-                                                        <label class="option-item benar-salah-option mb-0 flex-fill text-center">
-                                                            <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="true"
-                                                                data-benar-salah-answer data-soal-id="{{ $soal->id }}" data-total-pernyataan="{{ count($pernyataanList) }}" data-index="{{ $index }}" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === true || $checkedBS[$pIdx] === 'true' || $checkedBS[$pIdx] === 1) ? 'checked' : '' }}>
-                                                            <span><strong>BENAR</strong></span>
-                                                        </label>
-                                                        <label class="option-item benar-salah-option mb-0 flex-fill text-center">
-                                                            <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="false"
-                                                                data-benar-salah-answer data-soal-id="{{ $soal->id }}" data-total-pernyataan="{{ count($pernyataanList) }}" data-index="{{ $index }}" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === false || $checkedBS[$pIdx] === 'false' || $checkedBS[$pIdx] === 0) ? 'checked' : '' }}>
-                                                            <span><strong>SALAH</strong></span>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-
-                                        @else
-                                            <textarea name="jawaban[{{ $soal->id }}]" rows="6" class="form-control"
-                                                placeholder="Tulis jawaban Anda..." data-answer-text data-index="{{ $index }}" data-soal-id="{{ $soal->id }}">{{ $existingAnswers[$soal->id] ?? '' }}</textarea>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        @else
-                            <div class="text-center py-5">
-                                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                                <h5 class="text-muted">Soal tidak ditemukan!</h5>
-                                <p class="text-muted small mt-2">
-                                    ID Ujian: {{ $ujian->id }}<br>
-                                    Mata Pelajaran: {{ $mataPelajaran->nama_mapel ?? 'N/A' }}<br>
-                                    Jumlah Soal: {{ $soalList->count() ?? 0 }}
-                                </p>
-
-                                @if($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan')
-                                <div class="mt-4">
-                                    <p class="text-muted mb-3">Anda sedang dalam sesi ujian tanpa ada soal. Pilih aksi di bawah:</p>
-                                    <form action="{{ route($routePrefix . 'submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="empty-submit-form">
-                                        @csrf
-                                        <button type="submit" class="btn btn-danger" data-confirm-empty-submit>
-                                            <i class="fas fa-times-circle"></i> Akhiri Ujian Sekarang
-                                        </button>
-                                    </form>
-                                    <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-secondary ms-2">
-                                        <i class="fas fa-arrow-left"></i> Kembali ke Mata Pelajaran
-                                    </a>
-                                </div>
-                                @else
-                                <div class="mt-4">
-                                    <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-secondary">
-                                        <i class="fas fa-arrow-left"></i> Kembali ke Mata Pelajaran
-                                    </a>
-                                </div>
-                                @endif
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Navigation Buttons -->
-                    <div class="d-flex justify-content-between align-items-center mt-3 gap-2 flex-nowrap exam-nav-actions">
-                        <button type="button" class="btn btn-primary btn-nav-q flex-grow-1 text-nowrap" id="btn-prev" data-prev-question>
-                            <i class="fas fa-chevron-left me-1"></i> <span class="d-none d-sm-inline">SOAL </span>SEBELUMNYA
-                        </button>
-
-                        <label class="btn btn-warning d-flex align-items-center justify-content-center m-0 flex-grow-1 text-nowrap nav-ragu-label" id="label-ragu">
-                            <input type="checkbox" id="cb-ragu" class="ragu-checkbox" data-toggle-doubt>
-                            <span class="fw-bold"><i class="fas fa-flag me-1"></i> RAGU-RAGU</span>
-                        </label>
-
-                        <button type="button" class="btn btn-primary btn-nav-q flex-grow-1 text-nowrap" id="btn-next" data-next-question>
-                            <span class="d-none d-sm-inline">SOAL </span>SELANJUTNYA <i class="fas fa-chevron-right ms-1"></i>
-                        </button>
+                    <div class="min-[992px]:hidden">
+                        <div class="{{ $timerBox }} mb-[15px] inline-block px-4 py-2">
+                            <small class="block text-[0.75rem] leading-[18px] text-[rgba(33,37,41,0.75)]">SISA WAKTU</small>
+                            <span data-exam-timer class="{{ $timerText }}" x-text="timerText">00:00:00</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Right: Sidebar (30%) -->
-                <div class="col-lg-3">
-                    <div class="exam-sidebar">
-                        <!-- Timer Desktop -->
-                        <div class="timer-box">
-                            <small class="d-block text-muted mb-1 timer-label">SISA WAKTU</small>
-                            <div class="timer-badge" id="timer-display-main">00:00:00</div>
-                        </div>
+                <div class="rounded-[4px] bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.1)] min-[576px]:min-h-[400px] min-[576px]:p-[25px]">
+                    @if($soalList->count() > 0)
+                        @foreach($soalList as $index => $soal)
+                            <div id="q-item-{{ $index }}" x-show="current === {{ $index }}" @if($index > 0) x-cloak @endif>
+                                @if($soal->narasi)
+                                    <div class="mb-4 rounded-[4px] border-l-4 border-[#165fac] bg-[#f0f7ff] p-[15px]">
+                                        <small class="mb-1 block text-sm/[1.5] font-bold text-[rgba(33,37,41,0.75)]"><i class="fas fa-book-open mr-1"></i> Bacaan</small>
+                                        <div class="text-[0.95rem] leading-[1.7] text-[#333]">{!! nl2br(e($soal->narasi)) !!}</div>
+                                    </div>
+                                @endif
 
-                        <!-- Navigation Title -->
-                        <h6 class="fw-bold mb-2 small">NOMOR SOAL</h6>
+                                @if($soal->image_path)
+                                    <div class="mb-4">
+                                        <div class="rounded-[6px] bg-white shadow-[0_0.125rem_0.25rem_rgba(0,0,0,0.075)]">
+                                            <div class="p-2 text-center">
+                                                <img src="{{ asset('storage/' . $soal->image_path) }}" alt="Gambar Soal {{ $index + 1 }}"
+                                                     data-question-image x-on:click="zoom($el.src)"
+                                                     class="h-auto max-h-[250px] max-w-full cursor-pointer rounded-[6px]">
+                                                <small class="mt-2 block text-sm/[1.5] text-[rgba(33,37,41,0.75)]"><i class="fas fa-search-plus mr-1"></i> Klik gambar untuk memperbesar</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
 
-                        <!-- Navigation Grid -->
-                        <div class="q-nav-grid mb-3">
-                            @foreach($soalList as $index => $soal)
-                                <div class="q-nav-item" id="nav-item-{{ $index }}" data-jump-question="{{ $index }}">
-                                    {{ $index + 1 }}
+                                <div class="mb-5 text-base leading-[1.6] text-[#212529]">{!! nl2br(e($soal->pertanyaan)) !!}</div>
+
+                                <div>
+                                    @if($soal->tipe_soal === 'pilihan_ganda')
+                                        @php $pilihan = $soal->pilihanJawabanForSiswa(); @endphp
+                                        @if(is_array($pilihan))
+                                            @foreach($pilihan as $key => $value)
+                                                <label class="{{ $opsi }}">
+                                                    <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" data-answer-choice
+                                                        x-on:change="setAnswer({{ $index }}, {{ $soal->id }}, $el.value)"
+                                                        class="mr-[10px] mt-[3px] h-[18px] w-[18px] shrink-0"
+                                                        {{ isset($existingAnswers[$soal->id]) && $existingAnswers[$soal->id] == $key ? 'checked' : '' }}>
+                                                    <span><strong>{{ $key }}.</strong> {{ $value }}</span>
+                                                </label>
+                                            @endforeach
+                                        @endif
+
+                                    @elseif($soal->tipe_soal === 'pilihan_ganda_kompleks')
+                                        @php
+                                            $pilihan = $soal->pilihanJawabanForSiswa();
+                                            $ansRaw = $existingAnswers[$soal->id] ?? '';
+                                            $checkedKompleks = json_decode($ansRaw, true);
+                                            if (!is_array($checkedKompleks)) {
+                                                $checkedKompleks = $ansRaw ? explode(',', $ansRaw) : [];
+                                            }
+                                        @endphp
+                                        <small class="mb-2 block text-sm/[1.5] text-[rgba(33,37,41,0.75)]"><i class="fas fa-info-circle mr-1"></i>Pilih semua jawaban yang benar</small>
+                                        <input type="hidden" name="jawaban[{{ $soal->id }}]" id="kompleks-hidden-{{ $soal->id }}" value="{{ $existingAnswers[$soal->id] ?? '' }}">
+                                        @if(is_array($pilihan))
+                                            @foreach($pilihan as $key => $value)
+                                                @if($key !== 'jawaban_benar')
+                                                    <label class="{{ $opsi }}">
+                                                        <input type="checkbox" data-kompleks data-soal-id="{{ $soal->id }}" value="{{ $key }}"
+                                                            x-on:change="answerKompleks({{ $index }}, {{ $soal->id }})"
+                                                            class="mr-[10px] mt-[3px] h-[18px] w-[18px] shrink-0"
+                                                            {{ in_array($key, $checkedKompleks) ? 'checked' : '' }}>
+                                                        <span><strong>{{ $key }}.</strong> {{ $value }}</span>
+                                                    </label>
+                                                @endif
+                                            @endforeach
+                                        @endif
+
+                                    @elseif($soal->tipe_soal === 'benar_salah')
+                                        @php
+                                            $pilihanData = $soal->pilihanJawabanForSiswa();
+                                            $pernyataanList = $pilihanData['pernyataan'] ?? [];
+                                            $checkedBS = isset($existingAnswers[$soal->id]) ? json_decode($existingAnswers[$soal->id], true) : [];
+                                        @endphp
+                                        <input type="hidden" name="jawaban[{{ $soal->id }}]" id="bs-hidden-{{ $soal->id }}" value="{{ $existingAnswers[$soal->id] ?? '' }}">
+                                        @foreach($pernyataanList as $pIdx => $item)
+                                            <div class="mb-4 rounded-[6px] border border-[#dee2e6] bg-[#f8f9fa] p-4">
+                                                <p class="mb-2 font-bold">{{ $item['text'] ?? $item['pernyataan'] ?? '' }}</p>
+                                                <div class="flex gap-4">
+                                                    @foreach(['true' => 'BENAR', 'false' => 'SALAH'] as $nilaiBs => $labelBs)
+                                                        @php
+                                                            $cek = isset($checkedBS[$pIdx]) && ($nilaiBs === 'true'
+                                                                ? ($checkedBS[$pIdx] === true || $checkedBS[$pIdx] === 'true' || $checkedBS[$pIdx] === 1)
+                                                                : ($checkedBS[$pIdx] === false || $checkedBS[$pIdx] === 'false' || $checkedBS[$pIdx] === 0));
+                                                        @endphp
+                                                        <label class="{{ $opsi }} !mb-0 flex-1 justify-center text-center">
+                                                            <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="{{ $nilaiBs }}" data-benar-salah-answer data-soal-id="{{ $soal->id }}"
+                                                                x-on:change="answerBenarSalah({{ $index }}, {{ $soal->id }}, {{ count($pernyataanList) }})"
+                                                                class="mr-2 mt-[3px] h-[18px] w-[18px] shrink-0" {{ $cek ? 'checked' : '' }}>
+                                                            <span><strong>{{ $labelBs }}</strong></span>
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endforeach
+
+                                    @else
+                                        <textarea name="jawaban[{{ $soal->id }}]" rows="6" placeholder="Tulis jawaban Anda..." data-answer-text
+                                            x-on:input="setAnswer({{ $index }}, {{ $soal->id }}, $el.value)"
+                                            class="block w-full rounded-[6px] border border-[#dee2e6] bg-white px-3 py-1.5 text-base leading-6 text-[#212529] placeholder:text-[rgba(33,37,41,0.75)] focus:border-[#86b7fe] focus:outline-none focus:ring-4 focus:ring-[rgba(13,110,253,0.25)]">{{ $existingAnswers[$soal->id] ?? '' }}</textarea>
+                                    @endif
                                 </div>
-                            @endforeach
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="py-12 text-center">
+                            <i class="fas fa-exclamation-triangle mb-4 text-5xl text-[#ffc107]"></i>
+                            <h5 class="text-xl font-medium leading-[1.2] text-[rgba(33,37,41,0.75)]">Soal tidak ditemukan!</h5>
+                            <p class="mt-2 text-sm/[1.5] text-[rgba(33,37,41,0.75)]">
+                                ID Ujian: {{ $ujian->id }}<br>
+                                Mata Pelajaran: {{ $mataPelajaran->nama_mapel ?? 'N/A' }}<br>
+                                Jumlah Soal: {{ $soalList->count() ?? 0 }}
+                            </p>
+                            <div class="mt-6">
+                                <p class="mb-4 text-[rgba(33,37,41,0.75)]">Anda sedang dalam sesi ujian tanpa ada soal. Pilih aksi di bawah:</p>
+                                <button type="button" data-end-empty-exam x-on:click="akhiriTanpaSoal()"
+                                    class="inline-flex items-center gap-1 rounded-[6px] border border-[#dc3545] bg-[#dc3545] px-3 py-1.5 text-white hover:bg-[#bb2d3b]">
+                                    <i class="fas fa-times-circle"></i> Akhiri Ujian Sekarang
+                                </button>
+                                <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="ml-2 inline-flex items-center gap-1 rounded-[6px] border border-[#6c757d] bg-[#6c757d] px-3 py-1.5 text-white no-underline hover:bg-[#5c636a]">
+                                    <i class="fas fa-arrow-left"></i> Kembali ke Mata Pelajaran
+                                </a>
+                            </div>
                         </div>
+                    @endif
+                </div>
 
-                        <!-- Legend -->
-                        <div class="mb-3">
-                            <div class="legend-item">
-                                <div class="legend-box bg-success"></div>
-                                <span>Hijau = Sudah dijawab</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-box bg-warning"></div>
-                                <span>Orange = Ragu-ragu</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-box bg-secondary"></div>
-                                <span>Abu-abu = Belum dijawab</span>
-                            </div>
-                        </div>
+                {{-- Navigasi soal --}}
+                <div class="mt-4 flex flex-nowrap items-center justify-between gap-2">
+                    <button type="button" id="btn-prev" data-prev-question x-on:click="prev()" x-bind:disabled="current === 0" class="{{ $btnNav }}">
+                        <i class="fas fa-chevron-left mr-1"></i> <span class="hidden min-[576px]:inline">SOAL </span>SEBELUMNYA
+                    </button>
 
-                        <!-- Submit Button -->
-                        <button type="button" class="btn btn-danger w-100 fw-bold" data-finish-exam>
-                            SELESAIKAN UJIAN
-                        </button>
+                    <label id="label-ragu" x-bind:class="doubts[current] && 'brightness-90 saturate-[1.2] shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]'"
+                        class="m-0 flex grow cursor-pointer items-center justify-center whitespace-nowrap rounded-[6px] border border-[#ffc107] bg-[#ffc107] px-2 py-1.5 text-[11px] leading-[1.5] text-black min-[576px]:px-3 min-[576px]:py-2 min-[576px]:text-[0.85rem]">
+                        <input type="checkbox" id="cb-ragu" data-toggle-doubt x-bind:checked="!!doubts[current]" x-on:change="toggleDoubt($el.checked)" class="mr-1.5 scale-110">
+                        <span class="font-bold"><i class="fas fa-flag mr-1"></i> RAGU-RAGU</span>
+                    </label>
+
+                    <button type="button" id="btn-next" data-next-question x-on:click="next()" x-bind:disabled="current === total - 1" class="{{ $btnNav }}">
+                        <span class="hidden min-[576px]:inline">SOAL </span>SELANJUTNYA <i class="fas fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            {{-- Kanan: panel nomor soal --}}
+            <div class="min-w-0 px-2">
+                <div class="rounded-[4px] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.1)] min-[576px]:p-5">
+                    <div class="{{ $timerBox }} mb-[15px] p-[10px]">
+                        <small class="mb-1 block text-[0.75rem] leading-[18px] text-[rgba(33,37,41,0.75)]">SISA WAKTU</small>
+                        <div data-exam-timer class="{{ $timerText }}" x-text="timerText">00:00:00</div>
                     </div>
+
+                    <h6 class="mb-2 text-sm/[1.2] font-bold">NOMOR SOAL</h6>
+
+                    <div class="mb-4 grid grid-cols-5 gap-1 min-[576px]:gap-[6px] min-[992px]:grid-cols-7">
+                        @foreach($soalList as $index => $soal)
+                            <div id="nav-item-{{ $index }}" data-jump-question="{{ $index }}" x-on:click="go({{ $index }})" x-bind:class="navClass({{ $index }})"
+                                class="flex aspect-square cursor-pointer items-center justify-center rounded-[4px] text-xs font-semibold text-white transition hover:opacity-80 min-[576px]:text-sm">
+                                {{ $index + 1 }}
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="mb-4 text-sm/[1.5]">
+                        @foreach([['bg-[#198754]', 'Hijau = Sudah dijawab'], ['bg-[#ffc107]', 'Orange = Ragu-ragu'], ['bg-[#6c757d]', 'Abu-abu = Belum dijawab']] as [$warnaLegend, $teksLegend])
+                            <div class="mb-2 flex items-center gap-2">
+                                <div class="h-5 w-5 rounded-[3px] {{ $warnaLegend }}"></div>
+                                <span>{{ $teksLegend }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <button type="button" data-finish-exam x-on:click="finish()" class="w-full rounded-[6px] border border-[#dc3545] bg-[#dc3545] px-3 py-1.5 text-base font-bold leading-6 text-white transition hover:border-[#b02a37] hover:bg-[#bb2d3b]">
+                        SELESAIKAN UJIAN
+                    </button>
                 </div>
             </div>
         </div>
     </form>
+
+    {{-- Pembesar gambar soal --}}
+    <dialog x-ref="zoomDialog" x-on:click="$event.target === $el && $el.close()" class="m-auto max-w-[min(800px,95vw)] bg-transparent p-0 backdrop:bg-black/50">
+        <div class="pt-2 text-center">
+            <img x-bind:src="zoomSrc" alt="Gambar soal diperbesar" class="mx-auto h-auto max-h-[80vh] max-w-full rounded-[6px] shadow-[0_1rem_3rem_rgba(0,0,0,0.175)]">
+        </div>
+        <div class="flex justify-center p-3">
+            <button type="button" x-on:click="$refs.zoomDialog.close()" class="rounded-full border border-[#6c757d] bg-[#6c757d] px-6 py-1 text-sm/[1.5] text-white hover:bg-[#5c636a]"><i class="fas fa-times mr-2"></i>Tutup Gambar</button>
+        </div>
+    </dialog>
     </div>
 @endif
 

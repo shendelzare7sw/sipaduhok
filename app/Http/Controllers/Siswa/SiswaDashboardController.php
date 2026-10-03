@@ -115,7 +115,7 @@ class SiswaDashboardController extends Controller
                 $q->where('kelas.id', $siswa->kelas_id);
             })
             ->with(['mataPelajaran', 'guru'])
-            ->orderByRaw("FIELD(hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat')")
+            ->orderByRaw("CASE hari WHEN 'Senin' THEN 1 WHEN 'Selasa' THEN 2 WHEN 'Rabu' THEN 3 WHEN 'Kamis' THEN 4 WHEN 'Jumat' THEN 5 WHEN 'Sabtu' THEN 6 WHEN 'Minggu' THEN 7 ELSE 8 END") // portabel (FIELD() khusus MySQL)
             ->orderBy('jam_mulai')
             ->get()
             ->groupBy('hari');

@@ -15,7 +15,12 @@ function ukur(textarea) {
     // Textarea tersembunyi (accordion tertutup) belum bisa diukur; tunggu terlihat.
     if (textarea.offsetParent === null) return;
 
-    const batas = Number(textarea.dataset.autogrowMax) || BATAS_DEFAULT;
+    // Tinggi bawaan (atribut rows) diukur ulang tiap kali — font web bisa selesai dimuat belakangan.
+    textarea.style.height = '';
+    const tinggiRows = textarea.offsetHeight;
+    // Batas ringkas tidak boleh lebih kecil dari tinggi bawaan, supaya textarea kosong
+    // ber-rows besar tidak memunculkan tombol "Tampilkan semua".
+    const batas = Math.max(Number(textarea.dataset.autogrowMax) || BATAS_DEFAULT, tinggiRows);
     const terbuka = textarea.dataset.autogrowExpanded === 'true';
     const gaya = getComputedStyle(textarea);
     const tepi = parseFloat(gaya.borderTopWidth) + parseFloat(gaya.borderBottomWidth);
@@ -29,7 +34,8 @@ function ukur(textarea) {
 
     const tombol = textarea._autogrowToggle;
     if (tombol) {
-        tombol.hidden = !lebih;
+        // Pakai kelas Tailwind `hidden`: atribut hidden kalah oleh kelas inline-flex pada tombol.
+        tombol.classList.toggle('hidden', !lebih);
         tombol.querySelector('span').textContent = terbuka ? 'Ringkas' : 'Tampilkan semua';
         tombol.querySelector('i').className = `fa-solid ${terbuka ? 'fa-chevron-up' : 'fa-chevron-down'} text-[10px]`;
         tombol.setAttribute('aria-expanded', terbuka ? 'true' : 'false');
@@ -55,8 +61,8 @@ function daftarkan(textarea) {
 
     const tombol = document.createElement('button');
     tombol.type = 'button';
-    tombol.hidden = true;
-    tombol.className = 'mt-1 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-bold text-indigo-700 hover:bg-indigo-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200';
+
+    tombol.className = 'mt-1 hidden inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-bold text-indigo-700 hover:bg-indigo-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200';
     tombol.innerHTML = '<i class="fa-solid fa-chevron-down text-[10px]" aria-hidden="true"></i><span>Tampilkan semua</span>';
     tombol.addEventListener('click', (event) => {
         event.preventDefault();
@@ -92,4 +98,7 @@ export function initTextareaAutogrow() {
         pindai(akar);
         (akar.querySelectorAll ? akar.querySelectorAll('textarea[data-autogrow]') : []).forEach(ukur);
     };
+
+    // Font web yang selesai dimuat belakangan mengubah tinggi baris tanpa mengubah lebar.
+    document.fonts?.ready.then(() => window.refreshAutogrow());
 }

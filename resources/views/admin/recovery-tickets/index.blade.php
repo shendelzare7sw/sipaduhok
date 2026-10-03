@@ -27,8 +27,7 @@
                     $user=$ticket->user;
                     $roleName=ucwords(str_replace('_',' ',$user->roleRelation->name??$user->role??'User'));
                     $phoneRaw=$user->phone ?: $user->siswa?->telepon_orangtua;
-                    $waPhone=$phoneRaw?preg_replace('/[^0-9]/','',$phoneRaw):'';
-                    if($waPhone&&str_starts_with($waPhone,'0'))$waPhone='62'.substr($waPhone,1); elseif($waPhone&&!str_starts_with($waPhone,'62'))$waPhone='62'.$waPhone;
+                    $waPhone=wa_nomor($phoneRaw);
                     $resetUrl=$ticket->token_reset?route('password.reset.ticket',['token'=>$ticket->token_reset]):null;
                     $waMessage=$ticket->tipe_recovery==='lupa_username'?"Halo {$user->name}, username SIPADUHOK Anda: {$user->username}":"Halo {$user->name}, gunakan link berikut untuk memulihkan akun SIPADUHOK: ".($resetUrl??'Hubungi admin.');
                 @endphp

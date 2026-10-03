@@ -56,6 +56,15 @@ return Application::configure(basePath: dirname(__DIR__))
             return redirect()->route('login')->with('error', 'Sesi Anda telah berakhir karena tidak ada aktivitas. Silakan login kembali.');
         });
 
+        // Data dihapus / tidak tersedia (findOrFail, firstOrFail, abort(404)) pada rute valid:
+        // alihkan ke halaman induk dengan pesan, bukan halaman 404 polos. Lihat App\Support\NotFoundRedirector.
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, \Illuminate\Http\Request $request) {
+            return \App\Support\NotFoundRedirector::handle($request);
+        });
+        $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, \Illuminate\Http\Request $request) {
+            return \App\Support\NotFoundRedirector::handle($request);
+        });
+
         // Handle other 419 cases if any
         $exceptions->respond(function (\Illuminate\Http\Response|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response $response, \Throwable $e, \Illuminate\Http\Request $request) {
             if ($response->getStatusCode() === 419) {

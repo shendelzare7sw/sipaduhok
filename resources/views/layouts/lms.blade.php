@@ -6,6 +6,6 @@
     'backUrl' => route('siswa.sia.dashboard'),
     'backLabel' => 'Kembali ke SIA',
     'notificationContext' => 'lms',
-    'legacyLayoutCss' => 'resources/css/layouts/lms.css',
+    'bootstrapFree' => true,
     'showChatbot' => false,
 ])

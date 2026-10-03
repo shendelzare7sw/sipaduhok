@@ -1,3 +1,5 @@
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import '../../../components/ai-question-generator.js';
 import '../../../components/ai-sidebar.js';
 
@@ -25,12 +27,7 @@ import '../../../components/ai-sidebar.js';
     function showLmsToast(type, message) {
         const icon = type === 'error' || type === 'danger' ? 'error' : (type === 'success' ? 'success' : (type === 'warning' ? 'warning' : 'info'));
 
-        if (window.Swal) {
-            window.Swal.fire({ toast: true, position: 'top-end', icon, title: message, showConfirmButton: false, timer: 3500, timerProgressBar: true });
-            return;
-        }
-
-        window.alert(message);
+        Swal.fire({ toast: true, position: 'top-end', icon, title: message, showConfirmButton: false, timer: 3500, timerProgressBar: true });
     }
 
     const optionInputClass = 'block h-9 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100';

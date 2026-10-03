@@ -134,6 +134,15 @@ class LmsTugasController extends Controller
     /**
      * Tampilkan semua tugas (Lists)
      */
+    /**
+     * Daftar tugas per mapel memakai halaman Tugas umum yang sudah tersaring mapel.
+     * (Rute ini sebelumnya menunjuk method yang tidak ada sehingga selalu HTTP 500.)
+     */
+    public function index($mapelId)
+    {
+        return redirect()->route('siswa.lms.tugas.index', ['mapel' => $mapelId]);
+    }
+
     public function indexAll(Request $request)
     {
         $user = Auth::user();

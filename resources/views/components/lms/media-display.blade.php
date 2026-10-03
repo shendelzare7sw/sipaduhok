@@ -1,16 +1,17 @@
 {{--
     Lampiran forum diskusi LMS (Guru & Siswa).
-    Gambar dan video dipratinjau langsung. PDF dan dokumen lain tampil sebagai kartu file
+    Gambar dibuka di galeri lightbox halaman yang sama (dikelompokkan per $group), video diputar langsung. PDF dan dokumen lain tampil sebagai kartu file
     (tanpa iframe, agar tidak memicu unduhan otomatis oleh pengelola unduhan seperti IDM);
     PDF dibuka di tab baru lewat preview_url(), dokumen Office lewat Google Docs Viewer di tab baru.
 --}}
-@props(['file'])
+@props(['file', 'group' => 'lampiran'])
 
 @php
     $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
     $url = Storage::url($file);
     $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-    $isVideo = in_array($extension, ['mp4', 'webm', 'ogg']);
+    $videoMime = ['mp4' => 'video/mp4', 'm4v' => 'video/mp4', 'mov' => 'video/quicktime', 'webm' => 'video/webm', 'ogg' => 'video/ogg', 'ogv' => 'video/ogg'];
+    $isVideo = isset($videoMime[$extension]);
     $isPdf = $extension === 'pdf';
     $isOffice = in_array($extension, ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']);
     [$label, $icon, $tone] = match (true) {
@@ -27,14 +28,17 @@
         : ($isOffice ? 'https://docs.google.com/gview?url='.urlencode(asset('storage/'.$file)) : null);
 @endphp
 
-<div class="mt-3 min-w-0">
+{{-- Gambar = thumbnail persegi (berjajar dalam wadah flex-wrap), lainnya selebar konten. --}}
+<div x-data class="min-w-0 {{ $isImage ? 'w-28 sm:w-40' : 'w-full' }}">
     @if($isImage)
-        <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="block w-fit max-w-full">
-            <img src="{{ $url }}" alt="Lampiran gambar" class="max-h-[400px] max-w-full rounded-xl border border-slate-200 object-contain">
-        </a>
+        <button type="button" x-on:click="$store.lightbox.buka($el.querySelector('img'))" class="group relative block aspect-square w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50" aria-label="Perbesar gambar">
+            <img src="{{ $url }}" alt="Lampiran gambar" loading="lazy" data-lightbox="{{ $group }}"
+                 class="h-full w-full cursor-zoom-in object-cover transition duration-200 group-hover:scale-105">
+            <span class="pointer-events-none absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/60 text-xs text-white opacity-80 transition group-hover:opacity-100"><i class="fa-solid fa-expand" aria-hidden="true"></i></span>
+        </button>
     @elseif($isVideo)
-        <video controls preload="metadata" class="max-h-[400px] w-full rounded-xl border border-slate-200 bg-black">
-            <source src="{{ $url }}" type="video/{{ $extension }}">
+        <video controls playsinline preload="metadata" class="max-h-[420px] w-full max-w-2xl rounded-xl border border-slate-200 bg-black">
+            <source src="{{ $url }}" type="{{ $videoMime[$extension] }}">
             Browser Anda tidak mendukung pemutaran video.
         </video>
     @else
