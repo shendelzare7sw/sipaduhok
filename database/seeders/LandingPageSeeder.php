@@ -402,7 +402,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                 'order' => 1,
                 'content' => [
                     'title' => 'Profil Guru & Tenaga Ahli',
-                    'background_image' => 'img/hero-bg.png'
+                    'background_image' => 'img/hero-bg.jpg'
                 ]
             ]
         );

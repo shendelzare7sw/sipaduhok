@@ -51,6 +51,14 @@ class LoginController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
+        // Alumni (siswa LULUS) selalu ke dashboard alumni, bukan URL tujuan lama
+        // (mis. profil atau menu LMS yang sudah tertutup untuknya).
+        if ($roleName === 'siswa' && \App\Models\Siswa::where('user_id', $user->id)->value('status') === 'lulus') {
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('siswa.sia.dashboard');
+        }
+
         // Check for intended URL but avoid AJAX/API endpoints
         $intendedUrl = redirect()->intended()->getTargetUrl();
         if (str_contains($intendedUrl, 'notifications/unread-count') || 

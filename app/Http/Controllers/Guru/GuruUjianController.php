@@ -1053,7 +1053,7 @@ class GuruUjianController extends Controller
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
         $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
         
-        $ujianSiswa = UjianSiswa::with(['siswa', 'jawabanSiswa.soalUjian'])
+        $ujianSiswa = UjianSiswa::with(['siswa' => fn ($q) => $q->termasukNonaktif(), 'jawabanSiswa.soalUjian'])
             ->where('id', $ujianSiswaId)
             ->where('ujian_id', $ujianId)
             ->firstOrFail();

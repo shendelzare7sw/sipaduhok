@@ -40,8 +40,12 @@ class SiswaImportStatusTest extends TestCase
         $this->useMysql();
         DB::connection('mysql')->beginTransaction();
         try {
-            $cabang = Cabang::first();
-            $this->assertNotNull($cabang, 'Butuh data Cabang (seed).');
+            // Import mewajibkan nama_kelas & agama: pakai kelas pada tahun ajaran aktif.
+            $kelas = \App\Models\Kelas::with('cabang')
+                ->where('tahun_ajaran_id', \App\Models\TahunAjaran::where('is_active', true)->value('id'))
+                ->first();
+            $this->assertNotNull($kelas?->cabang, 'Butuh kelas tahun ajaran aktif yang terhubung ke cabang.');
+            $cabang = $kelas->cabang;
             $sfx = substr(md5(uniqid('', true)), 0, 8);
 
             $rows = collect([
@@ -54,6 +58,8 @@ class SiswaImportStatusTest extends TestCase
                     'alamat' => 'Alamat',
                     'tanggal_masuk' => '2023-07-15',
                     'nama_cabang' => $cabang->nama_cabang,
+                    'nama_kelas' => $kelas->nama_kelas,
+                    'agama' => 'Islam',
                     'status' => 'nonaktif',
                 ]),
                 collect([
@@ -65,6 +71,8 @@ class SiswaImportStatusTest extends TestCase
                     'alamat' => 'Alamat',
                     'tanggal_masuk' => '2023-07-15',
                     'nama_cabang' => $cabang->nama_cabang,
+                    'nama_kelas' => $kelas->nama_kelas,
+                    'agama' => 'Islam',
                     'status' => 'lulus',
                 ]),
             ]);

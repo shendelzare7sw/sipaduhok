@@ -19,7 +19,7 @@
     <div class="mb-5 text-center">
         <h1 class="my-[5px] text-[16pt]">HOUSE OF KNOWLEDGE</h1>
         <h2 class="my-[5px] text-[14pt] font-normal">The Second Home For Your Children - 家庭教育</h2>
-        <p class="my-[3px] text-[9pt]">Jl. Contoh No. 123, Kota, Provinsi | Telp: (021) 1234567 | Email: info@hok.sch.id</p>
+        <p class="my-[3px] text-[9pt]">Komplek Ruko Reni Jaya Baru Jl.Ketapang III Blok AF 5 No 22-23 Pamulang Barat – Tangerang Selatan | Telp. 021 – 7427521 / 085811278144 | Email: hokhomeshool@gmail.com</p>
         <hr class="my-[15px]">
         <h1 class="my-[5px] text-[16pt]">PENCAPAIAN KOMPETENSI PESERTA DIDIK</h1>
     </div>

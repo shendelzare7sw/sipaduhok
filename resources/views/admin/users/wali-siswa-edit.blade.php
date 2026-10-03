@@ -59,7 +59,7 @@
                         <div class="flex items-start gap-3">
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 shadow-sm"><i class="fas fa-user-graduate" aria-hidden="true"></i></span>
                             <div class="min-w-0 flex-1">
-                                <h4 class="truncate text-sm font-extrabold text-slate-900">{{ $sp->siswa->nama_lengkap }}</h4>
+                                <h4 class="truncate text-sm font-extrabold text-slate-900">{{ $sp->siswa->nama_lengkap }}@unless($sp->siswa->user?->is_active)<span class="ml-1 rounded-full bg-red-50 px-1.5 py-0.5 text-[9px] font-bold text-red-700">akun nonaktif</span>@endunless</h4>
                                 <p class="mt-1 text-xs text-slate-500">NIS {{ $sp->siswa->nis ?: '-' }} · NISN {{ $sp->siswa->nisn ?: '-' }}</p>
                                 <div class="mt-2 flex flex-wrap gap-1.5">
                                     <span class="rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200">{{ $sp->siswa->kelas->jenjang ?? '-' }}</span>

@@ -93,7 +93,7 @@
                         <article class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
                             <div class="flex flex-wrap items-start justify-between gap-3">
                                 <div class="min-w-0">
-                                    <h4 class="break-words text-sm font-extrabold text-slate-900">{{ $sp->siswa->nama_lengkap }}</h4>
+                                    <h4 class="break-words text-sm font-extrabold text-slate-900">{{ $sp->siswa->nama_lengkap }}@unless($sp->siswa->user?->is_active)<span class="ml-1 rounded-full bg-red-50 px-1.5 py-0.5 text-[9px] font-bold text-red-700">akun nonaktif</span>@endunless</h4>
                                     <p class="mt-1 text-xs text-slate-500">NIS {{ $sp->siswa->nis ?: '-' }} · NISN {{ $sp->siswa->nisn ?: '-' }}</p>
                                 </div>
                                 <span class="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-bold text-violet-700">{{ ucwords(str_replace('_', ' ', $sp->relationship)) }}</span>

@@ -618,7 +618,8 @@ class PembayaranController extends Controller
      */
     public function cetakKwitansi($id)
     {
-        $pembayaran = Pembayaran::with(['siswa', 'siswa.kelas', 'siswa.cabang', 'siswa.studentParents.parent', 'tagihan', 'validator'])
+        // Kwitansi adalah arsip keuangan: tetap bisa dicetak walau akun siswa sudah dinonaktifkan.
+        $pembayaran = Pembayaran::with(['siswa' => fn ($q) => $q->termasukNonaktif(), 'siswa.kelas', 'siswa.cabang', 'siswa.studentParents.parent', 'tagihan', 'validator'])
             ->findOrFail($id);
 
         // Only allow printing for approved payments

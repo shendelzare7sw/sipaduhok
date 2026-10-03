@@ -15,7 +15,14 @@
 
     <!-- Hero Section -->
     <section class="relative h-[400px] flex items-center justify-center">
-        <img src="{{ asset($heroContent['background_image'] ?? 'img/hero-bg.png') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        @php
+            // Gambar bawaan (bukan unggahan) yang tidak ada di public/ jatuh ke latar hero standar.
+            $latarHero = $heroContent['background_image'] ?? null;
+            if (! $latarHero || (! str_starts_with($latarHero, 'storage/') && ! file_exists(public_path($latarHero)))) {
+                $latarHero = 'img/hero-bg.jpg';
+            }
+        @endphp
+        <img src="{{ asset($latarHero) }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
         <div class="bg-[linear-gradient(135deg,rgba(22,95,172,0.9)_0%,rgba(40,127,59,0.8)_100%)] absolute inset-0"></div>
         <div class="relative z-10 text-center text-white px-4">
             <nav class="text-sm mb-4">

@@ -262,7 +262,11 @@
                 Hubungi kami sekarang untuk informasi lebih lanjut tentang program pendidikan dan pendaftaran
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="https://wa.me/6281234567890?text=Halo%20PKBM%20House%20Of%20Knowledge,%20saya%20ingin%20mendaftar"
+                @php
+                    $kontakFooter = \App\Models\LandingPage::where('slug', 'footer')->first()?->getSection('contact_info')?->content ?? [];
+                    $waPendaftaran = wa_link($kontakFooter['phone'] ?? '+62 858-1125-8534', 'Halo PKBM House Of Knowledge, saya ingin mendaftar');
+                @endphp
+                <a href="{{ $waPendaftaran }}"
                     target="_blank"
                     class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

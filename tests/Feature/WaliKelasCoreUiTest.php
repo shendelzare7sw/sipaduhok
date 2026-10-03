@@ -260,7 +260,9 @@ class WaliKelasCoreUiTest extends TestCase
             $this->get($printUrl)->assertOk()->assertDontSee('id="admin-sidebar"', false)->assertDontSee('bootstrap-icons');
         }
         $studentPrint = $this->get(route('wali.nilai.print-siswa', ['siswa' => $student->id, 'semester' => 'ganjil']));
-        $studentPrint->assertSee('Semester Ganjil')->assertSee('data-print-toolbar')->assertSee('wali-nilai-print-');
+        $studentPrint->assertSee('Semester Ganjil')->assertSee('data-print-toolbar')
+            // Build: wali-nilai-print-<hash>.css; dev server Vite: resources/css/wali-nilai-print.css.
+            ->assertSee('wali-nilai-print');
         $studentPrint->assertDontSee('css/wali-kelas/nilai/print.css');
         $this->get(route('wali.nilai.print-siswa', ['siswa' => $student->id, 'semester' => 'genap']))
             ->assertSee('Semester Genap')->assertSee('data-print-toolbar');
@@ -294,12 +296,12 @@ class WaliKelasCoreUiTest extends TestCase
             $this->get(route('wali.rapor.preview', $reportToPrint->id))
                 ->assertOk()
                 ->assertSee('with-watermark')
-                ->assertSee('rapor-document-')
+                ->assertSee('rapor-document') // build: rapor-document-<hash>.css; dev: rapor-document.css
                 ->assertDontSee('bootstrap-icons')
                 ->assertDontSee('id="admin-sidebar"', false);
             $this->get(route('wali.rapor.print', $reportToPrint->id))
                 ->assertOk()
-                ->assertSee('rapor-document-')
+                ->assertSee('rapor-document') // build: rapor-document-<hash>.css; dev: rapor-document.css
                 ->assertDontSee('id="admin-sidebar"', false);
         }
         $editRapor = $this->get(route('wali.rapor.edit', $rapor->id));

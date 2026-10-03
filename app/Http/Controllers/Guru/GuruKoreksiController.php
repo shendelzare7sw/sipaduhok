@@ -279,7 +279,8 @@ class GuruKoreksiController extends Controller
      */
     private function authorizedSubmission($submissionId, Tugas $tugas): TugasSiswa
     {
-        return TugasSiswa::with('siswa')
+        // Jawaban yang sudah masuk tetap bisa dibuka/dinilai walau akun siswanya kini nonaktif.
+        return TugasSiswa::with(['siswa' => fn ($q) => $q->termasukNonaktif()])
             ->where('id', $submissionId)
             ->where('tugas_id', $tugas->id)
             ->firstOrFail();

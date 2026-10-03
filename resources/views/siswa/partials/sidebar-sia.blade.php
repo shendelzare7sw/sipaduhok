@@ -5,6 +5,7 @@
 
 @php
     $siswa = \App\Models\Siswa::where('user_id', auth()->id())->with('kelas')->first();
+    $isAlumni = $siswa?->status === 'lulus';
 
     $setting = \App\Models\AppSetting::where('key', 'lms_allowed_jenjang')->first();
     $allowedJenjang = $setting ? json_decode($setting->value, true) : [];
@@ -41,6 +42,10 @@
     $toneIdx = 0;
 @endphp
 
+@if($isAlumni)
+    {{-- Alumni: hanya menu yang masih boleh diakses (lihat middleware student.active). --}}
+    @include('siswa.partials.sidebar-alumni')
+@else
 @foreach($sections as $section)
     <li class="mb-5">
         <div class="mb-2 px-3">
@@ -70,3 +75,4 @@
         </ul>
     </li>
 @endforeach
+@endif

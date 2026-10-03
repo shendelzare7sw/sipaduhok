@@ -22,7 +22,7 @@ class UserController extends Controller
         $tenagaPendidik = TenagaPendidik::with('user')->latest()->take(10)->get();
         $siswa = Siswa::with('user', 'kelas')->latest()->take(10)->get();
         $orangTua = User::where('role', 'orang_tua')
-            ->with(['studentParents.siswa.kelas'])
+            ->with(['studentParents.siswa' => fn ($q) => $q->termasukNonaktif(), 'studentParents.siswa.user', 'studentParents.siswa.kelas'])
             ->latest()
             ->take(5)
             ->get();
@@ -1161,7 +1161,7 @@ class UserController extends Controller
     public function orangTua(Request $request)
     {
         $query = User::where('role', 'orang_tua')
-            ->with(['studentParents.siswa.kelas', 'studentParents.siswa.cabang']);
+            ->with(['studentParents.siswa' => fn ($q) => $q->termasukNonaktif(), 'studentParents.siswa.user', 'studentParents.siswa.kelas', 'studentParents.siswa.cabang']);
 
         // Handle search parameter
         if ($request->has('search') && $request->search != '') {
@@ -1201,7 +1201,7 @@ class UserController extends Controller
     public function printOrangTua(Request $request)
     {
         $query = User::where('role', 'orang_tua')
-            ->with(['studentParents.siswa.kelas', 'studentParents.siswa.cabang']);
+            ->with(['studentParents.siswa' => fn ($q) => $q->termasukNonaktif(), 'studentParents.siswa.user', 'studentParents.siswa.kelas', 'studentParents.siswa.cabang']);
 
         // Handle search parameter
         if ($request->has('search') && $request->search != '') {
@@ -1342,7 +1342,7 @@ class UserController extends Controller
     public function showOrangTua(int $id)
     {
         $orangTua = User::where('role', 'orang_tua')
-            ->with(['studentParents.siswa.kelas.cabang', 'studentParents.siswa.cabang'])
+            ->with(['studentParents.siswa' => fn ($q) => $q->termasukNonaktif(), 'studentParents.siswa.user', 'studentParents.siswa.kelas.cabang', 'studentParents.siswa.cabang'])
             ->findOrFail($id);
 
         return view('admin.users.wali-siswa-show', compact('orangTua'));
@@ -1351,7 +1351,7 @@ class UserController extends Controller
     public function editOrangTua(int $id)
     {
         $orangTua = User::where('role', 'orang_tua')
-            ->with(['studentParents.siswa.kelas'])
+            ->with(['studentParents.siswa' => fn ($q) => $q->termasukNonaktif(), 'studentParents.siswa.user', 'studentParents.siswa.kelas'])
             ->findOrFail($id);
 
         return view('admin.users.wali-siswa-edit', compact('orangTua'));
