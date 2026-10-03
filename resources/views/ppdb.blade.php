@@ -1,21 +1,12 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.landing')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('seo')
     <x-seo-meta title="PPDB - PKBM House Of Knowledge" description="Penerimaan Peserta Didik Baru (PPDB) PKBM House Of Knowledge. Daftar sekarang untuk masa depan pendidikan yang lebih baik."></x-seo-meta>
+@endsection
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@section('content')
+<div x-data="{ modalBiaya: null }" x-on:keydown.escape.window="modalBiaya = null" class="[&_section_.grid>div_p]:[overflow-wrap:anywhere] [&_section_.grid>div_p]:[word-break:break-word] [&_section_h1]:[overflow-wrap:anywhere] [&_section_h1]:[word-break:break-word] [&_section_h2]:[overflow-wrap:anywhere] [&_section_h2]:[word-break:break-word]">
 
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/ppdb.css'])
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-</head>
-
-<body class="bg-white">
     @php
         $heroSection = $page->getSection('hero');
         $heroContent = $heroSection->content ?? [];
@@ -74,21 +65,16 @@
         $biayaSmaContent = $biayaSmaSection->content ?? [];
         $biayaSmaItems = $biayaSmaContent['items'] ?? [];
     @endphp
-    <x-navbar></x-navbar>
 
-    <section class="relative min-h-screen flex items-center bg-cover bg-center bg-no-repeat overflow-hidden"
-        style="background-image: linear-gradient(135deg, rgba(22,95,172,0.75) 45%, rgba(40,127,59,0.75) 20%), url('{{ asset($heroContent['background_image'] ?? 'img/bg-ppdb.jpg') }}');">
 
-        <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,<svg width=" 60"
-            height="60" xmlns="http://www.w3.org/2000/svg">
-            <path d="M30 0l30 30-30 30L0 30z" fill="white" /></svg>'); background-size: 60px 60px;">
-        </div>
+    <section class="relative min-h-screen flex items-center overflow-hidden">
+        <img src="{{ asset($heroContent['background_image'] ?? 'img/bg-ppdb.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(22,95,172,0.75)_45%,rgba(40,127,59,0.75)_20%)]"></div>
 
         <div
-            class="absolute top-20 left-10 w-20 h-20 border-4 border-white/20 rounded-full float-animation hidden lg:block">
+            class="absolute top-20 left-10 w-20 h-20 border-4 border-white/20 rounded-full animate-float hidden lg:block">
         </div>
-        <div class="absolute bottom-20 right-20 w-16 h-16 bg-accent-yellow/30 rounded-full float-animation hidden lg:block"
-            style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-20 right-20 w-16 h-16 bg-accent-yellow/30 rounded-full animate-float [animation-delay:1s] hidden lg:block"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-20">
             <div class="text-center">
@@ -96,17 +82,14 @@
                     class="inline-block px-6 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full mb-6 animate-fade-up">
                     <i class="fas fa-books"></i> {{ $heroContent['tahun_ajaran'] ?? 'Tahun Ajaran 2025/2026' }}
                 </span>
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 animate-fade-up"
-                    style="animation-delay: 0.1s;">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 animate-fade-up [animation-delay:0.1s]">
                     {{ $heroContent['title'] ?? 'Penerimaan Peserta' }}<br>
                     <span class="text-accent-bright">{{ $heroContent['title_highlight'] ?? 'Didik Baru' }}</span>
                 </h1>
-                <p class="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto animate-fade-up"
-                    style="animation-delay: 0.2s;">
+                <p class="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto animate-fade-up [animation-delay:0.2s]">
                     {{ $heroContent['subtitle'] ?? 'Bergabunglah bersama kami dan raih masa depan yang cerah melalui pendidikan berkualitas' }}
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up"
-                    style="animation-delay: 0.3s;">
+                <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up [animation-delay:0.3s]">
                     <a href="{{ url($heroContent['cta_link'] ?? '/kontak') }}"
                         class="inline-flex items-center justify-center px-8 py-4 bg-white text-primary hover:bg-cream font-semibold rounded-full shadow-lg transition-all duration-300 hover:-translate-y-1">
                         {{ $heroContent['cta_text'] ?? 'Daftar Sekarang' }}
@@ -174,15 +157,15 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-8 relative">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-8 relative [&>div]:min-w-0">
                 @foreach($alurItems as $idx => $step)
                     @php
                         $icon = $alurIconSet[$idx % count($alurIconSet)];
                         $isLast = $loop->last;
                         $gradient = $isLast ? 'from-secondary to-primary' : 'from-primary to-secondary';
                     @endphp
-                    <div class="{{ $isLast ? 'relative' : 'step-connector relative' }}">
-                        <div class="card-hover bg-white rounded-2xl shadow-lg p-6 text-center {{ $isLast ? 'border-2 border-secondary' : '' }}">
+                    <div class="relative {{ $isLast ? '' : "after:absolute after:left-full after:top-1/2 after:-z-[1] after:h-[3px] after:w-full after:-translate-y-1/2 after:bg-[linear-gradient(to_right,#165fac,#287f3b)] after:content-[''] max-md:after:hidden" }}">
+                        <div class="overflow-hidden [overflow-wrap:anywhere] [word-break:break-word] [hyphens:auto] transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] bg-white rounded-2xl shadow-lg p-6 text-center {{ $isLast ? 'border-2 border-secondary' : '' }}">
                             <div
                                 class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br {{ $gradient }} rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
                                 {{ $idx + 1 }}
@@ -208,7 +191,7 @@
     @php
         $syaratTabKey = fn($sectionKey) => str_replace('_', '-', preg_replace('/^syarat_/', '', $sectionKey));
     @endphp
-    <section id="syarat" class="py-20 bg-white">
+    <section id="syarat" class="py-20 bg-white" x-data="{ tab: @js($syaratTabKey($syaratTabs->first()->section_key)) }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <span
@@ -230,7 +213,9 @@
                         $tabKey = $syaratTabKey($tab->section_key);
                         $tabLabel = $tab->content['header']['tab_label'] ?? ucfirst($tabKey);
                     @endphp
-                    <button class="tab-button {{ $tabIdx === 0 ? 'active' : '' }} px-6 py-3 rounded-full font-semibold bg-gray-100" data-tab="{{ $tabKey }}">
+                    <button type="button" x-on:click="tab = @js($tabKey)"
+                        :class="tab === @js($tabKey) ? 'bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)] text-white' : 'bg-gray-100'"
+                        class="max-w-full whitespace-normal text-center leading-[1.3] [overflow-wrap:anywhere] [word-break:break-word] [hyphens:auto] transition-all duration-300 px-6 py-3 rounded-full font-semibold max-sm:text-[0.9rem]">
                         {{ $tabLabel }}
                     </button>
                 @endforeach
@@ -253,11 +238,10 @@
                         }
                         $tabNote = $tabHeader['note'] ?? null;
                     @endphp
-                    <div class="tab-content {{ $tabIdx === 0 ? 'active' : '' }}" id="{{ $tabKey }}">
-                        <div class="rounded-3xl p-8" style="background: linear-gradient(135deg, {{ $tabColor }}1a, {{ $tabColor }}0d);">
+                    <div x-show="tab === @js($tabKey)" @if($tabIdx > 0) x-cloak @endif data-warna="{{ warna_landing($tabColor) }}" class="animate-[fade-in-up_0.5s_ease-out] [overflow-wrap:anywhere] [word-break:break-word] [hyphens:auto]">
+                        <div class="rounded-3xl p-8 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--warna)_10%,transparent),color-mix(in_srgb,var(--warna)_5%,transparent))]">
                             <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                                <span class="w-10 h-10 rounded-full flex items-center justify-center text-white mr-3"
-                                    style="background-color: {{ $tabColor }};">
+                                <span class="w-10 h-10 rounded-full flex items-center justify-center text-white mr-3 bg-[var(--warna)]">
                                     <i class="{{ $tabIcon }}"></i>
                                 </span>
                                 {{ $tabTitle }}
@@ -266,7 +250,7 @@
                                 @foreach($tabItems as $item)
                                     @php $itemText = is_array($item) ? ($item['text'] ?? '') : $item; @endphp
                                     @if($itemText !== '')
-                                        <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
+                                        <div class="[overflow-wrap:anywhere] [word-break:break-word] [hyphens:auto] transition-all duration-300 hover:translate-x-[5px] flex items-start gap-3 bg-white p-4 rounded-xl">
                                             <div
                                                 class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                                                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -280,7 +264,7 @@
                                     @endif
                                 @endforeach
                                 @if($tabNote)
-                                    <div class="p-4 rounded-xl" style="background-color: {{ $tabColor }}1a;">
+                                    <div class="p-4 rounded-xl bg-[color-mix(in_srgb,var(--warna)_10%,transparent)]">
                                         <p class="text-sm text-gray-700 leading-relaxed">
                                             <strong>Catatan:</strong> {{ $tabNote }}
                                         </p>
@@ -333,7 +317,7 @@
                 ];
             @endphp
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 [&>div]:min-w-0">
                 @foreach($biayaSections as $section)
                     @if(!($section['section']?->is_visible))
                         @continue
@@ -347,11 +331,13 @@
                         $isHex = str_starts_with($color, '#');
                         $hexColor = $isHex ? $color : ($colorMap[$color]['hex'] ?? '#165fac');
 
-                        // Use inline styles for hex colors, CSS classes for named colors
+                        // Warna token -> kelas tema; hex dari color picker -> variabel --warna (data-warna).
                         $useInlineStyle = $isHex || !isset($colorMap[$color]);
-                        $borderClass = $useInlineStyle ? '' : ($colorMap[$color]['border'] ?? '');
-                        $bgClass = $useInlineStyle ? '' : ($colorMap[$color]['bg'] ?? '');
-                        $gradientClass = $useInlineStyle ? '' : ($colorMap[$color]['gradient'] ?? '');
+                        $borderClass = $useInlineStyle ? 'border-[var(--warna)]' : ($colorMap[$color]['border'] ?? '');
+                        $bgClass = $useInlineStyle ? 'bg-[color-mix(in_srgb,var(--warna)_8%,transparent)]' : ($colorMap[$color]['bg'] ?? '');
+                        $badgeClass = $useInlineStyle
+                            ? 'bg-[linear-gradient(to_right,var(--warna),color-mix(in_srgb,var(--warna)_80%,transparent))]'
+                            : 'bg-gradient-to-r ' . ($colorMap[$color]['gradient'] ?? '');
 
                         $icon = $header['icon'] ?? ($iconMap[$color] ?? 'fa-book');
                         // Prepend 'fas ' if icon doesn't start with 'fa'
@@ -366,16 +352,15 @@
                         $pokokItems = collect($items)->where('type', 'pokok');
                         $tambahanItems = collect($items)->where('type', 'tambahan');
                     @endphp
-                    <div class="card-hover bg-white rounded-3xl shadow-xl p-8 border-t-4 {{ $borderClass }}"
-                        @if($useInlineStyle) style="border-top-color: {{ $hexColor }}" @endif>
+                    <div class="overflow-hidden [overflow-wrap:anywhere] [word-break:break-word] [hyphens:auto] transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] bg-white rounded-3xl shadow-xl p-8 border-t-4 {{ $borderClass }}"
+                        @if($useInlineStyle) data-warna="{{ warna_landing($hexColor) }}" @endif>
                         <div class="text-center mb-6">
                             <div
-                                class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center overflow-hidden {{ $bgClass }}"
-                                @if($useInlineStyle) style="background-color: {{ $hexColor }}15" @endif>
+                                class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center overflow-hidden {{ $bgClass }}">
                                 @if($image)
                                     <img loading="lazy" decoding="async" src="{{ asset($image) }}" alt="{{ $header['title'] ?? 'Icon' }}" class="w-full h-full object-cover">
                                 @else
-                                    <span class="text-3xl" @if($useInlineStyle) style="color: {{ $hexColor }}" @endif><i class="{{ $icon }}"></i></span>
+                                    <span class="text-3xl {{ $useInlineStyle ? 'text-[var(--warna)]' : '' }}"><i class="{{ $icon }}"></i></span>
                                 @endif
                             </div>
                             <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $header['title'] ?? 'Program' }}</h3>
@@ -391,9 +376,8 @@
                                 </div>
                             @endforeach
                         </div>
-                        <div class="price-badge text-white text-center py-3 rounded-xl font-bold cursor-pointer {{ $gradientClass ? 'bg-gradient-to-r ' . $gradientClass : '' }}"
-                            @if($useInlineStyle) style="background: linear-gradient(to right, {{ $hexColor }}, {{ $hexColor }}cc)" @endif
-                            onclick="{{ $section['modalFunc'] }}()">
+                        <div class="relative overflow-hidden before:absolute before:-left-full before:top-0 before:h-full before:w-full before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent)] before:transition-[left] before:duration-500 before:content-[''] hover:before:left-full text-white text-center py-3 rounded-xl font-bold cursor-pointer {{ $badgeClass }}"
+                            role="button" tabindex="0" x-on:click="modalBiaya = @js($section['modalId'])" x-on:keydown.enter="modalBiaya = @js($section['modalId'])">
                             {{ $header['badge_text'] ?? 'Lihat Detail' }}
                         </div>
                     </div>
@@ -428,187 +412,6 @@
     </section>
     @endif
 
-    <!-- Formulir Section
-    <section id="formulir" class="py-20 bg-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-                    Daftar Sekarang
-                </span>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                    Formulir Pendaftaran Online
-                </h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Lengkapi formulir di bawah ini untuk memulai proses pendaftaran
-                </p>
-            </div>
-
-            <form id="registrationForm" class="bg-gradient-to-br from-cream/50 to-white rounded-3xl shadow-2xl p-8 md:p-12"> -->
-    <!-- Data Peserta Didik
-                <div class="mb-10">
-                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
-                        <span class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-3 text-sm">1</span>
-                        Data Peserta Didik
-                    </h3>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Lengkap *</label>
-                            <input type="text" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="Masukkan nama lengkap">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Kelamin *</label>
-                            <select required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none">
-                                <option value="">Pilih jenis kelamin</option>
-                                <option value="L">Laki-laki</option>
-                                <option value="P">Perempuan</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tempat Lahir *</label>
-                            <input type="text" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="Kota tempat lahir">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Lahir *</label>
-                            <input type="date" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Alamat Lengkap *</label>
-                            <textarea required rows="3" class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="Alamat lengkap sesuai KTP"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">No. Telepon/HP *</label>
-                            <input type="tel" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="08xx-xxxx-xxxx">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                            <input type="email" class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="email@contoh.com">
-                        </div>
-                    </div>
-                </div> -->
-
-    <!-- Pilihan Program
-                <div class="mb-10">
-                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
-                        <span class="w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-white mr-3 text-sm">2</span>
-                        Pilihan Program
-                    </h3>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Jenjang Pendidikan *</label>
-                            <select id="jenjangSelect" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none">
-                                <option value="">Pilih jenjang</option>
-                                <option value="paud">PAUD</option>
-                                <option value="paket-a">Paket A (Setara SD)</option>
-                                <option value="paket-b">Paket B (Setara SMP)</option>
-                                <option value="paket-c">Paket C (Setara SMA)</option>
-                                <option value="inklusi">Pendidikan Inklusi</option>
-                            </select>
-                        </div>
-                        <div id="jurusanField" class="hidden">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Pilihan Jurusan (Paket C) *</label>
-                            <select class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none">
-                                <option value="">Pilih jurusan</option>
-                                <option value="ipa">IPA</option>
-                                <option value="ips">IPS</option>
-                            </select>
-                        </div>
-                    </div>
-                </div> -->
-
-    <!-- Data Orang Tua
-                <div class="mb-10">
-                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
-                        <span class="w-8 h-8 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3 text-sm">3</span>
-                        Data Orang Tua/Wali
-                    </h3>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Ayah/Wali *</label>
-                            <input type="text" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="Nama lengkap ayah/wali">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Ibu *</label>
-                            <input type="text" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="Nama lengkap ibu">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Pekerjaan Ayah/Wali *</label>
-                            <input type="text" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="Pekerjaan ayah/wali">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Pekerjaan Ibu *</label>
-                            <input type="text" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="Pekerjaan ibu">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">No. HP Orang Tua *</label>
-                            <input type="tel" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="08xx-xxxx-xxxx">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Penghasilan Orang Tua/Bulan</label>
-                            <select class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none">
-                                <option value="">Pilih range penghasilan</option>
-                                <option value="< 1jt">< Rp 1.000.000</option>
-                                <option value="1-3jt">Rp 1.000.000 - Rp 3.000.000</option>
-                                <option value="3-5jt">Rp 3.000.000 - Rp 5.000.000</option>
-                                <option value="> 5jt">> Rp 5.000.000</option>
-                            </select>
-                        </div>
-                    </div>
-                </div> -->
-
-    <!-- Informasi Tambahan
-                <div class="mb-10">
-                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
-                        <span class="w-8 h-8 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3 text-sm">4</span>
-                        Informasi Tambahan
-                    </h3>
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Asal Sekolah/Lembaga Sebelumnya</label>
-                            <input type="text" class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="Nama sekolah/lembaga terakhir">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Motivasi Mendaftar</label>
-                            <textarea rows="4" class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="Ceritakan motivasi Anda mendaftar di PKBM House Of Knowledge"></textarea>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <input type="checkbox" required id="agreement" class="mt-1 w-5 h-5 text-primary border-2 border-gray-300 rounded focus:ring-primary">
-                            <label for="agreement" class="text-sm text-gray-700">
-                                Saya menyatakan bahwa data yang saya isi adalah benar dan dapat dipertanggungjawabkan. Saya bersedia mengikuti seluruh proses seleksi dan aturan yang berlaku di PKBM House Of Knowledge. *
-                            </label>
-                        </div>
-                    </div>
-                </div> -->
-
-    <!-- Submit Button
-                <div class="text-center">
-                    <button type="submit" class="inline-flex items-center justify-center px-10 py-4 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        Kirim Pendaftaran
-                    </button>
-                    <p class="text-sm text-gray-600 mt-4">* Wajib diisi</p>
-                </div>
-            </form>
-        </div>
-    </section> -->
-
-    <!-- Success Modal
-    <div id="successModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 text-center animate-fade-up">
-            <div class="w-20 h-20 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg class="w-10 h-10 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-4">Pendaftaran Berhasil!</h3>
-            <p class="text-gray-600 mb-6">Terima kasih telah mendaftar. Tim kami akan segera menghubungi Anda untuk proses selanjutnya.</p>
-            <button onclick="closeModal()" class="px-8 py-3 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-full hover:shadow-lg transition-all">
-                Tutup
-            </button>
-        </div>
-    </div> -->
-
     <!-- Cost Detail Modal PAUD-->
     @php
         $paudPokokItems = collect($biayaPaudItems)->where('type', 'pokok');
@@ -622,7 +425,7 @@
             $paudTambahanTotal += (int) preg_replace('/[^0-9]/', '', $item['price'] ?? '0');
         }
     @endphp
-    <div id="costModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div x-show="modalBiaya === 'costModal'" x-cloak class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
@@ -636,7 +439,7 @@
                     </span>
                     Rincian Biaya {{ $biayaPaudContent['header']['title'] ?? 'PAUD' }}
                 </h3>
-                <button onclick="closeCostModal()" class="text-gray-400 hover:text-gray-600">
+                <button type="button" x-on:click="modalBiaya = null" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
@@ -727,15 +530,15 @@
                 <div class="bg-gray-50 rounded-xl p-4">
                     <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
-                        <li>â€¢ Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
-                        <li>â€¢ Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
-                        <li>â€¢ Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
-                        <li>â€¢ Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
+                        <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
+                        <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
+                        <li>• Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
+                        <li>• Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
                     </ul>
                 </div>
 
                 <div class="text-center">
-                    <button onclick="closeCostModal()"
+                    <button type="button" x-on:click="modalBiaya = null"
                         class="px-8 py-3 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-full hover:shadow-lg transition-all">
                         Tutup
                     </button>
@@ -757,8 +560,7 @@
             $smaTambahanTotal += (int) preg_replace('/[^0-9]/', '', $item['price'] ?? '0');
         }
     @endphp
-    <div id="costModalPaketC"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div x-show="modalBiaya === 'costModalPaketC'" x-cloak class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
@@ -772,7 +574,7 @@
                     </span>
                     Rincian Biaya {{ $biayaSmaContent['header']['title'] ?? 'SMA' }}
                 </h3>
-                <button onclick="closeCostModalPaketC()" class="text-gray-400 hover:text-gray-600">
+                <button type="button" x-on:click="modalBiaya = null" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
@@ -855,15 +657,15 @@
                 <div class="bg-gray-50 rounded-xl p-4">
                     <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
-                        <li>â€¢ Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
-                        <li>â€¢ Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
-                        <li>â€¢ Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
-                        <li>â€¢ Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
+                        <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
+                        <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
+                        <li>• Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
+                        <li>• Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
                     </ul>
                 </div>
 
                 <div class="text-center">
-                    <button onclick="closeCostModalPaketC()"
+                    <button type="button" x-on:click="modalBiaya = null"
                         class="px-8 py-3 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-full hover:shadow-lg transition-all">
                         Tutup
                     </button>
@@ -885,8 +687,7 @@
             $sdTambahanTotal += (int) preg_replace('/[^0-9]/', '', $item['price'] ?? '0');
         }
     @endphp
-    <div id="costModalPaketA"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div x-show="modalBiaya === 'costModalPaketA'" x-cloak class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
@@ -899,7 +700,7 @@
                     </span>
                     Rincian Biaya {{ $biayaSdContent['header']['title'] ?? 'SD' }}
                 </h3>
-                <button onclick="closeCostModalPaketA()" class="text-gray-400 hover:text-gray-600">
+                <button type="button" x-on:click="modalBiaya = null" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
@@ -981,15 +782,15 @@
                 <div class="bg-gray-50 rounded-xl p-4">
                     <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
-                        <li>â€¢ Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
-                        <li>â€¢ Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
-                        <li>â€¢ Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
-                        <li>â€¢ Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
+                        <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
+                        <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
+                        <li>• Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
+                        <li>• Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
                     </ul>
                 </div>
 
                 <div class="text-center">
-                    <button onclick="closeCostModalPaketA()"
+                    <button type="button" x-on:click="modalBiaya = null"
                         class="px-8 py-3 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-full hover:shadow-lg transition-all">
                         Tutup
                     </button>
@@ -1011,8 +812,7 @@
             $smpTambahanTotal += (int) preg_replace('/[^0-9]/', '', $item['price'] ?? '0');
         }
     @endphp
-    <div id="costModalPaketB"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div x-show="modalBiaya === 'costModalPaketB'" x-cloak class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
@@ -1026,7 +826,7 @@
                     </span>
                     Rincian Biaya {{ $biayaSmpContent['header']['title'] ?? 'SMP' }}
                 </h3>
-                <button onclick="closeCostModalPaketB()" class="text-gray-400 hover:text-gray-600">
+                <button type="button" x-on:click="modalBiaya = null" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
@@ -1108,15 +908,15 @@
                 <div class="bg-gray-50 rounded-xl p-4">
                     <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
-                        <li>â€¢ Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
-                        <li>â€¢ Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
-                        <li>â€¢ Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
-                        <li>â€¢ Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
+                        <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
+                        <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
+                        <li>• Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
+                        <li>• Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
                     </ul>
                 </div>
 
                 <div class="text-center">
-                    <button onclick="closeCostModalPaketB()"
+                    <button type="button" x-on:click="modalBiaya = null"
                         class="px-8 py-3 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-full hover:shadow-lg transition-all">
                         Tutup
                     </button>
@@ -1124,9 +924,5 @@
             </div>
         </div>
     </div>
-
-    <x-footer></x-footer>
-    @vite(['resources/js/navbar.js', 'resources/js/pages/ppdb.js'])
-</body>
-
-</html>
+</div>
+@endsection

@@ -1,30 +1,22 @@
-﻿<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.landing')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('seo')
     @php
         $heroSection = $page->getSection('hero');
         $heroContent = $heroSection->content ?? [];
     @endphp
     <x-seo-meta title="{{ $heroContent['title'] ?? 'Struktur Organisasi' }} - PKBM House Of Knowledge" description="Struktur organisasi dan manajemen PKBM House Of Knowledge yang profesional dalam mendukung operasional pendidikan berkualitas sehari-hari." keywords="struktur organisasi, manajemen sekolah, tim profesional, hierarki pendidikan"></x-seo-meta>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@endsection
 
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/struktur-organisasi.css'])
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-</head>
+@section('body_class', 'bg-gray-50')
 
-<body class="bg-gray-50">
+@section('content')
 
-    <x-navbar></x-navbar>
 
     <!-- Hero Section -->
-    <section class="relative h-[400px] flex items-center justify-center"
-        style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="hero-overlay absolute inset-0"></div>
+    <section class="relative h-[400px] flex items-center justify-center">
+        <img src="{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        <div class="bg-[linear-gradient(135deg,rgba(22,95,172,0.9)_0%,rgba(40,127,59,0.8)_100%)] absolute inset-0"></div>
         <div class="relative z-10 text-center text-white px-4">
             <nav class="text-sm mb-4">
                 <a href="{{ url('/') }}" class="hover:underline">Beranda</a>
@@ -79,8 +71,7 @@
                         $leaderColor = (str_starts_with($rawColor, '#')) ? $rawColor : ($colorMap[$rawColor] ?? '#165fac');
                     @endphp
                     <!-- Leader Card -->
-                    <div class="org-card text-white rounded-2xl p-6 text-center shadow-xl mb-8"
-                        style="background-color: {{ $leaderColor }}">
+                    <div class="transition-all duration-300 hover:-translate-y-[5px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] text-white rounded-2xl p-6 text-center shadow-xl mb-8 bg-[var(--warna)]" data-warna="{{ warna_landing($leaderColor) }}">
                         <img loading="lazy" decoding="async" src="{{ asset($leader['image'] ?? 'img/guru-1.png') }}" alt="{{ $leader['name'] }}"
                             class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-white">
                         <h3 class="font-bold text-lg">{{ $leader['name'] }}</h3>
@@ -103,8 +94,7 @@
                             $rawStaffColor = $staff['color'] ?? 'primary';
                             $staffColor = (str_starts_with($rawStaffColor, '#')) ? $rawStaffColor : ($colorMap[$rawStaffColor] ?? '#165fac');
                         @endphp
-                        <div class="org-card bg-white rounded-2xl p-6 text-center shadow-lg border-t-4"
-                            style="border-color: {{ $staffColor }}">
+                        <div class="transition-all duration-300 hover:-translate-y-[5px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] bg-white rounded-2xl p-6 text-center shadow-lg border-t-4 border-[var(--warna)]" data-warna="{{ warna_landing($staffColor) }}">
                             <img loading="lazy" decoding="async" src="{{ asset($staff['image'] ?? 'img/guru-1.png') }}" alt="{{ $staff['name'] }}"
                                 class="w-20 h-20 rounded-full mx-auto mb-4 object-cover">
                             <h3 class="font-bold text-gray-800">{{ $staff['name'] }}</h3>
@@ -119,7 +109,7 @@
                         {{ $coordHeader['title'] ?? 'Koordinator Program' }}</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         @foreach($coordinators as $coord)
-                            <div class="org-card bg-gray-50 rounded-xl p-4 text-center shadow hover:bg-white">
+                            <div class="transition-all duration-300 hover:-translate-y-[5px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] bg-gray-50 rounded-xl p-4 text-center shadow hover:bg-white">
                                 <img loading="lazy" decoding="async" src="{{ asset($coord['image'] ?? 'img/guru-1.png') }}"
                                     alt="{{ $coord['name'] }}" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover">
                                 <h4 class="font-semibold text-gray-800 text-sm">{{ $coord['name'] }}</h4>
@@ -131,11 +121,4 @@
             </div>
         </div>
     </section>
-
-    <x-footer></x-footer>
-
-    @vite(['resources/js/navbar.js'])
-</body>
-
-</html>
-
+@endsection

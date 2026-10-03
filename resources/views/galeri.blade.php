@@ -1,23 +1,11 @@
-﻿<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.landing')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('seo')
     <x-seo-meta title="PKBM House Of Knowledge - Galeri" description="Galeri foto dan dokumentasi kegiatan pembelajaran serta fasilitas di PKBM House Of Knowledge."></x-seo-meta>
+@endsection
 
-    <!-- CDN Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@section('content')
 
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/galeri.css'])
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-</head>
-
-<body class="bg-white">
     @php
         $heroSection = $page->getSection('hero');
         $heroContent = $heroSection->content ?? [];
@@ -41,11 +29,12 @@
     @endphp
 
     <!-- Navbar Component -->
-    <x-navbar></x-navbar>
+
 
     <!-- Hero Section -->
-    <section class="relative pt-32 pb-20 bg-cover bg-center bg-no-repeat"
-        style="background-image: linear-gradient(135deg, rgba(22,95,172,0.75) 0%, rgba(40,127,59,0.75) 100%), url('{{ asset($heroContent['background_image'] ?? 'img/bg-galeri.jpg') }}');">
+    <section class="relative pt-32 pb-20">
+        <img src="{{ asset($heroContent['background_image'] ?? 'img/bg-galeri.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(22,95,172,0.75)_0%,rgba(40,127,59,0.75)_100%)]"></div>
 
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute top-20 left-10 w-32 h-32 border-4 border-white/10 rounded-full"></div>
@@ -69,19 +58,20 @@
         </div>
     </section>
 
+    <div x-data="galeriPublik">
     <!-- Filter Section -->
     <section class="py-8 bg-white sticky top-0 z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-wrap justify-center gap-3">
-                <button
-                    class="filter-btn active px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-full hover:bg-gray-200"
-                    data-filter="all">
+                <button type="button" x-on:click="filter = 'all'"
+                    :class="filter === 'all' ? 'bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)] text-white -translate-y-0.5 shadow-[0_10px_20px_rgba(22,95,172,0.3)]' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                    class="transition-all duration-300 px-6 py-3 font-medium rounded-full">
                     Semua
                 </button>
                 @foreach($categories as $category)
-                    <button
-                        class="filter-btn px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-full hover:bg-gray-200"
-                        data-filter="{{ $category['key'] ?? '' }}">
+                    <button type="button" x-on:click="filter = @js($category['key'] ?? '')"
+                        :class="filter === @js($category['key'] ?? '') ? 'bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)] text-white -translate-y-0.5 shadow-[0_10px_20px_rgba(22,95,172,0.3)]' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                        class="transition-all duration-300 px-6 py-3 font-medium rounded-full">
                         {{ $category['label'] ?? '' }}
                     </button>
                 @endforeach
@@ -92,7 +82,7 @@
     <!-- Gallery Grid Section -->
     <section class="py-16 bg-cream">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="masonry-grid" id="galleryGrid">
+            <div class="columns-1 gap-6 sm:columns-2 lg:columns-3">
 
                 @php
                     // Build category lookup for labels and colors
@@ -109,12 +99,12 @@
                         $categoryColor = $cat['color'] ?? 'primary';
                         $badgeClass = $colorMap[$categoryColor] ?? 'bg-primary text-white';
                     @endphp
-                    <div class="masonry-item scroll-reveal gallery-item rounded-2xl overflow-hidden shadow-lg bg-white"
-                        data-category="{{ $item['category'] ?? '' }}">
+                    <div class="group relative mb-6 cursor-pointer break-inside-avoid overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-[600ms] ease-[ease]"
+                        x-show="tampil(@js($item['category'] ?? ''))" x-muncul="opacity-0 translate-y-[30px]">
                         <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/gallery-1.jpg') }}" alt="{{ $item['title'] ?? '' }}"
-                            class="w-full h-auto object-cover">
-                        <div class="gallery-overlay"></div>
-                        <div class="gallery-info">
+                            class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.15]">
+                        <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.8),transparent)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                        <div class="absolute bottom-0 left-0 right-0 translate-y-full p-6 transition-transform duration-300 group-hover:translate-y-0">
                             <span class="inline-block px-3 py-1 {{ $badgeClass }} text-xs rounded-full mb-2">{{ $categoryLabel }}</span>
                             <h3 class="text-white font-bold text-lg mb-1">{{ $item['title'] ?? '' }}</h3>
                             <p class="text-white/80 text-sm">{{ $item['date'] ?? '' }}</p>
@@ -123,45 +113,12 @@
                 @endforeach
 
             </div>
-
-            <!-- Load More Button
-            <div class="text-center mt-12">
-                <button id="loadMoreBtn" class="inline-flex items-center px-8 py-4 bg-primary hover:bg-secondary text-white font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
-                    Muat Lebih Banyak
-                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-            </div>-->
         </div>
     </section>
-
-    <!-- Image Modal -->
-    <div id="imageModal" class="modal">
-        <span
-            class="absolute top-6 right-6 text-white text-5xl font-light cursor-pointer hover:text-accent-yellow transition z-10"
-            id="closeModal">&times;</span>
-        <button id="prevImage"
-            class="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition z-10">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-        </button>
-        <button id="nextImage"
-            class="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition z-10">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-        </button>
-        <img class="modal-content rounded-lg" id="modalImage" src="" alt="Gallery Image">
-        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-white">
-            <h3 id="modalTitle" class="text-xl font-bold mb-1"></h3>
-            <p id="modalDate" class="text-sm text-white/80"></p>
-        </div>
     </div>
 
     <!-- CTA Section -->
-    <section class="py-20" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
+    <section class="py-20 bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)]">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
                 Bergabunglah dengan Keluarga Besar Kami
@@ -184,9 +141,4 @@
             </div>
         </div>
     </section>
-
-    <x-footer></x-footer>
-    @vite(['resources/js/navbar.js', 'resources/js/pages/galeri.js'])
-</body>
-
-</html>
+@endsection

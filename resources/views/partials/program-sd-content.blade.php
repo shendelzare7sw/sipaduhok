@@ -75,14 +75,13 @@
                         : ($iconColorMap[$rawIconColor] ?? '#165fac');
                 @endphp
                 <div
-                    class="bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100"
-                    style="background-color: {{ $cardColor }}; border-color: {{ $cardColor }}">
+                    class="rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer border bg-[var(--warna,#fff)] border-[var(--warna,#f3f4f6)]" data-warna="{{ warna_landing($cardColor, '#ffffff') }}">
                     <div
                         class="w-16 h-16 bg-white/50 rounded-2xl flex items-center justify-center mb-4" >
                          @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                             <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-10 h-10 object-contain">
                          @elseif(!empty($item['icon']) && (str_starts_with($item['icon'], 'fa') || str_starts_with($item['icon'], 'bx')))
-                            <i class="{{ $item['icon'] }} text-2xl" style="color: {{ $iconHex }}"></i>
+                            <i class="{{ $item['icon'] }} text-2xl text-[var(--warna)]" data-warna="{{ warna_landing($iconHex) }}"></i>
                          @else
                             @php
                                 $title = strtolower($item['title'] ?? '');
@@ -182,15 +181,14 @@
 </section>
 
 <!-- CTA -->
-<section class="py-16" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
+<section class="py-16 bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)]">
     <div class="max-w-4xl mx-auto px-4 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">{{ $content['cta_title'] ?? 'Mulai Pendidikan Anda Sekarang' }}
         </h2>
         <p class="text-white/90 mb-8">
             {{ $content['cta_description'] ?? 'Dapatkan ijazah resmi setara SD dengan program Paket A kami.' }}</p>
         <a href="/ppdb"
-            class="inline-block px-8 py-4 bg-white text-[#165fac] font-semibold rounded-full hover:bg-gray-100 transition"
-            style="cursor: pointer;">
+            class="inline-block px-8 py-4 bg-white text-[#165fac] font-semibold rounded-full hover:bg-gray-100 transition cursor-pointer">
             Daftar Sekarang
         </a>
     </div>

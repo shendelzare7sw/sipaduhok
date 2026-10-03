@@ -30,7 +30,6 @@ class SitemapController extends Controller
                 'galeri',
                 'kontak',
                 'berita',
-                'legalitas',
                 'kebijakan-privasi',
                 'syarat-ketentuan',
             ];

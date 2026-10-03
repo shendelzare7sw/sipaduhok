@@ -1,27 +1,11 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peningkatan Keamanan Akun - PKBM House Of Knowledge</title>
-    <!-- Favicons -->
-    <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('img/logo.png') }}">
-    
-    <!-- CDN Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@extends('layouts.auth')
 
-    @vite(['resources/css/pages/login.css'])
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-</head>
-<body>
-    <div class="animated-bg" style="background: linear-gradient(-45deg, #165fac, #287f3b, #d45930);">
-        <div class="login-container max-w-2xl mx-auto">
-            <div class="glass-effect rounded-3xl shadow-2xl overflow-hidden slide-in bg-white p-8 md:p-12 relative border-t-4 border-[#165fac]">
+@section('title', 'Peningkatan Keamanan Akun')
+
+@section('content')
+    <div class="flex min-h-screen items-center justify-center p-5 bg-[linear-gradient(-45deg,#165fac,#287f3b,#d45930)]">
+        <div class="w-full max-w-2xl mx-auto">
+            <div class="rounded-3xl shadow-2xl overflow-hidden animate-fade-up bg-white backdrop-blur-[20px] p-8 md:p-12 relative border border-t-4 border-[#165fac]">
                 
                 <div class="mb-8 text-center">
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-[#165fac] mb-4">
@@ -49,7 +33,7 @@
                     <!-- Security Question -->
                     <div>
                         <label for="security_question" class="block text-sm font-semibold text-gray-700 mb-2">Pilih Pertanyaan Keamanan</label>
-                        <select id="security_question" name="security_question" class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none bg-white" required>
+                        <select id="security_question" name="security_question" class="transition-all duration-300 focus:-translate-y-0.5 focus:shadow-[0_10px_30px_rgba(22,95,172,0.2)] [&::-ms-clear]:hidden [&::-ms-reveal]:hidden w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none bg-white" required>
                             <option value="" disabled selected>Pilih pertanyaan...</option>
                             <option value="Apa nama SD Anda?">Apa nama SD Anda?</option>
                             <option value="Siapa nama teman masa kecil Anda?">Siapa nama teman masa kecil Anda?</option>
@@ -63,7 +47,7 @@
                     <div>
                         <label for="security_answer" class="block text-sm font-semibold text-gray-700 mb-2">Jawaban (Disimpan Terenkripsi)</label>
                         <input type="text" id="security_answer" name="security_answer"
-                            class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none"
+                            class="transition-all duration-300 focus:-translate-y-0.5 focus:shadow-[0_10px_30px_rgba(22,95,172,0.2)] [&::-ms-clear]:hidden [&::-ms-reveal]:hidden w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none"
                             placeholder="Jawaban Anda" required maxlength="255">
                         <p class="text-xs text-gray-500 mt-1">Harap catat baik-baik. Jawaban ini bersifat <em>case-insensitive</em> saat pemulihan nantinya.</p>
                     </div>
@@ -73,13 +57,13 @@
                         <div>
                             <label for="security_pin" class="block text-sm font-semibold text-gray-700 mb-2">Buat 6-Digit PIN</label>
                             <input type="password" id="security_pin" name="security_pin" maxlength="6" pattern="\d{6}"
-                                class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none text-center tracking-[0.5em]"
+                                class="transition-all duration-300 focus:-translate-y-0.5 focus:shadow-[0_10px_30px_rgba(22,95,172,0.2)] [&::-ms-clear]:hidden [&::-ms-reveal]:hidden w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none text-center tracking-[0.5em]"
                                 placeholder="••••••" required>
                         </div>
                         <div>
                             <label for="security_pin_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi PIN</label>
                             <input type="password" id="security_pin_confirmation" name="security_pin_confirmation" maxlength="6" pattern="\d{6}"
-                                class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none text-center tracking-[0.5em]"
+                                class="transition-all duration-300 focus:-translate-y-0.5 focus:shadow-[0_10px_30px_rgba(22,95,172,0.2)] [&::-ms-clear]:hidden [&::-ms-reveal]:hidden w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none text-center tracking-[0.5em]"
                                 placeholder="••••••" required>
                         </div>
                     </div>
@@ -115,5 +99,4 @@
             </div>
         </div>
     </div>
-</body>
-</html>
+@endsection

@@ -1,30 +1,22 @@
-﻿<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.landing')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('seo')
     <x-seo-meta title="Tentang Sekolah - PKBM House Of Knowledge" description="Pelajari profil lengkap PKBM House Of Knowledge, visi misi, sejarah, dan komitmen kami dalam memberikan pendidikan berkualitas untuk semua." keywords="tentang PKBM, profil sekolah, visi misi, sejarah pendidikan"></x-seo-meta>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@endsection
 
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/about.css'])
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-</head>
+@section('body_class', 'bg-gray-50')
 
-<body class="bg-gray-50">
+@section('content')
 
-    <x-navbar></x-navbar>
 
     @php
         $heroSection = $page->getSection('hero');
         $heroContent = $heroSection->content ?? [];
     @endphp
     <!-- Hero Section -->
-    <section class="relative h-[400px] flex items-center justify-center"
-        style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="hero-overlay absolute inset-0"></div>
+    <section class="relative h-[400px] flex items-center justify-center">
+        <img src="{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        <div class="bg-[linear-gradient(135deg,rgba(22,95,172,0.9)_0%,rgba(40,127,59,0.8)_100%)] absolute inset-0"></div>
         <div class="relative z-10 text-center text-white px-4">
             <nav class="text-sm mb-4">
                 <a href="{{ url('/') }}" class="hover:underline">Beranda</a>
@@ -150,17 +142,15 @@
     <section class="py-20 bg-white">
         <div class="max-w-6xl mx-auto px-4 relative">
 
-            <div class="timeline-line hidden md:block"></div>
+            <div class="absolute left-5 h-full w-1 -translate-x-1/2 bg-[linear-gradient(to_bottom,#165fac,#287f3b)] hidden md:left-1/2 md:block"></div>
 
             <div class="space-y-12">
 
                 @foreach($historyItems as $index => $item)
-                    <div class="flex flex-col md:flex-row{{ $index % 2 != 0 ? '-reverse' : '' }} items-center gap-8">
+                    <div class="flex flex-col {{ $index % 2 != 0 ? 'md:flex-row-reverse' : 'md:flex-row' }} items-center gap-8" data-warna="{{ warna_landing($item['color'] ?? '#165fac') }}">
                         <div class="md:w-1/2 {{ $index % 2 == 0 ? 'md:text-right md:pr-12' : 'md:text-left md:pl-12' }}">
-                            <div class="bg-gray-50 rounded-2xl p-6 shadow-lg border-l-4 {{ $index % 2 == 0 ? 'md:border-l-0 md:border-r-4' : '' }}"
-                                 style="border-color: {{ $item['color'] ?? '#165fac' }}">
-                                <span class="inline-block text-white px-4 py-1 rounded-full text-sm font-bold mb-3"
-                                      style="background-color: {{ $item['color'] ?? '#165fac' }}">
+                            <div class="bg-gray-50 rounded-2xl p-6 shadow-lg border-l-4 {{ $index % 2 == 0 ? 'md:border-l-0 md:border-r-4' : '' }} border-[var(--warna)]">
+                                <span class="inline-block text-white px-4 py-1 rounded-full text-sm font-bold mb-3 bg-[var(--warna)]">
                                     {{ $item['year'] ?? '' }}
                                 </span>
                                 <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $item['title'] ?? '' }}</h3>
@@ -168,8 +158,7 @@
                             </div>
                         </div>
 
-                        <div class="hidden md:flex w-8 h-8 rounded-full items-center justify-center z-10"
-                             style="background-color: {{ $item['color'] ?? '#165fac' }}">
+                        <div class="hidden md:flex w-8 h-8 rounded-full items-center justify-center z-10 bg-[var(--warna)]">
                             <div class="w-3 h-3 bg-white rounded-full"></div>
                         </div>
 
@@ -199,12 +188,12 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($whyItems as $item)
-                <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center">
-                    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background-color: {{ $item['icon_color'] ?? '#165fac' }}1A;">
+                <div class="transition-all duration-300 hover:-translate-y-[5px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] bg-gray-50 rounded-2xl p-8 text-center" data-warna="{{ warna_landing($item['icon_color'] ?? '#165fac') }}">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 bg-[color-mix(in_srgb,var(--warna)_10%,transparent)]">
                          @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                              <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Icon' }}" class="w-8 h-8 object-contain">
                          @else
-                             <svg class="w-8 h-8" style="color: {{ $item['icon_color'] ?? '#165fac' }};" fill="currentColor" viewBox="0 0 20 20">
+                             <svg class="w-8 h-8 text-[var(--warna)]" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                              </svg>
                          @endif
@@ -219,7 +208,7 @@
     @endif
 
     <!-- CTA -->
-    <section class="py-16" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
+    <section class="py-16 bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)]">
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">{{ $ctaContent['title'] ?? 'Tertarik Bergabung?' }}</h2>
             <p class="text-white/90 mb-8">{{ $ctaContent['description'] ?? 'Daftarkan putra-putri Anda sekarang dan berikan pendidikan terbaik untuk masa depan yang cerah' }}</p>
@@ -232,11 +221,4 @@
             </a>
         </div>
     </section>
-
-    <x-footer></x-footer>
-
-    @vite(['resources/js/navbar.js'])
-</body>
-
-</html>
-
+@endsection

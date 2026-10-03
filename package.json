@@ -8,7 +8,6 @@
     },
     "devDependencies": {
         "autoprefixer": "^10.4.22",
-        "axios": "^1.6.4",
         "laravel-vite-plugin": "^1.0",
         "playwright": "^1.49.0",
         "postcss": "^8.5.6",

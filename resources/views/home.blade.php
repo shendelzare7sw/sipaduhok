@@ -1,24 +1,10 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('layouts.landing')
+
+@section('seo')
     <x-seo-meta title="Beranda - PKBM House Of Knowledge" description="PKBM House Of Knowledge adalah lembaga pendidikan non-formal terpercaya di Tangerang Selatan yang menyediakan program PAUD, SD, SMP, SMA, inklusi, dan terapi." keywords="PKBM House Of Knowledge, pendidikan non-formal, PPDB, sekolah alternatif, pendidikan inklusi"></x-seo-meta>
+@endsection
 
-    <!-- CDN Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
-
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/home.css'])
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body class="bg-white">
-
-    <!-- Navbar Component -->
-    <x-navbar></x-navbar>
-
+@section('content')
     <!-- ==================== HERO SECTION ==================== -->
     @php
         $hero = $page->getSection('hero');
@@ -53,13 +39,14 @@
         $ctaSection = $page->getSection('cta_section');
         $ctaContent = $ctaSection->content ?? [];
     @endphp
-    <section class="relative min-h-screen flex items-center overflow-hidden" style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="hero-overlay absolute inset-0"></div>
+    <section class="relative min-h-screen flex items-center overflow-hidden">
+        <img src="{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(22,95,172,0.9)_0%,rgba(40,127,59,0.8)_100%)]"></div>
 
         <!-- Decorative Elements -->
-        <div class="absolute top-20 left-10 w-20 h-20 border-4 border-white/20 rounded-full float-animation hidden lg:block"></div>
-        <div class="absolute bottom-40 left-20 w-10 h-10 bg-accent-yellow/30 rounded-full float-animation hidden lg:block" style="animation-delay: 1s;"></div>
-        <div class="absolute top-40 right-40 w-16 h-16 border-4 border-secondary/30 rounded-lg rotate-45 float-animation hidden lg:block" style="animation-delay: 2s;"></div>
+        <div class="absolute top-20 left-10 w-20 h-20 border-4 border-white/20 rounded-full animate-float hidden lg:block"></div>
+        <div class="absolute bottom-40 left-20 w-10 h-10 bg-accent-yellow/30 rounded-full animate-float [animation-delay:1s] hidden lg:block"></div>
+        <div class="absolute top-40 right-40 w-16 h-16 border-4 border-secondary/30 rounded-lg rotate-45 animate-float [animation-delay:2s] hidden lg:block"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-20">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -94,7 +81,7 @@
 
                 <!-- Right Content - Decorative Image -->
                 <div class="hidden lg:block">
-                    <div class="decorative-frame-tilt relative">
+                    <div class="relative p-5 before:absolute before:-right-[30px] before:-top-[30px] before:-z-[1] before:h-full before:w-full before:rotate-6 before:rounded-2xl before:border-4 before:border-white/30 before:transition-transform before:duration-500 before:content-[''] after:absolute after:-bottom-[30px] after:-left-[30px] after:-z-[2] after:h-[70%] after:w-[70%] after:-rotate-6 after:rounded-2xl after:bg-[linear-gradient(135deg,#287f3b_0%,#165fac_100%)] after:opacity-40 after:transition-transform after:duration-500 after:content-[''] hover:before:rotate-3 hover:after:-rotate-3">
                         <img loading="lazy" decoding="async" src="{{ asset($heroContent['image'] ?? 'img/hero-img.jpg') }}" alt="PKBM House of Knowledge" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
 
                         <!-- Floating Badge 1 -->
@@ -125,11 +112,11 @@
         </div>
 
         <!-- Scroll Indicator -->
-        <div class="absolute bottom-28 sm:bottom-24 md:bottom-20 left-1/2 transform -translate-x-1/2 z-20">
-            <a href="#stats" class="scroll-indicator flex flex-col items-center text-white/80 hover:text-white transition-all duration-300 group">
+        <div class="absolute bottom-28 sm:bottom-24 md:bottom-20 left-1/2 transform -translate-x-1/2 z-20" x-data="{ turun: false }" x-on:scroll.window.passive="turun = window.scrollY > 300">
+            <a href="#stats" :class="turun && '!opacity-0'" class="animate-float-gentle flex flex-col items-center text-white/80 hover:text-white transition-all duration-300 group">
                 <span class="text-xs sm:text-sm mb-2 sm:mb-3 font-medium tracking-wide">Scroll Down</span>
                 <div class="relative w-6 h-10 sm:w-8 sm:h-12 border-2 border-white rounded-full flex items-center justify-center group-hover:border-accent-yellow transition-colors duration-300">
-                    <div class="scroll-wheel absolute w-1 h-2 sm:h-3 bg-white rounded-full top-2 sm:top-3 group-hover:bg-accent-yellow transition-colors duration-300"></div>
+                    <div class="animate-scroll-down absolute w-1 h-2 sm:h-3 bg-white rounded-full top-2 sm:top-3 group-hover:bg-accent-yellow transition-colors duration-300"></div>
                 </div>
             </a>
         </div>
@@ -142,39 +129,27 @@
                 {{-- Logic moved to top php block --}}
 
                 @foreach($statsItems as $index => $stat)
-                @php
-                    $isHex = isset($stat['icon_color']) && substr($stat['icon_color'], 0, 1) === '#';
-                    $themeColor = $stat['icon_color'] ?? 'primary';
-
-                    // Fallback for classes
-                    $bgClass = $isHex ? '' : 'bg-' . $themeColor . '/10';
-                    $textClass = $isHex ? '' : 'text-' . $themeColor;
-
-                    // Inline styles for Hex
-                    $bgStyle = $isHex ? "background-color: {$themeColor}1A;" : ""; // 10% opacity
-                    $textStyle = $isHex ? "color: $themeColor;" : "";
-                @endphp
-                <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center {{ $bgClass }}" style="{{ $bgStyle }}">
+                <div class="text-center" data-warna="{{ warna_landing($stat['icon_color'] ?? 'primary') }}">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-[color-mix(in_srgb,var(--warna,#165fac)_10%,transparent)]">
                         {{-- Dynamic Icon or Fallback --}}
                         @if(!empty($stat['icon']) && str_contains($stat['icon'], '/'))
                              <img loading="lazy" decoding="async" src="{{ asset($stat['icon']) }}" alt="{{ $stat['label'] ?? 'Icon' }}" class="w-8 h-8 object-contain">
                         @else
                             {{-- Fallback SVGs with color --}}
                             @if($index == 0)
-                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-8 h-8 text-[var(--warna,#165fac)]" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
                             </svg>
                             @elseif($index == 1)
-                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-8 h-8 text-[var(--warna,#165fac)]" fill="currentColor" viewBox="0 0 20 20">
                                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
                             </svg>
                             @elseif($index == 2)
-                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-8 h-8 text-[var(--warna,#165fac)]" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
                             </svg>
                             @else
-                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-8 h-8 text-[var(--warna,#165fac)]" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                             @endif
@@ -210,20 +185,12 @@
                 @foreach($programItems as $item)
                 @php
                     $isHex = isset($item['color']) && substr($item['color'], 0, 1) === '#';
-                    $themeColor = $item['color'] ?? 'primary';
-                    $shadeMap = ['primary' => 'blue', 'secondary' => 'green', 'accent-orange' => 'orange', 'accent-yellow' => 'yellow'];
-                    $shadeColor = $shadeMap[$themeColor] ?? 'blue';
-
-                    // Fallback classes
-                    $borderClass = $isHex ? '' : 'border-' . $themeColor;
-                    $bgIconClass = $isHex ? '' : 'bg-' . $shadeColor . '-50';
-                    $groupHoverIconBgClass = $isHex ? '' : 'group-hover:bg-' . $themeColor;
-                    $iconColorClass = $isHex ? '' : 'text-' . $themeColor;
-
-                    // Inline styles
-                    $cardStyle = $isHex ? "border-top-color: $themeColor;" : "";
-                    $iconBgStyle = $isHex ? "background-color: {$themeColor}10;" : ""; // ~6% opacity
-                    $iconStyle = $isHex ? "color: $themeColor;" : "";
+                    $warnaProgram = warna_landing($item['color'] ?? 'primary');
+                    // Latar ikon: token tema memakai shade -50 seperti sebelumnya; hex memakai tint 6% + garis tipis.
+                    $latarIkonTema = ['primary' => 'bg-blue-50', 'secondary' => 'bg-green-50', 'accent-orange' => 'bg-orange-50', 'accent-yellow' => 'bg-yellow-50'];
+                    $bgIconClass = $isHex
+                        ? 'bg-[color-mix(in_srgb,var(--warna)_6%,transparent)] border border-[color-mix(in_srgb,var(--warna)_12%,transparent)]'
+                        : ($latarIkonTema[$item['color'] ?? 'primary'] ?? 'bg-blue-50');
 
                     $programIconSource = strtolower(($item['title'] ?? '') . ' ' . ($item['link'] ?? ''));
                     $programIconKey = match (true) {
@@ -234,23 +201,22 @@
                         default => 'program',
                     };
                 @endphp
-                <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 {{ $borderClass }} group" style="{{ $cardStyle }}">
-                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center {{ $bgIconClass }} {{ $groupHoverIconBgClass }} transition-colors duration-300"
-                         style="{{ $iconBgStyle }} {{ $isHex ? 'border: 1px solid '.$themeColor.'20;' : '' }}">
+                <div class="transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-[var(--warna)] group" data-warna="{{ $warnaProgram }}">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center {{ $bgIconClass }} group-hover:bg-[var(--warna)] transition-colors duration-300">
                         {{-- Custom image icon or relevant program fallback icon. --}}
                         @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                              <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Program' }}" class="w-10 h-10 object-contain">
                         @else
                             @switch($programIconKey)
                                 @case('inklusi')
-                                    <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <svg class="w-10 h-10 text-[var(--warna)] group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 21s-7-4.35-7-10a4 4 0 017-2.65A4 4 0 0119 11c0 5.65-7 10-7 10z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v5m-2.5-2.5h5" />
                                     </svg>
                                     @break
 
                                 @case('kesetaraan')
-                                    <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <svg class="w-10 h-10 text-[var(--warna)] group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v16M5 7h14" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 7l-3 6h6L7 7zm10 0l-3 6h6l-3-6z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 20h8" />
@@ -258,14 +224,14 @@
                                     @break
 
                                 @case('konseling')
-                                    <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <svg class="w-10 h-10 text-[var(--warna)] group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 14a6 6 0 118 0c-.8.8-1.2 1.6-1.2 2.6H9.2c0-1-.4-1.8-1.2-2.6z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.5 20h5M10.5 8.5h.01M13.5 8.5h.01M10 11.5c1.1.9 2.9.9 4 0" />
                                     </svg>
                                     @break
 
                                 @case('usia_dini')
-                                    <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <svg class="w-10 h-10 text-[var(--warna)] group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 12.5a4 4 0 100-8 4 4 0 000 8z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5.5 21a6.5 6.5 0 0113 0" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 4l.7-1.5L6.4 4 8 4.7l-1.6.7L5.7 7 5 5.4l-1.6-.7L5 4z" />
@@ -273,7 +239,7 @@
                                     @break
 
                                 @default
-                                    <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <svg class="w-10 h-10 text-[var(--warna)] group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.5l7 3.5-7 3.5-7-3.5 7-3.5z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 14l7 3.5 7-3.5" />
                                     </svg>
@@ -282,7 +248,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $item['title'] }}</h3>
                     <p class="text-gray-600 text-sm mb-4">{{ $item['description'] }}</p>
-                    <a href="{{ url($item['link'] ?? '#') }}" class="font-semibold hover:opacity-80 transition inline-flex items-center {{ $isHex ? '' : 'text-primary hover:text-secondary' }}" style="{{ $isHex ? 'color: '.$themeColor : '' }}">
+                    <a href="{{ url($item['link'] ?? '#') }}" class="font-semibold hover:opacity-80 transition inline-flex items-center {{ $isHex ? 'text-[var(--warna)]' : 'text-primary hover:text-secondary' }}">
                         Selengkapnya
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
@@ -355,7 +321,7 @@
     </section>
 
     <!-- ==================== NEWS SECTION (3D CAROUSEL) ==================== -->
-    <section class="py-12 sm:py-20" style="background: linear-gradient(135deg, #165fac 0%, #7cb5ec 100%);">
+    <section class="py-12 sm:py-20 bg-[linear-gradient(135deg,#165fac_0%,#7cb5ec_100%)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-6 sm:mb-12">
                 <span class="inline-block px-4 py-2 bg-white/20 text-white text-sm font-medium rounded-full mb-4">
@@ -367,10 +333,12 @@
                 </p>
             </div>
 
+            <div x-data="carouselBerita(@js($beritaList->map(fn ($item) => ['title' => $item->judul, 'category' => $item->kategori_label])->values()))">
             <!-- 3D Carousel -->
-            <div class="carousel-3d relative flex items-center justify-center overflow-hidden">
+            <div class="relative flex h-[320px] items-center justify-center overflow-hidden [perspective:1000px] sm:h-[352px] md:h-[520px]"
+                 x-on:mouseenter="jeda()" x-on:mouseleave="mulai()" x-on:touchstart.passive="sentuhMulai($event)" x-on:touchend.passive="sentuhSelesai($event)">
                 <!-- Navigation Left -->
-                <button id="carouselPrev" aria-label="Berita sebelumnya" class="absolute left-3 sm:left-6 md:left-8 z-20 w-9 h-9 sm:w-12 sm:h-12 bg-white/95 backdrop-blur rounded-full flex items-center justify-center shadow-xl hover:bg-primary hover:text-white transition-all duration-300">
+                <button type="button" x-on:click="geser(-1)" aria-label="Berita sebelumnya" class="absolute left-3 sm:left-6 md:left-8 z-20 w-9 h-9 sm:w-12 sm:h-12 bg-white/95 backdrop-blur rounded-full flex items-center justify-center shadow-xl hover:bg-primary hover:text-white transition-all duration-300">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
@@ -379,7 +347,7 @@
                 <!-- Carousel Items -->
                 <div id="carouselTrack" class="relative w-full h-full">
                     @foreach($beritaList as $index => $berita)
-                    <div class="carousel-item" data-index="{{ $index }}">
+                    <div class="absolute top-1/2 -mt-[160px] h-[320px] w-[min(72vw,260px)] overflow-hidden rounded-[1.25rem] shadow-[0_25px_50px_rgba(0,0,0,0.2)] transition-all duration-[800ms] ease-[cubic-bezier(0.4,0,0.2,1)] sm:w-[240px] md:-mt-[190px] md:h-[380px] md:w-[280px] md:rounded-3xl" :class="posisi({{ $index }})">
                         <a href="{{ $berita->url_berita }}" target="_blank" class="block w-full h-full">
                             <img loading="lazy" decoding="async" src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="w-full h-full object-cover">
                             <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/85 via-black/50 to-transparent">
@@ -392,7 +360,7 @@
                 </div>
 
                 <!-- Navigation Right -->
-                <button id="carouselNext" aria-label="Berita berikutnya" class="absolute right-3 sm:right-6 md:right-8 z-20 w-9 h-9 sm:w-12 sm:h-12 bg-white/95 backdrop-blur rounded-full flex items-center justify-center shadow-xl hover:bg-primary hover:text-white transition-all duration-300">
+                <button type="button" x-on:click="geser(1)" aria-label="Berita berikutnya" class="absolute right-3 sm:right-6 md:right-8 z-20 w-9 h-9 sm:w-12 sm:h-12 bg-white/95 backdrop-blur rounded-full flex items-center justify-center shadow-xl hover:bg-primary hover:text-white transition-all duration-300">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
@@ -400,12 +368,19 @@
             </div>
 
             <!-- Pagination Dots -->
-            <div id="carouselDots" class="carousel-dots" aria-label="Indikator slide berita"></div>
+            <div class="mt-5 flex items-center justify-center gap-2" aria-label="Indikator slide berita">
+                @if($beritaList->count() > 1)
+                    @foreach($beritaList as $index => $berita)
+                        <button type="button" x-on:click="ke({{ $index }})" aria-label="Slide {{ $index + 1 }}" class="h-2 cursor-pointer rounded-full border-0 p-0 transition-all duration-300" :class="aktif === {{ $index }} ? 'w-6 bg-white' : 'w-2 bg-white/40'"></button>
+                    @endforeach
+                @endif
+            </div>
 
             <!-- Info Display -->
-            <div id="newsInfo" class="text-center mt-8">
-                <h3 class="text-xl md:text-2xl font-bold text-white mb-2" id="newsTitle">Kegiatan Pembelajaran Aktif</h3>
-                <p class="text-white/80" id="newsCategory">Kegiatan</p>
+            <div class="text-center mt-8">
+                <h3 class="text-xl md:text-2xl font-bold text-white mb-2" x-text="berita[aktif]?.title ?? 'Kegiatan Pembelajaran Aktif'">{{ $beritaList->first()?->judul ?? 'Kegiatan Pembelajaran Aktif' }}</h3>
+                <p class="text-white/80" x-text="berita[aktif]?.category ?? 'Kegiatan'">{{ $beritaList->first()?->kategori_label ?? 'Kegiatan' }}</p>
+            </div>
             </div>
 
             <!-- View All Button -->
@@ -434,8 +409,8 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @if(!empty($galleryItems))
                     @foreach($galleryItems as $item)
-                    <div class="gallery-item rounded-2xl shadow-lg">
-                        <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="Gallery Item" class="w-full h-64 object-cover rounded-2xl">
+                    <div class="group overflow-hidden rounded-2xl shadow-lg">
+                        <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="Gallery Item" class="w-full h-64 object-cover rounded-2xl transition-transform duration-500 group-hover:scale-110">
                     </div>
                     @endforeach
                 @else
@@ -477,9 +452,9 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @php
                     $colorClasses = [
-                        'orange' => ['border' => 'border-accent-orange', 'text' => 'text-accent-orange', 'bg' => 'bg-orange-50', 'icon_bg' => 'bg-orange-100', 'hover_bg' => 'hover:bg-accent-orange', 'shade' => 'orange'],
-                        'blue' => ['border' => 'border-primary', 'text' => 'text-primary', 'bg' => 'bg-blue-50', 'icon_bg' => 'bg-blue-100', 'hover_bg' => 'hover:bg-primary', 'shade' => 'blue'],
-                        'green' => ['border' => 'border-secondary', 'text' => 'text-secondary', 'bg' => 'bg-green-50', 'icon_bg' => 'bg-green-100', 'hover_bg' => 'hover:bg-secondary', 'shade' => 'green'],
+                        'orange' => ['border' => 'border-accent-orange', 'text' => 'text-accent-orange', 'bg' => 'bg-orange-50', 'icon_bg' => 'bg-orange-100', 'icon_hover' => 'group-hover:bg-accent-orange'],
+                        'blue' => ['border' => 'border-primary', 'text' => 'text-primary', 'bg' => 'bg-blue-50', 'icon_bg' => 'bg-blue-100', 'icon_hover' => 'group-hover:bg-primary'],
+                        'green' => ['border' => 'border-secondary', 'text' => 'text-secondary', 'bg' => 'bg-green-50', 'icon_bg' => 'bg-green-100', 'icon_hover' => 'group-hover:bg-secondary'],
                     ];
                 @endphp
 
@@ -494,35 +469,23 @@
                         $bgShadeClass = $colorMap['bg'];
                         $iconBgClass = $colorMap['icon_bg'];
                         $textColorClass = $colorMap['text'];
-                        $iconHoverBgClass = "group-hover:" . str_replace('text-', 'bg-', $colorMap['text']);
-                        $cardStyle = "";
-                        $bgStyle = "";
-                        $iconBgStyle = "";
-                        $textStyle = "";
+                        $iconHoverBgClass = $colorMap['icon_hover'];
                     } else {
-                        $themeColor = $inputColor;
-                        $borderColorClass = '';
-                        $bgShadeClass = '';
-                        $iconBgClass = '';
-                        $textColorClass = '';
-                        $iconHoverBgClass = '';
-
-                        $cardStyle = "border-bottom-color: $themeColor;";
-                        $bgStyle = "background-color: {$themeColor}10;";
-                        $iconBgStyle = "background-color: {$themeColor}20; color: $themeColor;";
-                        $textStyle = "color: $themeColor;";
+                        $borderColorClass = 'border-[var(--warna)]';
+                        $bgShadeClass = 'bg-[color-mix(in_srgb,var(--warna)_6%,transparent)]';
+                        $iconBgClass = 'bg-[color-mix(in_srgb,var(--warna)_12%,transparent)]';
+                        $textColorClass = 'text-[var(--warna)]';
+                        $iconHoverBgClass = 'group-hover:bg-[var(--warna)]';
                     }
                 @endphp
-                <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 {{ $borderColorClass }} group relative overflow-hidden"
-                     style="{{ $cardStyle }}">
+                <div class="transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] bg-white rounded-2xl shadow-xl p-8 border-b-4 {{ $borderColorClass }} group relative overflow-hidden"
+                     @if($isHex) data-warna="{{ warna_landing($inputColor) }}" @endif>
 
                     {{-- Decorative Background Circle --}}
-                    <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 {{ $bgShadeClass }}"
-                         style="{{ $bgStyle }}"></div>
+                    <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 {{ $bgShadeClass }}"></div>
 
                     <div class="relative z-10">
-                        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 {{ $iconBgClass }} {{ $textColorClass }} {{ $iconHoverBgClass }} group-hover:text-white"
-                             style="{{ $iconBgStyle }}">
+                        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 {{ $iconBgClass }} {{ $textColorClass }} {{ $iconHoverBgClass }} group-hover:text-white">
                              @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                                  <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="Icon" class="w-8 h-8 object-contain">
                             @else
@@ -533,7 +496,7 @@
                         </div>
 
                         <h3 class="text-xl font-bold text-gray-800 mb-1">{{ $item['name'] ?? '' }}</h3>
-                        <p class="text-sm font-medium uppercase tracking-wider mb-4 {{ $textColorClass }}" style="{{ $textStyle }}">
+                        <p class="text-sm font-medium uppercase tracking-wider mb-4 {{ $textColorClass }}">
                             {{ $item['area'] ?? '' }}
                         </p>
 
@@ -559,7 +522,7 @@
     </section>
 
     <!-- Dynamic CTA -->
-    <section class="py-20" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
+    <section class="py-20 bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)]">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
                 {{ $ctaContent['title'] ?? 'Siap Bergabung Bersama Kami?' }}
@@ -583,13 +546,5 @@
         </div>
     </section>
 
-    <x-footer></x-footer>
-    <script>
-        window.PageData = {
-            newsData: @json($beritaList->map(fn($item) => ['title' => $item->judul, 'category' => $item->kategori_label]))
-        };
-    </script>
-    @vite(['resources/js/navbar.js', 'resources/js/pages/home.js'])
-</body>
-</html>
+@endsection
 

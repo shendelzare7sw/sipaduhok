@@ -1,31 +1,22 @@
-﻿<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.landing')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('seo')
     @php
         $heroSection = $page->getSection('hero');
         $heroContent = $heroSection->content ?? [];
     @endphp
     <x-seo-meta title="{{ $heroContent['title'] ?? 'Visi & Misi' }} - PKBM House Of Knowledge" description="Visi dan misi PKBM House Of Knowledge adalah memberikan pendidikan inklusif berkualitas yang mendukung perkembangan optimal setiap peserta didik tanpa terkecuali." keywords="visi misi, misi pendidikan, nilai-nilai pendidikan, komitmen sekolah"></x-seo-meta>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@endsection
 
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css'])
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-</head>
+@section('body_class', 'bg-gray-50')
 
-<body class="bg-gray-50">
+@section('content')
 
-    <x-navbar></x-navbar>
 
     <!-- Hero Section -->
-    <section class="relative h-[400px] flex items-center justify-center"
-        style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="hero-overlay absolute inset-0"></div>
+    <section class="relative h-[400px] flex items-center justify-center">
+        <img src="{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        <div class="bg-[linear-gradient(135deg,rgba(22,95,172,0.9)_0%,rgba(40,127,59,0.8)_100%)] absolute inset-0"></div>
         <div class="relative z-10 text-center text-white px-4">
             <nav class="text-sm mb-4">
                 <a href="{{ url('/') }}" class="hover:underline">Beranda</a>
@@ -101,10 +92,8 @@
                             $itemColor = $colorMap[$colorValue] ?? '#165fac';
                         }
                     @endphp
-                    <div class="bg-gray-50 rounded-2xl p-6 border-t-4 hover:shadow-lg transition"
-                        style="border-color: {{ $itemColor }}">
-                        <div class="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-xl mb-4"
-                            style="background-color: {{ $itemColor }}">{{ $index + 1 }}</div>
+                    <div class="bg-gray-50 rounded-2xl p-6 border-t-4 border-[var(--warna)] hover:shadow-lg transition" data-warna="{{ warna_landing($itemColor) }}">
+                        <div class="w-12 h-12 text-white rounded-full flex items-center justify-center font-bold text-xl mb-4 bg-[var(--warna)]">{{ $index + 1 }}</div>
                         <h3 class="text-lg font-bold text-gray-800 mb-2">{{ $item['title'] }}</h3>
                         <p class="text-gray-600">{{ $item['description'] }}</p>
                     </div>
@@ -141,15 +130,14 @@
                     @php
                         $iconColorValue = $item['icon_color'] ?? 'orange';
                         $isHex = str_starts_with($iconColorValue, '#');
-                        $iconClass = $isHex ? '' : ($iconColorMap[$iconColorValue] ?? 'text-orange-400');
-                        $iconStyle = $isHex ? "color: {$iconColorValue};" : "";
+                        $iconClass = $isHex ? 'text-[var(--warna)]' : ($iconColorMap[$iconColorValue] ?? 'text-orange-400');
                     @endphp
                     <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
                         <div class="text-4xl mb-3 flex justify-center">
                              @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                                 <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Icon' }}" class="w-12 h-12 object-contain">
                              @else
-                                <i class="{{ $item['icon'] ?? 'fas fa-star' }} {{ $iconClass }}" style="{{ $iconStyle }}"></i>
+                                <i class="{{ $item['icon'] ?? 'fas fa-star' }} {{ $iconClass }}" @if($isHex) data-warna="{{ warna_landing($iconColorValue) }}" @endif></i>
                              @endif
                         </div>
                         <h3 class="text-white font-bold">{{ $item['title'] }}</h3>
@@ -158,11 +146,4 @@
             </div>
         </div>
     </section>
-
-    <x-footer></x-footer>
-
-    @vite(['resources/js/navbar.js'])
-</body>
-
-</html>
-
+@endsection

@@ -1,0 +1,8 @@
+/* Halaman publik (landing + auth): Tailwind terkompilasi dengan tema landing.
+   Tidak ada aturan CSS kustom di sini — seluruh tampilan ditulis sebagai kelas Tailwind di Blade. */
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@config "../../tailwind.landing.config.js";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

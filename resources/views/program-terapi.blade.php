@@ -1,19 +1,13 @@
-﻿<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.landing')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('seo')
     <x-seo-meta title="Program Terapi - PKBM House Of Knowledge" description="Program terapi komprehensif PKBM House Of Knowledge mencakup terapi wicara, terapi kognitif, dan konseling untuk mendukung perkembangan holistik setiap anak." keywords="terapi anak, terapi wicara, terapi kognitif, layanan konseling pendidikan, program khusus"></x-seo-meta>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@endsection
 
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css'])
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-</head>
+@section('body_class', 'bg-gray-50')
 
-<body class="bg-gray-50">
+@section('content')
+
     @php
         $heroSection = $page->getSection('hero');
         $heroContent = $heroSection->content ?? [];
@@ -48,12 +42,11 @@
         ];
     @endphp
 
-    <x-navbar></x-navbar>
 
     <!-- Hero Section -->
-    <section class="relative h-[400px] flex items-center justify-center"
-        style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="hero-overlay absolute inset-0"></div>
+    <section class="relative h-[400px] flex items-center justify-center">
+        <img src="{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        <div class="bg-[linear-gradient(135deg,rgba(22,95,172,0.9)_0%,rgba(40,127,59,0.8)_100%)] absolute inset-0"></div>
         <div class="relative z-10 text-center text-white px-4">
             <nav class="text-sm mb-4">
                 <a href="{{ url('/') }}" class="hover:underline">Beranda</a>
@@ -175,12 +168,12 @@
                         $features = isset($item['features']) ? explode('|', $item['features']) : [];
                     @endphp
 
-                    <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100" style="border-top: 4px solid {{ $hexColor }}">
+                    <div class="transition-all duration-300 hover:-translate-y-[5px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 border-t-4 border-t-[var(--warna)]" data-warna="{{ warna_landing($hexColor) }}">
                         <div class="h-48 flex items-center justify-center relative">
                             <!-- Helper div for background opacity -->
-                             <div class="absolute inset-0 opacity-10" style="background-color: {{ $hexColor }}"></div>
+                             <div class="absolute inset-0 opacity-10 bg-[var(--warna)]"></div>
 
-                            <svg class="w-20 h-20 relative z-10" style="color: {{ $hexColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-20 h-20 relative z-10 text-[var(--warna)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="{{ $config['icon_path'] }}" />
                             </svg>
@@ -193,7 +186,7 @@
                                 <ul class="text-sm text-gray-600 space-y-2">
                                     @foreach($features as $feature)
                                         <li class="flex items-center gap-2">
-                                            <svg class="w-4 h-4" style="color: {{ $hexColor }}" fill="currentColor" viewBox="0 0 20 20">
+                                            <svg class="w-4 h-4 text-[var(--warna)]" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                                     clip-rule="evenodd" />
@@ -264,11 +257,4 @@
             </div>
         </div>
     </section>
-
-    <x-footer></x-footer>
-
-    @vite(['resources/js/navbar.js'])
-</body>
-
-</html>
-
+@endsection

@@ -1,20 +1,13 @@
-﻿<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.landing')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('seo')
     <x-seo-meta title="Program Inklusi - PKBM House Of Knowledge" description="Program pendidikan inklusif PKBM House Of Knowledge memberikan akses pendidikan berkualitas untuk anak-anak berkebutuhan khusus dengan dukungan terapi dan bimbingan khusus." keywords="pendidikan inklusi, anak berkebutuhan khusus, ABK, sekolah inklusi, pendidikan khusus"></x-seo-meta>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@endsection
 
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css'])
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
+@section('body_class', 'bg-gray-50')
 
-<body class="bg-gray-50">
+@section('content')
+
     @php
         $heroSection = $page->getSection('hero');
         $heroContent = $heroSection->content ?? [];
@@ -34,12 +27,11 @@
         ];
     @endphp
 
-    <x-navbar></x-navbar>
 
     <!-- Hero Section -->
-    <section class="relative h-[400px] flex items-center justify-center"
-        style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="hero-overlay absolute inset-0"></div>
+    <section class="relative h-[400px] flex items-center justify-center">
+        <img src="{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        <div class="bg-[linear-gradient(135deg,rgba(22,95,172,0.9)_0%,rgba(40,127,59,0.8)_100%)] absolute inset-0"></div>
         <div class="relative z-10 text-center text-white px-4">
             <nav class="text-sm mb-4">
                 <a href="{{ url('/') }}" class="hover:underline">Beranda</a>
@@ -113,15 +105,13 @@
                         }
                     @endphp
 
-                    <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4"
-                        style="border-color: {{ $styles['border'] }}">
+                    <div class="transition-all duration-300 hover:-translate-y-[5px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] bg-gray-50 rounded-2xl p-8 border-t-4 border-[var(--warna)]" data-warna="{{ warna_landing($styles['border']) }}">
 
-                        <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
-                             style="background-color: {{ $styles['bg'] }}1A;">
+                        <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-4 bg-[color-mix(in_srgb,var(--warna)_10%,transparent)]">
                              @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                                 <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-8 h-8 object-contain">
                              @else
-                                <i class="{{ $item['icon'] ?? 'fas fa-info-circle' }} text-2xl" style="color: {{ $styles['text'] }}"></i>
+                                <i class="{{ $item['icon'] ?? 'fas fa-info-circle' }} text-2xl text-[var(--warna)]"></i>
                              @endif
                         </div>
                         <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $item['title'] }}</h3>
@@ -156,13 +146,12 @@
                         }
                     @endphp
                     <a href="{{ url($item['link'] ?? '/profil-guru') }}"
-                        class="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
-                        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                             style="background-color: {{ $styles['bg'] }}1A;">
+                        class="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow cursor-pointer" data-warna="{{ warna_landing($styles['bg']) }}">
+                        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-[color-mix(in_srgb,var(--warna)_10%,transparent)]">
                              @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                                 <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-8 h-8 object-contain">
                              @else
-                                <i class="{{ $item['icon'] ?? 'fas fa-user' }} text-3xl" style="color: {{ $styles['text'] }}"></i>
+                                <i class="{{ $item['icon'] ?? 'fas fa-user' }} text-3xl text-[var(--warna)]"></i>
                              @endif
                         </div>
                         <h3 class="font-bold text-gray-800">{{ $item['title'] }}</h3>
@@ -174,30 +163,20 @@
     </section>
 
     <!-- CTA -->
-    <section class="py-16" style="background: linear-gradient(135deg, {{ $ctaContent['background_gradient_start'] ?? '#d45930' }} 0%, {{ $ctaContent['background_gradient_end'] ?? '#fac030' }} 100%);">
+    <section class="py-16 bg-[linear-gradient(135deg,var(--warna)_0%,var(--warna-akhir)_100%)]" data-warna="{{ warna_landing($ctaContent['background_gradient_start'] ?? '#d45930', '#d45930') }}" data-warna-akhir="{{ warna_landing($ctaContent['background_gradient_end'] ?? '#fac030', '#fac030') }}">
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">{{ $ctaContent['title'] ?? 'Setiap Anak Berhak Mendapat Pendidikan' }}</h2>
             <p class="text-white/90 mb-8">{{ $ctaContent['description'] ?? 'Konsultasikan kebutuhan anak Anda dengan tim ahli kami secara gratis.' }}</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="{{ url($ctaContent['button_link_1'] ?? '/ppdb') }}"
-                    class="inline-flex items-center justify-center px-8 py-4 bg-white text-[#d45930] font-semibold rounded-full hover:bg-gray-100 transition"
-                    style="color: {{ $ctaContent['background_gradient_start'] ?? '#d45930' }}">
+                    class="inline-flex items-center justify-center px-8 py-4 bg-white text-[var(--warna)] font-semibold rounded-full hover:bg-gray-100 transition">
                     {{ $ctaContent['button_text_1'] ?? 'Daftar Sekarang' }}
                 </a>
                 <a href="{{ url($ctaContent['button_link_2'] ?? '/kontak') }}"
-                    class="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-[#d45930] transition"
-                   onmouseover="this.style.color='{{ $ctaContent['background_gradient_start'] ?? '#d45930' }}'"
-                   onmouseout="this.style.color='white'">
+                    class="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-[var(--warna)] transition">
                     {{ $ctaContent['button_text_2'] ?? 'Konsultasi Gratis' }}
                 </a>
             </div>
         </div>
     </section>
-
-    <x-footer></x-footer>
-
-    @vite(['resources/js/navbar.js'])
-</body>
-
-</html>
-
+@endsection

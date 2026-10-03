@@ -1,21 +1,13 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.landing')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('seo')
     <x-seo-meta title="Program Pendidikan SD - SMP - SMA | PKBM House Of Knowledge" description="Program pendidikan SD, SMP, dan SMA di PKBM House Of Knowledge menggabungkan kurikulum formal dengan pembelajaran praktis untuk mempersiapkan masa depan cerah." keywords="SD, SMP, SMA, program pendidikan, sekolah menengah, kurikulum nasional, Kejar Paket"></x-seo-meta>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@endsection
 
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/program-sd-sma.css'])
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+@section('body_class', 'bg-gray-50')
 
-</head>
+@section('content')
 
-<body class="bg-gray-50">
     @php
         $heroSection = $page->getSection('hero');
         $heroContent = $heroSection->content ?? [];
@@ -41,12 +33,11 @@
         $prospekCContent = $prospekCSection->content ?? [];
     @endphp
 
-    <x-navbar></x-navbar>
 
     <!-- HERO -->
-    <section class="relative h-[350px] flex items-center justify-center"
-        style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="hero-overlay absolute inset-0"></div>
+    <section class="relative h-[350px] flex items-center justify-center">
+        <img src="{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        <div class="bg-[linear-gradient(135deg,rgba(22,95,172,0.9)_0%,rgba(40,127,59,0.8)_100%)] absolute inset-0"></div>
         <div class="relative z-10 text-center text-white px-4">
             <nav class="text-sm mb-4">
                 <a href="{{ url('/') }}" class="hover:underline">Beranda</a>
@@ -59,36 +50,32 @@
         </div>
     </section>
 
+    <div x-data="{ tab: 'sd' }">
     <!-- SWITCH TAB -->
     <section class="py-10 bg-white shadow-sm border-b">
         <div class="max-w-5xl mx-auto px-4 flex justify-center gap-4">
-            <button class="tab-btn px-6 py-3 rounded-full border font-medium" data-tab="sd">Paket A (SD)</button>
-            <button class="tab-btn px-6 py-3 rounded-full border font-medium" data-tab="smp">Paket B (SMP)</button>
-            <button class="tab-btn px-6 py-3 rounded-full border font-medium" data-tab="sma">Paket C (SMA)</button>
+            @foreach(['sd' => 'Paket A (SD)', 'smp' => 'Paket B (SMP)', 'sma' => 'Paket C (SMA)'] as $kunciTab => $labelTab)
+                <button type="button" x-on:click="tab = '{{ $kunciTab }}'" :class="tab === '{{ $kunciTab }}' && 'bg-[#165fac] text-white'" class="px-6 py-3 rounded-full border font-medium">{{ $labelTab }}</button>
+            @endforeach
         </div>
     </section>
 
+    @php
+        $transisiTab = 'x-transition:enter="transition ease-out duration-[350ms]" x-transition:enter-start="opacity-0 translate-y-2.5" x-transition:enter-end="opacity-100 translate-y-0"';
+    @endphp
     <!-- SD • Paket A -->
-    <div id="tab-sd" class="tab-content">
+    <div x-show="tab === 'sd'" {!! $transisiTab !!}>
         @include('partials.program-sd-content', ['content' => $paketAContent, 'mataPelajaran' => $mataPelajaranAContent])
     </div>
 
     <!-- SMP • Paket B -->
-    <div id="tab-smp" class="tab-content hidden">
+    <div x-show="tab === 'smp'" x-cloak {!! $transisiTab !!}>
         @include('partials.program-smp-content', ['content' => $paketBContent, 'mataPelajaran' => $mataPelajaranBContent, 'keunggulan' => $keunggulanBContent])
     </div>
 
     <!-- SMA • Paket C -->
-    <div id="tab-sma" class="tab-content hidden">
+    <div x-show="tab === 'sma'" x-cloak {!! $transisiTab !!}>
         @include('partials.program-sma-content', ['content' => $paketCContent, 'jurusan' => $jurusanCContent, 'prospek' => $prospekCContent])
     </div>
-
-
-
-
-    <x-footer />
-
-    @vite(['resources/js/navbar.js', 'resources/js/pages/program-sd-sma.js'])
-</body>
-
-</html>
+    </div>
+@endsection

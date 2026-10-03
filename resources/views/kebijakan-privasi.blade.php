@@ -1,23 +1,18 @@
-<!DOCTYPE html>
-<html lang="id" class="overflow-x-hidden">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('layouts.landing')
+
+@section('seo')
     <x-seo-meta title="Kebijakan Privasi - PKBM House Of Knowledge" description="Kebijakan Privasi PKBM House Of Knowledge menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi data pribadi Anda di platform SipaduHOK." keywords="kebijakan privasi, privacy policy, PKBM House Of Knowledge, perlindungan data, SipaduHOK"></x-seo-meta>
+@endsection
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@section('body_class', 'bg-gray-50 overflow-x-hidden')
 
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/kebijakan-privasi.css'])
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body class="bg-gray-50 overflow-x-hidden">
+@section('content')
 
-    <x-navbar></x-navbar>
 
     <!-- Hero Section -->
-    <section class="relative h-[400px] flex items-center justify-center" style="background-image: url('{{ asset('img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="hero-overlay absolute inset-0"></div>
+    <section class="relative h-[400px] flex items-center justify-center">
+        <img src="{{ asset('img/hero-bg.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
+        <div class="bg-[linear-gradient(135deg,rgba(22,95,172,0.85),rgba(40,127,59,0.75))] absolute inset-0"></div>
         <div class="relative z-10 text-center text-white px-4">
             <nav class="text-sm mb-4">
                 <a href="{{ url('/') }}" class="hover:underline">Beranda</a>
@@ -44,7 +39,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <!-- Intro -->
-            <div class="legal-card bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
+            <div class="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
                 <div class="flex items-start mb-6">
                     <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
@@ -62,7 +57,7 @@
             </div>
 
             <!-- Section 1: Data yang Dikumpulkan -->
-            <div class="legal-card bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
+            <div class="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
                 <div class="flex items-start mb-6">
                     <div class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
@@ -114,7 +109,7 @@
             </div>
 
             <!-- Section 2: Penggunaan Data -->
-            <div class="legal-card bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
+            <div class="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
                 <div class="flex items-start mb-6">
                     <div class="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
@@ -137,7 +132,7 @@
             </div>
 
             <!-- Section 3: Perlindungan Data -->
-            <div class="legal-card bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
+            <div class="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
                 <div class="flex items-start mb-6">
                     <div class="flex-shrink-0 w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -157,7 +152,7 @@
             </div>
 
             <!-- Section 4: Berbagi Data -->
-            <div class="legal-card bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
+            <div class="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
                 <div class="flex items-start mb-6">
                     <div class="flex-shrink-0 w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -175,7 +170,7 @@
             </div>
 
             <!-- Section 5: Hak Pengguna -->
-            <div class="legal-card bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
+            <div class="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
                 <div class="flex items-start mb-6">
                     <div class="flex-shrink-0 w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -221,7 +216,7 @@
             </div>
 
             <!-- Section 6: Cookie -->
-            <div class="legal-card bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
+            <div class="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
                 <div class="flex items-start mb-6">
                     <div class="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
@@ -242,7 +237,7 @@
             </div>
 
             <!-- Section 7: Retensi Data -->
-            <div class="legal-card bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
+            <div class="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
                 <div class="flex items-start mb-6">
                     <div class="flex-shrink-0 w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
@@ -257,7 +252,7 @@
             </div>
 
             <!-- Section 8: Perubahan Kebijakan -->
-            <div class="legal-card bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
+            <div class="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
                 <div class="flex items-start mb-6">
                     <div class="flex-shrink-0 w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mr-4">
                         <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -272,7 +267,7 @@
             </div>
 
             <!-- Section 9: Kontak -->
-            <div class="legal-card bg-white rounded-2xl shadow-lg p-5 md:p-8 lg:p-10 mb-8 border-2 border-blue-100">
+            <div class="transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white rounded-2xl shadow-lg p-5 md:p-8 lg:p-10 mb-8 border-2 border-blue-100">
                 <div class="flex flex-col md:flex-row items-start mb-6">
                     <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 md:mb-0 md:mr-4">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -303,9 +298,4 @@
 
         </div>
     </section>
-
-    <x-footer></x-footer>
-
-    @vite(['resources/js/navbar.js'])
-</body>
-</html>
+@endsection

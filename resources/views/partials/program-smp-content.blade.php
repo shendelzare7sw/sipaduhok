@@ -64,13 +64,12 @@
                         ? $rawIconColor
                         : ($iconColorMap[$rawIconColor] ?? '#165fac');
                 @endphp
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4"
-                     style="border-color: {{ $cardColor }}">
+                <div class="transition-all duration-300 hover:-translate-y-[5px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[var(--warna)]" data-warna="{{ warna_landing($cardColor, '#ffffff') }}">
                     <div class="mb-4 flex justify-center text-3xl">
                          @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                             <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-10 h-10 object-contain">
                          @elseif(!empty($item['icon']) && (str_starts_with($item['icon'], 'fa') || str_starts_with($item['icon'], 'bx')))
-                            <i class="{{ $item['icon'] }}" style="color: {{ $iconHex }}"></i>
+                            <i class="{{ $item['icon'] }} text-[var(--warna)]" data-warna="{{ warna_landing($iconHex) }}"></i>
                          @else
                             @php
                                 $title = strtolower($item['title'] ?? '');
@@ -144,13 +143,12 @@
                         : ($colorMap[$rawColor] ?? '#165fac');
                     $c = ['bg' => $themeColor, 'text' => $themeColor];
                 @endphp
-                <div class="bg-white rounded-2xl p-8 shadow-lg text-center">
-                    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
-                         style="background-color: {{ $c['bg'] }}1a"> <!-- 10% opacity hex approximately 1a -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg text-center" data-warna="{{ warna_landing($c['bg']) }}">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 bg-[color-mix(in_srgb,var(--warna)_10%,transparent)]">
                          @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                             <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-8 h-8 object-contain">
                          @elseif(!empty($item['icon']) && (str_starts_with($item['icon'], 'fa') || str_starts_with($item['icon'], 'bx')))
-                            <i class="{{ $item['icon'] }}" style="color: {{ $c['text'] }}; font-size: 2rem;"></i>
+                            <i class="{{ $item['icon'] }} text-[2rem] text-[var(--warna)]"></i>
                          @else
                             @php $title = strtolower($item['title'] ?? ''); @endphp
                             @if(str_contains($title, 'guru') || str_contains($title, 'tutor') || str_contains($title, 'pengajar'))
@@ -185,15 +183,14 @@
 </section>
 
 <!-- CTA -->
-<section class="py-16" style="background: linear-gradient(135deg, #287f3b 0%, #165fac 100%);">
+<section class="py-16 bg-[linear-gradient(135deg,#287f3b_0%,#165fac_100%)]">
     <div class="max-w-4xl mx-auto px-4 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">{{ $content['cta_title'] ?? 'Raih Ijazah SMP Anda' }}</h2>
         <p class="text-white/90 mb-8">
             {{ $content['cta_description'] ?? 'Daftarkan diri Anda sekarang dan mulai perjalanan pendidikan baru.' }}
         </p>
         <a href="/ppdb"
-            class="inline-block px-8 py-4 bg-white text-[#287f3b] font-semibold rounded-full hover:bg-gray-100 transition"
-            style="cursor: pointer;">
+            class="inline-block px-8 py-4 bg-white text-[#287f3b] font-semibold rounded-full hover:bg-gray-100 transition cursor-pointer">
             Daftar Sekarang
         </a>
     </div>

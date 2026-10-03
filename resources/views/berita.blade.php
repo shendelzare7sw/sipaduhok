@@ -1,28 +1,18 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('layouts.landing')
+
+@section('seo')
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <x-seo-meta title="Berita & Artikel - PKBM House Of Knowledge" description="Kumpulan berita, artikel, dan pengumuman terbaru dari kegiatan PKBM House Of Knowledge."></x-seo-meta>
+@endsection
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+@section('content')
 
-    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/berita.css'])
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body class="bg-white">
-
-    <x-navbar></x-navbar>
 
     <!-- PAGE HEADER -->
-    <section class="relative py-24"
-        style="background-image: url('{{ asset('img/bg-berita.jpg') }}');
-               background-size: cover;
-               background-position: center;">
+    <section class="relative py-24">
+        <img src="{{ asset('img/bg-berita.jpg') }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center">
 
-        <div class="hero-overlay absolute inset-0"></div>
+        <div class="bg-[linear-gradient(135deg,rgba(22,95,172,0.9)_0%,rgba(40,127,59,0.8)_100%)] absolute inset-0"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">
@@ -61,7 +51,7 @@
 
                 <!-- Search Box -->
                 <div class="w-full md:w-96">
-                    <div class="search-box relative">
+                    <div class="relative transition-all duration-300">
                         <input
                             type="text"
                             name="search"
@@ -80,27 +70,27 @@
                 <!-- Filter Buttons -->
                 <div class="flex flex-wrap gap-3 justify-center">
                     <button type="submit" name="kategori" value="all"
-                            class="filter-btn {{ $kategori === 'all' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
+                            class="transition-all duration-300 {{ $kategori === 'all' ? 'bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)] text-white' : 'bg-white' }} px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg">
                         Semua
                     </button>
                     <button type="submit" name="kategori" value="kegiatan"
-                            class="filter-btn {{ $kategori === 'kegiatan' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
+                            class="transition-all duration-300 {{ $kategori === 'kegiatan' ? 'bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)] text-white' : 'bg-white' }} px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg">
                         Kegiatan
                     </button>
                     <button type="submit" name="kategori" value="prestasi"
-                            class="filter-btn {{ $kategori === 'prestasi' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
+                            class="transition-all duration-300 {{ $kategori === 'prestasi' ? 'bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)] text-white' : 'bg-white' }} px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg">
                         Prestasi
                     </button>
                     <button type="submit" name="kategori" value="pengumuman"
-                            class="filter-btn {{ $kategori === 'pengumuman' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
+                            class="transition-all duration-300 {{ $kategori === 'pengumuman' ? 'bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)] text-white' : 'bg-white' }} px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg">
                         Pengumuman
                     </button>
                     <button type="submit" name="kategori" value="artikel"
-                            class="filter-btn {{ $kategori === 'artikel' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
+                            class="transition-all duration-300 {{ $kategori === 'artikel' ? 'bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)] text-white' : 'bg-white' }} px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg">
                         Artikel
                     </button>
                     <button type="submit" name="kategori" value="ujian"
-                            class="filter-btn {{ $kategori === 'ujian' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
+                            class="transition-all duration-300 {{ $kategori === 'ujian' ? 'bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)] text-white' : 'bg-white' }} px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg">
                         Ujian
                     </button>
                 </div>
@@ -120,13 +110,13 @@
                     Berita Utama
                 </h2>
 
-                <div class="news-card bg-white rounded-3xl shadow-xl overflow-hidden grid md:grid-cols-2 gap-0">
-                    <div class="news-image-wrapper h-80 md:h-auto">
-                        <img loading="lazy" decoding="async" src="{{ $beritaUtama->gambar_url }}" alt="{{ $beritaUtama->judul }}" class="w-full h-full object-cover">
+                <div class="group transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] bg-white rounded-3xl shadow-xl overflow-hidden grid md:grid-cols-2 gap-0">
+                    <div class="relative overflow-hidden h-80 md:h-auto">
+                        <img loading="lazy" decoding="async" src="{{ $beritaUtama->gambar_url }}" alt="{{ $beritaUtama->judul }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                     </div>
                     <div class="p-8 md:p-12 flex flex-col justify-center">
                         <div class="flex items-center gap-3 mb-4">
-                            <span class="category-badge inline-block px-4 py-1.5 {{ $beritaUtama->kategori_badge_class }} text-xs font-medium rounded-full">
+                            <span class="transition-all duration-300 group-hover:scale-105 inline-block px-4 py-1.5 {{ $beritaUtama->kategori_badge_class }} text-xs font-medium rounded-full">
                                 {{ $beritaUtama->kategori_label }}
                             </span>
                             <span class="text-sm text-gray-500">{{ $beritaUtama->tanggal_format_indonesia }}</span>
@@ -156,15 +146,18 @@
                 </h2>
 
                 @if($beritaList->count() > 0)
-                    <div id="newsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    @php
+                        $jedaKartu = ['[animation-delay:0s]', '[animation-delay:0.1s]', '[animation-delay:0.2s]', '[animation-delay:0.3s]', '[animation-delay:0.4s]', '[animation-delay:0.5s]', '[animation-delay:0.6s]', '[animation-delay:0.7s]', '[animation-delay:0.8s]', '[animation-delay:0.9s]', '[animation-delay:1s]', '[animation-delay:1.1s]'];
+                    @endphp
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         @foreach($beritaList as $index => $item)
-                            <div class="news-card bg-white rounded-2xl shadow-lg overflow-hidden fade-in-up" style="animation-delay: {{ $index * 0.1 }}s;">
-                                <div class="news-image-wrapper h-56">
-                                    <img loading="lazy" decoding="async" src="{{ $item->gambar_url }}" alt="{{ $item->judul }}" class="w-full h-full object-cover">
+                            <div class="group transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] bg-white rounded-2xl shadow-lg overflow-hidden animate-fade-in-up {{ $jedaKartu[min($index, 11)] }}">
+                                <div class="relative overflow-hidden h-56">
+                                    <img loading="lazy" decoding="async" src="{{ $item->gambar_url }}" alt="{{ $item->judul }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                                 </div>
                                 <div class="p-6">
                                     <div class="flex items-center gap-3 mb-3">
-                                        <span class="category-badge inline-block px-3 py-1 {{ $item->kategori_badge_class }} text-xs font-medium rounded-full">
+                                        <span class="transition-all duration-300 group-hover:scale-105 inline-block px-3 py-1 {{ $item->kategori_badge_class }} text-xs font-medium rounded-full">
                                             {{ $item->kategori_label }}
                                         </span>
                                         <span class="text-sm text-gray-500">{{ $item->tanggal_berita->format('d M Y') }}</span>
@@ -202,7 +195,7 @@
     </section>
 
     <!-- CTA SECTION -->
-    <section class="py-20" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
+    <section class="py-20 bg-[linear-gradient(135deg,#165fac_0%,#287f3b_100%)]">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
                 Ingin Tahu Lebih Banyak?
@@ -223,10 +216,4 @@
             </div>
         </div>
     </section>
-
-    <x-footer></x-footer>
-
-    @vite(['resources/js/navbar.js'])
-</body>
-</html>
-
+@endsection

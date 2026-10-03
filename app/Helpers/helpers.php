@@ -381,3 +381,47 @@ if (! function_exists('normalisasi_input_rupiah')) {
         }
     }
 }
+
+if (! function_exists('warna_landing')) {
+    /**
+     * Normalkan warna dari CMS landing page menjadi hex untuk atribut `data-warna`.
+     * Menerima hex dari color picker admin (#rgb/#rrggbb) maupun token lama
+     * (primary, accent-orange, blue, red-600, instagram, ...). Nilai tak dikenal → $cadangan.
+     */
+    function warna_landing(?string $nilai, string $cadangan = '#165fac'): string
+    {
+        $nilai = strtolower(trim((string) $nilai));
+
+        if (preg_match('/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/', $nilai)) {
+            return $nilai;
+        }
+
+        $tema = [
+            'primary' => '#165fac', 'secondary' => '#287f3b', 'accent-orange' => '#d45930',
+            'accent-yellow' => '#fac030', 'accent-bright' => '#ffe400', 'cream' => '#e8e7e2',
+            'instagram' => '#db2777', 'white' => '#ffffff', 'black' => '#000000',
+        ];
+        if (isset($tema[$nilai])) {
+            return $tema[$nilai];
+        }
+
+        // Palet Tailwind (shade 500/600) untuk token warna polos yang tersimpan di CMS.
+        $palet = [
+            'slate' => ['#64748b', '#475569'], 'gray' => ['#6b7280', '#4b5563'], 'red' => ['#ef4444', '#dc2626'],
+            'orange' => ['#f97316', '#ea580c'], 'amber' => ['#f59e0b', '#d97706'], 'yellow' => ['#eab308', '#ca8a04'],
+            'green' => ['#22c55e', '#16a34a'], 'emerald' => ['#10b981', '#059669'], 'teal' => ['#14b8a6', '#0d9488'],
+            'sky' => ['#0ea5e9', '#0284c7'], 'blue' => ['#3b82f6', '#2563eb'], 'indigo' => ['#6366f1', '#4f46e5'],
+            'purple' => ['#a855f7', '#9333ea'], 'pink' => ['#ec4899', '#db2777'],
+        ];
+        if (preg_match('/^([a-z]+)(?:-(\d{2,3}))?$/', $nilai, $m) && isset($palet[$m[1]])) {
+            $shade = $m[2] ?? '600';
+            if ($m[1] === 'gray' && $shade === '900') {
+                return '#111827';
+            }
+
+            return $shade === '500' ? $palet[$m[1]][0] : $palet[$m[1]][1];
+        }
+
+        return $cadangan;
+    }
+}
