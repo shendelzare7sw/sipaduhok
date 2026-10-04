@@ -137,4 +137,62 @@ class LandingPublicCleanFlowTest extends TestCase
             $this->assertStringNotContainsString('@vite(', $source, basename($view) . ' memuat aset per halaman');
         }
     }
+
+    public function test_seo_halaman_publik_dapat_diindeks_dengan_data_terstruktur_valid(): void
+    {
+        foreach (self::HALAMAN_PUBLIK as $url) {
+            $res = $this->get($url)->assertOk();
+            $html = $res->getContent();
+
+            $this->assertFalse($res->headers->has('X-Robots-Tag'), "$url tidak boleh noindex");
+            $this->assertStringContainsString('<meta name="robots" content="index, follow', $html, $url);
+            $this->assertMatchesRegularExpression('#<link rel="canonical" href="[^"]+">#', $html, $url);
+            $this->assertSame(1, preg_match_all('#<h1[\s>]#', $html), "$url harus punya tepat satu <h1>");
+
+            preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $html, $m);
+            $schema = json_decode($m[1] ?? '', true);
+            $this->assertIsArray($schema, "$url: JSON-LD tidak valid");
+            $jenis = array_column($schema['@graph'], '@type');
+            $this->assertContains('EducationalOrganization', $jenis, $url);
+            $this->assertSame($url !== '/', in_array('BreadcrumbList', $jenis, true), "$url: breadcrumb hanya untuk selain beranda");
+        }
+    }
+
+    public function test_halaman_login_dan_area_privat_tidak_diindeks(): void
+    {
+        foreach (['/login', '/recovery'] as $url) {
+            $res = $this->get($url)->assertOk();
+            $this->assertSame('noindex, nofollow', $res->headers->get('X-Robots-Tag'), $url);
+            $this->assertStringContainsString('<meta name="robots" content="noindex, nofollow">', $res->getContent(), $url);
+        }
+
+        $admin = \App\Models\User::factory()->create([
+            'role' => 'admin', 'is_active' => true,
+            'security_question' => 'x', 'security_answer' => 'x', 'security_pin' => '123456',
+        ]);
+        $this->actingAs($admin)->get('/profile')->assertOk()->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+    }
+
+    public function test_sitemap_dan_robots_txt_untuk_mesin_pencari(): void
+    {
+        $res = $this->get('/sitemap.xml')->assertOk();
+        $this->assertStringStartsWith('application/xml', $res->headers->get('Content-Type'));
+        $xml = simplexml_load_string($res->getContent());
+        $this->assertNotFalse($xml, 'Sitemap harus XML valid');
+        $lokasi = array_map(fn ($u) => (string) $u->loc, iterator_to_array($xml->url, false));
+        $this->assertCount(count(self::HALAMAN_PUBLIK), $lokasi);
+        foreach ($lokasi as $loc) {
+            $path = '/' . ltrim((string) parse_url($loc, PHP_URL_PATH), '/');
+            $this->get($path)->assertOk(); // tidak ada URL mati di sitemap
+        }
+
+        $robots = file_get_contents(public_path('robots.txt'));
+        $this->assertStringContainsString('Sitemap: https://app.sipaduhok.id/sitemap.xml', $robots);
+        foreach (['/admin', '/siswa', '/wali', '/login'] as $privat) {
+            $this->assertStringContainsString("Disallow: $privat\n", $robots);
+        }
+        foreach (['/ppdb', '/program', '/galeri', '/berita'] as $publik) {
+            $this->assertStringNotContainsString("Disallow: $publik", $robots, "$publik harus boleh dirayapi");
+        }
+    }
 }

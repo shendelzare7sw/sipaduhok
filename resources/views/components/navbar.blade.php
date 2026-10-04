@@ -71,7 +71,7 @@
             <div class="flex h-20 items-center justify-between">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <a href="{{ url('/') }}"><img src="{{ asset('img/logo.png') }}" alt="Logo" width="100"></a>
+                        <a href="{{ url('/') }}"><img src="{{ asset('img/logo-nav.png') }}" alt="Logo PKBM House Of Knowledge" width="100" height="80"></a>
                     </div>
                 </div>
                 <div class="hidden md:block">

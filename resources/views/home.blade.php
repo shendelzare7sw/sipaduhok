@@ -410,7 +410,7 @@
                 @if(!empty($galleryItems))
                     @foreach($galleryItems as $item)
                     <div class="group overflow-hidden rounded-2xl shadow-lg">
-                        <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="Gallery Item" class="w-full h-64 object-cover rounded-2xl transition-transform duration-500 group-hover:scale-110">
+                        <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Kegiatan siswa PKBM House Of Knowledge' }}" class="w-full h-64 object-cover rounded-2xl transition-transform duration-500 group-hover:scale-110">
                     </div>
                     @endforeach
                 @else

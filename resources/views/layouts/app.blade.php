@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') - SIPADUHOK</title>
     <meta name="description" content="Sistem Informasi PKBM Duta House of Knowledge">
-    <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('img/icons/favicon-48.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -48,7 +48,7 @@
     <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#17699f] bg-gradient-to-b from-[#245f91] via-[#176fa8] to-[#0f5688] text-white shadow-2xl transition-transform duration-200 lg:translate-x-0 print:!hidden">
         <div class="relative flex h-20 shrink-0 items-center border-b border-white/15 px-4">
             <a href="{{ route($dashboardRoute) }}" class="flex min-w-0 flex-1 items-center gap-2.5 pr-11 no-underline lg:pr-0">
-                <img src="{{ asset('img/logo.png') }}" alt="SIPADUHOK" class="h-12 w-12 shrink-0 object-contain">
+                <img src="{{ asset('img/logo-nav.png') }}" alt="SIPADUHOK" class="h-12 w-12 shrink-0 object-contain">
                 <span class="min-w-0">
                     <span class="block truncate text-[15px] font-extrabold tracking-tight text-white">SIPADUHOK</span>
                     <span class="block truncate text-[10px] font-bold uppercase tracking-[0.16em] text-sky-100/90">{{ auth()->user()->role_label }}</span>

@@ -50,6 +50,14 @@ class SecurityHeaders
             );
         }
 
+        // SEO: area berlogin (SIA/LMS/keuangan) & halaman akun tidak boleh masuk indeks mesin pencari,
+        // walau tautannya tersebar. Halaman publik (landing) tidak terkena karena tanpa middleware auth.
+        $middleware = $request->route()?->gatherMiddleware() ?? [];
+        $rutePrivat = collect($middleware)->contains(fn ($m) => is_string($m) && ($m === 'auth' || str_starts_with($m, 'role:')));
+        if ($rutePrivat || $request->is('login', 'recovery', 'recovery/*', 'admin-recovery')) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        }
+
         // HSTS - paksa HTTPS. Hanya dikirim pada koneksi HTTPS (spec: diabaikan di HTTP).
         // Tanpa includeSubDomains agar tak mengunci subdomain yang mungkin belum HTTPS.
         if ($request->isSecure()) {

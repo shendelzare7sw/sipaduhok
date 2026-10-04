@@ -1,99 +1,50 @@
-# Blokir Bot crawling/SEO tools agresif untuk hemat resouce server (Homeserver)
+# robots.txt — app.sipaduhok.id
+# Halaman publik (beranda, profil, program, fasilitas, PPDB, galeri, berita, kontak) BOLEH diindeks.
+# Area login/akun (SIA, LMS, keuangan) tidak untuk mesin pencari.
+# Catatan: Google-Extended hanya untuk pelatihan AI Google, TIDAK memengaruhi Google Search.
+
+# Bot SEO tool agresif (hemat resource server)
 User-agent: AhrefsBot
-Disallow: /
-
 User-agent: SemrushBot
-Disallow: /
-
 User-agent: MJ12bot
-Disallow: /
-
 User-agent: BLEXBot
-Disallow: /
-
 User-agent: Baiduspider
-Disallow: /
-
 User-agent: Ezooms
 Disallow: /
 
-# Blokir Bot AI Populer untuk Melindungi Konten & Resource
+# Bot AI (lindungi konten & resource)
 User-agent: GPTBot
-Disallow: /
-
 User-agent: Google-Extended
-Disallow: /
-
 User-agent: CCBot
-Disallow: /
-
 User-agent: ChatGPT-User
-Disallow: /
-
 User-agent: anthropic-ai
-Disallow: /
-
 User-agent: Claude-Web
-Disallow: /
-
 User-agent: Omgilibot
-Disallow: /
-
 User-agent: PerplexityBot
-Disallow: /
-
 User-agent: Bytespider
-Disallow: /
-
 User-agent: Applebot-Extended
-Disallow: /
-
 User-agent: meta-externalagent
 Disallow: /
 
-# Optimasi Bot Mesin Pencari Utama (Google & Bing)
-User-agent: Googlebot
-Disallow: /admin
-Disallow: /ketua
-Disallow: /waka
-Disallow: /bendahara
-Disallow: /sekretaris
-Disallow: /guru
-Disallow: /siswa
-Disallow: /orang-tua
-Disallow: /login
-Disallow: /recovery
-Disallow: /admin-recovery
-Allow: /
-
-User-agent: bingbot
-Disallow: /admin
-Disallow: /ketua
-Disallow: /waka
-Disallow: /bendahara
-Disallow: /sekretaris
-Disallow: /guru
-Disallow: /siswa
-Disallow: /orang-tua
-Disallow: /login
-Disallow: /recovery
-Disallow: /admin-recovery
-Allow: /
-
-# Aturan Default untuk Semua Bot Lainnya
+# Mesin pencari (Google, Bing, dan lainnya)
 User-agent: *
 Disallow: /admin
 Disallow: /ketua
 Disallow: /waka
-Disallow: /bendahara
 Disallow: /sekretaris
+Disallow: /bendahara
 Disallow: /guru
+Disallow: /wali
 Disallow: /siswa
-Disallow: /orang-tua
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /account
+Disallow: /notifications
+Disallow: /view-document
+Disallow: /ai-chatbot
 Disallow: /login
 Disallow: /recovery
-Disallow: /admin-recovery
+Disallow: /_ignition
 Allow: /
 
-# Sitemap Link
 Sitemap: https://app.sipaduhok.id/sitemap.xml

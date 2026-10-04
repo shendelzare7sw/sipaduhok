@@ -29,7 +29,7 @@
             {{-- About Section --}}
             <div>
                 <div class="mb-6">
-                    <img src="{{ asset($about['logo'] ?? 'img/logo.png') }}" alt="Logo Sekolah" class="h-16 mb-4">
+                    <img src="{{ asset(in_array($about['logo'] ?? null, [null, '', 'img/logo.png'], true) ? 'img/logo-nav.png' : $about['logo']) }}" alt="Logo Sekolah" class="h-16 mb-4">
                     <h3 class="text-xl font-bold mb-2">{{ $about['name'] ?? 'House Of Knowledge' }}</h3>
                 </div>
                 <p class="text-gray-300 text-sm leading-relaxed mb-4">

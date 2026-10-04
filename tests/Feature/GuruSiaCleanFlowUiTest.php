@@ -169,6 +169,9 @@ class GuruSiaCleanFlowUiTest extends TestCase
 
     public function test_schedule_cards_and_todays_sessions_render_with_data(): void
     {
+        // Kunci "hari ini" ke Kamis: kolom hari hanya Senin–Sabtu (Minggu ditolak DB) dan
+        // tidak boleh bentrok dengan jadwal Rabu/Senin di bawah — dulu test ini gagal setiap hari Minggu.
+        $this->travelTo(now()->next(\Carbon\Carbon::THURSDAY)->setTime(8, 0));
         $hariIni = [0 => 'Minggu', 1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu'][now()->dayOfWeek];
 
         foreach (['Rabu' => '10:00', $hariIni => '07:30', 'Senin' => '08:00'] as $hari => $jam) {
