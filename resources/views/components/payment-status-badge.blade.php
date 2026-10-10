@@ -4,7 +4,7 @@
     $tone = match ($payment->payment_status_label) {
         'Lunas', 'Disetujui' => 'bg-emerald-50 text-emerald-700 ring-emerald-200',
         'Menunggu Pembayaran' => 'bg-blue-50 text-blue-700 ring-blue-200',
-        'Menunggu Validasi' => 'bg-amber-50 text-amber-700 ring-amber-200',
+        'Menunggu Validasi', 'Menunggu Verifikasi' => 'bg-amber-50 text-amber-700 ring-amber-200',
         'Kedaluwarsa' => 'bg-slate-100 text-slate-600 ring-slate-200',
         default => 'bg-red-50 text-red-700 ring-red-200',
     };

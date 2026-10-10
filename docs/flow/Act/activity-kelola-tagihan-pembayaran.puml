@@ -72,9 +72,9 @@ elseif (Sub-Menu?) then (Tarik Tunggakan)
 
 else (Config Pembayaran)
     |Sistem|
-    :Menampilkan Form\nConfigurasi Bank / Paywuz;
+    :Menampilkan Form\nConfigurasi Bank / Midtrans;
     |Pengguna (Bendahara / Admin)|
-    :Memperbarui Data Rekening\natau API Key Paywuz;
+    :Memperbarui Data Rekening\natau Server Key Midtrans;
     :Klik "Simpan Konfigurasi";
     |Sistem|
     :Menyimpan Konfigurasi;

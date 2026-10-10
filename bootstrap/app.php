@@ -43,9 +43,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'student.active' => \App\Http\Middleware\CheckStudentActive::class,
         ]);
 
-        // Webhook server-to-server diverifikasi menggunakan HMAC, bukan CSRF browser.
+        // Notifikasi server-to-server diverifikasi menggunakan signature, bukan CSRF browser.
         $middleware->validateCsrfTokens(except: [
-            'payments/paywuz/webhook',
+            'payments/midtrans/notification',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

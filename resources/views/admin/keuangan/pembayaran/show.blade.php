@@ -7,7 +7,7 @@
 @section('content')
 @php
     $pembayaranRoute = request()->routeIs('bendahara.*') ? 'bendahara.pembayaran' : 'admin.keuangan.pembayaran';
-    $isDigital = $pembayaran->payment_gateway === 'paywuz';
+    $isDigital = $pembayaran->is_digital;
     $isExpired = $isDigital && $pembayaran->status_validasi === 'pending' && ($pembayaran->payment_expires_at?->isPast() ?? false);
     $canValidate = $pembayaran->status_validasi === 'pending' && ! $isExpired && ! $isDigital;
     $tagihanStatus = match ($pembayaran->tagihan?->status) {

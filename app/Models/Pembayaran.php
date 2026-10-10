@@ -9,6 +9,12 @@ class Pembayaran extends Model
 {
     use HasFactory;
 
+    /**
+     * Nilai gateway digital. "paywuz" dipertahankan agar riwayat transaksi
+     * lama tetap terbaca dan terhitung di laporan.
+     */
+    public const DIGITAL_GATEWAYS = ['midtrans', 'paywuz'];
+
     protected $table = 'pembayaran';
 
     protected $fillable = [
@@ -51,6 +57,22 @@ class Pembayaran extends Model
         'gateway_attempts' => 'integer',
     ];
 
+    /**
+     * Nilai metode_pembayaran yang dicakup oleh filter metode pada laporan.
+     *
+     * @return list<string>
+     */
+    public static function metodeFilterValues(string $metode): array
+    {
+        return $metode === 'midtrans' ? self::DIGITAL_GATEWAYS : [$metode];
+    }
+
+    public function getIsDigitalAttribute(): bool
+    {
+        return in_array($this->payment_gateway, self::DIGITAL_GATEWAYS, true)
+            || in_array($this->metode_pembayaran, self::DIGITAL_GATEWAYS, true);
+    }
+
     public function getPaymentChannelLabelAttribute(): string
     {
         if ($this->metode_pembayaran === 'tunai') {
@@ -61,7 +83,7 @@ class Pembayaran extends Model
             return 'Direct Transfer';
         }
 
-        if ($this->payment_gateway !== 'paywuz' && $this->metode_pembayaran !== 'paywuz') {
+        if (! $this->is_digital) {
             return ucfirst((string) $this->metode_pembayaran);
         }
 
@@ -69,6 +91,10 @@ class Pembayaran extends Model
 
         return match ($code) {
             'QRIS' => 'QRIS',
+            'GOPAY' => 'GoPay',
+            'SHOPEEPAY' => 'ShopeePay',
+            'CREDIT_CARD' => 'Kartu Kredit/Debit',
+            'CSTORE' => 'Gerai Retail',
             'VA' => 'Virtual Account (Pilih Bank)',
             'BCAVA' => 'BCA Virtual Account',
             '014' => 'BCA Virtual Account',
@@ -105,7 +131,8 @@ class Pembayaran extends Model
 
         return match (true) {
             $code === 'QRIS' => 'qris',
-            in_array($code, ['ALFAMART', 'INDOMARET'], true) => 'retail',
+            in_array($code, ['ALFAMART', 'INDOMARET', 'CSTORE'], true) => 'retail',
+            in_array($code, ['GOPAY', 'SHOPEEPAY'], true) => 'ewallet',
             $code === 'VA' || str_ends_with($code, 'VA') || preg_match('/^\d{3}$/', $code) === 1 => 'va',
             default => 'digital',
         };
@@ -113,14 +140,15 @@ class Pembayaran extends Model
 
     public function getPaymentStatusLabelAttribute(): string
     {
-        if ($this->payment_gateway === 'paywuz' || $this->metode_pembayaran === 'paywuz') {
+        if ($this->is_digital) {
             $gatewayStatus = strtolower(trim((string) $this->gateway_status));
 
             return match (true) {
-                $this->status_validasi === 'disetujui' || in_array($gatewayStatus, ['settlement', 'success'], true) => 'Lunas',
-                $gatewayStatus === 'cancelled' => 'Dibatalkan',
-                $gatewayStatus === 'expired' || ($this->status_validasi === 'pending' && $this->payment_expires_at?->isPast()) => 'Kedaluwarsa',
-                $gatewayStatus === 'failed' => 'Gagal',
+                $this->status_validasi === 'disetujui' => 'Lunas',
+                $this->status_validasi === 'pending' && $gatewayStatus === 'capture' => 'Menunggu Verifikasi',
+                in_array($gatewayStatus, ['cancel', 'cancelled'], true) => 'Dibatalkan',
+                in_array($gatewayStatus, ['expire', 'expired'], true) || ($this->status_validasi === 'pending' && $this->payment_expires_at?->isPast()) => 'Kedaluwarsa',
+                in_array($gatewayStatus, ['deny', 'failure', 'failed'], true) => 'Gagal',
                 $this->status_validasi === 'pending' => 'Menunggu Pembayaran',
                 default => 'Tidak Aktif',
             };
@@ -138,7 +166,7 @@ class Pembayaran extends Model
         return match ($this->payment_status_label) {
             'Lunas', 'Disetujui' => 'bg-success',
             'Menunggu Pembayaran' => 'bg-info',
-            'Menunggu Validasi' => 'bg-warning text-white',
+            'Menunggu Validasi', 'Menunggu Verifikasi' => 'bg-warning text-white',
             'Kedaluwarsa' => 'bg-secondary',
             default => 'bg-danger',
         };
@@ -149,7 +177,7 @@ class Pembayaran extends Model
         return match ($this->payment_status_label) {
             'Lunas', 'Disetujui' => 'fas fa-check-circle',
             'Menunggu Pembayaran' => 'fas fa-hourglass-half',
-            'Menunggu Validasi' => 'fas fa-clock',
+            'Menunggu Validasi', 'Menunggu Verifikasi' => 'fas fa-clock',
             'Kedaluwarsa' => 'fas fa-hourglass-end',
             'Dibatalkan' => 'fas fa-ban',
             default => 'fas fa-times-circle',

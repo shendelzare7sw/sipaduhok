@@ -445,7 +445,7 @@ package "Keuangan" #F8D7DA {
         - id : Integer <<PK>>
         - id_tagihan : Integer <<FK>>
         - kode_pembayaran : String
-        - metode : Enum(TransferManual, Paywuz)
+        - metode : Enum(TransferManual, Midtrans)
         - nominal_bayar : Decimal
         - bukti_transfer : String
         - status : Enum(Pending, MenungguPembayaran, Lunas, Ditolak)
@@ -489,8 +489,8 @@ package "Keuangan" #F8D7DA {
         - nama_bank : String
         - no_rekening : String
         - atas_nama : String
-        - paywuz_server_key : String
-        - paywuz_client_key : String
+        - midtrans_server_key : String
+        - midtrans_client_key : String
         - is_aktif : Boolean
     }
 }
@@ -576,7 +576,7 @@ package "External Service" #F5F5F5 {
         + getFileUrl(path) : String
     }
 
-    class API_Paywuz <<external>> {
+    class API_Midtrans <<external>> {
         + requestToken(transaksi) : String
         + handleWebhook(notification) : void
     }
@@ -706,6 +706,6 @@ T_Publikasi "*" -- "1" T_Pengguna : ditulis oleh >
 T_Ujian ..> Service_AI : menggunakan
 T_Latihan ..> Service_AI : menggunakan
 T_Materi ..> Storage : menyimpan file
-T_Pembayaran ..> API_Paywuz : request token
+T_Pembayaran ..> API_Midtrans : request token
 
 @enduml

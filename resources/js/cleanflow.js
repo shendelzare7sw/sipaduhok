@@ -131,7 +131,7 @@ Alpine.data('tagihanPage', () => ({
     },
 
     updateAvailableChannels() {
-        if (this.selectedMethod !== 'paywuz') {
+        if (this.selectedMethod !== 'midtrans') {
             this.availableChannelCount = 0;
             return;
         }
@@ -179,7 +179,7 @@ Alpine.data('tagihanPage', () => ({
             return;
         }
 
-        if (this.selectedMethod === 'paywuz'
+        if (this.selectedMethod === 'midtrans'
             && !event.target.querySelector('input[name="payment_method"]:checked')) {
             event.preventDefault();
             return;

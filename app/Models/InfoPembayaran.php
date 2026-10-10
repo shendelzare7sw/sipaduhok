@@ -17,11 +17,10 @@ class InfoPembayaran extends Model
         'rekening_bank',
         'atas_nama',
         'direct_transfer_enabled',
-        'paywuz_sandbox_api_key',
-        'paywuz_production_api_key',
-        'paywuz_is_production',
-        'paywuz_enabled',
-        'paywuz_fee_by_merchant',
+        'midtrans_sandbox_server_key',
+        'midtrans_production_server_key',
+        'midtrans_is_production',
+        'midtrans_enabled',
         'tunai_lokasi',
         'tunai_jam_operasional',
         'tunai_deskripsi',
@@ -30,9 +29,8 @@ class InfoPembayaran extends Model
 
     protected $casts = [
         'direct_transfer_enabled' => 'boolean',
-        'paywuz_is_production' => 'boolean',
-        'paywuz_enabled' => 'boolean',
-        'paywuz_fee_by_merchant' => 'boolean',
+        'midtrans_is_production' => 'boolean',
+        'midtrans_enabled' => 'boolean',
     ];
 
     /**
@@ -77,29 +75,29 @@ class InfoPembayaran extends Model
     }
 
     /**
-     * Cek kesiapan konfigurasi Paywuz untuk environment yang sedang aktif.
+     * Cek kesiapan konfigurasi Midtrans untuk environment yang sedang aktif.
      */
-    public function hasPaywuz(): bool
+    public function hasMidtrans(): bool
     {
-        return filled($this->getPaywuzApiKey($this->paywuz_is_production ? 'production' : 'sandbox'));
+        return filled($this->getMidtransServerKey($this->midtrans_is_production ? 'production' : 'sandbox'));
     }
 
-    public function isPaywuzEnabled(): bool
+    public function isMidtransEnabled(): bool
     {
-        return $this->hasPaywuz() && (bool) $this->paywuz_enabled;
+        return $this->hasMidtrans() && (bool) $this->midtrans_enabled;
     }
 
-    public function getPaywuzApiKey(string $environment): ?string
+    public function getMidtransServerKey(string $environment): ?string
     {
         $column = $environment === 'production'
-            ? 'paywuz_production_api_key'
-            : 'paywuz_sandbox_api_key';
+            ? 'midtrans_production_server_key'
+            : 'midtrans_sandbox_server_key';
         $encrypted = $this->{$column};
 
         if (blank($encrypted)) {
             return $environment === 'production'
-                ? config('services.paywuz.production_api_key')
-                : config('services.paywuz.sandbox_api_key');
+                ? config('services.midtrans.production_server_key')
+                : config('services.midtrans.sandbox_server_key');
         }
 
         try {
@@ -109,9 +107,9 @@ class InfoPembayaran extends Model
         }
     }
 
-    public function getPaywuzModeAttribute(): string
+    public function getMidtransModeAttribute(): string
     {
-        return $this->paywuz_is_production ? 'Production' : 'Sandbox';
+        return $this->midtrans_is_production ? 'Production' : 'Sandbox';
     }
 
     /**

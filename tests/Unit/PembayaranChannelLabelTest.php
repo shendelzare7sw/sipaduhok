@@ -9,11 +9,11 @@ use PHPUnit\Framework\TestCase;
 class PembayaranChannelLabelTest extends TestCase
 {
     #[DataProvider('channels')]
-    public function test_label_kanal_paywuz_mengikuti_metode_final(string $code, string $label): void
+    public function test_label_kanal_midtrans_mengikuti_metode_final(string $code, string $label): void
     {
         $payment = new Pembayaran([
-            'metode_pembayaran' => 'paywuz',
-            'payment_gateway' => 'paywuz',
+            'metode_pembayaran' => 'midtrans',
+            'payment_gateway' => 'midtrans',
             'payment_type' => $code,
         ]);
 
@@ -24,6 +24,11 @@ class PembayaranChannelLabelTest extends TestCase
     {
         return [
             'qris' => ['QRIS', 'QRIS'],
+            'gopay' => ['GOPAY', 'GoPay'],
+            'shopeepay' => ['SHOPEEPAY', 'ShopeePay'],
+            'bca va midtrans' => ['BCAVA', 'BCA Virtual Account'],
+            'mandiri bill midtrans' => ['MANDIRIVA', 'Mandiri Virtual Account'],
+            'permata va midtrans' => ['PERMATAVA', 'Permata Virtual Account'],
             'va belum dipilih' => ['VA', 'Virtual Account (Pilih Bank)'],
             'bca va hasil resolve' => ['014', 'BCA Virtual Account'],
             'bni va hasil resolve' => ['009', 'BNI Virtual Account'],
@@ -41,14 +46,14 @@ class PembayaranChannelLabelTest extends TestCase
     }
 
     #[DataProvider('paymentStatuses')]
-    public function test_label_status_paywuz_mengikuti_status_gateway(
+    public function test_label_status_midtrans_mengikuti_status_gateway(
         string $validationStatus,
         string $gatewayStatus,
         string $label,
     ): void {
         $payment = new Pembayaran([
-            'metode_pembayaran' => 'paywuz',
-            'payment_gateway' => 'paywuz',
+            'metode_pembayaran' => 'midtrans',
+            'payment_gateway' => 'midtrans',
             'status_validasi' => $validationStatus,
             'gateway_status' => $gatewayStatus,
         ]);
@@ -60,11 +65,30 @@ class PembayaranChannelLabelTest extends TestCase
     {
         return [
             'pending' => ['pending', 'pending', 'Menunggu Pembayaran'],
+            'kartu ditinjau' => ['pending', 'capture', 'Menunggu Verifikasi'],
             'settlement' => ['disetujui', 'settlement', 'Lunas'],
-            'success' => ['disetujui', 'success', 'Lunas'],
-            'cancelled' => ['ditolak', 'cancelled', 'Dibatalkan'],
-            'expired' => ['ditolak', 'expired', 'Kedaluwarsa'],
-            'failed' => ['ditolak', 'failed', 'Gagal'],
+            'capture' => ['disetujui', 'capture', 'Lunas'],
+            'cancel' => ['ditolak', 'cancel', 'Dibatalkan'],
+            'expire' => ['ditolak', 'expire', 'Kedaluwarsa'],
+            'deny' => ['ditolak', 'deny', 'Gagal'],
+            'failure' => ['ditolak', 'failure', 'Gagal'],
         ];
+    }
+
+    public function test_riwayat_paywuz_lama_tetap_terbaca_sebagai_pembayaran_digital(): void
+    {
+        $payment = new Pembayaran([
+            'metode_pembayaran' => 'paywuz',
+            'payment_gateway' => 'paywuz',
+            'payment_type' => 'QRIS',
+            'status_validasi' => 'disetujui',
+            'gateway_status' => 'success',
+        ]);
+
+        $this->assertTrue($payment->is_digital);
+        $this->assertSame('QRIS', $payment->payment_channel_label);
+        $this->assertSame('Lunas', $payment->payment_status_label);
+        $this->assertSame(['midtrans', 'paywuz'], Pembayaran::metodeFilterValues('midtrans'));
+        $this->assertSame(['tunai'], Pembayaran::metodeFilterValues('tunai'));
     }
 }

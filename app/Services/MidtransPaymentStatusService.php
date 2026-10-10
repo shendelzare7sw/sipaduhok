@@ -10,23 +10,28 @@ use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Throwable;
 
-class PaywuzPaymentStatusService
+class MidtransPaymentStatusService
 {
-    public function __construct(private readonly PaywuzService $paywuz) {}
+    /** Toleransi selisih jam sebelum token Snap tak terpakai dianggap kedaluwarsa. */
+    private const EXPIRY_GRACE_MINUTES = 5;
 
-    public function sync(string $orderId): bool
+    public function __construct(private readonly MidtransService $midtrans) {}
+
+    /**
+     * Sinkronkan status order dari Core API Midtrans.
+     *
+     * @param  bool  $throw  lempar error API (dipakai webhook agar Midtrans mengulang)
+     */
+    public function sync(string $orderId, bool $throw = false): bool
     {
-        $payments = Pembayaran::query()
-            ->where('payment_gateway', 'paywuz')
-            ->where('order_id', $orderId)
-            ->get();
+        $payments = $this->orderQuery($orderId)->get();
 
         if ($payments->isEmpty()) {
             return false;
         }
 
         try {
-            $transaction = $this->paywuz->getTransactionStatus(
+            $transaction = $this->midtrans->findTransactionStatus(
                 $orderId,
                 (int) $payments->sum('jumlah_bayar'),
                 $payments->first()->payment_environment,
@@ -37,7 +42,15 @@ class PaywuzPaymentStatusService
                 'message' => $exception->getMessage(),
             ]);
 
+            if ($throw) {
+                throw $exception;
+            }
+
             return false;
+        }
+
+        if ($transaction === null) {
+            return $this->expireUnusedSnapOrder($orderId);
         }
 
         return $this->apply($orderId, $transaction);
@@ -46,15 +59,23 @@ class PaywuzPaymentStatusService
     /** @param array<string, mixed> $transaction */
     public function apply(string $orderId, array $transaction): bool
     {
-        $newStatus = $this->paywuz->mapStatus((string) ($transaction['status'] ?? 'pending'));
+        $gatewayStatus = strtolower((string) ($transaction['status'] ?? 'pending'));
+        $newStatus = $this->midtrans->mapStatus($gatewayStatus, $transaction['fraudStatus'] ?? null);
         $baruDisetujui = collect();
         $duplicateGatewayOrders = collect();
 
-        $changed = DB::transaction(function () use ($orderId, $transaction, $newStatus, &$baruDisetujui, &$duplicateGatewayOrders): bool {
-            $payments = Pembayaran::query()
+        if (in_array($gatewayStatus, ['refund', 'partial_refund', 'chargeback', 'partial_chargeback'], true)) {
+            // Pengembalian dana diproses manual oleh bendahara; status lunas
+            // tidak diturunkan otomatis agar riwayat kas tetap konsisten.
+            Log::critical('Midtrans melaporkan refund/chargeback untuk pembayaran sekolah.', [
+                'order_id' => $orderId,
+                'status' => $gatewayStatus,
+            ]);
+        }
+
+        $changed = DB::transaction(function () use ($orderId, $transaction, $gatewayStatus, $newStatus, &$baruDisetujui, &$duplicateGatewayOrders): bool {
+            $payments = $this->orderQuery($orderId)
                 ->with('tagihan')
-                ->where('payment_gateway', 'paywuz')
-                ->where('order_id', $orderId)
                 ->lockForUpdate()
                 ->get();
 
@@ -71,21 +92,26 @@ class PaywuzPaymentStatusService
                     ? 'disetujui'
                     : $newStatus;
                 $updates = [
-                    'transaction_id' => (string) ($transaction['id'] ?? $payment->transaction_id),
-                    'payment_type' => (string) ($transaction['paymentMethod'] ?? $payment->payment_type),
                     'gateway_total' => (int) ($transaction['totalPayment'] ?? $payments->sum('jumlah_bayar')),
-                    'gateway_response' => $transaction,
+                    'gateway_response' => $transaction['raw'] ?? $transaction,
                     'payment_expires_at' => filled($transaction['expiresAt'] ?? null)
                         ? CarbonImmutable::parse((string) $transaction['expiresAt'])
                         : $payment->payment_expires_at,
                 ];
 
+                if (filled($transaction['id'] ?? null)) {
+                    $updates['transaction_id'] = (string) $transaction['id'];
+                }
+
+                if (filled($transaction['paymentMethod'] ?? null)) {
+                    $updates['payment_type'] = (string) $transaction['paymentMethod'];
+                }
+
                 // Status pembayaran yang sudah disetujui tidak boleh diturunkan
-                // oleh webhook terlambat/keliru. Selain itu, status Paywuz adalah
-                // sumber kebenaran dan boleh memperbaiki status lokal yang sempat
-                // salah akibat kegagalan parsial.
+                // oleh notifikasi terlambat/keliru. Selain itu, status Midtrans
+                // adalah sumber kebenaran dan boleh memperbaiki status lokal.
                 if ($oldStatus !== 'disetujui' || $newStatus === 'disetujui') {
-                    $updates['gateway_status'] = (string) ($transaction['status'] ?? $payment->gateway_status);
+                    $updates['gateway_status'] = $gatewayStatus;
                 }
 
                 if (filled($transaction['paymentUrl'] ?? null)) {
@@ -96,14 +122,14 @@ class PaywuzPaymentStatusService
                 if ($oldStatus !== $authoritativeStatus) {
                     $updates['status_validasi'] = $authoritativeStatus;
                     $updates['tanggal_validasi'] = $authoritativeStatus === 'pending' ? null : now();
-                    if ($authoritativeStatus === 'disetujui' && ($transaction['status'] ?? null) === 'settlement') {
+                    if ($authoritativeStatus === 'disetujui') {
                         $updates['gateway_settled_at'] = now();
                     }
                 }
 
                 $payment->update($updates);
 
-                if ($oldStatus !== $payment->fresh()->status_validasi) {
+                if ($oldStatus !== $payment->status_validasi) {
                     $changed = true;
                     $this->audit($payment, $oldStatus, $authoritativeStatus, $orderId);
 
@@ -119,17 +145,17 @@ class PaywuzPaymentStatusService
                             ->get();
 
                         $duplicateGatewayOrders->push(...$duplicates
-                            ->where('payment_gateway', 'paywuz')
+                            ->where('payment_gateway', MidtransService::GATEWAY)
                             ->pluck('order_id')
                             ->filter()
                             ->all());
 
-                        // Pembayaran Paywuz tidak boleh ditolak secara lokal
-                        // sebelum pembatalan remote dikonfirmasi. Metode manual
+                        // Transaksi Midtrans tidak boleh ditolak secara lokal
+                        // sebelum penutupan remote dikonfirmasi. Metode manual
                         // tidak memiliki transaksi remote sehingga aman ditutup.
                         Pembayaran::query()
                             ->whereIn('id', $duplicates
-                                ->where('payment_gateway', '!=', 'paywuz')
+                                ->where('payment_gateway', '!=', MidtransService::GATEWAY)
                                 ->pluck('id'))
                             ->update([
                                 'status_validasi' => 'ditolak',
@@ -158,7 +184,7 @@ class PaywuzPaymentStatusService
                 // Pertahankan pending secara lokal jika pembatalan remote belum
                 // pasti. Ini lebih aman daripada menyembunyikan tagihan yang
                 // masih mungkin dibayar pelanggan.
-                Log::critical('Transaksi Paywuz duplikat belum berhasil dibatalkan.', [
+                Log::critical('Transaksi Midtrans duplikat belum berhasil dibatalkan.', [
                     'paid_order_id' => $orderId,
                     'duplicate_order_id' => $duplicateOrderId,
                     'message' => $exception->getMessage(),
@@ -170,16 +196,13 @@ class PaywuzPaymentStatusService
     }
 
     /**
-     * Batalkan order lama secara aman sebelum membuat kanal pengganti.
+     * Tutup order lama secara aman sebelum membuat kanal pengganti.
      *
      * @return bool true jika order lama aman diganti; false jika ternyata sudah dibayar
      */
     public function cancelIfPending(string $orderId): bool
     {
-        $payments = Pembayaran::query()
-            ->where('payment_gateway', 'paywuz')
-            ->where('order_id', $orderId)
-            ->get();
+        $payments = $this->orderQuery($orderId)->get();
 
         if ($payments->isEmpty()) {
             throw new RuntimeException('Data pembayaran lama tidak ditemukan.');
@@ -187,16 +210,17 @@ class PaywuzPaymentStatusService
 
         $amount = (int) $payments->sum('jumlah_bayar');
         $environment = $payments->first()->payment_environment;
-        $transaction = $this->paywuz->findTransactionStatus($orderId, $amount, $environment);
+        $transaction = $this->midtrans->findTransactionStatus($orderId, $amount, $environment);
 
         if ($transaction === null) {
-            // 404 terverifikasi: tidak ada transaksi remote yang dapat tertinggal.
-            $this->markCancelledWithoutRemoteTransaction($orderId);
+            // Belum ada transaksi Core API: wali belum memilih kanal di Snap
+            // sehingga tidak ada kode bayar yang perlu ditutup di Midtrans.
+            $this->markClosedWithoutRemoteTransaction($orderId, 'cancel', 'Transaksi lokal ditutup sebelum kanal dipilih di halaman pembayaran Midtrans.');
 
             return true;
         }
 
-        $mappedStatus = $this->paywuz->mapStatus((string) ($transaction['status'] ?? 'pending'));
+        $mappedStatus = $this->midtrans->mapStatus((string) $transaction['status'], $transaction['fraudStatus'] ?? null);
         if ($mappedStatus === 'disetujui') {
             $this->apply($orderId, $transaction);
 
@@ -204,32 +228,44 @@ class PaywuzPaymentStatusService
         }
 
         if ($mappedStatus === 'pending') {
-            $cancelled = $this->paywuz->cancelTransaction($orderId, $amount, $environment);
+            $closed = $this->midtrans->cancelTransaction($orderId, (string) $transaction['status'], $environment);
 
-            if (strtolower((string) ($cancelled['status'] ?? '')) !== 'cancelled') {
-                throw new RuntimeException('Penyedia pembayaran belum mengonfirmasi pembatalan transaksi lama.');
-            }
-
-            // Endpoint cancel dapat mengembalikan payload minimal. Pertahankan
-            // amount, metode, dan URL dari hasil GET yang sudah tervalidasi.
-            $transaction = array_replace($transaction, $cancelled);
+            // Respons expire/cancel minimal; pertahankan nominal dan kanal dari
+            // hasil status yang sudah tervalidasi.
+            $transaction = array_replace($transaction, $closed);
         }
 
         $this->apply($orderId, $transaction);
 
-        return ! Pembayaran::query()
-            ->where('payment_gateway', 'paywuz')
-            ->where('order_id', $orderId)
+        return ! $this->orderQuery($orderId)
             ->where('status_validasi', 'disetujui')
             ->exists();
     }
 
-    private function markCancelledWithoutRemoteTransaction(string $orderId): void
+    /**
+     * Token Snap yang kedaluwarsa tanpa pernah dipakai tidak tercatat di Core
+     * API. Tutup order lokalnya agar tagihan dapat dibayar ulang.
+     */
+    private function expireUnusedSnapOrder(string $orderId): bool
     {
-        DB::transaction(function () use ($orderId): void {
-            $payments = Pembayaran::query()
-                ->where('payment_gateway', 'paywuz')
-                ->where('order_id', $orderId)
+        $payments = $this->orderQuery($orderId)->get();
+        $expiresAt = $payments->pluck('payment_expires_at')->filter()->max();
+
+        if (! $payments->contains('status_validasi', 'pending')
+            || ! $expiresAt
+            || $expiresAt->copy()->addMinutes(self::EXPIRY_GRACE_MINUTES)->isFuture()) {
+            return false;
+        }
+
+        $this->markClosedWithoutRemoteTransaction($orderId, 'expire', 'Batas waktu pembayaran berakhir sebelum kanal dipilih.');
+
+        return true;
+    }
+
+    private function markClosedWithoutRemoteTransaction(string $orderId, string $gatewayStatus, string $note): void
+    {
+        DB::transaction(function () use ($orderId, $gatewayStatus, $note): void {
+            $payments = $this->orderQuery($orderId)
                 ->lockForUpdate()
                 ->get();
 
@@ -238,20 +274,28 @@ class PaywuzPaymentStatusService
                     throw new RuntimeException('Pembayaran yang sudah lunas tidak dapat dibatalkan.');
                 }
 
-                $oldStatus = $payment->status_validasi;
+                if ($payment->status_validasi !== 'pending') {
+                    continue;
+                }
+
                 $payment->update([
                     'status_validasi' => 'ditolak',
                     'tanggal_validasi' => now(),
-                    'gateway_status' => 'cancelled',
+                    'gateway_status' => $gatewayStatus,
                     'gateway_error' => null,
-                    'catatan' => trim(($payment->catatan ? $payment->catatan."\n" : '').'Transaksi lokal dibatalkan setelah Paywuz memastikan order tidak ditemukan.'),
+                    'catatan' => trim(($payment->catatan ? $payment->catatan."\n" : '').$note),
                 ]);
 
-                if ($oldStatus !== 'ditolak') {
-                    $this->audit($payment, $oldStatus, 'ditolak', $orderId);
-                }
+                $this->audit($payment, 'pending', 'ditolak', $orderId);
             }
         });
+    }
+
+    private function orderQuery(string $orderId)
+    {
+        return Pembayaran::query()
+            ->where('payment_gateway', MidtransService::GATEWAY)
+            ->where('order_id', $orderId);
     }
 
     private function audit(Pembayaran $payment, string $oldStatus, string $newStatus, string $orderId): void
@@ -265,7 +309,7 @@ class PaywuzPaymentStatusService
             'new_values' => ['status_validasi' => $newStatus],
             'description' => "Pembayaran digital {$orderId} diperbarui dari {$oldStatus} menjadi {$newStatus} melalui status terverifikasi.",
             'ip_address' => request()->ip(),
-            'user_agent' => 'Paywuz Webhook/Status Sync',
+            'user_agent' => 'Midtrans Notification/Status Sync',
         ]);
     }
 }

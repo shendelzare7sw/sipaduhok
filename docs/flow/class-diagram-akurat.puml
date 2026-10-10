@@ -166,7 +166,7 @@ package "Service - Logika Bisnis" #E2D9F3 {
     +notifyKelasVirtualBaru() : void
     +notifyAbsensiAlpha() : void
   }
-  class PaywuzService {
+  class MidtransService {
     +requestToken(tagihan) : string
     +handleNotification(payload) : void
   }
@@ -178,7 +178,7 @@ package "External" #F5F5F5 {
     +generateSoal() : JSON
     +autoGrade() : JSON
   }
-  class "Paywuz API" as PaywuzAPI <<external>>
+  class "Midtrans API" as MidtransAPI <<external>>
   class Storage <<external>>
 }
 
@@ -225,8 +225,8 @@ TunggakanCarryoverService ..> Tagihan
 ValidasiAksesService ..> Siswa
 ValidasiAksesService ..> Tagihan
 NotificationService ..> User
-PaywuzService ..> Pembayaran
-PaywuzService ..> PaywuzAPI
+MidtransService ..> Pembayaran
+MidtransService ..> MidtransAPI
 Ujian ..> AI
 Materi ..> Storage
 

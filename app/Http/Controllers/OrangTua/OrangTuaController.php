@@ -13,8 +13,8 @@ use App\Models\Rapor;
 use App\Models\Presensi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Services\PaywuzPaymentStatusService;
-use App\Services\PaywuzService;
+use App\Services\MidtransPaymentStatusService;
+use App\Services\MidtransService;
 use App\Models\RequestDownloadRapor;
 
 class OrangTuaController extends Controller
@@ -196,9 +196,9 @@ class OrangTuaController extends Controller
         // Info pembayaran
         $infoPembayaran = \App\Models\InfoPembayaran::getInstance();
         $paymentMethods = [];
-        if ($infoPembayaran->isPaywuzEnabled()) {
+        if ($infoPembayaran->isMidtransEnabled()) {
             try {
-                $paymentMethods = app(PaywuzService::class)->paymentMethods();
+                $paymentMethods = app(MidtransService::class)->paymentMethods();
             } catch (\Throwable $exception) {
                 \Log::warning('Metode pembayaran digital tidak dapat dimuat.', [
                     'message' => $exception->getMessage(),
@@ -802,7 +802,7 @@ class OrangTuaController extends Controller
     {
         $orderIds = Pembayaran::query()
             ->whereIn('siswa_id', $studentIds)
-            ->where('payment_gateway', 'paywuz')
+            ->where('payment_gateway', MidtransService::GATEWAY)
             ->where('status_validasi', 'pending')
             ->whereNotNull('order_id')
             ->distinct()
@@ -812,7 +812,7 @@ class OrangTuaController extends Controller
             return;
         }
 
-        $service = app(PaywuzPaymentStatusService::class);
+        $service = app(MidtransPaymentStatusService::class);
         foreach ($orderIds as $orderId) {
             $service->sync((string) $orderId);
         }

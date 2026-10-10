@@ -171,15 +171,9 @@ class SITClosureDomainIntegrationTest extends TestCase
     public function test_webhook_berulang_idempotent_membatalkan_pending_duplikat_dan_mencatat_audit(): void
     {
         $context = $this->makeAcademicContext();
-        $serverKey = 'pk_sand_'.bin2hex(random_bytes(16));
+        $serverKey = 'SB-Mid-server-'.bin2hex(random_bytes(12));
         $orderId = 'SIT-ORDER-'.uniqid();
-
-        $info = InfoPembayaran::getInstance();
-        $info->update([
-            'paywuz_sandbox_api_key' => Crypt::encryptString($serverKey),
-            'paywuz_enabled' => true,
-            'paywuz_is_production' => false,
-        ]);
+        $this->enableMidtrans($serverKey);
 
         $tagihan = Tagihan::create([
             'siswa_id' => $context['siswa']->id,
@@ -189,185 +183,163 @@ class SITClosureDomainIntegrationTest extends TestCase
             'tanggal_jatuh_tempo' => now()->addMonth()->toDateString(),
             'status' => 'belum_bayar',
         ]);
-        $successful = Pembayaran::create([
-            'tagihan_id' => $tagihan->id,
-            'siswa_id' => $context['siswa']->id,
-            'kode_pembayaran' => 'SIT-WEBHOOK-'.uniqid(),
-            'jumlah_bayar' => 1000000,
-            'tanggal_bayar' => now(),
-            'metode_pembayaran' => 'paywuz',
-            'payment_gateway' => 'paywuz',
-            'order_id' => $orderId,
-            'payment_environment' => 'sandbox',
-            'status_validasi' => 'pending',
-        ]);
-        $duplicate = Pembayaran::create([
-            'tagihan_id' => $tagihan->id,
-            'siswa_id' => $context['siswa']->id,
-            'kode_pembayaran' => 'SIT-DUPLICATE-'.uniqid(),
-            'jumlah_bayar' => 1000000,
-            'tanggal_bayar' => now(),
-            'metode_pembayaran' => 'paywuz',
-            'payment_gateway' => 'paywuz',
-            'order_id' => 'SIT-DUP-ORDER-'.uniqid(),
-            'payment_environment' => 'sandbox',
-            'status_validasi' => 'pending',
-        ]);
+        $successful = $this->makeMidtransPayment($tagihan, $context['siswa'], $orderId, 1000000);
+        $duplicate = $this->makeMidtransPayment($tagihan, $context['siswa'], 'SIT-DUP-ORDER-'.uniqid(), 1000000);
 
-        Http::fake(function (Request $request) use ($duplicate) {
-            if ($request->method() === 'GET' && str_ends_with($request->url(), '/transactions/'.$duplicate->order_id)) {
-                return Http::response(['data' => [
-                    'id' => 'SIT-DUP-TRX',
-                    'orderId' => $duplicate->order_id,
-                    'amount' => 1000000,
-                    'totalPayment' => 1000000,
-                    'paymentMethod' => 'QRIS',
-                    'paymentUrl' => 'https://paywuz.id/pay/SIT-DUP-TRX',
-                    'status' => 'pending',
-                ]]);
+        Http::fake(function (Request $request) use ($orderId, $duplicate) {
+            if ($request->method() === 'GET' && str_ends_with($request->url(), '/'.$orderId.'/status')) {
+                return Http::response($this->midtransStatus($orderId, '1000000.00', 'settlement', '200'));
             }
 
-            if ($request->method() === 'POST' && str_ends_with($request->url(), '/transactions/'.$duplicate->order_id.'/cancel')) {
-                return Http::response(['data' => [
-                    'id' => 'SIT-DUP-TRX',
-                    'orderId' => $duplicate->order_id,
-                    'status' => 'cancelled',
-                ]]);
+            if ($request->method() === 'GET' && str_ends_with($request->url(), '/'.$duplicate->order_id.'/status')) {
+                return Http::response($this->midtransStatus($duplicate->order_id, '1000000.00', 'pending', '201'));
             }
 
-            return Http::response(['message' => 'Unexpected request'], 500);
+            if ($request->method() === 'POST' && str_ends_with($request->url(), '/'.$duplicate->order_id.'/expire')) {
+                return Http::response($this->midtransStatus($duplicate->order_id, '1000000.00', 'expire', '407'));
+            }
+
+            return Http::response(['status_message' => 'Unexpected request'], 500);
         });
 
         $notifications = Mockery::mock(NotificationService::class);
         $notifications->shouldReceive('notifyPembayaranDigitalBerhasil')->once();
         $this->app->instance(NotificationService::class, $notifications);
 
-        $deliveryId = 'SIT-DELIVERY-'.uniqid();
-        $payload = [
-            'id' => 'SIT-TRX-'.uniqid(),
-            'orderId' => $orderId,
-            'amount' => 1000000,
-            'fee' => 0,
-            'totalPayment' => 1000000,
-            'paymentMethod' => 'QRIS',
-            'status' => 'settlement',
-            'timestamp' => now()->toIso8601String(),
-            'metadata' => ['source' => 'contract-fixture'],
-        ];
-        $rawPayload = json_encode($payload, JSON_UNESCAPED_SLASHES);
-        $headers = [
-            'CONTENT_TYPE' => 'application/json',
-            'HTTP_X_PAYWUZ_SIGNATURE' => 'sha256='.hash_hmac('sha256', $rawPayload, $serverKey),
-            'HTTP_X_PAYWUZ_EVENT' => 'transaction.settlement',
-            'HTTP_X_PAYWUZ_DELIVERY' => $deliveryId,
-        ];
+        $rawPayload = $this->midtransNotification($orderId, '200', '1000000.00', 'settlement', $serverKey);
 
-        $this->call('POST', '/payments/paywuz/webhook', [], [], [], $headers, $rawPayload)->assertOk();
+        $this->call('POST', '/payments/midtrans/notification', [], [], [], ['CONTENT_TYPE' => 'application/json'], $rawPayload)->assertOk();
 
         $successful->refresh();
         $duplicate->refresh();
         $tagihan->refresh();
         $this->assertSame('disetujui', $successful->status_validasi);
+        $this->assertSame('QRIS', $successful->payment_type);
         $this->assertSame('ditolak', $duplicate->status_validasi);
-        $this->assertSame('cancelled', $duplicate->gateway_status);
+        $this->assertSame('expire', $duplicate->gateway_status);
         $this->assertSame('sudah_bayar', $tagihan->status);
         $auditCount = FinancialAuditLog::where('model_type', 'Pembayaran')
             ->where('model_id', $successful->id)
             ->count();
         $this->assertSame(1, $auditCount);
 
-        $this->call('POST', '/payments/paywuz/webhook', [], [], [], $headers, $rawPayload)->assertOk();
+        $this->call('POST', '/payments/midtrans/notification', [], [], [], ['CONTENT_TYPE' => 'application/json'], $rawPayload)
+            ->assertOk()
+            ->assertJson(['message' => 'Notification already processed.']);
         $this->assertSame($auditCount, FinancialAuditLog::where('model_type', 'Pembayaran')
             ->where('model_id', $successful->id)
             ->count());
-        $this->assertSame('disetujui', $successful->fresh()->status_validasi);
-        $this->assertSame('ditolak', $duplicate->fresh()->status_validasi);
         Http::assertSent(fn (Request $request): bool => $request->method() === 'POST'
-            && str_ends_with($request->url(), '/transactions/'.$duplicate->order_id.'/cancel'));
+            && str_ends_with($request->url(), '/'.$duplicate->order_id.'/expire'));
     }
 
-    public function test_webhook_paywuz_dengan_signature_palsu_ditolak(): void
+    public function test_webhook_midtrans_dengan_signature_palsu_ditolak(): void
     {
-        $serverKey = 'pk_sand_'.bin2hex(random_bytes(16));
-        InfoPembayaran::getInstance()->update([
-            'paywuz_sandbox_api_key' => Crypt::encryptString($serverKey),
-            'paywuz_enabled' => true,
-            'paywuz_is_production' => false,
-        ]);
+        $this->enableMidtrans('SB-Mid-server-'.bin2hex(random_bytes(12)));
 
-        $payload = [
-            'id' => 'SIT-TRX-INVALID',
-            'orderId' => 'SIT-ORDER-NOT-FOUND',
-            'amount' => 100000,
-            'fee' => 0,
-            'totalPayment' => 100000,
-            'paymentMethod' => 'QRIS',
-            'status' => 'settlement',
-            'timestamp' => now()->toIso8601String(),
-        ];
-        $rawPayload = json_encode($payload, JSON_UNESCAPED_SLASHES);
+        $rawPayload = $this->midtransNotification('SIT-ORDER-NOT-FOUND', '200', '100000.00', 'settlement', 'SB-Mid-server-salah1234567');
 
-        $this->call('POST', '/payments/paywuz/webhook', [], [], [], [
-            'CONTENT_TYPE' => 'application/json',
-            'HTTP_X_PAYWUZ_SIGNATURE' => 'sha256='.str_repeat('0', 64),
-            'HTTP_X_PAYWUZ_EVENT' => 'transaction.settlement',
-            'HTTP_X_PAYWUZ_DELIVERY' => 'SIT-INVALID-'.uniqid(),
-        ], $rawPayload)->assertForbidden();
+        $this->call('POST', '/payments/midtrans/notification', [], [], [], ['CONTENT_TYPE' => 'application/json'], $rawPayload)
+            ->assertForbidden();
     }
 
-    public function test_webhook_paywuz_mewajibkan_event_header_dan_menolak_replay_kedaluwarsa(): void
+    public function test_webhook_midtrans_memakai_status_core_api_bukan_isi_payload(): void
     {
-        $serverKey = 'pk_sand_'.bin2hex(random_bytes(16));
-        InfoPembayaran::getInstance()->update([
-            'paywuz_sandbox_api_key' => Crypt::encryptString($serverKey),
-            'paywuz_enabled' => true,
-            'paywuz_is_production' => false,
+        $context = $this->makeAcademicContext();
+        $serverKey = 'SB-Mid-server-'.bin2hex(random_bytes(12));
+        $orderId = 'SIT-FORGED-'.uniqid();
+        $this->enableMidtrans($serverKey);
+
+        $tagihan = Tagihan::create([
+            'siswa_id' => $context['siswa']->id,
+            'tahun_ajaran_id' => $context['tahun']->id,
+            'jenis_tagihan' => 'spp_oktober',
+            'jumlah' => 300000,
+            'tanggal_jatuh_tempo' => now()->addMonth()->toDateString(),
+            'status' => 'belum_bayar',
+        ]);
+        $payment = $this->makeMidtransPayment($tagihan, $context['siswa'], $orderId, 300000);
+
+        Http::fake([
+            '*/'.$orderId.'/status' => Http::response($this->midtransStatus($orderId, '300000.00', 'pending', '201')),
         ]);
 
-        $payload = [
-            'id' => 'SIT-TRX-CONTRACT',
-            'orderId' => 'SIT-ORDER-NOT-FOUND',
-            'amount' => 100000,
-            'fee' => 290,
-            'totalPayment' => 100290,
-            'paymentMethod' => 'QRIS',
-            'status' => 'settlement',
-            'timestamp' => now()->subHours(2)->toIso8601String(),
-            'metadata' => ['source' => 'official-sdk-contract'],
-        ];
-        $rawPayload = json_encode($payload, JSON_UNESCAPED_SLASHES);
-        $baseHeaders = [
-            'CONTENT_TYPE' => 'application/json',
-            'HTTP_X_PAYWUZ_SIGNATURE' => 'sha256='.hash_hmac('sha256', $rawPayload, $serverKey),
-            'HTTP_X_PAYWUZ_DELIVERY' => 'SIT-CONTRACT-'.uniqid(),
-        ];
+        // Signature hanya mencakup order_id+status_code+gross_amount sehingga
+        // transaction_status dapat dimanipulasi oleh pihak yang memutar ulang
+        // notifikasi pending lama.
+        $rawPayload = $this->midtransNotification($orderId, '201', '300000.00', 'settlement', $serverKey);
 
-        $this->call('POST', '/payments/paywuz/webhook', [], [], [], $baseHeaders, $rawPayload)
-            ->assertStatus(400)
-            ->assertJson(['message' => 'Missing or invalid Paywuz headers.']);
+        $this->call('POST', '/payments/midtrans/notification', [], [], [], ['CONTENT_TYPE' => 'application/json'], $rawPayload)->assertOk();
 
-        $this->call('POST', '/payments/paywuz/webhook', [], [], [], [
-            ...$baseHeaders,
-            'HTTP_X_PAYWUZ_EVENT' => 'transaction.settlement',
-        ], $rawPayload)
-            ->assertStatus(400)
-            ->assertJson(['message' => 'Webhook timestamp is outside the accepted window.']);
+        $this->assertSame('pending', $payment->fresh()->status_validasi);
+        $this->assertSame('belum_bayar', $tagihan->fresh()->status);
+    }
 
+    public function test_webhook_midtrans_menolak_nominal_berbeda_dan_menerima_notifikasi_uji(): void
+    {
+        $context = $this->makeAcademicContext();
+        $serverKey = 'SB-Mid-server-'.bin2hex(random_bytes(12));
+        $orderId = 'SIT-AMOUNT-'.uniqid();
+        $this->enableMidtrans($serverKey);
+
+        $tagihan = Tagihan::create([
+            'siswa_id' => $context['siswa']->id,
+            'tahun_ajaran_id' => $context['tahun']->id,
+            'jenis_tagihan' => 'spp_november',
+            'jumlah' => 300000,
+            'tanggal_jatuh_tempo' => now()->addMonth()->toDateString(),
+            'status' => 'belum_bayar',
+        ]);
+        $this->makeMidtransPayment($tagihan, $context['siswa'], $orderId, 300000);
+        Http::fake();
+
+        $this->call('POST', '/payments/midtrans/notification', [], [], [], ['CONTENT_TYPE' => 'application/json'],
+            $this->midtransNotification($orderId, '200', '1000.00', 'settlement', $serverKey))
+            ->assertStatus(422);
+
+        $this->call('POST', '/payments/midtrans/notification', [], [], [], ['CONTENT_TYPE' => 'application/json'],
+            $this->midtransNotification('payment_notif_test_'.uniqid(), '200', '1000.00', 'settlement', $serverKey))
+            ->assertOk()
+            ->assertJson(['message' => 'Notification accepted; payment not found.']);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_webhook_midtrans_gagal_cek_status_minta_dikirim_ulang(): void
+    {
+        $context = $this->makeAcademicContext();
+        $serverKey = 'SB-Mid-server-'.bin2hex(random_bytes(12));
+        $orderId = 'SIT-RETRY-'.uniqid();
+        $this->enableMidtrans($serverKey);
+
+        $tagihan = Tagihan::create([
+            'siswa_id' => $context['siswa']->id,
+            'tahun_ajaran_id' => $context['tahun']->id,
+            'jenis_tagihan' => 'spp_desember',
+            'jumlah' => 300000,
+            'tanggal_jatuh_tempo' => now()->addMonth()->toDateString(),
+            'status' => 'belum_bayar',
+        ]);
+        $payment = $this->makeMidtransPayment($tagihan, $context['siswa'], $orderId, 300000);
+
+        Http::fake(['*' => Http::response(['status_message' => 'Service unavailable'], 503)]);
+
+        $rawPayload = $this->midtransNotification($orderId, '200', '300000.00', 'settlement', $serverKey);
+
+        $this->call('POST', '/payments/midtrans/notification', [], [], [], ['CONTENT_TYPE' => 'application/json'], $rawPayload)
+            ->assertStatus(503);
+
+        $this->assertSame('pending', $payment->fresh()->status_validasi);
         $this->assertDatabaseMissing('payment_webhook_deliveries', [
-            'delivery_id' => $baseHeaders['HTTP_X_PAYWUZ_DELIVERY'],
+            'delivery_id' => 'midtrans:'.hash('sha256', $rawPayload),
         ]);
     }
 
-    public function test_pembayaran_paywuz_tidak_bisa_dilunasi_manual_oleh_bendahara(): void
+    public function test_pembayaran_midtrans_tidak_bisa_dilunasi_manual_oleh_bendahara(): void
     {
         $context = $this->makeAcademicContext();
         $bendahara = $this->makeUser('bendahara');
-        $serverKey = 'pk_sand_'.bin2hex(random_bytes(16));
-        InfoPembayaran::getInstance()->update([
-            'paywuz_sandbox_api_key' => Crypt::encryptString($serverKey),
-            'paywuz_enabled' => true,
-            'paywuz_is_production' => false,
-        ]);
+        $this->enableMidtrans('SB-Mid-server-'.bin2hex(random_bytes(12)));
 
         $tagihan = Tagihan::create([
             'siswa_id' => $context['siswa']->id,
@@ -378,32 +350,10 @@ class SITClosureDomainIntegrationTest extends TestCase
             'status' => 'belum_bayar',
         ]);
         $orderId = 'SIT-MANUAL-GUARD-'.uniqid();
-        $payment = Pembayaran::create([
-            'tagihan_id' => $tagihan->id,
-            'siswa_id' => $context['siswa']->id,
-            'kode_pembayaran' => 'SIT-GUARD-'.uniqid(),
-            'jumlah_bayar' => 250000,
-            'tanggal_bayar' => now(),
-            'metode_pembayaran' => 'paywuz',
-            'payment_gateway' => 'paywuz',
-            'order_id' => $orderId,
-            'transaction_id' => 'SIT-TRX-GUARD',
-            'payment_type' => 'QRIS',
-            'payment_environment' => 'sandbox',
-            'status_validasi' => 'pending',
-        ]);
+        $payment = $this->makeMidtransPayment($tagihan, $context['siswa'], $orderId, 250000);
 
         Http::fake([
-            'https://api.paywuz.id/v1/transactions/*' => Http::response([
-                'data' => [
-                    'id' => 'SIT-TRX-GUARD',
-                    'orderId' => $orderId,
-                    'amount' => 250000,
-                    'totalPayment' => 250000,
-                    'paymentMethod' => 'QRIS',
-                    'status' => 'pending',
-                ],
-            ]),
+            '*/'.$orderId.'/status' => Http::response($this->midtransStatus($orderId, '250000.00', 'pending', '201')),
         ]);
 
         $this->actingAs($bendahara)->withoutMiddleware()->post(
@@ -413,6 +363,64 @@ class SITClosureDomainIntegrationTest extends TestCase
 
         $this->assertSame('pending', $payment->fresh()->status_validasi);
         $this->assertSame('belum_bayar', $tagihan->fresh()->status);
+    }
+
+    private function enableMidtrans(string $serverKey): void
+    {
+        InfoPembayaran::getInstance()->update([
+            'midtrans_sandbox_server_key' => Crypt::encryptString($serverKey),
+            'midtrans_enabled' => true,
+            'midtrans_is_production' => false,
+        ]);
+    }
+
+    private function makeMidtransPayment(Tagihan $tagihan, Siswa $siswa, string $orderId, int $amount): Pembayaran
+    {
+        return Pembayaran::create([
+            'tagihan_id' => $tagihan->id,
+            'siswa_id' => $siswa->id,
+            'kode_pembayaran' => 'SIT-MID-'.uniqid(),
+            'jumlah_bayar' => $amount,
+            'tanggal_bayar' => now(),
+            'metode_pembayaran' => 'midtrans',
+            'payment_gateway' => 'midtrans',
+            'payment_type' => 'QRIS',
+            'order_id' => $orderId,
+            'payment_environment' => 'sandbox',
+            'payment_url' => 'https://app.sandbox.midtrans.com/snap/v4/redirection/'.uniqid(),
+            'payment_expires_at' => now()->addHours(2),
+            'status_validasi' => 'pending',
+        ]);
+    }
+
+    /** @return array<string, string> */
+    private function midtransStatus(string $orderId, string $grossAmount, string $status, string $statusCode): array
+    {
+        return [
+            'status_code' => $statusCode,
+            'status_message' => 'Success, transaction is found',
+            'transaction_id' => 'trx-'.md5($orderId),
+            'order_id' => $orderId,
+            'gross_amount' => $grossAmount,
+            'payment_type' => 'qris',
+            'transaction_status' => $status,
+            'fraud_status' => 'accept',
+        ];
+    }
+
+    private function midtransNotification(string $orderId, string $statusCode, string $grossAmount, string $status, string $serverKey): string
+    {
+        return json_encode([
+            'transaction_time' => now('Asia/Jakarta')->format('Y-m-d H:i:s'),
+            'transaction_status' => $status,
+            'transaction_id' => 'trx-'.md5($orderId),
+            'status_code' => $statusCode,
+            'signature_key' => hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey),
+            'payment_type' => 'qris',
+            'order_id' => $orderId,
+            'gross_amount' => $grossAmount,
+            'fraud_status' => 'accept',
+        ], JSON_UNESCAPED_SLASHES);
     }
 
     public function test_request_rapor_disetujui_menghasilkan_token_valid_yang_hanya_bisa_dipakai_pemilik(): void

@@ -2,13 +2,24 @@
 
 return [
 
-    'paywuz' => [
-        'base_url' => env('PAYWUZ_BASE_URL', 'https://api.paywuz.id/v1'),
-        'checkout_url' => env('PAYWUZ_CHECKOUT_URL', 'https://paywuz.id/pay'),
-        'sandbox_api_key' => env('PAYWUZ_SANDBOX_API_KEY'),
-        'production_api_key' => env('PAYWUZ_PRODUCTION_API_KEY'),
-        'expiry_minutes' => (int) env('PAYWUZ_EXPIRY_MINUTES', 720),
-        'webhook_tolerance_seconds' => (int) env('PAYWUZ_WEBHOOK_TOLERANCE_SECONDS', 900),
+    'midtrans' => [
+        'sandbox_server_key' => env('MIDTRANS_SANDBOX_SERVER_KEY'),
+        'production_server_key' => env('MIDTRANS_PRODUCTION_SERVER_KEY'),
+        'snap_url' => [
+            'sandbox' => env('MIDTRANS_SANDBOX_SNAP_URL', 'https://app.sandbox.midtrans.com/snap/v1'),
+            'production' => env('MIDTRANS_PRODUCTION_SNAP_URL', 'https://app.midtrans.com/snap/v1'),
+        ],
+        'api_url' => [
+            'sandbox' => env('MIDTRANS_SANDBOX_API_URL', 'https://api.sandbox.midtrans.com/v2'),
+            'production' => env('MIDTRANS_PRODUCTION_API_URL', 'https://api.midtrans.com/v2'),
+        ],
+        'expiry_minutes' => (int) env('MIDTRANS_EXPIRY_MINUTES', 720),
+        // Kode kanal yang ditawarkan kepada wali siswa. Setiap kanal juga harus
+        // aktif di dashboard Midtrans agar Snap dapat menampilkannya.
+        'channels' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('MIDTRANS_CHANNELS', 'QRIS,GOPAY,SHOPEEPAY,VA')),
+        ))),
     ],
 
     /*

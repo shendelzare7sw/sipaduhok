@@ -20,3 +20,10 @@ Schedule::command('promotion:execute-scheduled')
     ->withoutOverlapping()
     ->timezone('Asia/Jakarta')
     ->description('Execute scheduled academic promotions');
+
+// Jaring pengaman jika notifikasi Midtrans terlewat: sinkronkan order pending.
+Schedule::command('midtrans:reconcile')
+    ->everyThirtyMinutes()
+    ->withoutOverlapping()
+    ->timezone('Asia/Jakarta')
+    ->description('Reconcile pending Midtrans payments');

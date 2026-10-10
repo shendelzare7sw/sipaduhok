@@ -899,11 +899,11 @@ entity "info_pembayaran" as info_pembayaran {
     nama_bank : varchar
     rekening_bank : varchar
     atas_nama : varchar
-    paywuz_merchant_id : varchar
-    paywuz_server_key : text
-    paywuz_client_key : text
-  * paywuz_is_production : tinyint
-  * paywuz_enabled : tinyint
+    midtrans_merchant_id : varchar
+    midtrans_server_key : text
+    midtrans_client_key : text
+  * midtrans_is_production : tinyint
+  * midtrans_enabled : tinyint
     tunai_lokasi : varchar
     tunai_jam_operasional : varchar
     tunai_deskripsi : text

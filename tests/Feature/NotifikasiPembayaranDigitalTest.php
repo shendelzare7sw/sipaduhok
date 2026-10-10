@@ -61,7 +61,7 @@ class NotifikasiPembayaranDigitalTest extends TestCase
 
     public function test_status_service_mengirim_notifikasi_pembayaran_digital(): void
     {
-        $isi = file_get_contents(app_path('Services/PaywuzPaymentStatusService.php'));
+        $isi = file_get_contents(app_path('Services/MidtransPaymentStatusService.php'));
 
         $this->assertStringContainsString(
             'notifyPembayaranDigitalBerhasil',
@@ -72,7 +72,7 @@ class NotifikasiPembayaranDigitalTest extends TestCase
 
     public function test_webhook_memeriksa_status_per_pembayaran(): void
     {
-        $isi = file_get_contents(app_path('Services/PaywuzPaymentStatusService.php'));
+        $isi = file_get_contents(app_path('Services/MidtransPaymentStatusService.php'));
 
         $this->assertStringNotContainsString(
             'if ($oldStatus !== $newStatus) {',
@@ -93,7 +93,7 @@ class NotifikasiPembayaranDigitalTest extends TestCase
         // getOriginal() SESUDAH update() sudah berisi nilai baru (Laravel
         // menyinkronkan original setiap kali save berhasil), sehingga audit
         // log dulu mencatat old == new dan jejaknya jadi tidak berguna.
-        $isi = file_get_contents(app_path('Services/PaywuzPaymentStatusService.php'));
+        $isi = file_get_contents(app_path('Services/MidtransPaymentStatusService.php'));
 
         $this->assertStringNotContainsString(
             "getOriginal('status_validasi')",
@@ -129,7 +129,7 @@ class NotifikasiPembayaranDigitalTest extends TestCase
             'jumlah_bayar' => 500000,
             'tanggal_bayar' => now(),
             'metode_pembayaran' => 'transfer',
-            'payment_gateway' => 'paywuz',
+            'payment_gateway' => 'midtrans',
             'order_id' => 'ORDER-UJI-'.uniqid(),
             'payment_type' => 'qris',
             'status_validasi' => 'disetujui',

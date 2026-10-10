@@ -34,9 +34,9 @@ use App\Http\Controllers\Guru\GuruUjianController;
 // Bendahara Controllers
 use App\Http\Controllers\Ketua\KetuaController;
 use App\Http\Controllers\Ketua\ValidasiRaporController as KetuaValidasiRaporController;
+use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Controllers\OrangTua\OrangTuaController;
 use App\Http\Controllers\OrangTua\PembayaranDigitalController;
-use App\Http\Controllers\PaywuzWebhookController;
 use App\Http\Controllers\Sekretaris\SekretarisController;
 // Wali Kelas Controllers
 use App\Http\Controllers\Siswa\LmsDashboardController;
@@ -70,8 +70,8 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Webhook Paywuz berada di luar autentikasi; keasliannya diverifikasi dengan HMAC.
-Route::post('/payments/paywuz/webhook', PaywuzWebhookController::class)->name('paywuz.webhook');
+// Notifikasi Midtrans berada di luar autentikasi; keasliannya diverifikasi dengan signature SHA512.
+Route::post('/payments/midtrans/notification', MidtransWebhookController::class)->name('midtrans.webhook');
 
 // Sitemap
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');

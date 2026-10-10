@@ -10,7 +10,8 @@ use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\TahunAjaran;
 use App\Services\NotificationService;
-use App\Services\PaywuzPaymentStatusService;
+use App\Services\MidtransPaymentStatusService;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -38,7 +39,7 @@ class PembayaranController extends Controller
 
         // Filter metode pembayaran
         if ($request->filled('metode')) {
-            $query->where('metode_pembayaran', $request->metode);
+            $query->whereIn('metode_pembayaran', Pembayaran::metodeFilterValues((string) $request->metode));
         }
 
         // Filter kelas
@@ -167,8 +168,10 @@ class PembayaranController extends Controller
     {
         $targetPembayaran = Pembayaran::findOrFail($id);
 
-        if ($targetPembayaran->payment_gateway === 'paywuz') {
-            app(\App\Services\PaywuzPaymentStatusService::class)->sync((string) $targetPembayaran->order_id);
+        if ($targetPembayaran->is_digital) {
+            if ($targetPembayaran->payment_gateway === MidtransService::GATEWAY) {
+                app(MidtransPaymentStatusService::class)->sync((string) $targetPembayaran->order_id);
+            }
 
             return redirect()->back()->with(
                 'info',
@@ -227,7 +230,7 @@ class PembayaranController extends Controller
                             ->where('status_validasi', 'pending')
                             ->where(fn ($query) => $query
                                 ->whereNull('payment_gateway')
-                                ->orWhere('payment_gateway', '!=', 'paywuz'))
+                                ->orWhereNotIn('payment_gateway', Pembayaran::DIGITAL_GATEWAYS))
                             ->update([
                                 'status_validasi' => 'ditolak',
                                 'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Kode: '.$pembayaran->kode_pembayaran.')',
@@ -261,7 +264,7 @@ class PembayaranController extends Controller
             DB::commit();
 
             if ($request->status_validasi === 'disetujui') {
-                $this->cancelPendingPaywuzDuplicates($relatedPayments);
+                $this->cancelPendingMidtransDuplicates($relatedPayments);
             }
 
             // Auto-validasi akses ujian/rapor jika siswa sudah lunas
@@ -474,7 +477,7 @@ class PembayaranController extends Controller
                             ->where('status_validasi', 'pending')
                             ->where(fn ($query) => $query
                                 ->whereNull('payment_gateway')
-                                ->orWhere('payment_gateway', '!=', 'paywuz'))
+                                ->orWhereNotIn('payment_gateway', Pembayaran::DIGITAL_GATEWAYS))
                             ->update([
                                 'status_validasi' => 'ditolak',
                                 'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar tunai di loket (Kode: '.$kodePembayaran.')',
@@ -507,7 +510,7 @@ class PembayaranController extends Controller
             DB::commit();
 
             if ($validasiLangsung) {
-                $this->cancelPendingPaywuzDuplicates($approvedPayments);
+                $this->cancelPendingMidtransDuplicates($approvedPayments);
             }
 
             $message = $validasiLangsung
@@ -572,7 +575,7 @@ class PembayaranController extends Controller
                     ->where('status_validasi', 'pending')
                     ->where(fn ($query) => $query
                         ->whereNull('payment_gateway')
-                        ->orWhere('payment_gateway', '!=', 'paywuz'))
+                        ->orWhereNotIn('payment_gateway', Pembayaran::DIGITAL_GATEWAYS))
                     ->update([
                         'status_validasi' => 'ditolak',
                         'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar tunai di loket (Kode: '.$kodePembayaran.')',
@@ -602,7 +605,7 @@ class PembayaranController extends Controller
 
             DB::commit();
 
-            $this->cancelPendingPaywuzDuplicates([$pembayaran]);
+            $this->cancelPendingMidtransDuplicates([$pembayaran]);
 
             return redirect()->route('bendahara.pembayaran.riwayat-siswa', $siswaId)
                 ->with('success', 'Pembayaran tunai berhasil dicatat dan divalidasi.');
@@ -693,18 +696,18 @@ class PembayaranController extends Controller
     }
 
     /**
-     * Pembayaran digital hanya boleh ditutup setelah Paywuz mengonfirmasi
+     * Pembayaran digital hanya boleh ditutup setelah Midtrans mengonfirmasi
      * pembatalannya. Jika API sedang bermasalah, status lokal tetap pending.
      *
      * @param  iterable<Pembayaran>  $approvedPayments
      */
-    private function cancelPendingPaywuzDuplicates(iterable $approvedPayments): void
+    private function cancelPendingMidtransDuplicates(iterable $approvedPayments): void
     {
         $orderIds = collect($approvedPayments)
             ->flatMap(fn (Pembayaran $payment) => Pembayaran::query()
                 ->where('tagihan_id', $payment->tagihan_id)
                 ->where('siswa_id', $payment->siswa_id)
-                ->where('payment_gateway', 'paywuz')
+                ->where('payment_gateway', MidtransService::GATEWAY)
                 ->where('status_validasi', 'pending')
                 ->when($payment->order_id, fn ($query) => $query->where('order_id', '!=', $payment->order_id))
                 ->whereNotNull('order_id')
@@ -712,12 +715,12 @@ class PembayaranController extends Controller
             ->filter()
             ->unique();
 
-        $service = app(PaywuzPaymentStatusService::class);
+        $service = app(MidtransPaymentStatusService::class);
         foreach ($orderIds as $orderId) {
             try {
                 $service->cancelIfPending((string) $orderId);
             } catch (\Throwable $exception) {
-                Log::critical('Pembayaran Paywuz tetap pending setelah tagihan dilunasi melalui kanal lain.', [
+                Log::critical('Pembayaran Midtrans tetap pending setelah tagihan dilunasi melalui kanal lain.', [
                     'order_id' => $orderId,
                     'message' => $exception->getMessage(),
                 ]);

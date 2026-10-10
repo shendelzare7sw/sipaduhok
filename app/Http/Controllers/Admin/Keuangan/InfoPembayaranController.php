@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Keuangan;
 
 use App\Http\Controllers\Controller;
 use App\Models\InfoPembayaran;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,8 @@ class InfoPembayaranController extends Controller
 
         return view('admin.keuangan.info-pembayaran.index', [
             'infoPembayaran' => $infoPembayaran,
-            'paywuzWebhookUrl' => route('paywuz.webhook'),
+            'midtransWebhookUrl' => route('midtrans.webhook'),
+            'midtransChannels' => collect(app(MidtransService::class)->paymentMethods())->pluck('name')->all(),
         ]);
     }
 
@@ -46,46 +48,43 @@ class InfoPembayaranController extends Controller
 
             $message = 'Informasi rekening bank berhasil diperbarui.';
 
-        } elseif ($type === 'paywuz') {
+        } elseif ($type === 'midtrans') {
             $validated = $request->validate([
-                'paywuz_sandbox_api_key' => ['nullable', 'string', 'max:255', 'regex:/^pk_sand_[a-f0-9]{32}$/i'],
-                'paywuz_production_api_key' => ['nullable', 'string', 'max:255', 'regex:/^pk_live_[a-f0-9]{32}$/i'],
-                'paywuz_environment' => ['required', 'in:sandbox,production'],
-                'paywuz_fee_by_merchant' => ['nullable', 'boolean'],
+                'midtrans_sandbox_server_key' => ['nullable', 'string', 'max:255', 'regex:/^SB-Mid-server-[A-Za-z0-9_-]{10,}$/'],
+                'midtrans_production_server_key' => ['nullable', 'string', 'max:255', 'regex:/^Mid-server-[A-Za-z0-9_-]{10,}$/'],
+                'midtrans_environment' => ['required', 'in:sandbox,production'],
             ], [
-                'paywuz_sandbox_api_key.regex' => 'API key Sandbox harus berformat pk_sand_ diikuti 32 karakter.',
-                'paywuz_production_api_key.regex' => 'API key Production harus berformat pk_live_ diikuti 32 karakter.',
+                'midtrans_sandbox_server_key.regex' => 'Server key Sandbox harus diawali SB-Mid-server-.',
+                'midtrans_production_server_key.regex' => 'Server key Production harus diawali Mid-server-.',
             ]);
 
             $info = InfoPembayaran::getInstance();
-            $isProduction = $validated['paywuz_environment'] === 'production';
+            $isProduction = $validated['midtrans_environment'] === 'production';
             $activeKey = $isProduction
-                ? (filled($validated['paywuz_production_api_key'] ?? null) ? $validated['paywuz_production_api_key'] : $info->getPaywuzApiKey('production'))
-                : (filled($validated['paywuz_sandbox_api_key'] ?? null) ? $validated['paywuz_sandbox_api_key'] : $info->getPaywuzApiKey('sandbox'));
+                ? (filled($validated['midtrans_production_server_key'] ?? null) ? $validated['midtrans_production_server_key'] : $info->getMidtransServerKey('production'))
+                : (filled($validated['midtrans_sandbox_server_key'] ?? null) ? $validated['midtrans_sandbox_server_key'] : $info->getMidtransServerKey('sandbox'));
 
             if (blank($activeKey)) {
                 return back()->withErrors([
-                    ($isProduction ? 'paywuz_production_api_key' : 'paywuz_sandbox_api_key') => 'API key untuk environment aktif wajib tersedia.',
+                    ($isProduction ? 'midtrans_production_server_key' : 'midtrans_sandbox_server_key') => 'Server key untuk environment aktif wajib tersedia.',
                 ])->withInput();
             }
 
             $data = [
-                'paywuz_is_production' => $isProduction,
-                'paywuz_enabled' => true,
-                'paywuz_fee_by_merchant' => $request->boolean('paywuz_fee_by_merchant'),
+                'midtrans_is_production' => $isProduction,
+                'midtrans_enabled' => true,
                 'updated_by' => auth()->id(),
             ];
 
-            if (filled($validated['paywuz_sandbox_api_key'] ?? null)) {
-                $data['paywuz_sandbox_api_key'] = Crypt::encryptString(trim($validated['paywuz_sandbox_api_key']));
+            if (filled($validated['midtrans_sandbox_server_key'] ?? null)) {
+                $data['midtrans_sandbox_server_key'] = Crypt::encryptString(trim($validated['midtrans_sandbox_server_key']));
             }
 
-            if (filled($validated['paywuz_production_api_key'] ?? null)) {
-                $data['paywuz_production_api_key'] = Crypt::encryptString(trim($validated['paywuz_production_api_key']));
+            if (filled($validated['midtrans_production_server_key'] ?? null)) {
+                $data['midtrans_production_server_key'] = Crypt::encryptString(trim($validated['midtrans_production_server_key']));
             }
 
             $message = 'Konfigurasi pembayaran digital berhasil diperbarui.';
-
         } elseif ($type === 'tunai') {
             $request->validate([
                 'tunai_lokasi' => 'nullable|string|max:255',
@@ -102,13 +101,19 @@ class InfoPembayaranController extends Controller
 
             $message = 'Informasi pembayaran tunai berhasil diperbarui.';
 
-        } elseif ($type === 'paywuz_toggle') {
+        } elseif ($type === 'midtrans_toggle') {
+            $enabled = $request->has('midtrans_enabled');
+
+            if ($enabled && ! InfoPembayaran::getInstance()->hasMidtrans()) {
+                return redirect()->back()->with('error', 'Lengkapi server key Midtrans sebelum mengaktifkan kanal digital.');
+            }
+
             $data = [
-                'paywuz_enabled' => $request->has('paywuz_enabled'),
+                'midtrans_enabled' => $enabled,
                 'updated_by' => auth()->id(),
             ];
 
-            $status = $request->has('paywuz_enabled') ? 'diaktifkan' : 'dinonaktifkan';
+            $status = $enabled ? 'diaktifkan' : 'dinonaktifkan';
             $message = "Metode pembayaran digital berhasil {$status}.";
 
         } elseif ($type === 'direct_transfer_toggle') {

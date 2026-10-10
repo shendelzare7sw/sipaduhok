@@ -30,7 +30,7 @@ start
 :Membuat Tagihan Massal Otomatis;
 
 |Orang Tua / Wali Siswa|
-:Membayar Tagihan Secara Online\n(via Paywuz Payment Gateway);
+:Membayar Tagihan Secara Online\n(via Midtrans Payment Gateway);
 
 |Sistem|
 :Memproses Callback Pembayaran &\nMemperbarui Status Real-Time;

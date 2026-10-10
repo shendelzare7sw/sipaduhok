@@ -17,12 +17,13 @@
     if (!$paymentNotice) {
         [$paymentNotice, $paymentNoticeType] = match (true) {
             $isPaid => ['Pembayaran telah dikonfirmasi otomatis dan tagihan siswa sudah diperbarui.', 'success'],
-            $isPending && $expired => ['Batas waktu pembayaran telah berakhir. Silakan pilih kanal pembayaran baru.', 'warning'],
+            $isPending && $expired => ['Batas waktu pembayaran telah berakhir. Tekan Cek Status Pembayaran untuk memperbarui, lalu buat pembayaran baru dari halaman tagihan.', 'warning'],
+            $isPending && $gatewayStatus === 'capture' => ['Pembayaran kartu sedang ditinjau oleh penyedia pembayaran. Status akan diperbarui otomatis.', 'info'],
             $isPending && filled($pembayaran->payment_url) => ['Pembayaran masih menunggu penyelesaian.', 'info'],
             $isPending => [$pembayaran->gateway_error ?: 'Kanal pembayaran belum terbentuk. Silakan coba kembali atau pilih kanal lain.', 'warning'],
-            $gatewayStatus === 'failed' => ['Pembayaran gagal diproses. Silakan kembali ke tagihan dan pilih kanal pembayaran lain.', 'danger'],
-            $gatewayStatus === 'expired' => ['Transaksi pembayaran telah kedaluwarsa.', 'warning'],
-            $gatewayStatus === 'cancelled' => ['Transaksi pembayaran telah dibatalkan.', 'danger'],
+            in_array($gatewayStatus, ['deny', 'failure'], true) => ['Pembayaran gagal diproses. Silakan kembali ke tagihan dan pilih kanal pembayaran lain.', 'danger'],
+            $gatewayStatus === 'expire' => ['Transaksi pembayaran telah kedaluwarsa.', 'warning'],
+            $gatewayStatus === 'cancel' => ['Transaksi pembayaran telah dibatalkan.', 'danger'],
             default => ['Pembayaran sudah tidak aktif dan tidak dapat dilanjutkan.', 'danger'],
         };
     } else {
@@ -135,7 +136,7 @@
                             <i class="fa-solid fa-lock"></i> Selesaikan Pembayaran
                         </a>
                         <p class="text-center text-xs text-slate-400">Anda dapat menutup halaman ini dan melanjutkan pembayaran kembali dari riwayat tagihan.</p>
-                    @elseif($isPending)
+                    @elseif($isPending && blank($pembayaran->payment_url))
                         <form action="{{ route('wali-siswa.pembayaran.continue', $pembayaran) }}" method="POST">
                             @csrf
                             <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-700">
@@ -209,7 +210,7 @@
                                 <div class="flex items-center justify-between rounded-lg border-2 border-slate-200 pl-4 pr-12 py-3 transition peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:ring-2 peer-checked:ring-brand-500/20 hover:border-slate-300">
                                     <div>
                                         <div class="text-sm font-bold text-slate-800">{{ $method['name'] }}</div>
-                                        <div class="text-[11px] text-slate-500">{{ $feeParts ? 'Biaya ' . implode(' + ', $feeParts) : 'Biaya ditampilkan saat memilih bank' }}</div>
+                                        <div class="text-[11px] text-slate-500">{{ $feeParts ? 'Biaya ' . implode(' + ', $feeParts) : 'Tanpa biaya tambahan' }}</div>
                                     </div>
                                 </div>
                                     <span class="absolute right-4 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-brand-600 text-white opacity-0 transition peer-checked:opacity-100" aria-hidden="true">

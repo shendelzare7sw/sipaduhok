@@ -340,9 +340,9 @@
                         <div>
                             <label class="mb-2 block text-sm font-bold text-slate-700">Pilihan Metode Pembayaran</label>
                             <div class="grid grid-cols-3 gap-2">
-                                @if($infoPembayaran->isPaywuzEnabled() && count($paymentMethods) > 0)
+                                @if($infoPembayaran->isMidtransEnabled() && count($paymentMethods) > 0)
                                     <label class="relative cursor-pointer">
-                                        <input type="radio" name="metode_pembayaran" value="paywuz" x-model="selectedMethod" class="peer sr-only" required>
+                                        <input type="radio" name="metode_pembayaran" value="midtrans" x-model="selectedMethod" class="peer sr-only" required>
                                         <div class="flex flex-col items-center justify-center rounded-lg border-2 border-slate-200 bg-white p-4 text-center transition peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:ring-2 peer-checked:ring-brand-500/20 hover:border-slate-300">
                                             <i class="fa-solid fa-credit-card mb-2 text-2xl text-slate-400 peer-checked:text-brand-600"></i>
                                             <span class="text-xs font-bold text-slate-700">Kanal Pembayaran</span>
@@ -368,7 +368,7 @@
                                 </div>
                             </div>
 
-                            @if((!$infoPembayaran->isPaywuzEnabled() || count($paymentMethods) === 0) && !$infoPembayaran->isDirectTransferEnabled())
+                            @if((!$infoPembayaran->isMidtransEnabled() || count($paymentMethods) === 0) && !$infoPembayaran->isDirectTransferEnabled())
                                 <div class="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
                                     <i class="fa-solid fa-exclamation-triangle mt-0.5 shrink-0"></i>
                                     <div><strong>Tidak ada metode pembayaran online yang tersedia.</strong> Silakan lakukan pembayaran tunai di sekolah.</div>
@@ -376,8 +376,8 @@
                             @endif
                         </div>
 
-                        {{-- 1. Paywuz Info --}}
-                        <div x-show="selectedMethod === 'paywuz'" x-transition x-cloak>
+                        {{-- 1. Midtrans Info --}}
+                        <div x-show="selectedMethod === 'midtrans'" x-transition x-cloak>
                             <div class="mb-3 flex items-start gap-2 rounded-lg border border-brand-200 bg-brand-50 p-3 text-xs text-brand-800">
                                 <i class="fa-solid fa-shield-alt mt-0.5 shrink-0"></i>
                                 <div>Setelah konfirmasi, Anda akan diarahkan ke halaman pembayaran aman. Status tagihan akan diperbarui <strong>otomatis</strong>.</div>
@@ -391,6 +391,7 @@
                                         $methodIcon = match ($method['type']) {
                                             'qris' => 'fa-qrcode',
                                             'retail' => 'fa-store',
+                                            'ewallet' => 'fa-wallet',
                                             default => 'fa-university',
                                         };
                                         $feeParts = [];
@@ -407,12 +408,12 @@
                                            data-max-amount="{{ $method['max_amount'] }}"
                                            x-show="isChannelAvailable({{ $method['min_amount'] }}, {{ $method['max_amount'] }})">
                                         <input type="radio" name="payment_method" value="{{ $method['code'] }}" class="peer sr-only"
-                                               :required="selectedMethod === 'paywuz'">
+                                               :required="selectedMethod === 'midtrans'">
                                         <div class="flex items-center gap-3 rounded-lg border-2 border-slate-200 bg-white pl-4 pr-12 py-3 transition peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:ring-2 peer-checked:ring-brand-500/20 hover:border-slate-300">
                                             <i class="fa-solid {{ $methodIcon }} w-5 text-center text-slate-400"></i>
                                             <div class="min-w-0 flex-1">
                                                 <div class="text-sm font-bold text-slate-800">{{ $method['name'] }}</div>
-                                                <div class="text-[11px] text-slate-500">{{ $feeParts ? 'Biaya ' . implode(' + ', $feeParts) : 'Biaya mengikuti bank yang dipilih' }}</div>
+                                                <div class="text-[11px] text-slate-500">{{ $feeParts ? 'Biaya ' . implode(' + ', $feeParts) : 'Tanpa biaya tambahan' }}</div>
                                                 <div class="text-[11px] text-slate-400">Rp {{ number_format($method['min_amount'], 0, ',', '.') }}–Rp {{ number_format($method['max_amount'], 0, ',', '.') }}</div>
                                             </div>
                                         </div>
@@ -425,7 +426,7 @@
                             <p x-show="availableChannelCount === 0" class="mt-2 text-xs text-red-500">Tidak ada kanal yang mendukung total pembayaran ini.</p>
                         </div>
 
-                        @if($infoPembayaran->isPaywuzEnabled() && count($paymentMethods) === 0)
+                        @if($infoPembayaran->isMidtransEnabled() && count($paymentMethods) === 0)
                             <div class="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
                                 <i class="fa-solid fa-exclamation-triangle mt-0.5 shrink-0"></i>
                                 <div>Kanal pembayaran digital sedang tidak dapat dimuat.
@@ -503,7 +504,7 @@
                     <div class="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3">
                         <button type="button" @click="showPayModal = false" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">Batal</button>
                         <button type="submit"
-                                :disabled="submitting || {{ ((!$infoPembayaran->isPaywuzEnabled() || count($paymentMethods) === 0) && !$infoPembayaran->isDirectTransferEnabled()) ? 'true' : 'false' }}"
+                                :disabled="submitting || {{ ((!$infoPembayaran->isMidtransEnabled() || count($paymentMethods) === 0) && !$infoPembayaran->isDirectTransferEnabled()) ? 'true' : 'false' }}"
                                 class="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-brand-700 disabled:opacity-50">
                             <template x-if="submitting">
                                 <span class="flex items-center gap-2"><svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg> Memproses...</span>
@@ -542,7 +543,7 @@
                     </div>
                     @foreach($riwayatPembayaran as $bayar)
                         @php
-                            $canContinue = $bayar->metode_pembayaran == 'paywuz'
+                            $canContinue = $bayar->payment_gateway === 'midtrans'
                                 && $bayar->status_validasi == 'pending'
                                 && (!$bayar->payment_expires_at || $bayar->payment_expires_at->isFuture());
                         @endphp
@@ -566,7 +567,7 @@
                                     <span class="inline-flex whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600"><i class="fa-solid fa-money-bill-wave mr-0.5"></i> Tunai</span>
                                 @elseif($bayar->metode_pembayaran == 'transfer')
                                     <span class="inline-flex whitespace-nowrap rounded-full bg-cyan-100 px-2.5 py-1 text-[11px] font-bold text-cyan-700"><i class="fa-solid fa-university mr-0.5"></i> Direct Transfer</span>
-                                @elseif($bayar->metode_pembayaran == 'paywuz')
+                                @elseif($bayar->is_digital)
                                     <x-payment-method-badge :payment="$bayar" />
                                 @endif
                             </div>

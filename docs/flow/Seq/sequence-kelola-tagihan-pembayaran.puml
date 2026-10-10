@@ -102,7 +102,7 @@ deactivate UI
 == Skenario D: Config Pembayaran ==
 Pengguna -> UI : 38. Memilih Sub-Menu "Config Pembayaran"
 activate UI
-Pengguna -> UI : 39. Memperbarui Data Rekening / API Key Paywuz
+Pengguna -> UI : 39. Memperbarui Data Rekening / Server Key Midtrans
 UI -> Control : 40. SubmitConfigPembayaran(Data)
 activate Control
 Control -> E_Config : 41. UpdateKonfigurasi()

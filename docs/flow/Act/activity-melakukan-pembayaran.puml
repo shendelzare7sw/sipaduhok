@@ -13,11 +13,11 @@ start
 
 repeat
     |Pengguna (Orang Tua)|
-    :Memilih Metode Pembayaran\n(Transfer Manual / Paywuz);
+    :Memilih Metode Pembayaran\n(Transfer Manual / Midtrans);
     :Memasukkan Nominal Bayar;
     if (Pilihan Metode?) then (Transfer Manual)
         :Mengunggah Bukti Transfer\n(Wajib File Foto/PDF);
-    else (Paywuz)
+    else (Midtrans)
         :Melewati proses unggah\n(Otomatis by System);
     endif
     :Klik "Proses Pembayaran";
@@ -38,8 +38,8 @@ repeat
         if (Metode?) then (Transfer Manual)
             :Set Status "Pending";
             :Menampilkan Pesan Sukses\n(Menunggu Validasi Bendahara);
-        else (Paywuz)
-            :Request Token ke API Paywuz;
+        else (Midtrans)
+            :Request Token ke API Midtrans;
             :Set Status "Menunggu Pembayaran";
             :Menampilkan Pop-up Pembayaran\natau Redirect ke Gateway;
             |Pengguna (Orang Tua)|

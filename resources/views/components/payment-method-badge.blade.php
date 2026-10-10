@@ -6,6 +6,7 @@
         'qris' => 'bg-blue-50 text-blue-700 ring-blue-200',
         'va' => 'bg-cyan-50 text-cyan-700 ring-cyan-200',
         'retail' => 'bg-amber-50 text-amber-700 ring-amber-200',
+        'ewallet' => 'bg-indigo-50 text-indigo-700 ring-indigo-200',
         default => $payment->metode_pembayaran === 'tunai'
             ? 'bg-blue-50 text-blue-700 ring-blue-200'
             : ($payment->metode_pembayaran === 'transfer'
@@ -16,6 +17,7 @@
         'qris' => 'fas fa-qrcode',
         'va' => 'fas fa-university',
         'retail' => 'fas fa-store',
+        'ewallet' => 'fas fa-wallet',
         default => $payment->metode_pembayaran === 'tunai'
             ? 'fas fa-money-bill-wave'
             : ($payment->metode_pembayaran === 'transfer' ? 'fas fa-university' : 'fas fa-credit-card'),

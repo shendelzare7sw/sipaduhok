@@ -7,7 +7,7 @@ boundary "UI_Pembayaran" as UI
 control "Control_Pembayaran" as Control
 entity "T_Pembayaran" as E_Pembayaran
 entity "T_Tagihan" as E_Tagihan
-participant "API_Paywuz" as Paywuz
+participant "API_Midtrans" as Midtrans
 
 == Skenario: Menampilkan Form Pembayaran ==
 Pengguna -> UI : 1. Mengakses Detail Tagihan & Klik "Bayar"
@@ -23,7 +23,7 @@ deactivate Control
 UI --> Pengguna : 6. Form Pembayaran Terbuka
 deactivate UI
 
-== Skenario: Proses Pembayaran (Manual & Paywuz) ==
+== Skenario: Proses Pembayaran (Manual & Midtrans) ==
 Pengguna -> UI : 7. Memilih Metode, Input Nominal, (Opsional) Upload Bukti
 activate UI
 Pengguna -> UI : 8. Klik "Proses Pembayaran"
@@ -49,22 +49,22 @@ else Validasi Sukses
         deactivate E_Pembayaran
         Control --> UI : 18. NotifikasiSukses()
         UI --> Pengguna : 19. Pesan Sukses (Menunggu Validasi Bendahara)
-    else Metode = Paywuz
-        Control -> Paywuz : 20. RequestTransaction()
-        activate Paywuz
-        Paywuz --> Control : 21. Data Transaksi (paymentUrl)
-        deactivate Paywuz
+    else Metode = Midtrans
+        Control -> Midtrans : 20. RequestTransaction()
+        activate Midtrans
+        Midtrans --> Control : 21. Data Transaksi (paymentUrl)
+        deactivate Midtrans
 
         Control -> E_Pembayaran : 22. SetStatus("Menunggu Pembayaran")
         activate E_Pembayaran
         deactivate E_Pembayaran
 
         Control --> UI : 23. RedirectKeGateway(paymentUrl)
-        UI --> Pengguna : 24. Menampilkan Halaman Pembayaran Paywuz
-        Pengguna -> Paywuz : 25. Menyelesaikan Pembayaran (VA / QRIS / E-Wallet)
-        activate Paywuz
-        Paywuz -> Control : 26. Webhook Notification (Lunas)
-        deactivate Paywuz
+        UI --> Pengguna : 24. Menampilkan Halaman Pembayaran Midtrans
+        Pengguna -> Midtrans : 25. Menyelesaikan Pembayaran (VA / QRIS / E-Wallet)
+        activate Midtrans
+        Midtrans -> Control : 26. Webhook Notification (Lunas)
+        deactivate Midtrans
 
         Control -> E_Pembayaran : 27. UpdateStatus("Lunas")
         activate E_Pembayaran

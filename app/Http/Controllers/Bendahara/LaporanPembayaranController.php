@@ -72,7 +72,7 @@ class LaporanPembayaranController extends Controller
         }
 
         if ($metode) {
-            $query->where('metode_pembayaran', $metode);
+            $query->whereIn('metode_pembayaran', Pembayaran::metodeFilterValues((string) $metode));
         }
 
         $pembayaran = $query->orderBy('tanggal_bayar', 'desc')->paginate(20)->appends($request->query());
@@ -110,11 +110,11 @@ class LaporanPembayaranController extends Controller
 
         // Statistik bulanan
         $totalPembayaran = (clone $baseQuery())
-            ->when($metode, fn ($q) => $q->where('metode_pembayaran', $metode))
+            ->when($metode, fn ($q) => $q->whereIn('metode_pembayaran', Pembayaran::metodeFilterValues((string) $metode)))
             ->sum('jumlah_bayar');
 
         $jumlahTransaksi = (clone $baseQuery())
-            ->when($metode, fn ($q) => $q->where('metode_pembayaran', $metode))
+            ->when($metode, fn ($q) => $q->whereIn('metode_pembayaran', Pembayaran::metodeFilterValues((string) $metode)))
             ->count();
 
         // Per metode pembayaran
@@ -122,8 +122,8 @@ class LaporanPembayaranController extends Controller
         $jumlahTunai = (clone $baseQuery())->where('metode_pembayaran', 'tunai')->count();
         $totalTransfer = (clone $baseQuery())->where('metode_pembayaran', 'transfer')->sum('jumlah_bayar');
         $jumlahTransfer = (clone $baseQuery())->where('metode_pembayaran', 'transfer')->count();
-        $totalDigital = (clone $baseQuery())->where('metode_pembayaran', 'paywuz')->sum('jumlah_bayar');
-        $jumlahDigital = (clone $baseQuery())->where('metode_pembayaran', 'paywuz')->count();
+        $totalDigital = (clone $baseQuery())->whereIn('metode_pembayaran', Pembayaran::DIGITAL_GATEWAYS)->sum('jumlah_bayar');
+        $jumlahDigital = (clone $baseQuery())->whereIn('metode_pembayaran', Pembayaran::DIGITAL_GATEWAYS)->count();
 
         $totalNonTunai = $totalTransfer + $totalDigital;
         $jumlahNonTunai = $jumlahTransfer + $jumlahDigital;
@@ -145,7 +145,7 @@ class LaporanPembayaranController extends Controller
 
         // Ambil data dalam satu query
         $dailyData = (clone $baseQuery())
-            ->when($metode, fn ($q) => $q->where('metode_pembayaran', $metode))
+            ->when($metode, fn ($q) => $q->whereIn('metode_pembayaran', Pembayaran::metodeFilterValues((string) $metode)))
             ->selectRaw("{$dayExpression} as day, SUM(jumlah_bayar) as total")
             ->groupByRaw($dayExpression)
             ->get();
