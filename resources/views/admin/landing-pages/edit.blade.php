@@ -112,7 +112,7 @@
         @csrf
         @method('PUT')
 
-        <div class="sticky top-20 z-30 mb-4 grid grid-cols-[minmax(0,1fr)_2.75rem] gap-2 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur lg:hidden">
+        <div class="sticky top-20 z-20 mb-4 grid grid-cols-[minmax(0,1fr)_2.75rem] gap-2 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur lg:hidden">
             <label class="relative min-w-0">
                 <span class="sr-only">Pindah ke bagian halaman</span>
                 <i class="fas fa-list-ol pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-brand-600" aria-hidden="true"></i>

@@ -275,7 +275,7 @@
 
     {{-- Sticky Footer for Bulk Payment --}}
     <div x-show="selectedCount > 0" x-transition x-cloak
-         class="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-3 py-3 shadow-2xl backdrop-blur-sm sm:px-5 lg:left-72">
+         class="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-200 bg-white/95 px-3 py-3 shadow-2xl backdrop-blur-sm sm:px-5 lg:left-72">
         <div class="flex items-center justify-between gap-3">
             <button type="button" @click="openPaymentModal()"
                     class="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-brand-600 px-3.5 py-2.5 text-xs font-bold text-white shadow-lg shadow-brand-600/25 transition hover:bg-brand-700 sm:gap-2 sm:px-5 sm:text-sm">

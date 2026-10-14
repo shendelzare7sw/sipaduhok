@@ -35,7 +35,7 @@
         @csrf
 
         {{-- Header lengket --}}
-        <div class="sticky top-[60px] z-[100] flex items-center justify-between gap-2 border-b border-[#e5e7eb] bg-white px-3 py-2.5 shadow-[0_2px_4px_rgba(0,0,0,0.05)] min-[576px]:gap-3 min-[576px]:px-5 min-[576px]:py-[15px]">
+        <div class="sticky top-[60px] z-20 flex items-center justify-between gap-2 border-b border-[#e5e7eb] bg-white px-3 py-2.5 shadow-[0_2px_4px_rgba(0,0,0,0.05)] min-[576px]:gap-3 min-[576px]:px-5 min-[576px]:py-[15px]">
             <div class="min-w-0 flex-1">
                 <h5 class="mb-0 truncate text-[0.85rem]/[1.2] font-bold min-[576px]:text-xl/[1.2]">{{ $ujian->judul_ujian }}</h5>
                 <small class="hidden text-[0.875em] uppercase text-[rgba(33,37,41,0.75)] min-[576px]:inline">{{ str_replace('_', ' ', $ujian->tipe_ujian) }}</small>

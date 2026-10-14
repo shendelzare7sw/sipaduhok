@@ -57,7 +57,7 @@
                             @if($rapor)
                                 <details class="group relative" @click.outside="$el.removeAttribute('open')">
                                     <summary aria-label="Aksi rapor {{ $siswa->nama_lengkap }}" class="flex min-h-10 cursor-pointer list-none items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-600 [&::-webkit-details-marker]:hidden">Aksi <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 shrink-0 transition-transform group-open:rotate-180"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg></summary>
-                                    <div class="absolute right-0 top-full z-30 mt-1 grid w-44 gap-0.5 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+                                    <div class="absolute right-0 top-full z-20 mt-1 grid w-44 gap-0.5 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
                                 <a href="{{ route('wali.rapor.edit', $rapor->id) }}" class="flex min-h-9 items-center rounded-lg px-3 text-xs font-bold text-sky-800 hover:bg-sky-50">Edit</a>
                                 <a href="{{ route('wali.rapor.preview', $rapor->id) }}" target="_blank" rel="noopener" class="flex min-h-9 items-center rounded-lg px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">Pratinjau</a>
                                 <a href="{{ route('wali.rapor.export-excel', $rapor->id) }}" class="flex min-h-9 items-center rounded-lg px-3 text-xs font-bold text-slate-700 hover:bg-slate-50">Excel</a>

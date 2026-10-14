@@ -80,7 +80,7 @@
                     <button type="button" @click="open = !open" :aria-expanded="open" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700"><i class="fas fa-school text-brand-600"></i><span x-text="selected.length ? selected.length + ' kelas dipilih' : 'Pilih beberapa kelas'"></span><i class="fas fa-chevron-down text-[10px] transition" :class="open && 'rotate-180'"></i></button>
                     <label class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-700"><input type="checkbox" name="no_kelas" value="1" @checked(request('no_kelas')==='1') @disabled($isHistorical) @change="$el.form.submit()" class="h-4 w-4 rounded border-slate-300 text-brand-600">Belum ada kelas</label>
                 </div>
-                <div x-cloak x-show="open" @click.outside="open = false" class="absolute left-0 top-12 z-30 w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+                <div x-cloak x-show="open" @click.outside="open = false" class="absolute left-0 top-12 z-20 w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
                     <input type="search" x-model="search" placeholder="Cari kelas atau cabang..." class="mb-2 h-10 w-full rounded-xl border border-slate-300 px-3 text-sm outline-none focus:border-brand-500">
                     <div class="max-h-64 space-y-1 overflow-y-auto">
                         @forelse($kelasList as $k)
