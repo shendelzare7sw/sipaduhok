@@ -192,7 +192,7 @@
             @endforeach
 
             @if($bisaSalin)
-                <div x-cloak x-show="selected.length > 0" x-transition class="sticky bottom-4 z-30 rounded-2xl border border-brand-200 bg-white/95 p-4 shadow-xl backdrop-blur">
+                <div x-cloak x-show="selected.length > 0" x-transition class="sticky bottom-4 z-20 rounded-2xl border border-brand-200 bg-white/95 p-4 shadow-xl backdrop-blur">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <p class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fa-solid fa-square-check text-brand-600" aria-hidden="true"></i><span x-text="selected.length"></span> item dipilih</p>
                         <div class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
