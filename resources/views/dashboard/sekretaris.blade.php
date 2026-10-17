@@ -102,9 +102,5 @@
         </section>
     </div>
 
-    <section class="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-800">
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 shadow-sm"><i class="fas fa-circle-info" aria-hidden="true"></i></span>
-        <p><strong>Alur yang disarankan:</strong> catat kegiatan pada Kalender Akademik terlebih dahulu. Jika informasi perlu menjangkau warga sekolah, lanjutkan ke Pengumuman atau materi publikasi yang sesuai.</p>
-    </section>
 </div>
 @endsection

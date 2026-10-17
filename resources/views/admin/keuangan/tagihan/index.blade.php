@@ -73,18 +73,15 @@
         </section>
     @endif
 
-    <section class="rounded-2xl border {{ ($isAlumniMode ?? false) ? 'border-amber-200 bg-amber-50' : 'border-blue-200 bg-blue-50' }} p-4">
-        <div class="flex items-start gap-3">
-            <i class="fas {{ ($isAlumniMode ?? false) ? 'fa-user-graduate text-amber-700' : 'fa-circle-info text-blue-700' }} mt-1" aria-hidden="true"></i>
-            <p class="text-sm leading-6 {{ ($isAlumniMode ?? false) ? 'text-amber-900' : 'text-blue-900' }}">
-                @if($isAlumniMode ?? false)
-                    <strong>Mode Alumni Menunggak:</strong> sisa tagihan dihitung lintas seluruh tahun ajaran untuk membantu proses pelunasan akhir.
-                @else
-                    Total mencakup seluruh kewajiban siswa pada periode terpilih. Gunakan <strong>Tagihan massal</strong> bila nominal seragam untuk banyak siswa.
-                @endif
-            </p>
-        </div>
-    </section>
+    @if($isAlumniMode ?? false)
+        {{-- Penanda mode aktif tetap di konten; penjelasan mode normal ada di panduan halaman. --}}
+        <section class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <div class="flex items-start gap-3">
+                <i class="fas fa-user-graduate mt-1 text-amber-700" aria-hidden="true"></i>
+                <p class="text-sm leading-6 text-amber-900"><strong>Mode Alumni Menunggak:</strong> sisa tagihan dihitung lintas seluruh tahun ajaran untuk membantu proses pelunasan akhir.</p>
+            </div>
+        </section>
+    @endif
 
     <section class="overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm">
         <header class="border-b border-slate-200 p-4 sm:p-5">
@@ -94,14 +91,14 @@
                     <p class="mt-1 text-sm text-slate-500">{{ $students->total() }} siswa ditemukan.</p>
                 </div>
 
-                <div class="relative flex w-full flex-wrap gap-2 sm:w-auto">
+                <div class="relative grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
                     @if($isAdminContext)
-                        <a href="{{ route($tagihanRoute.'.import') }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-cyan-50 px-3 text-xs font-bold text-cyan-700 no-underline hover:bg-cyan-100 sm:text-sm"><i class="fas fa-file-import" aria-hidden="true"></i>Import</a>
+                        <a href="{{ route($tagihanRoute.'.import') }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-cyan-50 px-3 text-xs font-bold text-cyan-700 no-underline whitespace-nowrap hover:bg-cyan-100 sm:text-sm"><i class="fas fa-file-import" aria-hidden="true"></i>Import</a>
                     @endif
-                    <a href="{{ route($tagihanRoute.'.cetak-laporan', request()->query()) }}" target="_blank" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-slate-100 px-3 text-xs font-bold text-slate-700 no-underline hover:bg-slate-200 sm:text-sm"><i class="fas fa-print" aria-hidden="true"></i>Cetak</a>
-                    <a href="{{ route($tagihanRoute.'.duplicate') }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-violet-50 px-3 text-xs font-bold text-violet-700 no-underline hover:bg-violet-100 sm:text-sm"><i class="fas fa-copy" aria-hidden="true"></i>Duplikasi</a>
-                    <div class="static sm:relative" @click.outside="actionsOpen = false">
-                        <button type="button" @click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-brand-600 px-3 text-xs font-bold text-white hover:bg-brand-700 sm:text-sm">
+                    <a href="{{ route($tagihanRoute.'.cetak-laporan', request()->query()) }}" target="_blank" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-slate-100 px-3 text-xs font-bold text-slate-700 no-underline whitespace-nowrap hover:bg-slate-200 sm:text-sm"><i class="fas fa-print" aria-hidden="true"></i>Cetak</a>
+                    <a href="{{ route($tagihanRoute.'.duplicate') }}" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-violet-50 px-3 text-xs font-bold text-violet-700 no-underline whitespace-nowrap hover:bg-violet-100 sm:text-sm"><i class="fas fa-copy" aria-hidden="true"></i>Duplikasi</a>
+                    <div class="static sm:relative {{ $isAdminContext ? '' : 'col-span-2' }}" @click.outside="actionsOpen = false">
+                        <button type="button" @click="actionsOpen = !actionsOpen" :aria-expanded="actionsOpen" class="inline-flex min-h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-brand-600 px-3 text-xs font-bold text-white hover:bg-brand-700 sm:w-auto sm:text-sm">
                             <i class="fas fa-plus" aria-hidden="true"></i>Buat tagihan<i class="fas fa-chevron-down text-[10px]" aria-hidden="true"></i>
                         </button>
                         <div x-cloak x-show="actionsOpen" x-transition.origin.top.left class="absolute inset-x-0 top-full z-20 mt-2 w-auto overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-xl sm:inset-x-auto sm:right-0 sm:w-64">
@@ -200,9 +197,9 @@
             </div>
 
             <div class="hidden overflow-x-auto xl:block">
-                <table class="w-full table-fixed text-left text-sm">
-                    <colgroup>@if($isAdminContext)<col class="w-12">@endif<col class="w-12"><col><col class="w-36"><col class="w-24"><col class="w-20"><col class="w-32"><col class="w-32"><col class="w-32"><col class="w-24"><col class="w-52"></colgroup>
-                    <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr>@if($isAdminContext)<th class="px-3 py-3 text-center"><input type="checkbox" :checked="allSelected" @change="toggleAll" class="h-4 w-4 rounded border-slate-300 text-brand-600"></th>@endif<th class="px-2 py-3">No</th><th class="px-3 py-3">Siswa</th><th class="px-3 py-3">NISN</th><th class="px-3 py-3">Kelas</th><th class="px-3 py-3">Cabang</th><th class="px-3 py-3 text-right">Total</th><th class="px-3 py-3 text-right">Terbayar</th><th class="px-3 py-3 text-right">Sisa</th><th class="px-3 py-3 text-center">Status</th><th class="py-3 pl-6 pr-3 text-right">Aksi</th></tr></thead>
+                <table class="w-full min-w-[69rem] table-fixed text-left text-sm">
+                    <colgroup>@if($isAdminContext)<col class="w-10">@endif<col class="w-10"><col><col class="w-28"><col class="w-20"><col class="w-20"><col class="w-28"><col class="w-28"><col class="w-28"><col class="w-24"><col class="w-48"></colgroup>
+                    <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr>@if($isAdminContext)<th class="px-3 py-3 text-center"><input type="checkbox" :checked="allSelected" @change="toggleAll" class="h-4 w-4 rounded border-slate-300 text-brand-600"></th>@endif<th class="px-2 py-3">No</th><th class="px-3 py-3">Siswa</th><th class="px-3 py-3">NISN</th><th class="px-3 py-3">Kelas</th><th class="px-3 py-3">Cabang</th><th class="px-3 py-3 text-right">Total</th><th class="px-3 py-3 text-right">Terbayar</th><th class="px-3 py-3 text-right">Sisa</th><th class="px-3 py-3 text-center">Status</th><th class="px-3 py-3 text-right">Aksi</th></tr></thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach($students as $index => $siswa)
                             @php
@@ -220,7 +217,7 @@
                                 <td class="whitespace-nowrap px-3 py-4 text-right text-xs font-bold tabular-nums text-emerald-700">Rp {{ number_format($siswa->tagihan_lunas, 0, ',', '.') }}</td>
                                 <td class="whitespace-nowrap px-3 py-4 text-right text-xs font-extrabold tabular-nums {{ $siswa->sisa_tagihan > 0 ? 'text-red-700' : 'text-emerald-700' }}">Rp {{ number_format($siswa->sisa_tagihan, 0, ',', '.') }}</td>
                                 <td class="px-3 py-4 text-center"><span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-extrabold {{ $isPaid ? 'bg-emerald-50 text-emerald-700' : ($isEmpty ? 'bg-slate-100 text-slate-600' : 'bg-red-50 text-red-700') }}">{{ $isPaid ? 'Lunas' : ($isEmpty ? 'Kosong' : 'Belum lunas') }}</span></td>
-                                <td class="py-4 pl-6 pr-3"><div class="flex justify-end gap-1.5"><x-cleanflow.table-action :href="route($tagihanRoute.'.show', $siswa->id)" tone="view" icon="fas fa-eye" label="Lihat detail tagihan" /><x-cleanflow.table-action :href="route($tagihanRoute.'.edit', $siswa->id)" tone="edit" icon="fas fa-pen" label="Edit tagihan" /><x-cleanflow.table-action :href="route($pembayaranRoute.'.riwayat-siswa', $siswa->id)" tone="success" icon="fas fa-clock-rotate-left" label="Riwayat pembayaran" /><x-cleanflow.table-action :href="route($tagihanRoute.'.cetak', $siswa->id)" tone="neutral" icon="fas fa-print" label="Cetak tagihan" target="_blank" /></div></td>
+                                <td class="px-3 py-4"><div class="flex justify-end gap-1.5"><x-cleanflow.table-action :href="route($tagihanRoute.'.show', $siswa->id)" tone="view" icon="fas fa-eye" label="Lihat detail tagihan" /><x-cleanflow.table-action :href="route($tagihanRoute.'.edit', $siswa->id)" tone="edit" icon="fas fa-pen" label="Edit tagihan" /><x-cleanflow.table-action :href="route($pembayaranRoute.'.riwayat-siswa', $siswa->id)" tone="success" icon="fas fa-clock-rotate-left" label="Riwayat pembayaran" /><x-cleanflow.table-action :href="route($tagihanRoute.'.cetak', $siswa->id)" tone="neutral" icon="fas fa-print" label="Cetak tagihan" target="_blank" /></div></td>
                             </tr>
                         @endforeach
                     </tbody>

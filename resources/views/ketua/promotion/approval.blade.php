@@ -31,7 +31,7 @@
             ['Siswa ditinjau', $requests->pluck('siswa_id')->unique()->count(), 'Tidak menghapus tunggakan', 'fa-user-graduate', 'bg-emerald-50 text-emerald-700'],
         ] as [$label, $value, $description, $icon, $tone])
             <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm {{ $loop->last ? 'col-span-2 lg:col-span-1' : '' }}">
-                <div class="flex flex-col-reverse items-start gap-2 sm:flex-row sm:justify-between sm:gap-3"><div class="min-w-0"><strong class="block text-xl font-extrabold text-slate-950">{{ $value }}</strong><span class="mt-1 block break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $label }}</span></div><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div>
+                <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 sm:flex sm:items-start sm:justify-between sm:gap-x-3"><div class="contents sm:block sm:min-w-0"><strong class="block text-xl font-extrabold text-slate-950">{{ $value }}</strong><span class="col-span-2 mt-1 block break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $label }}</span></div><span class="col-start-2 row-start-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div>
                 <p class="mt-3 break-words border-t border-slate-100 leading-snug pt-3 text-[11px] text-slate-500">{{ $description }}</p>
             </article>
         @endforeach

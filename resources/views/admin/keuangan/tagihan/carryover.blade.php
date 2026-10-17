@@ -90,9 +90,6 @@
         <span class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-emerald-50 px-3 text-xs font-bold text-emerald-700"><i class="fas fa-calendar-check"></i>Tujuan {{ $taAktif->nama_tahun_ajaran }}</span>
     </div>
 
-    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-        <div class="flex items-start gap-3 text-sm leading-6 text-blue-900"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p><strong>Urutan aman:</strong> pastikan tagihan reguler pada tahun ajaran aktif sudah tersedia, pilih siswa, periksa rincian, lalu buka pratinjau. Carryover menambah tagihan baru tanpa menghapus riwayat lama.</p></div>
-    </section>
 
     <section class="grid grid-cols-2 gap-3 lg:grid-cols-3">
         <article class="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700"><i class="fas fa-calendar-check"></i></span><div class="min-w-0"><span class="block text-[10px] font-bold uppercase tracking-wide text-slate-500">TA tujuan</span><strong class="mt-1 block truncate text-base text-slate-950 sm:text-lg">{{ $taAktif->nama_tahun_ajaran }}</strong></div></article>

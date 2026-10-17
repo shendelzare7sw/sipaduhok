@@ -41,16 +41,16 @@ class Pimpinan
                 'judul' => 'Aktivitas belajar dan keuangan',
                 'isi' => 'Progres tugas dan ujian setiap siswa beserta sisa tagihannya. Progres dihitung dari aktivitas LMS yang benar-benar tersedia untuk kelas siswa.'.$cakupan,
                 'langkah' => ['Saring siswa menurut cabang atau kelas aktif.', 'Perhatikan siswa dengan progres rendah atau sisa tagihan besar untuk ditindaklanjuti.'],
-                'istilah' => ['Rata-rata tugas / ujian' => 'Persentase tugas atau ujian yang sudah dikerjakan dari yang tersedia.', 'Sisa tagihan yang tampil' => 'Jumlah sisa tagihan dari siswa yang sedang ditampilkan di daftar.'],
+                'istilah' => ['Rata-rata tugas / ujian' => 'Persentase tugas atau ujian yang sudah dikerjakan dari yang tersedia di kelas siswa, selaras dengan LMS.', 'Sisa tagihan yang tampil' => 'Jumlah sisa tagihan dari siswa yang sedang ditampilkan di daftar.'],
             ],
             'admin.monitoring.wali-kelas,ketua.monitoring.wali-kelas,waka.monitoring.wali-kelas' => [
                 'judul' => 'Progress penerbitan rapor',
                 'isi' => 'Kemajuan penyelesaian rapor pada setiap kelas. Gunakan untuk melihat kelas yang perlu ditindaklanjuti pada periode dan cabang tertentu.'.$cakupan,
-                'istilah' => ['Rapor selesai' => 'Dihitung dari rapor yang sudah berstatus diterbitkan.'],
+                'istilah' => ['Rapor selesai' => 'Dihitung dari rapor yang sudah berstatus diterbitkan.', 'Cakupan data' => 'Termasuk penugasan wali kelas lama dan penugasan ganda dari menu Wali Kelas, selalu dibatasi ke periode yang dipilih.'],
             ],
             'admin.monitoring.guru-pengajar,ketua.monitoring.guru-pengajar,waka.monitoring.guru-pengajar' => [
                 'judul' => 'Aktivitas guru dan kelengkapan nilai',
-                'isi' => 'Materi, tugas, ujian, pertemuan, dan kelengkapan nilai setiap guru dalam satu ringkasan. Data mengikuti penugasan pada tahun ajaran dan cabang yang dipilih.'.$cakupan,
+                'isi' => 'Materi, tugas, ujian, kelas virtual, dan kelengkapan nilai setiap guru dalam satu ringkasan. Progres nilai hanya memakai penugasan pada tahun ajaran dan cabang yang dipilih.'.$cakupan,
                 'langkah' => ['Pilih tahun ajaran dan cabang.', 'Perhatikan guru dengan konten LMS sedikit atau nilai yang belum lengkap.', 'Kirim catatan instruksi bila perlu tindak lanjut.'],
             ],
             'admin.monitoring.lms.index,ketua.monitoring.lms.index,waka.monitoring.lms.index' => [

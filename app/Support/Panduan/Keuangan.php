@@ -28,7 +28,7 @@ class Keuangan
 
             'admin.keuangan.tagihan.index,bendahara.tagihan.index' => [
                 'judul' => 'Kelola Tagihan',
-                'isi' => 'Kewajiban setiap siswa pada tahun ajaran terpilih: total tagihan, yang sudah dibayar, dan sisanya. Pilih proses pembuatan tagihan sesuai kebutuhan.',
+                'isi' => 'Kewajiban setiap siswa pada tahun ajaran terpilih: total tagihan, yang sudah dibayar, dan sisanya. Total mencakup seluruh kewajiban siswa pada periode itu. Pilih proses pembuatan tagihan sesuai kebutuhan.',
                 'langkah' => ['Saring siswa menurut tahun ajaran, cabang, kelas, atau status tagihan.', 'Buat tagihan: Generate SPP untuk SPP bulanan, Massal untuk tagihan sama per kelas, Custom untuk siswa tertentu, atau Import dari Excel.', 'Buka detail siswa untuk melihat rincian, mengubah, atau mencetak tagihannya.', 'Tunggakan tahun sebelumnya dapat ditarik ke tahun aktif; gunakan "Lihat alumni menunggak" untuk siswa yang sudah lulus.'],
                 'istilah' => ['Lunas' => 'Seluruh tagihan sudah dibayar dan disetujui.', 'Belum lunas' => 'Masih ada sisa tagihan.', 'Tanpa tagihan' => 'Siswa belum memiliki tagihan pada periode ini.'],
             ],
@@ -37,26 +37,27 @@ class Keuangan
             'admin.keuangan.tagihan.generate-spp,bendahara.tagihan.generate-spp' => [
                 'judul' => 'Generate SPP Bulanan',
                 'isi' => 'Buat rangkaian tagihan SPP untuk setiap bulan pada periode belajar sekaligus.',
-                'langkah' => ['Tentukan penerima SPP (kelas atau jenjang).', 'Atur periode bulan dan nominalnya.', 'Simpan; bulan yang sudah memiliki tagihan SPP dilewati sehingga tidak tercatat dua kali.'],
+                'langkah' => ['Tentukan penerima berdasarkan kelas atau siswa.', 'Pilih rentang bulan (mengikuti urutan bulan resmi tahun ajaran), lalu isi nominal SPP.', 'Simpan; bulan yang sudah memiliki tagihan SPP dilewati sehingga tidak tercatat dua kali.'],
             ],
             'admin.keuangan.tagihan.bulk-create,bendahara.tagihan.bulk-create' => [
                 'judul' => 'Tagihan Massal',
                 'isi' => 'Buat tagihan yang sama untuk semua siswa aktif di beberapa kelas sekaligus, misalnya uang kegiatan.',
-                'langkah' => ['Pilih kelas penerima.', 'Isi jenis dan nominal tagihan.', 'Simpan; setiap siswa aktif di kelas tersebut menerima tagihan.'],
+                'langkah' => ['Pilih kelas penerima.', 'Isi jenis dan nominal tagihan, lalu periksa jatuh tempo.', 'Simpan; hanya siswa aktif yang menerima tagihan, dan tagihan sejenis yang sudah ada tidak dibuat ulang.'],
             ],
             'admin.keuangan.tagihan.create-custom,bendahara.tagihan.create-custom' => [
                 'judul' => 'Tagihan Custom',
                 'isi' => 'Tambahkan satu tagihan khusus kepada siswa tertentu saja.',
-                'langkah' => ['Isi detail tagihan.', 'Cari dan pilih siswa penerima.', 'Simpan.'],
+                'langkah' => ['Isi detail tagihan satu kali.', 'Pilih siswa penerima; gunakan filter cabang dan kelas agar target mudah diperiksa.', 'Simpan.'],
             ],
             'admin.keuangan.tagihan.duplicate,bendahara.tagihan.duplicate' => [
                 'judul' => 'Duplikasi Tagihan',
                 'isi' => 'Salin susunan tagihan seorang siswa ke siswa lain, berguna untuk siswa pindahan atau susunan biaya yang sama.',
-                'langkah' => ['Pilih siswa sumber.', 'Periksa tagihan yang akan disalin.', 'Pilih siswa target, lalu simpan.'],
+                'langkah' => ['Pilih satu siswa sumber.', 'Periksa susunan tagihan yang akan disalin.', 'Pilih siswa target (siswa sumber tidak dapat dipilih), lalu simpan.'],
             ],
             'admin.keuangan.tagihan.carryover,bendahara.tagihan.carryover' => [
                 'judul' => 'Tarik Tunggakan',
-                'isi' => 'Alihkan sisa tagihan tahun ajaran lama ke tahun ajaran aktif agar tetap tertagih. Tagihan lama ditandai sudah dialihkan sehingga tidak terhitung dua kali.',
+                'isi' => 'Alihkan sisa tagihan tahun ajaran lama ke tahun ajaran aktif agar tetap tertagih. Carryover menambah tagihan baru tanpa menghapus riwayat lama; tagihan lama ditandai sudah dialihkan sehingga tidak terhitung dua kali.',
+                'langkah' => ['Pastikan tagihan reguler pada tahun ajaran aktif sudah tersedia.', 'Pilih siswa dan periksa rinciannya.', 'Buka pratinjau sebelum memproses.'],
             ],
             'admin.keuangan.tagihan.import' => [
                 'judul' => 'Import Tagihan',

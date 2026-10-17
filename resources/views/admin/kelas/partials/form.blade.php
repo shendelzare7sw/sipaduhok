@@ -92,7 +92,6 @@
             </aside>
         </section>
 
-        <aside class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-900"><p class="font-extrabold"><i class="fas fa-circle-info mr-1" aria-hidden="true"></i>Langkah setelah menyimpan</p><p class="mt-1">Buka detail kelas lalu pilih <strong>Kelola siswa</strong> untuk menempatkan siswa ke kelas ini.</p></aside>
 
         <div class="sticky bottom-3 z-10 flex flex-wrap items-center justify-end gap-2 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
             @if($editing)<a href="{{ route($routePrefix . '.kelas.show', $kelas) }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-50 px-4 text-sm font-bold text-blue-700 no-underline hover:bg-blue-100"><i class="fas fa-eye" aria-hidden="true"></i>Lihat detail</a>@endif

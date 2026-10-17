@@ -40,9 +40,9 @@
             ['value' => $stats['siswaLaki'], 'label' => 'Laki-laki', 'icon' => 'fas fa-mars', 'tone' => 'bg-cyan-50 text-cyan-700'],
             ['value' => $stats['siswaPerempuan'], 'label' => 'Perempuan', 'icon' => 'fas fa-venus', 'tone' => 'bg-fuchsia-50 text-fuchsia-700'],
         ] as $stat)
-            <article class="flex min-w-0 flex-col items-start gap-2.5 rounded-2xl sm:flex-row sm:items-center sm:gap-3 border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+            <article class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 rounded-2xl sm:flex sm:items-center sm:gap-x-3 border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $stat['tone'] }}"><i class="{{ $stat['icon'] }}" aria-hidden="true"></i></span>
-                <div class="min-w-0"><strong class="block text-xl font-extrabold text-slate-950">{{ $stat['value'] }}</strong><span class="block break-words leading-tight text-[10px] sm:text-[11px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $stat['label'] }}</span></div>
+                <div class="contents sm:block sm:min-w-0"><strong class="block text-xl font-extrabold text-slate-950">{{ $stat['value'] }}</strong><span class="col-span-2 block break-words leading-tight text-[10px] sm:text-[11px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $stat['label'] }}</span></div>
             </article>
         @endforeach
     </section>

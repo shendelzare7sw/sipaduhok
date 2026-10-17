@@ -11,8 +11,10 @@
     @vite(['resources/css/cleanflow.css', 'resources/js/cleanflow.js'])
 </head>
 <body class="relative flex min-h-full items-center justify-center overflow-hidden bg-slate-50 px-4 py-10 font-sans text-slate-800 antialiased">
-    <span class="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-indigo-200/50 blur-3xl" aria-hidden="true"></span>
-    <span class="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-violet-200/50 blur-3xl" aria-hidden="true"></span>
+    <div class="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
+        <span class="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-indigo-200/50 blur-3xl"></span>
+        <span class="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-violet-200/50 blur-3xl"></span>
+    </div>
 
     <main class="relative w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-xl shadow-indigo-900/10 sm:p-8"
           x-data="{ sisa: 3 }"

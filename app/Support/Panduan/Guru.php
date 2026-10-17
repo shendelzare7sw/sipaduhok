@@ -36,7 +36,7 @@ class Guru
             ],
             'guru.jadwal.index' => ['judul' => 'Jadwal Mengajar', 'isi' => 'Jadwal mingguan Anda di semua kelas. Jadwal disusun oleh Admin; hubungi Admin bila ada yang tidak sesuai.'],
             'guru.kelas.index' => ['judul' => 'Daftar Kelas', 'isi' => 'Kelas yang Anda ajar pada tahun ajaran aktif. Pilih kelas, lalu pilih mata pelajaran untuk masuk ke LMS.'],
-            'guru.kelas.mapel' => ['judul' => 'Pilih Mata Pelajaran', 'isi' => 'Mata pelajaran yang Anda ajar di kelas ini. Setiap kombinasi kelas dan mapel memiliki ruang LMS sendiri.'],
+            'guru.kelas.mapel' => ['judul' => 'Pilih Mata Pelajaran', 'isi' => 'Mata pelajaran yang Anda ajar di kelas ini. Tekan "Masuk LMS" untuk mengelola materi, tugas, ujian, dan forum diskusi; setiap kombinasi kelas dan mapel memiliki ruang LMS sendiri.'],
             'guru.lms.arsip.index' => [
                 'judul' => 'Arsip LMS',
                 'isi' => 'Semua materi, tugas, latihan, dan ujian yang pernah Anda buat lintas tahun ajaran. Salin ke kelas aktif untuk dipakai ulang tanpa membuat dari awal.',

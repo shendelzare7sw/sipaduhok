@@ -78,7 +78,6 @@
 >
     <div class="flex flex-wrap items-center justify-between gap-3"><a href="{{ route($tagihanRoute.'.index') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 no-underline hover:bg-slate-50"><i class="fas fa-arrow-left"></i>Kembali ke tagihan</a><span class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-emerald-50 px-3 text-xs font-bold text-emerald-700"><i class="fas fa-calendar-check"></i>{{ $tahunAjaran->nama_tahun_ajaran }}</span></div>
 
-    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3 text-sm leading-6 text-blue-900"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p><strong>Alur kerja:</strong> tentukan penerima berdasarkan kelas atau siswa, pilih rentang bulan, lalu isi nominal SPP. Sistem memakai urutan bulan resmi tahun ajaran agar tidak melewati periode.</p></div></section>
 
     <form method="POST" action="{{ route($tagihanRoute.'.generate-spp.store') }}" class="space-y-5" @submit.prevent="submitForm($event)">
         @csrf

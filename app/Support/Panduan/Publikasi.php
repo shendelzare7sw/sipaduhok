@@ -16,7 +16,7 @@ class Publikasi
             'sekretaris.dashboard' => [
                 'judul' => 'Dashboard Sekretaris',
                 'isi' => 'Ringkasan agenda dan publikasi sekolah. Mulai dari kegiatan hari ini, lalu pilih pekerjaan utama sesuai informasi yang ingin dikelola.',
-                'langkah' => ['Periksa "Kegiatan hari ini" untuk agenda yang sedang berjalan.', 'Tambah agenda atau buka kalender untuk menyiapkan kegiatan berikutnya.', 'Kelola pengumuman, flyer, dan berita dari "Pekerjaan utama".'],
+                'langkah' => ['Periksa "Kegiatan hari ini" untuk agenda yang sedang berjalan.', 'Catat kegiatan di Kalender Akademik terlebih dahulu.', 'Bila informasinya perlu menjangkau warga sekolah, lanjutkan ke Pengumuman, Flyer, atau Berita dari "Pekerjaan utama".'],
             ],
 
             'admin.akademik.kalender.index,sekretaris.kalender.index' => [

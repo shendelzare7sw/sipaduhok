@@ -60,7 +60,6 @@
         <a href="{{ route($tagihanRoute.'.generate-spp') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-violet-50 px-4 text-sm font-bold text-violet-700 no-underline hover:bg-violet-100"><i class="fas fa-calendar-days"></i>Butuh SPP bulanan?</a>
     </div>
 
-    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3 text-sm leading-6 text-blue-900"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p><strong>Alur kerja:</strong> pilih kelas penerima, isi nominal yang diperlukan, periksa jatuh tempo, lalu simpan. Tagihan dibuat hanya untuk siswa aktif; data sejenis yang sudah ada tidak dibuat ulang.</p></div></section>
 
     <form method="POST" action="{{ route($tagihanRoute.'.bulk-create') }}" class="space-y-5" @submit.prevent="submitForm($event)">
         @csrf

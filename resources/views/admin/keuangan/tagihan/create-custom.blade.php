@@ -62,7 +62,6 @@
         <span class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-emerald-50 px-3 text-xs font-bold text-emerald-700"><i class="fas fa-calendar-check"></i>{{ $tahunAjaran->nama_tahun_ajaran }}</span>
     </div>
 
-    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3 text-sm leading-6 text-blue-900"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p><strong>Alur kerja:</strong> isi detail tagihan satu kali, lalu pilih siswa penerima. Gunakan filter cabang dan kelas agar target mudah diperiksa sebelum disimpan.</p></div></section>
 
     <form method="POST" action="{{ route($tagihanRoute.'.store-custom') }}" class="space-y-5" @submit.prevent="submitForm($event)">
         @csrf

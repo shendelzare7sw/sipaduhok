@@ -34,7 +34,7 @@
             ['Disetujui', $approvedCount, 'fa-circle-check', 'bg-emerald-50 text-emerald-600'],
             ['Ditolak', $rejectedCount, 'fa-circle-xmark', 'bg-red-50 text-red-600'],
         ] as [$label, $value, $icon, $tone])
-            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm {{ $loop->first ? 'col-span-2 sm:col-span-1' : '' }}"><div class="flex min-w-0 flex-col-reverse items-start gap-2 sm:flex-row sm:justify-between sm:gap-3"><div class="min-w-0"><p class="text-xl font-extrabold text-slate-950">{{ number_format($value) }}</p><p class="mt-1 break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500" title="{{ $label }}">{{ $label }}</p></div><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div></article>
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm {{ $loop->first ? 'col-span-2 sm:col-span-1' : '' }}"><div class="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 sm:flex sm:items-start sm:justify-between sm:gap-x-3"><div class="contents sm:block sm:min-w-0"><p class="text-xl font-extrabold text-slate-950">{{ number_format($value) }}</p><p class="col-span-2 mt-1 break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500" title="{{ $label }}">{{ $label }}</p></div><span class="col-start-2 row-start-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div></article>
         @endforeach
     </section>
 

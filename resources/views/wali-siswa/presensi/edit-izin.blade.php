@@ -41,12 +41,6 @@
             </div>
             <div class="p-4">
                 {{-- Info Callout --}}
-                <div class="mb-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3.5 text-sm text-blue-800">
-                    <i class="fa-solid fa-info-circle mt-0.5 shrink-0"></i>
-                    <div>
-                        <strong>Perhatian:</strong> Anda dapat mengedit pengajuan izin yang belum divalidasi oleh wali kelas.
-                        Pastikan data yang dimasukkan sudah benar.
-                    </div>
                 </div>
 
                 <form action="{{ route('wali-siswa.presensi.update-izin', $presensi->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">

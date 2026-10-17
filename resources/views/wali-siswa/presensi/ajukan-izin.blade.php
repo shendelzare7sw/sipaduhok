@@ -52,12 +52,6 @@
             </div>
             <div class="p-4">
                 {{-- Info Callout --}}
-                <div class="mb-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3.5 text-sm text-blue-800">
-                    <i class="fa-solid fa-info-circle mt-0.5 shrink-0"></i>
-                    <div>
-                        <strong>Informasi:</strong> Sebagai wali siswa/wali, Anda mengajukan izin ketidakhadiran untuk anak Anda.
-                        Pastikan melampirkan bukti yang valid seperti surat dokter atau keterangan izin.
-                    </div>
                 </div>
 
                 <form action="{{ route('wali-siswa.presensi.store-izin', $siswa->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">

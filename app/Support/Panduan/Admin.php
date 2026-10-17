@@ -34,6 +34,7 @@ class Admin
             'admin.tahun-ajaran.create,admin.tahun-ajaran.edit' => [
                 'judul' => 'Mengisi Tahun Ajaran',
                 'isi' => 'Isi nama periode (misalnya 2026/2027) serta tanggal mulai dan selesainya. Tanggal semester genap dan batas akhir PTS dipakai untuk menghitung kehadiran pada rapor.',
+                'langkah' => ['Simpan periode ini.', 'Pastikan cabang sudah tersedia, lalu masukkan pengguna sekolah.', 'Buat kelas dan mata pelajaran, lalu susun jadwal pelajaran.'],
                 'istilah' => ['PTS' => 'Penilaian Tengah Semester; rapor PTS menghitung kehadiran sampai tanggal akhir PTS.', 'PAS' => 'Penilaian Akhir Semester; rapor PAS menghitung kehadiran sampai akhir semester.'],
             ],
             'admin.tahun-ajaran.show' => [
@@ -48,6 +49,7 @@ class Admin
             'admin.cabang.create,admin.cabang.edit' => [
                 'judul' => 'Mengisi Data Cabang',
                 'isi' => 'Isi kode, nama, alamat, dan telepon cabang. Cabang nonaktif tidak muncul sebagai pilihan saat membuat data baru.',
+                'langkah' => ['Urutan persiapan: aktifkan tahun ajaran, lalu tambahkan cabang.', 'Masukkan pengguna sekolah.', 'Buat kelas, lalu susun mata pelajaran dan jadwal.'],
             ],
             'admin.cabang.show' => [
                 'judul' => 'Detail Cabang',
@@ -135,7 +137,7 @@ class Admin
             ],
             'admin.pengaturan-istirahat.create,admin.pengaturan-istirahat.edit' => [
                 'judul' => 'Mengisi Waktu Istirahat',
-                'isi' => 'Tentukan nama jeda, jam mulai dan selesai, hari berlaku, serta urutannya. Nonaktifkan bila jeda tidak lagi dipakai.',
+                'isi' => 'Tentukan nama jeda, jam mulai dan selesai, hari berlaku, serta urutannya. Sistem menolak jam selesai yang lebih awal, urutan ganda pada hari yang sama, dan waktu yang bertabrakan dengan istirahat lain. Nonaktifkan bila jeda tidak lagi dipakai.',
             ],
 
             // --- Kenaikan kelas ---

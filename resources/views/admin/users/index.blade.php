@@ -15,7 +15,6 @@
 @endphp
 
 <div class="min-w-0 space-y-5">
-    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5"><div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white"><i class="fas fa-route" aria-hidden="true"></i></span><div class="min-w-0"><h2 class="text-sm font-extrabold text-blue-950">Mulai dari mana?</h2><p class="mt-1 text-xs leading-5 text-blue-800">Untuk banyak siswa, gunakan <strong>Import Excel</strong>. Setelah siswa masuk, lanjutkan ke menu Kelas & Penugasan untuk menempatkan mereka sekaligus.</p></div></div></section>
 
     <x-cleanflow.stat-grid :items="$statItems" />
 

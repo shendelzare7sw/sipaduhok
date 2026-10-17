@@ -37,9 +37,5 @@
         </div>
     </section>
 
-    <section class="flex items-start gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 sm:p-5">
-        <i class="fa-solid fa-circle-info mt-0.5 text-sky-600" aria-hidden="true"></i>
-        <p class="text-xs leading-5 text-slate-600">Klik tombol <strong class="text-slate-800">"Masuk LMS"</strong> untuk mengakses sistem pembelajaran bagi mata pelajaran yang Anda pilih. Di dalam LMS, Anda dapat mengelola materi, tugas, ujian, dan forum diskusi.</p>
-    </section>
 </div>
 @endsection

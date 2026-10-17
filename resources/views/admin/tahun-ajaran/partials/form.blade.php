@@ -40,7 +40,6 @@
     </section>
 
     <aside class="space-y-4">
-        <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><h2 class="text-sm font-extrabold text-blue-900"><i class="fas fa-route mr-1.5 text-blue-600" aria-hidden="true"></i>Langkah Berikutnya</h2><ol class="mt-3 space-y-2 text-xs leading-5 text-blue-900"><li><strong>1. Simpan periode ini</strong></li><li>2. Pastikan cabang sudah tersedia</li><li>3. Masukkan pengguna sekolah</li><li>4. Buat kelas dan mata pelajaran</li><li>5. Susun jadwal pelajaran</li></ol></section>
         @if($isEdit)
             <section class="rounded-2xl border {{ $tahunAjaran->kelas->count() ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50' }} p-4"><h2 class="text-sm font-extrabold {{ $tahunAjaran->kelas->count() ? 'text-amber-900' : 'text-emerald-900' }}">{{ $tahunAjaran->kelas->count() ? 'Data sedang digunakan' : 'Aman untuk diedit' }}</h2><p class="mt-2 text-xs leading-5 {{ $tahunAjaran->kelas->count() ? 'text-amber-800' : 'text-emerald-800' }}">{{ $tahunAjaran->kelas->count() ? $tahunAjaran->kelas->count() . ' kelas menggunakan periode ini. Perubahan tanggal dapat memengaruhi laporan.' : 'Belum ada kelas yang memakai periode ini.' }}</p><p class="mt-3 border-t border-current/10 pt-3 text-[11px] opacity-75">Dibuat {{ $tahunAjaran->created_at->format('d M Y') }} · diperbarui {{ $tahunAjaran->updated_at->format('d M Y') }}</p></section>
         @else

@@ -58,7 +58,6 @@
         <span class="inline-flex min-h-9 items-center gap-2 rounded-xl bg-blue-50 px-3 text-xs font-bold text-blue-700"><i class="fas fa-calendar-check"></i>Tahun ajaran {{ $tahunAjaran->nama_tahun_ajaran }}</span>
     </div>
 
-    <section class="rounded-2xl border border-blue-200 bg-blue-50 p-4"><div class="flex items-start gap-3"><i class="fas fa-circle-info mt-1 text-blue-700"></i><p class="text-sm leading-6 text-blue-900"><strong>Alur kerja:</strong> pilih satu siswa sumber, periksa susunan tagihannya, lalu pilih siswa target. Sumber tidak dapat dipilih sebagai target.</p></div></section>
 
     <form action="{{ route($tagihanRoute.'.duplicate.store') }}" method="POST" class="space-y-5" @submit.prevent="submitDuplicate($event)">
         @csrf

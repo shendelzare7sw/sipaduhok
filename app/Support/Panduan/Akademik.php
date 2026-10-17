@@ -31,7 +31,7 @@ class Akademik
             'admin.kelas.create,waka.kelas.create,admin.kelas.edit,waka.kelas.edit' => [
                 'judul' => 'Mengisi Data Kelas',
                 'isi' => 'Lengkapi tahun ajaran, cabang, nama kelas, jenjang, dan kuota siswa. Wali kelas boleh dipilih sekarang atau nanti dari halaman detail kelas.',
-                'langkah' => ['Pilih tahun ajaran dan cabang terlebih dahulu.', 'Isi nama kelas dan jenjang sesuai rombongan belajar.', 'Tentukan kuota, lalu simpan. Siswa ditempatkan dari halaman detail kelas.'],
+                'langkah' => ['Pilih tahun ajaran dan cabang terlebih dahulu.', 'Isi nama kelas dan jenjang sesuai rombongan belajar.', 'Tentukan kuota, lalu simpan.', 'Setelah tersimpan, buka detail kelas lalu pilih Kelola siswa untuk menempatkan siswa.'],
             ],
             'admin.kelas.import,waka.kelas.import' => [
                 'judul' => 'Import Kelas dari Excel',

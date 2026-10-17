@@ -49,9 +49,9 @@
     <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">
         @foreach($stats as $stat)
             <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-                <div class="flex min-w-0 flex-col-reverse items-start gap-2 sm:flex-row sm:justify-between sm:gap-3">
+                <div class="flex min-w-0 items-start justify-between gap-2 sm:gap-3">
                     <p class="min-w-0 break-words text-[10px] font-extrabold uppercase leading-tight tracking-normal text-slate-500 sm:text-xs sm:tracking-[0.12em]">{{ $stat['label'] }}</p>
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm ring-1 ring-inset sm:h-11 sm:w-11 {{ $statTones[$stat['tone']] }}">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm ring-1 ring-inset sm:h-11 sm:w-11 {{ $statTones[$stat['tone']] }}">
                         <i class="fas {{ $stat['icon'] }}" aria-hidden="true"></i>
                     </span>
                 </div>
