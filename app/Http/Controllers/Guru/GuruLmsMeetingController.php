@@ -27,7 +27,7 @@ class GuruLmsMeetingController extends Controller
             ->where('guru_id', $tenagaPendidik->id)
             ->orderBy('waktu_mulai', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->tampil(10);
 
         return view('guru.lms.meeting.index', [
             'kelas' => $kelasModel,

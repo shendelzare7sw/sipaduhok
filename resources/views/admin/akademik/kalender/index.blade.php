@@ -43,7 +43,7 @@
             ['label' => 'Draft', 'value' => $kalender->where('status', 'draft')->count(), 'tone' => 'bg-amber-50 text-amber-700'],
             ['label' => 'Tahun Ajaran', 'value' => $tahunAjaranAktif->nama_tahun_ajaran ?? '-', 'tone' => 'bg-violet-50 text-violet-700'],
         ] as $stat)
-            <article class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><p class="truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $stat['label'] }}</p><p class="mt-2 truncate text-xl font-extrabold text-slate-900" title="{{ $stat['value'] }}">{{ is_numeric($stat['value']) ? number_format($stat['value']) : $stat['value'] }}</p><span class="mt-2 block h-1.5 w-10 rounded-full {{ $stat['tone'] }}"></span></article>
+            <article class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><p class="break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $stat['label'] }}</p><p class="mt-2 break-words leading-tight text-xl font-extrabold text-slate-900" title="{{ $stat['value'] }}">{{ is_numeric($stat['value']) ? number_format($stat['value']) : $stat['value'] }}</p><span class="mt-2 block h-1.5 w-10 rounded-full {{ $stat['tone'] }}"></span></article>
         @endforeach
     </section>
 

@@ -19,7 +19,7 @@
 @if($href && ! $muted)
     <a href="{{ $href }}" @if($active) aria-current="page" @endif {{ $attributes->class($classes) }}>
         <span class="{{ $iconClasses }}"><i class="fa-solid {{ $icon }}" aria-hidden="true"></i></span>
-        <span class="min-w-0 flex-1 truncate">{{ $slot }}</span>
+        <span class="min-w-0 flex-1 truncate" data-marquee>{{ $slot }}</span>
         @if($badge)
             <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold {{ $active ? 'bg-white text-indigo-700' : 'bg-rose-500 text-white' }}">{{ $badge }}</span>
         @endif
@@ -27,6 +27,6 @@
 @else
     <span {{ $attributes->class($classes) }}>
         <span class="{{ $iconClasses }}"><i class="fa-solid {{ $icon }}" aria-hidden="true"></i></span>
-        <span class="min-w-0 flex-1 truncate">{{ $slot }}</span>
+        <span class="min-w-0 flex-1 truncate" data-marquee>{{ $slot }}</span>
     </span>
 @endif

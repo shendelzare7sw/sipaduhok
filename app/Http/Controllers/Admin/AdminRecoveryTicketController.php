@@ -23,7 +23,7 @@ class AdminRecoveryTicketController extends Controller
             ->whereIn('status', ['pending_admin', 'processing', 'failed', 'sent'])
             ->orderByRaw("CASE status WHEN 'pending_admin' THEN 1 WHEN 'failed' THEN 2 WHEN 'processing' THEN 3 WHEN 'sent' THEN 4 ELSE 5 END")
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->tampil(15);
 
         $adminWa = AppSetting::where('key', 'admin_wa_number')->value('value') ?? '';
 
@@ -130,7 +130,7 @@ class AdminRecoveryTicketController extends Controller
         $tickets = RecoveryTicket::with('user')
             ->whereIn('status', ['resolved', 'rejected'])
             ->orderBy('updated_at', 'desc')
-            ->paginate(20);
+            ->tampil(20);
 
         return view('admin.recovery-tickets.history', compact('tickets'));
     }

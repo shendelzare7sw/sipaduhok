@@ -521,7 +521,7 @@ class OrangTuaController extends Controller
                 $query->where('status', $request->status);
             })
             ->orderBy('tanggal', 'desc')
-            ->paginate(15)
+            ->tampil(15)
             ->withQueryString();
 
         $rekap = [

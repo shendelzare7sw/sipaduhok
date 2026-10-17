@@ -80,7 +80,6 @@ class BendaharaTagihanStatusFilterPaginationTest extends TestCase
             $resPage1 = $this->get(route('bendahara.tagihan.index', [
                 'status_tagihan' => 'belum_lunas',
                 'search' => $suffix,
-                'page' => 1,
             ]));
             $resPage1->assertOk();
 
@@ -102,15 +101,15 @@ class BendaharaTagihanStatusFilterPaginationTest extends TestCase
             $resPage1->assertDontSee("SudahLunas{$suffix}");
             $resPage1->assertDontSee("TanpaTagihan{$suffix}");
 
-            // Halaman 2 berisi sisa 2 siswa belum-lunas yang tidak muat di halaman 1.
-            $resPage2 = $this->get(route('bendahara.tagihan.index', [
+            // "Tampilkan semua" memuat sisa siswa belum-lunas yang belum tampil, filter tetap terbawa.
+            $resPage1->assertSee('Tampilkan semua');
+            $resLagi = $this->get(route('bendahara.tagihan.index', [
                 'status_tagihan' => 'belum_lunas',
                 'search' => $suffix,
-                'page' => 2,
+                'tampil' => 'semua',
             ]));
-            $resPage2->assertOk();
-            $paginator2 = $resPage2->viewData('siswaList');
-            $this->assertCount(2, $paginator2->items());
+            $resLagi->assertOk()->assertSee('Semua data sudah ditampilkan');
+            $this->assertCount(17, $resLagi->viewData('siswaList')->items());
         } finally {
             DB::connection('mysql')->rollBack();
         }

@@ -36,7 +36,7 @@
         <li class="menu-item {{ $active ? 'active' : '' }}">
             <a href="{{ route('guru.dashboard') }}" class="menu-link {{ $baseClasses }} {{ $active ? $activeState : $idleState() }}">
                 <i class="fa-solid fa-house w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
-                <span class="min-w-0 flex-1 truncate">Dashboard</span>
+                <span class="min-w-0 flex-1 truncate" data-marquee>Dashboard</span>
             </a>
         </li>
     </ul>
@@ -49,7 +49,7 @@
         <li class="menu-item {{ $infoAkademikActive ? 'active open' : '' }}">
             <button type="button" class="menu-link menu-toggle bg-transparent {{ $baseClasses }} {{ $infoAkademikActive ? $activeState : $idleState() }}" data-menu-toggle aria-controls="guru-info-akademik" aria-expanded="{{ $infoAkademikActive ? 'true' : 'false' }}">
                 <i class="fa-solid fa-calendar-days w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
-                <span class="min-w-0 flex-1 truncate">Informasi Akademik</span>
+                <span class="min-w-0 flex-1 truncate" data-marquee>Informasi Akademik</span>
                 <i class="fa-solid fa-chevron-down text-[10px] transition-transform {{ $infoAkademikActive ? 'rotate-180' : '' }}" data-menu-chevron aria-hidden="true"></i>
             </button>
             <ul id="guru-info-akademik" class="menu-sub mt-1 space-y-1 pl-8 {{ $infoAkademikActive ? '' : 'hidden' }}">
@@ -74,14 +74,14 @@
         <li class="menu-item {{ $active ? 'active' : '' }}">
             <a href="{{ route('guru.lms.arsip.index') }}" class="menu-link {{ $baseClasses }} {{ $active ? $activeState : $idleState() }}">
                 <i class="fa-solid fa-box-archive w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
-                <span class="min-w-0 flex-1 truncate">Arsip LMS</span>
+                <span class="min-w-0 flex-1 truncate" data-marquee>Arsip LMS</span>
             </a>
         </li>
         @php $active = Str::startsWith($currentRoute, 'guru.lms.catatan-monitoring'); @endphp
         <li class="menu-item {{ $active ? 'active' : '' }}">
             <a href="{{ route('guru.lms.catatan-monitoring.index') }}" class="menu-link {{ $baseClasses }} {{ $active ? $activeState : $idleState() }}">
                 <i class="fa-solid fa-comment-dots w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
-                <span class="min-w-0 flex-1 truncate">Catatan Monitoring</span>
+                <span class="min-w-0 flex-1 truncate" data-marquee>Catatan Monitoring</span>
                 @if($unreadCm > 0)
                     <span class="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-extrabold text-white">{{ $unreadCm > 99 ? '99+' : $unreadCm }}</span>
                 @endif
@@ -104,7 +104,7 @@
                 <li class="menu-item {{ $isActive ? 'active open' : '' }}">
                     <button type="button" class="menu-link menu-toggle bg-transparent {{ $baseClasses }} {{ $isActive ? $activeState : $idleState() }}" data-menu-toggle aria-controls="{{ $targetId }}" aria-expanded="{{ $isActive ? 'true' : 'false' }}">
                         <i class="fa-solid fa-chalkboard w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
-                        <span class="min-w-0 flex-1 truncate">{{ $kelas->nama_kelas }}</span>
+                        <span class="min-w-0 flex-1 truncate" data-marquee>{{ $kelas->nama_kelas }}</span>
                         <i class="fa-solid fa-chevron-down text-[10px] transition-transform {{ $isActive ? 'rotate-180' : '' }}" data-menu-chevron aria-hidden="true"></i>
                     </button>
                     <ul id="{{ $targetId }}" class="menu-sub mt-1 space-y-1 pl-8 {{ $isActive ? '' : 'hidden' }}">

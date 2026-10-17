@@ -56,8 +56,8 @@
                         <i class="fa-solid {{ $card['icon'] }}"></i>
                     </div>
                     <div class="min-w-0 flex-1">
-                        <div class="truncate text-[9px] font-semibold uppercase tracking-wide text-slate-500 sm:text-[11px]">{{ $card['label'] }}</div>
-                        <div class="mt-0.5 truncate text-sm font-bold {{ $card['valueColor'] }} sm:text-lg">Rp {{ number_format($card['value'], 0, ',', '.') }}</div>
+                        <div class="break-words leading-tight text-[9px] font-semibold uppercase tracking-normal sm:tracking-wide text-slate-500 sm:text-[11px]">{{ $card['label'] }}</div>
+                        <div class="mt-0.5 break-words leading-tight text-sm font-bold {{ $card['valueColor'] }} sm:text-lg">Rp {{ number_format($card['value'], 0, ',', '.') }}</div>
                     </div>
                 </div>
             </div>

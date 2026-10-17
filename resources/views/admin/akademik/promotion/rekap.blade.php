@@ -14,7 +14,7 @@
     $executeRoute = $routeBase . '.execute';
     $promoteRoute = $routeBase . '.promote-selected';
     $cancelRoute = $routeBase . '.cancel-schedule';
-    $tabUrl = fn (string $tab) => route(Route::currentRouteName(), array_merge(request()->except(['page', 'sim_page']), ['tab' => $tab]));
+    $tabUrl = fn (string $tab) => route(Route::currentRouteName(), array_merge(request()->except(['tampil', 'tampil_sim']), ['tab' => $tab]));
     $historyEligibleIds = collect($students->items())->where('bisa_dinaikkan_manual', true)->pluck('siswa_id')->map(fn ($id) => (string) $id)->values();
     $simulationEligibleIds = collect($simulationData)->reject(fn ($row) => $row['result']['eligible'])->pluck('siswa.id')->map(fn ($id) => (string) $id)->values();
     $historyFilters = collect([$isAdminContext ? $cabangId : null, $jenjangFilter, $kelasId, $filterStatus])->filter()->count();
@@ -94,7 +94,7 @@
                 <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
 
                 @if ($historyEligibleIds->isNotEmpty())
-                    <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5"><button type="button" @click="togglePage()" class="text-xs font-bold text-brand-700 hover:text-brand-800" x-text="selected.length === pageIds.length ? 'Batalkan pilihan halaman' : 'Pilih semua yang dapat diproses'"></button><span class="text-[11px] text-slate-500"><strong x-text="selected.length">0</strong> dipilih</span></div>
+                    <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5"><button type="button" @click="togglePage()" class="text-xs font-bold text-brand-700 hover:text-brand-800" x-text="selected.length === pageIds.length ? 'Batalkan pilihan' : 'Pilih semua yang dapat diproses'"></button><span class="text-[11px] text-slate-500"><strong x-text="selected.length">0</strong> dipilih</span></div>
                 @endif
 
                 <div class="hidden grid-cols-[minmax(180px,1.35fr)_minmax(90px,.7fr)_minmax(90px,.7fr)_minmax(110px,.8fr)_minmax(130px,1fr)_minmax(120px,.9fr)] bg-slate-50 px-5 py-3 text-[10px] font-bold uppercase tracking-wide text-slate-500 xl:grid"><span>Nama Siswa</span><span>Kelas Asal</span><span>Kelas Tujuan</span><span>Keuangan</span><span>Akademik</span><span>Hasil</span></div>
@@ -108,7 +108,7 @@
                                 'NAIK_KELAS' => 'bg-emerald-50 text-emerald-700', 'LULUS' => 'bg-sky-50 text-sky-700', 'NAIK_KELAS_TUNGGAKAN' => 'bg-amber-50 text-amber-700', 'LULUS_TUNGGAKAN' => 'bg-violet-50 text-violet-700', 'TIDAK_NAIK_KELAS' => 'bg-red-50 text-red-700', default => 'bg-slate-100 text-slate-700',
                             };
                         @endphp
-                        <article class="grid grid-cols-2 gap-3 p-4 hover:bg-slate-50/80 sm:p-5 xl:grid-cols-[minmax(180px,1.35fr)_minmax(90px,.7fr)_minmax(90px,.7fr)_minmax(110px,.8fr)_minmax(130px,1fr)_minmax(120px,.9fr)] xl:items-center xl:gap-0">
+                        <article id="m-{{ $loop->iteration }}" class="grid grid-cols-2 gap-3 p-4 hover:bg-slate-50/80 sm:p-5 xl:grid-cols-[minmax(180px,1.35fr)_minmax(90px,.7fr)_minmax(90px,.7fr)_minmax(110px,.8fr)_minmax(130px,1fr)_minmax(120px,.9fr)] xl:items-center xl:gap-0">
                             <div class="col-span-2 flex min-w-0 items-start gap-3 xl:col-span-1 xl:pr-3">@if($data->bisa_dinaikkan_manual)<input type="checkbox" name="siswa_ids[]" value="{{ $data->siswa_id }}" x-model="selected" class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500">@endif<div class="min-w-0"><p class="break-words text-sm font-extrabold text-slate-950">{{ $data->nama_lengkap }}</p>@if($data->bisa_dinaikkan_manual)<p class="mt-1 text-[10px] font-bold text-amber-700">Dapat diproses manual</p>@endif</div></div>
                             <div><p class="text-[10px] font-bold uppercase text-slate-400 xl:hidden">Kelas Asal</p><p class="mt-1 break-words text-xs text-slate-700 xl:mt-0">{{ $data->kelas_asal }}</p></div>
                             <div><p class="text-[10px] font-bold uppercase text-slate-400 xl:hidden">Kelas Tujuan</p><p class="mt-1 break-words text-xs text-slate-700 xl:mt-0">{{ $data->kelas_tujuan ?? '-' }}</p></div>
@@ -129,7 +129,8 @@
                     @endforelse
                 </div>
 
-                <footer class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">@if($historyEligibleIds->isNotEmpty())<button type="submit" :disabled="selected.length === 0" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 text-xs font-bold text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-40"><i class="fas fa-arrow-up" aria-hidden="true"></i>Naikkan terpilih (<span x-text="selected.length">0</span>)</button>@else<span></span>@endif<div class="min-w-0">{{ $students->withQueryString()->links() }}</div></footer>
+                <x-cleanflow.muat-lagi :items="$students" />
+                @if($historyEligibleIds->isNotEmpty())<footer class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"><button type="submit" :disabled="selected.length === 0" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 text-xs font-bold text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-40"><i class="fas fa-arrow-up" aria-hidden="true"></i>Naikkan terpilih (<span x-text="selected.length">0</span>)</button></footer>@endif
             </form>
         </section>
     @elseif ($activeTab === 'simulation')
@@ -140,7 +141,7 @@
                     <form action="{{ route($executeRoute) }}" method="POST" data-confirm data-confirm-title="Proses kenaikan kelas sekarang?" data-confirm-message="Semua siswa aktif akan diperiksa dan hasilnya dicatat. Pastikan tahun ajaran serta kelas tujuan sudah benar." data-confirm-text="Ya, proses sekarang">@csrf<input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}"><button type="submit" @disabled(!$promotionReadiness['isReady']) class="inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold text-white {{ $promotionReadiness['isReady'] ? 'bg-brand-600 hover:bg-brand-700' : 'cursor-not-allowed bg-slate-300' }}"><i class="fas {{ $promotionReadiness['isReady'] ? 'fa-gears' : 'fa-lock' }}" aria-hidden="true"></i>Proses kenaikan kelas</button></form>
                 </div>
 
-                <div class="mt-4 inline-flex rounded-xl bg-slate-100 p-1"><a href="{{ route(Route::currentRouteName(), array_merge(request()->except(['sim_mode', 'sim_page']), ['sim_mode' => 'current', 'tab' => 'simulation'])) }}" class="rounded-lg px-3 py-2 text-[11px] font-bold {{ ($simMode ?? 'current') === 'current' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500' }}">Keadaan saat ini</a><a href="{{ route(Route::currentRouteName(), array_merge(request()->except(['sim_mode', 'sim_page']), ['sim_mode' => 'historical', 'tab' => 'simulation'])) }}" class="rounded-lg px-3 py-2 text-[11px] font-bold {{ ($simMode ?? 'current') === 'historical' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500' }}">Saat eksekusi</a></div>
+                <div class="mt-4 inline-flex rounded-xl bg-slate-100 p-1"><a href="{{ route(Route::currentRouteName(), array_merge(request()->except(['sim_mode', 'tampil_sim']), ['sim_mode' => 'current', 'tab' => 'simulation'])) }}" class="rounded-lg px-3 py-2 text-[11px] font-bold {{ ($simMode ?? 'current') === 'current' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500' }}">Keadaan saat ini</a><a href="{{ route(Route::currentRouteName(), array_merge(request()->except(['sim_mode', 'tampil_sim']), ['sim_mode' => 'historical', 'tab' => 'simulation'])) }}" class="rounded-lg px-3 py-2 text-[11px] font-bold {{ ($simMode ?? 'current') === 'historical' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500' }}">Saat eksekusi</a></div>
 
                 <form action="{{ route(Route::currentRouteName()) }}" method="GET" class="mt-4 grid gap-2 lg:grid-cols-[180px_minmax(180px,1fr)_auto]">
                     <input type="hidden" name="tab" value="simulation"><input type="hidden" name="sim_mode" value="{{ $simMode ?? 'current' }}">
@@ -172,7 +173,7 @@
             @if (($simMode ?? 'current') === 'current')
                 <form action="{{ route($promoteRoute) }}" method="POST" data-confirm data-confirm-title="Naikkan siswa terpilih?" data-confirm-message="Siswa terpilih akan diproses menuju kelas berikutnya. Periksa kembali pilihan Anda." data-confirm-text="Ya, naikkan" x-data="{ selected: [], pageIds: @js($simulationEligibleIds), allPages: false, togglePage() { this.allPages = false; this.selected = this.selected.length === this.pageIds.length ? [] : [...this.pageIds] } }">
                     @csrf<input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}"><input type="hidden" name="select_all" :value="allPages ? 1 : 0"><input type="hidden" name="cabang_id" value="{{ $cabangId }}"><input type="hidden" name="jenjang" value="{{ $jenjangFilter }}"><input type="hidden" name="kelas_id" value="{{ $kelasId }}"><input type="hidden" name="search" value="{{ $search }}">
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-y border-slate-100 px-4 py-3 sm:px-5"><div class="flex flex-wrap gap-2"><button type="button" @click="togglePage()" class="rounded-lg bg-brand-50 px-3 py-2 text-[11px] font-bold text-brand-700 hover:bg-brand-100" x-text="selected.length === pageIds.length ? 'Batalkan halaman' : 'Pilih yang tertunda di halaman ini'"></button>@if($activeStudentsLinks->lastPage() > 1)<button type="button" @click="allPages = !allPages; selected = []" class="rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700 hover:bg-amber-100" x-text="allPages ? 'Batalkan semua halaman' : 'Pilih semua {{ $totalActiveGlobal ?? $activeStudentsLinks->total() }} data'"></button>@endif</div><span class="text-[11px] text-slate-500" x-text="allPages ? '{{ $totalActiveGlobal ?? 0 }} data dipilih' : selected.length + ' dipilih'"></span></div>
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-y border-slate-100 px-4 py-3 sm:px-5"><div class="flex flex-wrap gap-2"><button type="button" @click="togglePage()" class="rounded-lg bg-brand-50 px-3 py-2 text-[11px] font-bold text-brand-700 hover:bg-brand-100" x-text="selected.length === pageIds.length ? 'Batalkan pilihan' : 'Pilih yang tertunda (yang tampil)'"></button>@if($activeStudentsLinks->lastPage() > 1)<button type="button" @click="allPages = !allPages; selected = []" class="rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700 hover:bg-amber-100" x-text="allPages ? 'Batalkan pilih semua' : 'Pilih semua {{ $totalActiveGlobal ?? $activeStudentsLinks->total() }} data'"></button>@endif</div><span class="text-[11px] text-slate-500" x-text="allPages ? '{{ $totalActiveGlobal ?? 0 }} data dipilih' : selected.length + ' dipilih'"></span></div>
             @endif
 
             <div class="hidden grid-cols-[minmax(180px,1.35fr)_minmax(90px,.7fr)_minmax(140px,1fr)_minmax(130px,.9fr)_minmax(110px,.8fr)] bg-slate-50 px-5 py-3 text-[10px] font-bold uppercase tracking-wide text-slate-500 xl:grid"><span>Nama Siswa</span><span>Kelas</span><span>Keuangan</span><span>Akademik</span><span>Prediksi</span></div>
@@ -181,7 +182,7 @@
                     @php
                         $isFinalLevel = preg_match('/(9|IX|12|XII)/', strtoupper($sim['siswa']->kelas->nama_kelas ?? ''));
                     @endphp
-                    <article class="grid grid-cols-2 gap-3 p-4 hover:bg-slate-50/80 sm:p-5 xl:grid-cols-[minmax(180px,1.35fr)_minmax(90px,.7fr)_minmax(140px,1fr)_minmax(130px,.9fr)_minmax(110px,.8fr)] xl:items-center xl:gap-0">
+                    <article id="sim-m-{{ $loop->iteration }}" class="grid grid-cols-2 gap-3 p-4 hover:bg-slate-50/80 sm:p-5 xl:grid-cols-[minmax(180px,1.35fr)_minmax(90px,.7fr)_minmax(140px,1fr)_minmax(130px,.9fr)_minmax(110px,.8fr)] xl:items-center xl:gap-0">
                         <div class="col-span-2 flex min-w-0 items-start gap-3 xl:col-span-1 xl:pr-3">@if(($simMode ?? 'current') === 'current' && !$sim['result']['eligible'])<input type="checkbox" name="siswa_ids[]" value="{{ $sim['siswa']->id }}" x-model="selected" @change="allPages = false" class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500">@endif<div class="min-w-0"><p class="break-words text-sm font-extrabold text-slate-950">{{ $sim['siswa']->nama_lengkap }}</p><p class="mt-1 text-[10px] text-slate-500">{{ $sim['siswa']->nis ?? 'NIS belum tersedia' }}</p></div></div>
                         <div><p class="text-[10px] font-bold uppercase text-slate-400 xl:hidden">Kelas</p><p class="mt-1 break-words text-xs text-slate-700 xl:mt-0">{{ $sim['siswa']->kelas->nama_kelas ?? '-' }}</p></div>
                         <div>
@@ -204,10 +205,11 @@
             </div>
 
             @if (($simMode ?? 'current') === 'current')
-                    <footer class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"><button type="submit" :disabled="selected.length === 0 && !allPages" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"><i class="fas fa-arrow-up" aria-hidden="true"></i>Naikkan terpilih</button><div class="min-w-0">{{ $activeStudentsLinks->appends(['tab' => 'simulation'])->withQueryString()->links() }}</div></footer>
+                    <x-cleanflow.muat-lagi :items="$activeStudentsLinks" param="tampil_sim" jangkar="sim-" />
+                    <footer class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"><button type="submit" :disabled="selected.length === 0 && !allPages" class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"><i class="fas fa-arrow-up" aria-hidden="true"></i>Naikkan terpilih</button></footer>
                 </form>
             @else
-                <footer class="border-t border-slate-200 bg-slate-50/70 px-4 py-4 sm:px-5"><div class="min-w-0">{{ $activeStudentsLinks->appends(['tab' => 'simulation'])->withQueryString()->links() }}</div></footer>
+                <x-cleanflow.muat-lagi :items="$activeStudentsLinks" param="tampil_sim" jangkar="sim-" />
             @endif
         </section>
     @else

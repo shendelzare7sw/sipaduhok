@@ -41,7 +41,7 @@ class GuruForumController extends Controller
             ->where('mata_pelajaran_id', $mapelId)
             ->orderBy('is_pinned', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->tampil(15);
 
         return view('guru.lms.forum.index', [
             'kelas' => $kelas,

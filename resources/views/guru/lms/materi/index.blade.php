@@ -39,6 +39,7 @@
     </header>
 
     @if($materiList->count() > 0)
+        @php $no = 0; @endphp
         @foreach($materiList->groupBy(fn ($item) => $item->tanggal_upload->format('Y-m-d')) as $date => $materis)
             <section class="min-w-0">
                 <div class="mb-3 flex items-center gap-3">
@@ -49,7 +50,7 @@
                 <div class="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     @foreach($materis as $materi)
                         @php [$iconName, $iconTone] = explode(' ', $fileIcons[$materi->tipe_file] ?? 'fa-file bg-slate-100 text-slate-600', 2); @endphp
-                        <article class="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                        <article id="m-{{ ++$no }}" class="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                             <div class="flex min-w-0 items-start gap-3">
                                 <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl {{ $iconTone }}"><i class="fa-solid {{ $iconName }}" aria-hidden="true"></i></span>
                                 <div class="min-w-0">
@@ -72,7 +73,7 @@
             </section>
         @endforeach
 
-        <div>{{ $materiList->appends(request()->query())->links() }}</div>
+        <x-cleanflow.muat-lagi :items="$materiList" tema="lms" lepas />
     @else
         <section class="rounded-2xl border border-slate-200 bg-white px-5 py-14 text-center shadow-sm">
             <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></span>

@@ -147,7 +147,7 @@
             @if($notifications->isNotEmpty())
                 <label class="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-slate-600">
                     <input type="checkbox" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" :checked="allSelected" @change="toggleAll()">
-                    Pilih semua di halaman ini
+                    Pilih semua yang tampil
                 </label>
             @endif
         </div>
@@ -168,7 +168,7 @@
                     $isUnread = is_null($notification->read_at);
                     $showParams = ['id' => $notification->id] + ($ctx ? ['ctx' => $ctx] : []);
                 @endphp
-                <article class="group relative flex min-w-0 items-start gap-3 px-4 py-4 transition hover:bg-slate-50 sm:gap-4 sm:px-5 {{ $isUnread ? 'bg-blue-50/30' : 'bg-white' }}">
+                <article id="m-{{ $loop->iteration }}" class="group relative flex min-w-0 items-start gap-3 px-4 py-4 transition hover:bg-slate-50 sm:gap-4 sm:px-5 {{ $isUnread ? 'bg-blue-50/30' : 'bg-white' }}">
                     <label class="relative z-10 mt-3 inline-flex shrink-0 cursor-pointer" aria-label="Pilih notifikasi {{ $notification->judul }}">
                         <input type="checkbox" value="{{ $notification->id }}" x-model="selected" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
                     </label>
@@ -196,9 +196,7 @@
             @endforelse
         </div>
 
-        @if($notifications->hasPages())
-            <div class="border-t border-slate-200 px-4 py-4 sm:px-5">{{ $notifications->links() }}</div>
-        @endif
+        <x-cleanflow.muat-lagi :items="$notifications" />
     </section>
 
     <form x-ref="bulkForm" method="POST" action="{{ route('notifications.bulk-action') }}" class="hidden">

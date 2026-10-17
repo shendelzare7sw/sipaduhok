@@ -76,7 +76,7 @@
                 $c = $colorMap[$stat['color']];
             @endphp
             <div class="relative min-w-0 overflow-hidden rounded-xl border border-slate-200 border-l-4 {{ $c['border'] }} bg-white p-3 shadow-sm sm:p-4">
-                <div class="truncate text-[10px] font-extrabold uppercase tracking-wide text-slate-500 sm:text-[11px]">{{ $stat['label'] }}</div>
+                <div class="break-words leading-tight text-[10px] font-extrabold uppercase tracking-normal sm:tracking-wide text-slate-500 sm:text-[11px]">{{ $stat['label'] }}</div>
                 <div class="mt-1 text-xl font-extrabold text-slate-800 sm:text-2xl">{{ $stat['value'] }}</div>
                 <div class="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-lg {{ $c['bg'] }} {{ $c['text'] }} sm:right-3 sm:top-3 sm:h-9 sm:w-9">
                     <i class="fa-solid {{ $stat['icon'] }} text-sm"></i>

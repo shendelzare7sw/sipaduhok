@@ -311,19 +311,6 @@
         </form>
     @endif
 
-    <section class="flex items-start gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-xs leading-5 text-sky-950 sm:p-5">
-        <i class="fa-solid fa-circle-info mt-0.5 text-lg text-sky-600" aria-hidden="true"></i>
-        <div>
-            <h2 class="text-sm font-extrabold">Informasi penilaian</h2>
-            <ul class="mt-1 list-disc space-y-1 pl-4">
-                <li>Isi nilai <strong>Tugas 1-5</strong>, <strong>Latihan 1-5</strong>, dan <strong>UH 1-5</strong> secara parsial. Rata-rata dihitung otomatis saat disimpan.</li>
-                <li>Kolom kosong <strong>tidak dihitung sebagai 0</strong> dalam rata-rata.</li>
-                <li>Nilai akhir: <strong>((Rata Tugas x 1) + (Rata Latihan x 1) + (Rata UH x 2) + (PTS x 3) + (PAS x 3)) / 10</strong>.</li>
-                <li>Klik <strong>Simpan semua</strong> untuk menyimpan semua perubahan sekaligus.</li>
-                <li>Siswa berlabel <strong>Diedit wali</strong>: wali kelas sudah mengubah nilainya. Simpanan Anda tersimpan sebagai versi guru dan tidak langsung mengubah nilai rapor; wali kelas meninjaunya lewat <strong>Sinkron dari Guru</strong>.</li>
-            </ul>
-        </div>
-    </section>
 
     <dialog id="importNilaiDialog" x-ref="importDialog" @click.self="$el.close()" @close="$refs.importForm.reset(); mengimpor = false" class="w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50">
         <form x-ref="importForm" action="{{ route('guru.lms.nilai.import-excel', $args) }}" method="POST" enctype="multipart/form-data" class="px-5 py-5"

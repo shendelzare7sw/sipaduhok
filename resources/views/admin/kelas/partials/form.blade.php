@@ -43,8 +43,7 @@
     }"
 >
     <header class="flex min-w-0 items-start gap-3">
-        <a href="{{ route($routePrefix . '.kelas.index') }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali ke daftar kelas"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
-        <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Data master kelas</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">{{ $editing ? 'Edit kelas ' . $kelas->nama_kelas : 'Buat kelas baru' }}</h2><p class="mt-1 text-sm text-slate-500">Lengkapi data dasar terlebih dahulu. Siswa ditempatkan setelah kelas tersimpan.</p></div>
+        <a href="{{ route($routePrefix . '.kelas.index') }}" class="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali ke daftar kelas</a>
     </header>
 
     @if($errors->any())

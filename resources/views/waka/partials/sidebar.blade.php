@@ -57,7 +57,7 @@
                     @if($hasChildren)
                         <button type="button" class="menu-link menu-toggle group flex min-h-11 w-full items-center gap-3 rounded-xl bg-transparent px-3 py-2.5 text-left text-sm font-semibold transition {{ $stateClasses }}" data-menu-toggle aria-controls="{{ $targetId }}" aria-expanded="{{ $isActive ? 'true' : 'false' }}">
                             <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
-                            <span class="min-w-0 flex-1 truncate">{{ $item['label'] }}</span>
+                            <span class="min-w-0 flex-1 truncate" data-marquee>{{ $item['label'] }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] transition-transform {{ $isActive ? 'rotate-180' : '' }}" data-menu-chevron aria-hidden="true"></i>
                         </button>
                         <ul id="{{ $targetId }}" class="menu-sub mt-1 space-y-1 pl-8 {{ $isActive ? '' : 'hidden' }}">
@@ -73,7 +73,7 @@
                     @else
                         <a href="{{ route($item['route']) }}" class="menu-link group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition {{ $stateClasses }}">
                             <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
-                            <span class="min-w-0 flex-1 truncate">{{ $item['label'] }}</span>
+                            <span class="min-w-0 flex-1 truncate" data-marquee>{{ $item['label'] }}</span>
                         </a>
                     @endif
                 </li>

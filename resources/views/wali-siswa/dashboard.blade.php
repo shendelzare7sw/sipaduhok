@@ -47,7 +47,7 @@
                 <div class="rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                     <div class="p-5 sm:p-6">
                         {{-- Child Header --}}
-                        <div class="mb-5 flex items-center gap-3">
+                        <div class="mb-5 flex flex-wrap items-center gap-3">
                             <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br {{ $avatarGradients[$gradientIndex] }} text-lg font-bold text-white">
                                 @if($child->user && $child->user->foto_profil)
                                     <img src="{{ asset('storage/' . $child->user->foto_profil) }}" alt="avatar" class="h-full w-full object-cover">
@@ -57,7 +57,7 @@
                                     {{ strtoupper(substr($child->nama_lengkap, 0, 1)) }}
                                 @endif
                             </div>
-                            <div class="min-w-0 flex-1">
+                            <div class="min-w-0 flex-1 basis-40">
                                 <div class="text-[1.05rem] font-bold leading-snug text-slate-800 break-words">{{ $child->nama_lengkap }}</div>
                                 <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
                                     <span><i class="fa-solid fa-school mr-1"></i>{{ $child->kelas->nama_kelas ?? '-' }}</span>

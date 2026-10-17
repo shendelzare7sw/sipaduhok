@@ -163,7 +163,7 @@ class TagihanController extends Controller
             ->orderByRaw('COALESCE(kelas.jenjang, 999) asc')  // NULL classes last
             ->orderBy('siswa.nama_lengkap', 'asc')
             ->orderBy('siswa.id', 'asc')  // For consistency across pagination
-            ->paginate(15)
+            ->tampil(15)
             ->appends($request->query());
 
         // Load relationships for view - with safety checks

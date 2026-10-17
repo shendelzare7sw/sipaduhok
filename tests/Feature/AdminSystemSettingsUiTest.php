@@ -40,7 +40,7 @@ class AdminSystemSettingsUiTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.recovery-tickets.index'))
             ->assertOk()
-            ->assertSee('Antrean pemulihan akun')
+            ->assertSee('Tiket Pemulihan Akun')->assertSee('Tampilkan panduan halaman ini')
             ->assertSee('Guru Pemulihan')
             ->assertSee('table-fixed', false)
             ->assertSee('data-confirm', false)
@@ -49,14 +49,14 @@ class AdminSystemSettingsUiTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.recovery-tickets.history'))
             ->assertOk()
-            ->assertSee('Riwayat pemulihan akun')
+            ->assertSee('Riwayat Pemulihan Akun')->assertSee('Tampilkan panduan halaman ini')
             ->assertSee('Guru Pemulihan')
             ->assertSee('x-data=', false)
             ->assertDontSee('<script src="https://cdn.jsdelivr.net/npm/sweetalert2', false);
 
         $this->actingAs($admin)->get(route('admin.ai-settings.index'))
             ->assertOk()
-            ->assertSee('Konfigurasi AI terpadu')
+            ->assertSee('Pengaturan AI Assistant')->assertSee('Tampilkan panduan halaman ini')
             ->assertSee('Simpan seluruh pengaturan')
             ->assertSee('x-data=', false)
             ->assertDontSee('resources/js/admin/ai-settings', false)
@@ -64,8 +64,8 @@ class AdminSystemSettingsUiTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.lms-settings.index'))
             ->assertOk()
-            ->assertSee('Jenjang pengguna LMS')
-            ->assertSee('Data tetap aman')
+            ->assertSee('Pengaturan LMS')->assertSee('Tampilkan panduan halaman ini')
+            ->assertSee('Data lama tidak dihapus')
             ->assertSee('name="jenjang[]"', false)
             ->assertDontSee('resources/css/admin/lms-settings', false)
             ->assertDontSee('form-switch', false);

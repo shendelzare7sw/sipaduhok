@@ -27,7 +27,7 @@
             @foreach($kelasLain as $gpk)
                 <label class="flex min-w-0 cursor-pointer items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 hover:border-indigo-300">
                     <input type="checkbox" name="kelas_tambahan[]" value="{{ $gpk->kelas_id }}" x-model="dipilih" class="h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="min-w-0 truncate">{{ $gpk->kelas->nama_kelas ?? 'Kelas #'.$gpk->kelas_id }}</span>
+                    <span class="min-w-0 truncate" data-marquee>{{ $gpk->kelas->nama_kelas ?? 'Kelas #'.$gpk->kelas_id }}</span>
                     @if(in_array((string) $gpk->kelas_id, $ids, true))
                         <span class="ml-auto shrink-0 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-800">Terkait</span>
                     @endif

@@ -31,7 +31,7 @@
             ['label' => 'Mendesak', 'value' => $urgentCount, 'icon' => 'fas fa-exclamation-circle', 'tone' => 'bg-red-50 text-red-700'],
         ] as $stat)
             <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
-                <div class="flex items-center justify-between gap-2"><div class="min-w-0"><p class="truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $stat['label'] }}</p><p class="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">{{ number_format($stat['value']) }}</p></div><span class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:flex {{ $stat['tone'] }}"><i class="{{ $stat['icon'] }}" aria-hidden="true"></i></span></div>
+                <div class="flex items-center justify-between gap-2"><div class="min-w-0"><p class="break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $stat['label'] }}</p><p class="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">{{ number_format($stat['value']) }}</p></div><span class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:flex {{ $stat['tone'] }}"><i class="{{ $stat['icon'] }}" aria-hidden="true"></i></span></div>
             </article>
         @endforeach
     </section>
@@ -48,7 +48,7 @@
                     $priority = strtolower($item->prioritas ?? 'biasa');
                     $status = strtolower($item->status ?? 'aktif');
                 @endphp
-                <article class="min-w-0 p-4">
+                <article id="m-{{ $loop->iteration }}" class="min-w-0 p-4">
                     <div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="break-words text-sm font-extrabold text-slate-900">{{ $item->judul }}</h3><p class="mt-1 text-xs leading-5 text-slate-500">{{ Str::limit($item->isi_pengumuman, 120) }}</p></div><span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold {{ $statusTones[$status] ?? $statusTones['arsip'] }}">{{ $item->status_badge['label'] ?? ucfirst($status) }}</span></div>
                     <div class="mt-3 flex flex-wrap gap-2 text-[10px] font-bold"><span class="rounded-full px-2.5 py-1 {{ $priorityTones[$priority] ?? $priorityTones['biasa'] }}">{{ $item->prioritas_badge['label'] ?? ucfirst($priority) }}</span><span class="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600"><i class="far fa-calendar mr-1" aria-hidden="true"></i>{{ $item->tanggal_pengumuman?->format('d M Y') ?? '-' }}</span><span class="rounded-full {{ $item->is_from_kalender ? 'bg-emerald-50 text-emerald-700' : 'bg-violet-50 text-violet-700' }} px-2.5 py-1">{{ $item->is_from_kalender ? 'Dari kalender' : 'Manual' }}</span></div>
                     @if($item->lampiran_surat)<a href="{{ asset('storage/' . $item->lampiran_surat) }}" target="_blank" class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-brand-700 no-underline hover:text-brand-800"><i class="fas fa-paperclip" aria-hidden="true"></i>Lihat lampiran PDF</a>@endif
@@ -70,7 +70,7 @@
                                 $priority = strtolower($item->prioritas ?? 'biasa');
                                 $status = strtolower($item->status ?? 'aktif');
                             @endphp
-                            <tr class="hover:bg-slate-50/80">
+                            <tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50/80">
                                 <td class="min-w-0 px-4 py-4"><p class="truncate font-bold text-slate-900" title="{{ $item->judul }}">{{ $item->judul }}</p><p class="mt-1 truncate text-xs text-slate-500" title="{{ $item->isi_pengumuman }}">{{ Str::limit($item->isi_pengumuman, 110) }}</p>@if($item->lampiran_surat)<a href="{{ asset('storage/' . $item->lampiran_surat) }}" target="_blank" class="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-brand-700 no-underline"><i class="fas fa-paperclip" aria-hidden="true"></i>Lampiran</a>@endif</td>
                                 <td class="whitespace-nowrap px-3 py-4 text-xs text-slate-600">{{ $item->tanggal_pengumuman?->format('d M Y') ?? '-' }}</td>
                                 <td class="px-3 py-4"><span class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-bold {{ $priorityTones[$priority] ?? $priorityTones['biasa'] }}">{{ $item->prioritas_badge['label'] ?? ucfirst($priority) }}</span></td>
@@ -84,7 +84,7 @@
             </div>
         @endif
 
-        @if(is_object($pengumuman) && method_exists($pengumuman, 'hasPages') && $pengumuman->hasPages())<footer class="border-t border-slate-200 px-4 py-3">{{ $pengumuman->withQueryString()->links() }}</footer>@endif
+        <x-cleanflow.muat-lagi :items="$pengumuman" />
     </section>
 </div>
 @endsection

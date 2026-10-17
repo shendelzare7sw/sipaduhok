@@ -35,7 +35,7 @@ class CabangController extends Controller
 
         $cabangs = $query->withCount(['siswa', 'kelas', 'users'])
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->tampil(10);
 
         // Statistics
         $stats = [
@@ -100,7 +100,7 @@ class CabangController extends Controller
             ->where('cabang_id', $cabang->id)
             ->where('status', 'aktif')
             ->orderBy('nama_lengkap')
-            ->paginate(10, ['*'], 'siswa_page');
+            ->tampil(10);
 
         // Get kelas in this cabang
         $kelas = Kelas::with(['tahunAjaran', 'waliKelas'])

@@ -9,7 +9,7 @@
                 {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
             @endif
         </span>
-        <span class="hidden max-w-32 truncate text-xs font-semibold text-slate-700 md:block">{{ auth()->user()->name }}</span>
+        <span class="hidden max-w-32 truncate text-xs font-semibold text-slate-700 md:block" data-marquee>{{ auth()->user()->name }}</span>
         <i class="fa-solid fa-chevron-down hidden text-[10px] text-slate-400 transition group-open:rotate-180 md:block"></i>
     </summary>
     <div class="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-soft">

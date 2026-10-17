@@ -44,7 +44,7 @@
 
         <div class="divide-y divide-slate-100 lg:hidden">
             @forelse($mataPelajaranList as $mapel)
-                <article class="min-w-0 p-4">
+                <article id="m-{{ $loop->iteration }}" class="min-w-0 p-4">
                     <div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="break-words text-sm font-extrabold text-slate-900">{{ $mapel->nama_mapel }}</h3><p class="mt-1 text-[11px] font-semibold text-slate-500">{{ $mapel->kode_mapel ?: 'Tanpa kode' }}</p></div><span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold {{ $jenjangTone[$mapel->jenjang] ?? 'bg-slate-100 text-slate-700' }}">{{ $mapel->jenjang }}</span></div>
                     <div class="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-xs"><div><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Filter agama</p><p class="mt-1 font-semibold text-slate-700">{{ $mapel->filter_agama ?: '-' }}</p></div><div><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Deskripsi</p><p class="mt-1 break-words text-slate-600">{{ $mapel->deskripsi ? Str::limit($mapel->deskripsi, 55) : '-' }}</p></div></div>
                     <div class="mt-3 grid grid-cols-3 gap-2"><a href="{{ route('admin.mata-pelajaran.show', $mapel) }}" class="inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-blue-50 text-xs font-bold text-blue-700 no-underline hover:bg-blue-100"><i class="fas fa-eye" aria-hidden="true"></i>Detail</a><a href="{{ route('admin.mata-pelajaran.edit', $mapel) }}" class="inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-amber-50 text-xs font-bold text-amber-700 no-underline hover:bg-amber-100"><i class="fas fa-edit" aria-hidden="true"></i>Edit</a><form action="{{ route('admin.mata-pelajaran.destroy', $mapel) }}" method="POST" data-confirm data-confirm-title="Hapus mata pelajaran?" data-confirm-message="{{ $mapel->nama_mapel }} akan dihapus permanen." data-confirm-text="Ya, hapus">@csrf @method('DELETE')<button type="submit" class="inline-flex min-h-9 w-full items-center justify-center gap-1 rounded-lg bg-red-50 text-xs font-bold text-red-700 hover:bg-red-100"><i class="fas fa-trash" aria-hidden="true"></i>Hapus</button></form></div>
@@ -79,7 +79,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                     @foreach($mataPelajaranList as $index => $mapel)
-                        <tr class="hover:bg-slate-50/80">
+                        <tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50/80">
                             <td class="px-3 py-4 text-center text-xs text-slate-500">{{ $mataPelajaranList->firstItem() + $index }}</td>
                             <td class="px-3 py-4">
                                 <span class="inline-flex min-w-16 whitespace-nowrap rounded-lg bg-slate-100 px-2 py-1 font-mono text-[11px] font-bold text-slate-600">{{ $mapel->kode_mapel ?: '-' }}</span>
@@ -114,7 +114,7 @@
             </div>
         @endif
 
-        @if($mataPelajaranList->hasPages())<footer class="flex flex-col gap-2 border-t border-slate-200 px-4 py-3 text-[11px] text-slate-500 sm:flex-row sm:items-center sm:justify-between"><span>Menampilkan {{ $mataPelajaranList->firstItem() ?? 0 }}-{{ $mataPelajaranList->lastItem() ?? 0 }} dari {{ $mataPelajaranList->total() }}</span>{{ $mataPelajaranList->withQueryString()->links() }}</footer>@endif
+        <x-cleanflow.muat-lagi :items="$mataPelajaranList" />
     </section>
 </div>
 @endsection

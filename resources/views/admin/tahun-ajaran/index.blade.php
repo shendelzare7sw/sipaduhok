@@ -14,7 +14,7 @@
             </span>
             <div class="min-w-0">
                 <p class="text-xl font-extrabold leading-none text-slate-900 sm:text-2xl">{{ $tahunAjarans->total() }}</p>
-                <p class="mt-1.5 truncate text-[10px] font-bold uppercase tracking-wide text-slate-500 sm:text-xs">Total Periode</p>
+                <p class="mt-1.5 break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500 sm:text-xs">Total Periode</p>
             </div>
         </article>
 
@@ -24,7 +24,7 @@
             </span>
             <div class="min-w-0">
                 <p class="text-xl font-extrabold leading-none text-slate-900 sm:text-2xl">{{ $tahunAjarans->where('is_active', 1)->count() }}</p>
-                <p class="mt-1.5 truncate text-[10px] font-bold uppercase tracking-wide text-slate-500 sm:text-xs">Periode Aktif</p>
+                <p class="mt-1.5 break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500 sm:text-xs">Periode Aktif</p>
             </div>
         </article>
 
@@ -86,7 +86,7 @@
             @if($loop->first)
                 <div class="divide-y divide-slate-100 md:hidden">
             @endif
-            <article class="p-4">
+            <article id="m-{{ $loop->iteration }}" class="p-4">
                 <div class="flex min-w-0 items-start justify-between gap-3">
                     <div class="min-w-0">
                         <h3 class="truncate text-sm font-extrabold text-slate-900">{{ $ta->nama_tahun_ajaran }}</h3>
@@ -149,7 +149,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach($tahunAjarans as $index => $ta)
-                            <tr class="hover:bg-slate-50/80">
+                            <tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50/80">
                                 <td class="px-5 py-4 text-center text-xs text-slate-500">{{ $tahunAjarans->firstItem() + $index }}</td>
                                 <td class="px-5 py-4 font-bold text-slate-900">{{ $ta->nama_tahun_ajaran }}</td>
                                 <td class="whitespace-nowrap px-5 py-4 text-xs text-slate-600">
@@ -185,11 +185,7 @@
             </div>
         @endif
 
-        @if($tahunAjarans->hasPages())
-            <footer class="border-t border-slate-200 px-4 py-3">
-                {{ $tahunAjarans->appends(request()->query())->links() }}
-            </footer>
-        @endif
+        <x-cleanflow.muat-lagi :items="$tahunAjarans" />
     </section>
 </div>
 @endsection

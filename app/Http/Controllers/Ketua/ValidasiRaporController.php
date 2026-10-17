@@ -78,7 +78,7 @@ class ValidasiRaporController extends Controller
 
         $siswaList = $query->orderBy('kelas_id')
                            ->orderBy('nama_lengkap')
-                           ->paginate(50)
+                           ->tampil(50)
                            ->appends($request->query());
 
         // Stats for cards
@@ -313,7 +313,7 @@ class ValidasiRaporController extends Controller
 
         $query = PengajuanRaporKetua::with(['siswa.kelas', 'pengaju'])
             ->whereHas('siswa', $scopeTa)
-            ->orderByRaw("FIELD(status, 'menunggu', 'disetujui', 'ditolak')")
+            ->orderByRaw("CASE status WHEN 'menunggu' THEN 1 WHEN 'disetujui' THEN 2 WHEN 'ditolak' THEN 3 ELSE 4 END")
             ->latest('tanggal_pengajuan');
 
         if ($request->filled('status')) {
@@ -323,7 +323,7 @@ class ValidasiRaporController extends Controller
             $query->where('tipe', $request->tipe);
         }
 
-        $dispensasiList = $query->paginate(25);
+        $dispensasiList = $query->tampil(25);
 
         $stats = [
             'menunggu' => PengajuanRaporKetua::whereHas('siswa', $scopeTa)->where('status', 'menunggu')->count(),

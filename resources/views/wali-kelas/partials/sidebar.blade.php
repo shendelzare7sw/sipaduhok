@@ -64,8 +64,8 @@
                 <i class="fas fa-school" aria-hidden="true"></i>
                 Kelas aktif
             </div>
-            <p class="mt-2 truncate text-base font-extrabold text-white">{{ $selectedKelas->nama_kelas }}</p>
-            <p class="mt-0.5 truncate text-xs text-blue-100/80">{{ $selectedKelas->cabang->nama_cabang ?? 'Cabang belum diatur' }} · {{ strtoupper($selectedKelas->jenjang) }}</p>
+            <p class="mt-2 truncate text-base font-extrabold text-white" data-marquee>{{ $selectedKelas->nama_kelas }}</p>
+            <p class="mt-0.5 truncate text-xs text-blue-100/80" data-marquee>{{ $selectedKelas->cabang->nama_cabang ?? 'Cabang belum diatur' }} · {{ strtoupper($selectedKelas->jenjang) }}</p>
             <a href="{{ route('wali.pilih-kelas') }}" class="mt-3 inline-flex min-h-9 w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 text-xs font-bold text-white transition hover:bg-white/20">
                 <i class="fas fa-right-left" aria-hidden="true"></i>
                 Ganti kelas
@@ -95,7 +95,7 @@
                     @if($hasChildren)
                         <button type="button" class="menu-link menu-toggle group flex min-h-11 w-full items-center gap-3 rounded-xl bg-transparent px-3 py-2.5 text-left text-sm font-semibold transition {{ $stateClasses }}" data-menu-toggle aria-controls="{{ $targetId }}" aria-expanded="{{ $isActive ? 'true' : 'false' }}">
                             <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
-                            <span class="min-w-0 flex-1 truncate">{{ $item['label'] }}</span>
+                            <span class="min-w-0 flex-1 truncate" data-marquee>{{ $item['label'] }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] transition-transform {{ $isActive ? 'rotate-180' : '' }}" data-menu-chevron aria-hidden="true"></i>
                         </button>
                         <ul id="{{ $targetId }}" class="menu-sub mt-1 space-y-1 pl-8 {{ $isActive ? '' : 'hidden' }}">
@@ -111,7 +111,7 @@
                     @else
                         <a href="{{ route($item['route']) }}" class="menu-link group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition {{ $stateClasses }}" @if($isActive) aria-current="page" @endif>
                             <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
-                            <span class="min-w-0 flex-1 truncate">{{ $item['label'] }}</span>
+                            <span class="min-w-0 flex-1 truncate" data-marquee>{{ $item['label'] }}</span>
                         </a>
                     @endif
                 </li>

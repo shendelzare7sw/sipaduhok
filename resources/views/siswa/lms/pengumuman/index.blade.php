@@ -74,7 +74,7 @@
             <ul class="divide-y divide-slate-100 border-t border-slate-100">
                 @foreach($pengumumanList as $item)
                     @php $info = $prioritasInfo[$item->prioritas] ?? $prioritasInfo['biasa']; @endphp
-                    <li>
+                    <li id="m-{{ $loop->iteration }}">
                         <a href="{{ route('siswa.lms.pengumuman.show', $item->id) }}" class="group relative flex gap-3 px-4 py-4 no-underline transition hover:bg-indigo-50/50 sm:px-5">
                             <span class="mt-1 h-10 w-1 shrink-0 rounded-full {{ $info['bar'] }}" aria-hidden="true"></span>
                             <span class="min-w-0 flex-1">
@@ -97,9 +97,7 @@
                 @endforeach
             </ul>
 
-            @if($pengumumanList->hasPages())
-                <div class="border-t border-slate-100 px-4 py-3 sm:px-5">{{ $pengumumanList->links() }}</div>
-            @endif
+            <x-cleanflow.muat-lagi :items="$pengumumanList" tema="lms" />
         @else
             <div class="border-t border-slate-100 px-4 py-12 text-center">
                 <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-2xl text-indigo-500"><i class="fa-regular fa-envelope-open" aria-hidden="true"></i></span>

@@ -33,6 +33,13 @@ class AppServiceProvider extends ServiceProvider
         // Use Indonesian wording for relative dates such as "1 jam yang lalu".
         Carbon::setLocale('id');
 
+        // Daftar "Tampilkan N lagi" pengganti pagination bernomor: ->tampil(15) atau ->tampil(10, 'tampil_siswa').
+        foreach ([\Illuminate\Database\Eloquent\Builder::class, \Illuminate\Database\Query\Builder::class] as $builder) {
+            $builder::macro('tampil', function (int $langkah = \App\Support\Tampil::LANGKAH, string $param = 'tampil') {
+                return \App\Support\Tampil::ambil($this, $langkah, $param);
+            });
+        }
+
         // View Composer for Guru Sidebar
         \Illuminate\Support\Facades\View::composer(
             'guru.partials.sidebar',

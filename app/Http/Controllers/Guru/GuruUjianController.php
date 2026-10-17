@@ -48,7 +48,7 @@ class GuruUjianController extends Controller
 
         $ujianList = $query->orderBy('tanggal_mulai', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->tampil(10);
 
         return view('guru.lms.ujian.index', [
             'kelas' => $kelas,

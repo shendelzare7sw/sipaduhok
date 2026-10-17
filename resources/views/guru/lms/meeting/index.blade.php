@@ -37,7 +37,7 @@
     </header>
 
     @forelse($meetings as $meeting)
-        <article class="min-w-0 rounded-2xl border bg-white p-4 shadow-sm sm:p-5 {{ $meeting->is_active ? 'border-indigo-200' : 'border-slate-200 bg-slate-50' }}">
+        <article id="m-{{ $loop->iteration }}" class="min-w-0 rounded-2xl border bg-white p-4 shadow-sm sm:p-5 {{ $meeting->is_active ? 'border-indigo-200' : 'border-slate-200 bg-slate-50' }}">
             <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2">
@@ -71,7 +71,7 @@
         </section>
     @endforelse
 
-    <div>{{ $meetings->links() }}</div>
+    <x-cleanflow.muat-lagi :items="$meetings" tema="lms" lepas />
 
     <dialog x-ref="hapusDialog" @click.self="$el.close()" class="w-[calc(100%-2rem)] max-w-md rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50">
         <form method="POST" :action="hapusUrl" data-confirmed="true" class="px-5 py-5">

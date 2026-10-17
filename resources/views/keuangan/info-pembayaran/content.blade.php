@@ -66,10 +66,10 @@
         ] as [$label, $value, $description, $icon, $tone])
             <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
                 <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0"><p class="text-xl font-extrabold text-slate-950">{{ $value }}</p><p class="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $label }}</p></div>
+                    <div class="min-w-0"><p class="text-xl font-extrabold text-slate-950">{{ $value }}</p><p class="mt-1 break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $label }}</p></div>
                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span>
                 </div>
-                <p class="mt-3 truncate border-t border-slate-100 pt-3 text-[11px] text-slate-500" title="{{ $description }}">{{ $description }}</p>
+                <p class="mt-3 break-words border-t border-slate-100 leading-snug pt-3 text-[11px] text-slate-500" title="{{ $description }}">{{ $description }}</p>
             </article>
         @endforeach
     </section>

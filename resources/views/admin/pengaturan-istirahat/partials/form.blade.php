@@ -10,7 +10,7 @@
 @endphp
 
 <div class="min-w-0 w-full space-y-4">
-    <header class="flex min-w-0 items-center gap-3"><a href="{{ $backUrl }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali"><i class="fas fa-arrow-left" aria-hidden="true"></i></a><div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Pengaturan jadwal</p><h2 class="truncate text-xl font-extrabold text-slate-950 sm:text-2xl">{{ $editing ? 'Edit waktu istirahat' : 'Tambah waktu istirahat' }}</h2><p class="mt-0.5 text-sm text-slate-500">Atur waktu dan hari yang otomatis diblokir saat menyusun jadwal.</p></div></header>
+    <header class="flex min-w-0 items-center gap-3"><a href="{{ $backUrl }}" class="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali</a></header>
 
     @if($errors->any())<div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><p class="font-extrabold">Data belum dapat disimpan.</p><ul class="mt-2 list-disc space-y-1 pl-5 text-xs">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 

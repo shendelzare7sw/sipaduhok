@@ -78,11 +78,11 @@
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <p class="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">{{ $stat['value'] }}</p>
-                        <p class="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-slate-500 sm:text-xs">{{ $stat['label'] }}</p>
+                        <p class="mt-1 break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500 sm:text-xs">{{ $stat['label'] }}</p>
                     </div>
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm sm:h-10 sm:w-10 {{ $stat['tone'] }}"><i class="fa-solid {{ $stat['icon'] }}"></i></span>
                 </div>
-                <p class="mt-3 truncate border-t border-slate-100 pt-3 text-[10px] text-slate-500 sm:text-xs">{{ $stat['meta'] }}</p>
+                <p class="mt-3 break-words border-t leading-snug border-slate-100 pt-3 text-[10px] text-slate-500 sm:text-xs">{{ $stat['meta'] }}</p>
             </article>
         @endforeach
     </section>

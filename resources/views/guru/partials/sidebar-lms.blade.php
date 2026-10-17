@@ -6,7 +6,7 @@
 
 <div class="mb-3 overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-4 text-white shadow-lg shadow-indigo-600/25">
     <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-indigo-100">Anda mengajar</p>
-    <p class="mt-1 truncate text-base font-extrabold !text-white" title="{{ $mapel->nama_mapel ?? '-' }}">{{ $mapel->nama_mapel ?? 'N/A' }}</p>
+    <p class="mt-1 truncate text-base font-extrabold !text-white" data-marquee title="{{ $mapel->nama_mapel ?? '-' }}">{{ $mapel->nama_mapel ?? 'N/A' }}</p>
     <p class="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold text-white"><i class="fa-solid fa-chalkboard" aria-hidden="true"></i>Kelas {{ $kelas->nama_kelas ?? 'N/A' }}</p>
 </div>
 

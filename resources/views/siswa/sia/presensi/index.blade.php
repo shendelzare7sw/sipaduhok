@@ -31,7 +31,6 @@
     <header class="flex flex-col gap-1 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-5">
         <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-700">Kehadiran saya</p>
         <h1 class="text-lg font-extrabold text-slate-900">Riwayat presensi {{ now()->locale('id')->translatedFormat('F Y') }}</h1>
-        <p class="text-xs text-slate-500">Data presensi diperbarui oleh wali kelas setelah pembelajaran. Pengajuan izin dilakukan melalui Wali Siswa.</p>
     </header>
 
     <section class="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4" aria-label="Rekap presensi bulan ini">

@@ -29,7 +29,7 @@
                     $validationTone = match($validation) { 'pending' => 'bg-amber-50 text-amber-800', 'disetujui' => 'bg-emerald-50 text-emerald-800', 'ditolak' => 'bg-rose-50 text-rose-800', default => 'bg-slate-100 text-slate-700' };
                     $statusTone = match($item->status) { 'hadir' => 'bg-emerald-50 text-emerald-800', 'sakit' => 'bg-amber-50 text-amber-800', 'izin' => 'bg-sky-50 text-sky-800', 'alpha' => 'bg-rose-50 text-rose-800', default => 'bg-slate-100 text-slate-700' };
                 @endphp
-                <article class="grid min-w-0 gap-2 px-4 py-3 lg:grid-cols-[120px_minmax(170px,1.2fr)_90px_minmax(120px,1fr)_95px_50px] lg:items-center lg:gap-0">
+                <article id="m-{{ $loop->iteration }}" class="grid min-w-0 gap-2 px-4 py-3 lg:grid-cols-[120px_minmax(170px,1.2fr)_90px_minmax(120px,1fr)_95px_50px] lg:items-center lg:gap-0">
                     <p class="text-xs font-semibold text-slate-700">{{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('d M Y') }}</p>
                     <div class="min-w-0"><p class="truncate text-sm font-bold text-slate-900" title="{{ $item->siswa->nama_lengkap ?? '-' }}">{{ $item->siswa->nama_lengkap ?? '-' }}</p><p class="text-[11px] text-slate-500">NIS: {{ $item->siswa->nis ?? '-' }}</p></div>
                     <span class="w-fit rounded-full px-2 py-1 text-[11px] font-bold {{ $statusTone }}">{{ ucfirst($item->status) }}</span>
@@ -41,7 +41,7 @@
                 <p class="px-4 py-9 text-center text-sm text-slate-500">Tidak ada riwayat presensi yang cocok.</p>
             @endforelse
         </div>
-        @if($riwayat->hasPages())<div class="border-t border-slate-100 px-4 py-3">{{ $riwayat->links() }}</div>@endif
+        <x-cleanflow.muat-lagi :items="$riwayat" />
     </section>
 
     <dialog x-ref="editDialog" class="w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50" @click.self="$el.close()">

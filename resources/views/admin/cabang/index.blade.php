@@ -45,7 +45,7 @@
 
         <div class="divide-y divide-slate-100 md:hidden">
             @forelse($cabangs as $cabang)
-                <article class="min-w-0 p-4">
+                <article id="m-{{ $loop->iteration }}" class="min-w-0 p-4">
                     <div class="flex min-w-0 items-start justify-between gap-3">
                         <div class="min-w-0">
                             <h3 class="truncate text-sm font-extrabold text-slate-900">{{ $cabang->nama_cabang }}</h3>
@@ -83,7 +83,7 @@
                     <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500"><tr><th class="px-5 py-3 text-center">No</th><th class="px-5 py-3">Cabang</th><th class="px-5 py-3">Kontak & Alamat</th><th class="px-5 py-3">Statistik</th><th class="px-5 py-3 text-center">Status</th><th class="px-5 py-3 text-right">Aksi</th></tr></thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach($cabangs as $index => $cabang)
-                            <tr class="hover:bg-slate-50/80">
+                            <tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50/80">
                                 <td class="px-5 py-4 text-center text-xs text-slate-500">{{ $cabangs->firstItem() + $index }}</td>
                                 <td class="px-5 py-4"><p class="font-bold text-slate-900">{{ $cabang->nama_cabang }}</p><span class="mt-1 inline-flex rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">{{ $cabang->kode_cabang }}</span></td>
                                 <td class="max-w-xs px-5 py-4 text-xs leading-5 text-slate-600"><p><i class="fas fa-phone-alt mr-1 text-slate-400" aria-hidden="true"></i>{{ $cabang->telepon ?: '-' }}</p><p class="truncate" title="{{ $cabang->alamat }}"><i class="fas fa-map-marker-alt mr-1 text-slate-400" aria-hidden="true"></i>{{ $cabang->alamat ?: '-' }}</p></td>
@@ -97,9 +97,7 @@
             </div>
         @endif
 
-        @if($cabangs->hasPages())
-            <footer class="flex flex-col gap-2 border-t border-slate-200 px-4 py-3 text-[11px] text-slate-500 sm:flex-row sm:items-center sm:justify-between"><span>Menampilkan {{ $cabangs->firstItem() ?? 0 }}–{{ $cabangs->lastItem() ?? 0 }} dari {{ $cabangs->total() }}</span>{{ $cabangs->appends(request()->query())->links() }}</footer>
-        @endif
+        <x-cleanflow.muat-lagi :items="$cabangs" />
     </section>
 </div>
 @endsection

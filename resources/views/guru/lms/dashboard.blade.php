@@ -70,8 +70,8 @@
                 <a href="{{ $action['route'] }}" class="group flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 no-underline shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md">
                     <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl {{ $action['tone'] }}"><i class="fa-solid {{ $action['icon'] }}" aria-hidden="true"></i></span>
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate text-sm font-extrabold text-slate-900 group-hover:text-indigo-700">{{ $action['title'] }}</span>
-                        <span class="block truncate text-xs text-slate-500">{{ $action['desc'] }}</span>
+                        <span class="block leading-snug text-sm font-extrabold text-slate-900 group-hover:text-indigo-700">{{ $action['title'] }}</span>
+                        <span class="block leading-snug text-xs text-slate-500">{{ $action['desc'] }}</span>
                     </span>
                     <i class="fa-solid fa-chevron-right text-xs text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-indigo-500" aria-hidden="true"></i>
                 </a>

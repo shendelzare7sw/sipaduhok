@@ -287,7 +287,7 @@ class WaliKelasCoreUiTest extends TestCase
         $otherRaporNilai = RaporNilai::create(['rapor_id' => $otherRapor->id, 'mata_pelajaran_id' => $mapel->id, 'nilai_id' => $nilai->id, 'nilai_angka' => 0, 'nilai_huruf' => 'E']);
         $raporList = $this->get(route('wali.rapor.index', ['semester' => 'ganjil', 'jenis_rapor' => 'akhir_semester', 'siswa_id' => $student->id]));
         $raporList->assertOk()->assertSee('Aksi')->assertSee('Kirim ke Ketua')->assertSee('Pratinjau');
-        $this->assertStringContainsString('absolute right-0 top-full z-30', $raporList->getContent());
+        $this->assertStringContainsString('absolute right-0 top-full z-20', $raporList->getContent());
         $this->assertStringContainsString('group-open:rotate-180', $raporList->getContent());
         $this->assertStringContainsString('d="m4 6 4 4 4-4"', $raporList->getContent());
         $this->assertStringNotContainsString('⌄</span>', $raporList->getContent());

@@ -36,18 +36,18 @@
         @foreach([
             ['Total Catatan', $totalCatatan, 'Semua riwayat', 'fa-paper-plane', 'bg-blue-50 text-blue-600'],
             ['Publik', $totalSemua, 'Ke semua pengguna', 'fa-bullhorn', 'bg-emerald-50 text-emerald-600'],
-            ['Total Dibaca', $totalPembaca, 'Akumulasi halaman ini', 'fa-eye', 'bg-amber-50 text-amber-600'],
+            ['Total Dibaca', $totalPembaca, 'Akumulasi yang tampil', 'fa-eye', 'bg-amber-50 text-amber-600'],
             ['Mendesak', $totalMendesak, 'Perlu perhatian', 'fa-triangle-exclamation', 'bg-violet-50 text-violet-600'],
         ] as [$label, $value, $help, $icon, $tone])
             <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <p class="text-xl font-extrabold leading-none text-slate-900 sm:text-2xl">{{ number_format($value) }}</p>
-                        <p class="mt-2 truncate text-[10px] font-bold uppercase tracking-wide text-slate-500 sm:text-xs">{{ $label }}</p>
+                        <p class="mt-2 break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500 sm:text-xs">{{ $label }}</p>
                     </div>
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span>
                 </div>
-                <p class="mt-3 truncate text-[10px] text-slate-400 sm:text-xs">{{ $help }}</p>
+                <p class="mt-3 break-words text-[10px] leading-snug text-slate-400 sm:text-xs">{{ $help }}</p>
             </article>
         @endforeach
     </section>
@@ -68,7 +68,7 @@
                         $priority = $item->prioritas ?: 'biasa';
                         $isSentByCurrentUser = (int) $item->pengirim_id === (int) auth()->id();
                     @endphp
-                    <article class="my-3 min-w-0 rounded-2xl border border-l-4 border-slate-200 bg-white p-4 shadow-sm {{ $priorityBorder[$priority] ?? $priorityBorder['biasa'] }} sm:p-5">
+                    <article id="m-{{ $loop->iteration }}" class="my-3 min-w-0 rounded-2xl border border-l-4 border-slate-200 bg-white p-4 shadow-sm {{ $priorityBorder[$priority] ?? $priorityBorder['biasa'] }} sm:p-5">
                         <div class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div class="min-w-0">
                                 <h3 class="break-words text-sm font-extrabold leading-6 text-slate-900 sm:text-base">{{ $item->judul }}</h3>
@@ -116,9 +116,7 @@
                 @endforeach
             </div>
 
-            @if(is_object($catatan) && method_exists($catatan, 'hasPages') && $catatan->hasPages())
-                <footer class="border-t border-slate-200 px-4 py-3">{{ $catatan->links() }}</footer>
-            @endif
+            <x-cleanflow.muat-lagi :items="$catatan" />
         @else
             <div class="px-5 py-14 text-center">
                 <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-xl text-brand-600"><i class="fas fa-inbox" aria-hidden="true"></i></span>

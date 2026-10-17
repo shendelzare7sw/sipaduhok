@@ -185,13 +185,5 @@
             </div>
         </section>
     </div>
-
-    <section class="rounded-2xl border border-slate-200 border-l-4 border-l-sky-500 bg-white p-4 shadow-sm">
-        <h2 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fa-solid fa-circle-info text-sky-500" aria-hidden="true"></i>Informasi penting</h2>
-        <ul class="mt-2 list-disc space-y-1 pl-5 text-xs leading-5 text-slate-500">
-            <li>Klik nama mata pelajaran untuk melihat materi dan mengumpulkan tugas.</li>
-            <li>Jadwal ini merupakan jadwal rutin mingguan Anda.</li>
-        </ul>
-    </section>
 </div>
 @endsection

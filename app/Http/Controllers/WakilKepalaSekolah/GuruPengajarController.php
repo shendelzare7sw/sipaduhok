@@ -74,7 +74,7 @@ class GuruPengajarController extends Controller
                 ->when($tahunAjaranId, fn ($k2) => $k2->where('tahun_ajaran_id', $tahunAjaranId)));
         });
 
-        $guruList = $query->orderBy('nama_lengkap')->paginate(15);
+        $guruList = $query->orderBy('nama_lengkap')->tampil(15);
 
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $currentTahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;

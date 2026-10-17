@@ -31,7 +31,7 @@
                     <tbody class="divide-y divide-slate-100">
                         @foreach($tugasList as $tugas)
                             @php $lewat = $tugas->isOverdue(); @endphp
-                            <tr class="hover:bg-slate-50">
+                            <tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50">
                                 <td class="px-5 py-3">
                                     <p class="truncate font-extrabold text-slate-900" title="{{ $tugas->judul_tugas }}">{{ $tugas->judul_tugas }}</p>
                                     <p class="mt-0.5 truncate text-xs text-slate-500">{{ Str::limit($tugas->deskripsi, 80) }}</p>
@@ -58,7 +58,7 @@
             <div class="divide-y divide-slate-100 lg:hidden">
                 @foreach($tugasList as $tugas)
                     @php $lewat = $tugas->isOverdue(); @endphp
-                    <article class="space-y-3 p-4">
+                    <article id="m-{{ $loop->iteration }}" class="space-y-3 p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <h3 class="break-words text-sm font-extrabold text-slate-900">{{ $tugas->judul_tugas }}</h3>
@@ -81,7 +81,7 @@
             </div>
         </section>
 
-        <div>{{ $tugasList->links() }}</div>
+        <x-cleanflow.muat-lagi :items="$tugasList" tema="lms" lepas />
     @else
         <section class="rounded-2xl border border-slate-200 bg-white px-5 py-14 text-center shadow-sm">
             <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400"><i class="fa-solid fa-inbox" aria-hidden="true"></i></span>

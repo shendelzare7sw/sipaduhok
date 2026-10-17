@@ -19,8 +19,8 @@
             ['Gagal / dibatalkan', $stats['ditolak'], 'Transaksi tidak dilanjutkan', 'fa-circle-xmark', 'bg-red-50 text-red-600'],
         ] as [$label, $value, $description, $icon, $tone])
             <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4 {{ $loop->last ? 'col-span-2 lg:col-span-1' : '' }}">
-                <div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="text-xl font-extrabold text-slate-950 sm:text-2xl">{{ number_format($value) }}</p><p class="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $label }}</p></div><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div>
-                <p class="mt-3 truncate border-t border-slate-100 pt-3 text-[11px] text-slate-500">{{ $description }}</p>
+                <div class="flex flex-col-reverse items-start gap-2 sm:flex-row sm:justify-between sm:gap-2"><div class="min-w-0"><p class="text-xl font-extrabold text-slate-950 sm:text-2xl">{{ number_format($value) }}</p><p class="mt-1 break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $label }}</p></div><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div>
+                <p class="mt-3 break-words border-t border-slate-100 leading-snug pt-3 text-[11px] text-slate-500">{{ $description }}</p>
             </article>
         @endforeach
     </section>
@@ -48,7 +48,7 @@
         @else
             <div class="divide-y divide-slate-100 lg:hidden">
                 @foreach($pembayaranList as $pembayaran)
-                    <article class="p-4">
+                    <article id="m-{{ $loop->iteration }}" class="p-4">
                         <div class="flex min-w-0 items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><i class="fas fa-receipt" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><h3 class="break-words text-sm font-extrabold text-slate-900">{{ $pembayaran->siswa->nama_lengkap ?? '-' }}</h3><p class="mt-0.5 truncate font-mono text-[10px] font-bold text-brand-700">{{ $pembayaran->kode_pembayaran }}</p></div><x-payment-status-badge :payment="$pembayaran" class="shrink-0 text-[9px]" /></div>
                         <dl class="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 text-xs"><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Tagihan</dt><dd class="mt-1 break-words font-bold text-slate-700">{{ ucwords(str_replace('_', ' ', $pembayaran->tagihan->jenis_tagihan ?? '-')) }}</dd></div><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Kelas</dt><dd class="mt-1 whitespace-nowrap font-bold text-slate-700">{{ $pembayaran->siswa->kelas->nama_kelas ?? '-' }}</dd></div><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Jumlah</dt><dd class="mt-1 whitespace-nowrap font-extrabold text-slate-900">Rp {{ number_format($pembayaran->jumlah_bayar, 0, ',', '.') }}</dd></div><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Tanggal</dt><dd class="mt-1 whitespace-nowrap font-bold text-slate-700">{{ $pembayaran->tanggal_bayar?->format('d/m/Y') ?? '-' }}</dd></div></dl>
                         <div class="mt-3 flex items-center justify-between gap-3"><x-payment-method-badge :payment="$pembayaran" />@if($pembayaran->order_id && $pembayaran->group_transactions_count > 1)<span class="text-[10px] font-bold text-violet-700" title="Transaksi gabungan"><i class="fas fa-layer-group mr-1" aria-hidden="true"></i>{{ $pembayaran->group_transactions_count }} tagihan</span>@endif<a href="{{ route($pembayaranRoute.'.show', $pembayaran->id) }}" class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-xs font-bold text-white no-underline hover:bg-brand-700"><i class="fas fa-eye" aria-hidden="true"></i>Detail</a></div>
@@ -59,7 +59,7 @@
             <div class="hidden overflow-x-auto lg:block"><table class="w-full min-w-[1080px] table-fixed text-left text-xs">
                 <colgroup><col class="w-12"><col class="w-40"><col><col class="w-[17%]"><col class="w-36"><col class="w-44"><col class="w-28"><col class="w-40"><col class="w-20"></colgroup>
                 <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-3 py-3 text-center">No</th><th class="px-3 py-3">Kode</th><th class="px-3 py-3">Siswa</th><th class="px-3 py-3">Tagihan</th><th class="px-3 py-3 text-right">Jumlah</th><th class="px-3 py-3">Metode</th><th class="px-3 py-3">Tanggal</th><th class="px-3 py-3">Status</th><th class="px-4 py-3 text-right">Aksi</th></tr></thead>
-                <tbody class="divide-y divide-slate-100">@foreach($pembayaranList as $index => $pembayaran)<tr class="hover:bg-slate-50/70">
+                <tbody class="divide-y divide-slate-100">@foreach($pembayaranList as $index => $pembayaran)<tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50/70">
                     <td class="px-3 py-4 text-center tabular-nums text-slate-400">{{ $pembayaranList->firstItem() + $index }}</td>
                     <td class="px-3 py-4"><code class="block truncate font-mono text-[11px] font-bold text-brand-700" title="{{ $pembayaran->kode_pembayaran }}">{{ $pembayaran->kode_pembayaran }}</code>@if($pembayaran->order_id && $pembayaran->group_transactions_count > 1)<span class="mt-1 inline-flex whitespace-nowrap rounded-full bg-violet-50 px-2 py-1 text-[9px] font-bold text-violet-700" title="Bagian dari transaksi gabungan"><i class="fas fa-layer-group mr-1" aria-hidden="true"></i>{{ $pembayaran->group_transactions_count }} tagihan</span>@endif</td>
                     <td class="min-w-0 px-3 py-4"><p class="truncate text-sm font-bold text-slate-900" title="{{ $pembayaran->siswa->nama_lengkap ?? '-' }}">{{ $pembayaran->siswa->nama_lengkap ?? '-' }}</p><p class="mt-0.5 truncate text-[10px] font-bold uppercase tracking-wide text-slate-400">{{ $pembayaran->siswa->kelas->nama_kelas ?? '-' }}</p></td>
@@ -72,7 +72,7 @@
                 </tr>@endforeach</tbody>
             </table></div>
 
-            <footer class="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-5"><span>Menampilkan {{ $pembayaranList->firstItem() ?? 0 }}–{{ $pembayaranList->lastItem() ?? 0 }} dari {{ number_format($pembayaranList->total()) }} transaksi</span><div>{{ $pembayaranList->withQueryString()->links() }}</div></footer>
+            <x-cleanflow.muat-lagi :items="$pembayaranList" />
         @endif
     </section>
 </div>

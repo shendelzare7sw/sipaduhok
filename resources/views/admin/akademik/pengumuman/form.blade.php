@@ -19,7 +19,7 @@
         <section class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-800"><p class="font-extrabold"><i class="fas fa-exclamation-circle mr-1.5" aria-hidden="true"></i>Periksa kembali data berikut:</p><ul class="mt-2 list-disc space-y-1 pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></section>
     @endif
 
-    <form action="{{ $isEdit ? route($routeBase . '.pengumuman.update', $pengumuman->id) : route($routeBase . '.pengumuman.store') }}" method="POST" enctype="multipart/form-data" class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <form action="{{ $isEdit ? route($routeBase . '.pengumuman.update', $pengumuman->id) : route($routeBase . '.pengumuman.store') }}" method="POST" enctype="multipart/form-data" class="grid min-w-0 gap-5">
         @csrf
         @if($isEdit) @method('PUT') @endif
         <input type="hidden" name="_return_url" value="{{ url()->previous(route($routeBase . '.pengumuman.index')) }}">
@@ -44,7 +44,6 @@
             <footer class="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50/70 p-4 sm:flex-row sm:justify-end"><a href="{{ url()->previous(route($routeBase . '.pengumuman.index')) }}" class="inline-flex h-11 items-center justify-center rounded-xl bg-white px-5 text-xs font-bold text-slate-700 no-underline ring-1 ring-inset ring-slate-200 hover:bg-slate-100">Batal</a><button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-xs font-bold text-white hover:bg-brand-700"><i class="fas fa-save" aria-hidden="true"></i>{{ $isEdit ? 'Simpan perubahan' : 'Terbitkan pengumuman' }}</button></footer>
         </section>
 
-        <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 xl:sticky xl:top-24"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-lightbulb text-amber-500" aria-hidden="true"></i>Panduan singkat</h3><div class="mt-4 space-y-4 text-xs leading-5 text-slate-600"><div><p class="font-bold text-slate-800">Hubungan kalender</p><p>Perubahan dari kalender dapat memperbarui pengumuman terkait. Perubahan pengumuman tidak mengubah kalender.</p></div><div class="border-t border-slate-100 pt-4"><p class="font-bold text-slate-800">Pilih prioritas</p><ul class="mt-2 space-y-2"><li><span class="mr-1.5 rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">Biasa</span>informasi umum</li><li><span class="mr-1.5 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">Penting</span>perlu perhatian</li><li><span class="mr-1.5 rounded-full bg-red-50 px-2 py-1 text-[10px] font-bold text-red-700">Mendesak</span>harus segera dibaca</li></ul></div><div class="rounded-xl bg-brand-50 p-3 text-brand-800"><i class="fas fa-info-circle mr-1" aria-hidden="true"></i>Pengumuman aktif akan mengirim notifikasi saat pertama kali dibuat.</div></div></aside>
     </form>
 </div>
 @endsection

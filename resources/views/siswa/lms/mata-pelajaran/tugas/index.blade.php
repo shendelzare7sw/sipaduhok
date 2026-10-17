@@ -84,7 +84,7 @@
                 [$statusLabel, $statusTone] = $statusInfo[$status] ?? [ucwords(str_replace('_', ' ', $status)), 'bg-slate-100 text-slate-600'];
                 $detailUrl = route('siswa.lms.mapel.tugas.show', [$tugas->mata_pelajaran_id, $tugas->id]);
             @endphp
-            <article class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+            <article id="m-{{ $loop->iteration }}" class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-1.5">
                         <span class="text-xs font-bold text-indigo-700"><i class="fa-solid fa-book mr-1" aria-hidden="true"></i>{{ $tugas->mataPelajaran->nama_mapel }}</span>
@@ -130,9 +130,7 @@
             </div>
         @endforelse
 
-        @if($tugasList->hasPages())
-            <div>{{ $tugasList->links() }}</div>
-        @endif
+        <x-cleanflow.muat-lagi :items="$tugasList" tema="lms" lepas />
     </section>
 
     <section class="rounded-2xl border border-slate-200 border-l-4 border-l-sky-500 bg-white p-4 shadow-sm">

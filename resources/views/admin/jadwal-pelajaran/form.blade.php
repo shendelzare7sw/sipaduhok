@@ -32,7 +32,7 @@
 }">
     <header class="flex min-w-0 items-start gap-3">
         <a href="{{ route($routePrefix . '.jadwal-pelajaran.index', $editing ? ['tahun_ajaran_id' => $jadwalPelajaran->tahun_ajaran_id] : request()->query()) }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
-        <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Langkah 6 · Persiapan data</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">{{ $editing ? 'Edit jadwal ' . $jadwalPelajaran->mataPelajaran->nama_mapel : 'Susun jadwal baru' }}</h2><p class="mt-1 text-sm text-slate-500">Pilih kelas terlebih dahulu; pilihan mapel dan guru akan menyesuaikan otomatis.</p></div>
+        <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Langkah 6 · Persiapan data</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">{{ $editing ? 'Edit jadwal ' . $jadwalPelajaran->mataPelajaran->nama_mapel : 'Susun jadwal baru' }}</h2></div>
     </header>
 
     @if($errors->any())

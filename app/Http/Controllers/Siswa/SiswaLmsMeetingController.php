@@ -31,7 +31,7 @@ class SiswaLmsMeetingController extends Controller
             ->where('mata_pelajaran_id', $mapelId)
             ->where('is_active', true)
             ->orderBy('waktu_mulai', 'asc')
-            ->paginate(10);
+            ->tampil(10);
 
         return view('siswa.lms.meeting.index', [
             'kelas' => $kelas,

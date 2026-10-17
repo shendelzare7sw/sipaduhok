@@ -18,7 +18,7 @@
 
     @if($errors->any())<section class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-800"><p class="font-extrabold"><i class="fas fa-exclamation-circle mr-1.5" aria-hidden="true"></i>Periksa kembali data berikut:</p><ul class="mt-2 list-disc space-y-1 pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></section>@endif
 
-    <form action="{{ $isEdit ? route($routeBase . '.berita.update', $berita->id) : route($routeBase . '.berita.store') }}" method="POST" enctype="multipart/form-data" class="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]" x-data="{ preview: @js($currentImage) }">
+    <form action="{{ $isEdit ? route($routeBase . '.berita.update', $berita->id) : route($routeBase . '.berita.store') }}" method="POST" enctype="multipart/form-data" class="grid min-w-0 gap-5" x-data="{ preview: @js($currentImage) }">
         @csrf
         @if($isEdit) @method('PUT') @endif
         <input type="hidden" name="_return_url" value="{{ url()->previous(route($routeBase . '.berita.index')) }}">
@@ -41,7 +41,6 @@
             <footer class="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50/70 p-4 sm:flex-row sm:justify-end"><a href="{{ url()->previous(route($routeBase . '.berita.index')) }}" class="inline-flex h-11 items-center justify-center rounded-xl bg-white px-5 text-xs font-bold text-slate-700 no-underline ring-1 ring-inset ring-slate-200 hover:bg-slate-100">Batal</a><button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-xs font-bold text-white hover:bg-brand-700"><i class="fas fa-save" aria-hidden="true"></i>{{ $isEdit ? 'Simpan perubahan' : 'Simpan berita' }}</button></footer>
         </section>
 
-        <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 xl:sticky xl:top-24"><h3 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fas fa-lightbulb text-amber-500" aria-hidden="true"></i>Sebelum menerbitkan</h3><ol class="mt-4 space-y-4 text-xs leading-5 text-slate-600"><li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[10px] font-extrabold text-brand-700">1</span><span>Pastikan judul dan ringkasan mudah dipahami tanpa membuka tautan.</span></li><li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[10px] font-extrabold text-brand-700">2</span><span>Gunakan gambar mendatar agar kartu tidak terpotong pada ponsel.</span></li><li class="flex gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[10px] font-extrabold text-brand-700">3</span><span>Uji URL sumber dan pilih Draft jika konten belum siap tayang.</span></li></ol><div class="mt-5 rounded-xl bg-emerald-50 p-3 text-xs leading-5 text-emerald-800"><i class="fas fa-circle-check mr-1" aria-hidden="true"></i>Berita aktif dan unggulan dapat memicu notifikasi bagi pengguna.</div></aside>
     </form>
 </div>
 @endsection

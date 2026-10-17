@@ -15,12 +15,7 @@
 @endphp
 
 <div class="mb-4 flex min-w-0 items-center gap-3">
-    <a href="{{ $backUrl }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline transition hover:border-brand-300 hover:text-brand-700" aria-label="Kembali"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
-    <div class="min-w-0">
-        <p class="text-xs font-bold uppercase tracking-wider text-brand-600">Publikasi internal</p>
-        <h2 class="truncate text-xl font-extrabold text-slate-950 sm:text-2xl">Kirim catatan baru</h2>
-        <p class="mt-0.5 text-sm text-slate-500">Tulis pesan, tentukan penerima, lalu pilih tingkat prioritas.</p>
-    </div>
+    <a href="{{ $backUrl }}" class="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-600 no-underline transition hover:border-brand-300 hover:text-brand-700"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali</a>
 </div>
 
 @if($errors->any())

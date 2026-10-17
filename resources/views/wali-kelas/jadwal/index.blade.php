@@ -15,7 +15,6 @@
             <div class="min-w-0">
                 <p class="text-xs font-bold uppercase tracking-[0.16em] text-sky-700">Akademik · {{ strtoupper($kelas->jenjang) }}</p>
                 <h1 class="mt-1 text-xl font-extrabold text-slate-900 sm:text-2xl">Jadwal Kelas {{ $kelas->nama_kelas }}</h1>
-                <p class="mt-1 text-sm leading-6 text-slate-500">Jadwal dikelola oleh Admin. Wali kelas dapat melihat dan mencetaknya.</p>
             </div>
             <a href="{{ route('wali.jadwal.print') }}" target="_blank" rel="noopener" class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-sky-700 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-sky-800"><i class="fas fa-print" aria-hidden="true"></i>Cetak jadwal</a>
         </header>

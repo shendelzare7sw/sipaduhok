@@ -467,7 +467,7 @@ class PresensiController extends Controller
             $query->where('status', $request->status);
         }
 
-        $riwayat = $query->orderBy('tanggal', 'desc')->paginate(20)->withQueryString();
+        $riwayat = $query->orderBy('tanggal', 'desc')->tampil(20)->withQueryString();
 
         return view('wali-kelas.presensi.riwayat', [
             'kelas' => $kelas,

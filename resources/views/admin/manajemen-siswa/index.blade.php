@@ -26,12 +26,7 @@
 @endphp
 
 <div class="min-w-0 w-full space-y-4">
-    <header class="flex flex-wrap items-start justify-between gap-3">
-        <div>
-            <p class="text-xs font-bold uppercase tracking-wide text-brand-600">Penempatan siswa</p>
-            <h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Cari siswa, lalu tentukan kelas</h2>
-            <p class="mt-1 text-sm text-slate-500">Gunakan filter periode untuk melihat riwayat penempatan tanpa mengubah data saat ini.</p>
-        </div>
+    <header class="flex flex-wrap items-start justify-end gap-3">
         <a href="{{ route($routePrefix.'.manajemen-siswa.print', request()->query()) }}" target="_blank" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-slate-800 px-4 text-xs font-bold text-white no-underline hover:bg-slate-700">
             <i class="fas fa-print" aria-hidden="true"></i>Cetak daftar
         </a>
@@ -45,9 +40,9 @@
             ['value' => $stats['siswaLaki'], 'label' => 'Laki-laki', 'icon' => 'fas fa-mars', 'tone' => 'bg-cyan-50 text-cyan-700'],
             ['value' => $stats['siswaPerempuan'], 'label' => 'Perempuan', 'icon' => 'fas fa-venus', 'tone' => 'bg-fuchsia-50 text-fuchsia-700'],
         ] as $stat)
-            <article class="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+            <article class="flex min-w-0 flex-col items-start gap-2.5 rounded-2xl sm:flex-row sm:items-center sm:gap-3 border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $stat['tone'] }}"><i class="{{ $stat['icon'] }}" aria-hidden="true"></i></span>
-                <div class="min-w-0"><strong class="block text-xl font-extrabold text-slate-950">{{ $stat['value'] }}</strong><span class="block truncate text-[11px] font-bold uppercase tracking-wide text-slate-500">{{ $stat['label'] }}</span></div>
+                <div class="min-w-0"><strong class="block text-xl font-extrabold text-slate-950">{{ $stat['value'] }}</strong><span class="block break-words leading-tight text-[10px] sm:text-[11px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $stat['label'] }}</span></div>
             </article>
         @endforeach
     </section>
@@ -100,7 +95,7 @@
         <div class="divide-y divide-slate-100 lg:hidden">
             @forelse($siswaList as $siswa)
                 @php $snapshot = $isHistorical ? $siswa->statusNaikKelas->first() : null; @endphp
-                <article class="p-4">
+                <article id="m-{{ $loop->iteration }}" class="p-4">
                     <div class="flex items-start gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl {{ $siswa->jenis_kelamin === 'P' ? 'bg-fuchsia-50 text-fuchsia-700' : 'bg-blue-50 text-blue-700' }} text-sm font-extrabold">{{ strtoupper(substr($siswa->nama_lengkap,0,1)) }}</span><div class="min-w-0 flex-1"><h4 class="truncate text-sm font-extrabold text-slate-950">{{ $siswa->nama_lengkap }}</h4><p class="truncate text-xs text-slate-500">NISN {{ $siswa->nisn ?: '-' }} &middot; {{ $siswa->cabang->nama_cabang ?? 'Tanpa cabang' }}</p></div><span class="rounded-full px-2 py-1 text-[10px] font-bold {{ $statusStyles[$siswa->status] ?? 'bg-slate-100 text-slate-600' }}">{{ ucfirst($siswa->status) }}</span></div>
                     <div class="mt-3 flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2"><div class="min-w-0"><span class="block text-[10px] font-bold uppercase tracking-wide text-slate-400">Kelas</span><strong class="block truncate text-sm text-slate-800">{{ $snapshot?->kelas_asal ?? $siswa->kelas?->nama_kelas ?? 'Belum ditempatkan' }}</strong>@if($snapshot?->kelas_tujuan)<small class="block truncate text-slate-500">Tujuan: {{ $snapshot->kelas_tujuan }}</small>@endif</div><div class="flex shrink-0 gap-2"><x-cleanflow.table-action :href="route($routePrefix.'.manajemen-siswa.show',$siswa)" tone="view" icon="fas fa-eye" label="Lihat siswa" /><x-cleanflow.table-action :href="route($routePrefix.'.manajemen-siswa.print-kartu',$siswa)" tone="success" icon="fas fa-id-card" label="Cetak kartu" target="_blank" /></div></div>
                 </article>
@@ -119,7 +114,7 @@
                             $snapshot = $isHistorical ? $siswa->statusNaikKelas->first() : null;
                             [$snapshotStyle, $snapshotLabel] = $snapshot ? ($kelulusan[$snapshot->status_kelulusan] ?? ['bg-slate-100 text-slate-600', str_replace('_',' ',$snapshot->status_kelulusan)]) : [null, null];
                         @endphp
-                        <tr class="hover:bg-slate-50/70"><td class="px-5 py-3"><div class="flex min-w-0 items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $siswa->jenis_kelamin === 'P' ? 'bg-fuchsia-50 text-fuchsia-700' : 'bg-blue-50 text-blue-700' }} text-xs font-extrabold">{{ strtoupper(substr($siswa->nama_lengkap,0,1)) }}</span><div class="min-w-0"><strong class="block truncate text-slate-950" title="{{ $siswa->nama_lengkap }}">{{ $siswa->nama_lengkap }}</strong><span class="block truncate text-xs text-slate-500">NISN {{ $siswa->nisn ?: '-' }}{{ $siswa->nis ? ' · NIS '.$siswa->nis : '' }}</span></div></div></td><td class="whitespace-nowrap px-3 py-3 text-xs text-slate-600">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td><td class="px-3 py-3"><span class="block truncate text-xs text-slate-600" title="{{ $siswa->cabang->nama_cabang ?? '-' }}">{{ $siswa->cabang->nama_cabang ?? '-' }}</span></td><td class="px-3 py-3"><span class="block truncate whitespace-nowrap text-xs font-bold text-slate-800">{{ $snapshot?->kelas_asal ?? $siswa->kelas?->nama_kelas ?? 'Belum ada kelas' }}</span>@if($snapshot?->kelas_tujuan)<small class="block truncate text-slate-400">Tujuan {{ $snapshot->kelas_tujuan }}</small>@endif</td><td class="px-3 py-3">@if($snapshot)<span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold {{ $snapshotStyle }}">{{ $snapshotLabel }}</span>@else<span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold {{ $statusStyles[$siswa->status] ?? 'bg-slate-100 text-slate-600' }}">{{ ucfirst($siswa->status) }}</span>@endif</td><td class="px-5 py-3"><div class="flex justify-end gap-2"><x-cleanflow.table-action :href="route($routePrefix.'.manajemen-siswa.show',$siswa)" tone="view" icon="fas fa-eye" label="Lihat siswa" /><x-cleanflow.table-action :href="route($routePrefix.'.manajemen-siswa.print-kartu',$siswa)" tone="success" icon="fas fa-id-card" label="Cetak kartu" target="_blank" /></div></td></tr>
+                        <tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50/70"><td class="px-5 py-3"><div class="flex min-w-0 items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $siswa->jenis_kelamin === 'P' ? 'bg-fuchsia-50 text-fuchsia-700' : 'bg-blue-50 text-blue-700' }} text-xs font-extrabold">{{ strtoupper(substr($siswa->nama_lengkap,0,1)) }}</span><div class="min-w-0"><strong class="block truncate text-slate-950" title="{{ $siswa->nama_lengkap }}">{{ $siswa->nama_lengkap }}</strong><span class="block truncate text-xs text-slate-500">NISN {{ $siswa->nisn ?: '-' }}{{ $siswa->nis ? ' · NIS '.$siswa->nis : '' }}</span></div></div></td><td class="whitespace-nowrap px-3 py-3 text-xs text-slate-600">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td><td class="px-3 py-3"><span class="block truncate text-xs text-slate-600" title="{{ $siswa->cabang->nama_cabang ?? '-' }}">{{ $siswa->cabang->nama_cabang ?? '-' }}</span></td><td class="px-3 py-3"><span class="block truncate whitespace-nowrap text-xs font-bold text-slate-800">{{ $snapshot?->kelas_asal ?? $siswa->kelas?->nama_kelas ?? 'Belum ada kelas' }}</span>@if($snapshot?->kelas_tujuan)<small class="block truncate text-slate-400">Tujuan {{ $snapshot->kelas_tujuan }}</small>@endif</td><td class="px-3 py-3">@if($snapshot)<span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold {{ $snapshotStyle }}">{{ $snapshotLabel }}</span>@else<span class="inline-flex whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold {{ $statusStyles[$siswa->status] ?? 'bg-slate-100 text-slate-600' }}">{{ ucfirst($siswa->status) }}</span>@endif</td><td class="px-5 py-3"><div class="flex justify-end gap-2"><x-cleanflow.table-action :href="route($routePrefix.'.manajemen-siswa.show',$siswa)" tone="view" icon="fas fa-eye" label="Lihat siswa" /><x-cleanflow.table-action :href="route($routePrefix.'.manajemen-siswa.print-kartu',$siswa)" tone="success" icon="fas fa-id-card" label="Cetak kartu" target="_blank" /></div></td></tr>
                     @empty
                         <tr><td colspan="6" class="p-10 text-center text-sm text-slate-500">Tidak ada siswa yang sesuai dengan filter.</td></tr>
                     @endforelse
@@ -127,9 +122,7 @@
             </table>
         </div>
 
-        @if($siswaList->hasPages())
-            <footer class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 text-xs text-slate-500 sm:px-5"><span>Menampilkan {{ $siswaList->firstItem() }}-{{ $siswaList->lastItem() }} dari {{ $siswaList->total() }}</span><div>{{ $siswaList->links() }}</div></footer>
-        @endif
+        <x-cleanflow.muat-lagi :items="$siswaList" />
     </section>
 </div>
 @endsection

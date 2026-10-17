@@ -43,8 +43,8 @@
                     <a href="{{ route($item['route']) }}" class="menu-link {{ $baseClasses }} {{ $stateClasses }}">
                         <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
                         <span class="min-w-0 flex-1">
-                            <span class="block truncate">{{ $item['label'] }}</span>
-                            <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}">{{ $item['description'] }}</span>
+                            <span class="block truncate" data-marquee>{{ $item['label'] }}</span>
+                            <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}" data-marquee>{{ $item['description'] }}</span>
                         </span>
                     </a>
                 </li>
@@ -80,8 +80,8 @@
                     <button type="button" class="menu-link menu-toggle bg-transparent {{ $baseClasses }} {{ $stateClasses }}" data-menu-toggle aria-controls="{{ $targetId }}" aria-expanded="{{ $isChildActive ? 'true' : 'false' }}">
                         <i class="fa-solid fa-user-graduate w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
                         <span class="min-w-0 flex-1">
-                            <span class="block truncate">{{ Str::limit($child->nama_lengkap, 20) }}</span>
-                            <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isChildActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}">{{ $child->kelas->nama_kelas ?? '-' }} · {{ $child->cabang->nama_cabang ?? '-' }}</span>
+                            <span class="block truncate" data-marquee>{{ $child->nama_lengkap }}</span>
+                            <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isChildActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}" data-marquee>{{ $child->kelas->nama_kelas ?? '-' }} · {{ $child->cabang->nama_cabang ?? '-' }}</span>
                         </span>
                         <i class="fa-solid fa-chevron-down text-[10px] transition-transform {{ $isChildActive ? 'rotate-180' : '' }}" data-menu-chevron aria-hidden="true"></i>
                     </button>
@@ -122,7 +122,7 @@
                 <span class="flex min-h-11 w-full items-center gap-3 rounded-xl !border-0 !ring-0 !bg-white/[0.05] px-3 py-2.5 text-sm text-blue-100/60 cursor-default">
                     <i class="fa-solid fa-circle-info w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate">Belum Ada Data Anak</span>
+                        <span class="block truncate" data-marquee>Belum Ada Data Anak</span>
                     </span>
                 </span>
             </li>

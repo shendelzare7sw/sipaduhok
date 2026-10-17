@@ -31,7 +31,7 @@
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             @foreach($forums as $forum)
                 @php $dariGuru = $forum->isFromTeacher(); @endphp
-                <article class="min-w-0 border-b border-slate-100 p-4 last:border-b-0 sm:p-5 {{ $forum->is_pinned ? 'bg-amber-50/40' : '' }}">
+                <article id="m-{{ $loop->iteration }}" class="min-w-0 border-b border-slate-100 p-4 last:border-b-0 sm:p-5 {{ $forum->is_pinned ? 'bg-amber-50/40' : '' }}">
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div class="flex flex-wrap items-center gap-1.5">
                             @if($forum->is_pinned)<span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-800"><i class="fa-solid fa-thumbtack mr-1" aria-hidden="true"></i>Disematkan</span>@endif
@@ -65,7 +65,7 @@
                 </article>
             @endforeach
         </section>
-        <div>{{ $forums->links() }}</div>
+        <x-cleanflow.muat-lagi :items="$forums" tema="lms" lepas />
     @else
         <section class="rounded-2xl border border-slate-200 bg-white px-5 py-14 text-center shadow-sm">
             <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500"><i class="fa-solid fa-comments" aria-hidden="true"></i></span>

@@ -1280,7 +1280,7 @@ class RaporController extends Controller
         $kelas = $this->getSelectedKelas($tenagaPendidik);
 
         $query = RequestDownloadRapor::with(['rapor.siswa', 'user', 'siswa.kelas'])
-            ->orderByRaw("FIELD(status, 'menunggu', 'disetujui', 'ditolak')")
+            ->orderByRaw("CASE status WHEN 'menunggu' THEN 1 WHEN 'disetujui' THEN 2 WHEN 'ditolak' THEN 3 ELSE 4 END")
             ->latest('tanggal_request');
 
         if ($kelas) {
@@ -1291,7 +1291,7 @@ class RaporController extends Controller
             $query->whereHas('siswa', fn ($q) => $q->whereIn('kelas_id', $kelasIds));
         }
 
-        $requests = $query->paginate(25);
+        $requests = $query->tampil(25);
 
         return view('wali-kelas.rapor.request-download', compact('requests', 'kelas'));
     }

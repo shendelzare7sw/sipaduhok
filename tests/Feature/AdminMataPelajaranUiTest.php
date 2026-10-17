@@ -51,7 +51,7 @@ class AdminMataPelajaranUiTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.mata-pelajaran.edit', $mapel))
             ->assertOk()
-            ->assertSee('Edit mata pelajaran')
+            ->assertSee('Edit Mata Pelajaran')->assertSee('Mengisi Mata Pelajaran')
             ->assertSee('Matematika Pengujian');
 
         $this->actingAs($admin)->get(route('admin.mata-pelajaran.show', $mapel))

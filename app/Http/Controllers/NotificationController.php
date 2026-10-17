@@ -47,7 +47,7 @@ class NotificationController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $notifications = $query->orderBy('created_at', 'desc')->paginate(25)->withQueryString();
+        $notifications = $query->orderBy('created_at', 'desc')->tampil(25)->withQueryString();
         $unreadCount = Notification::where('user_id', Auth::id())->whereNull('read_at')->count();
 
         return view('notifications.index', compact('notifications', 'unreadCount'));
@@ -220,7 +220,7 @@ class NotificationController extends Controller
         $notifications = Notification::where('user_id', Auth::id())
             ->where('tipe', $tipe)
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->tampil(20);
 
         return view('notifications.index', compact('notifications', 'tipe'));
     }

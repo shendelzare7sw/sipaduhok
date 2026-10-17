@@ -32,7 +32,7 @@
             ['label' => 'Guru', 'value' => $stats['totalGuru'], 'icon' => 'fa-chalkboard-user', 'tone' => 'bg-violet-50 text-violet-600'],
             ['label' => 'Akses siswa', 'value' => $mataPelajaran->filter_agama ?: 'Semua', 'icon' => 'fa-user-shield', 'tone' => 'bg-amber-50 text-amber-600'],
         ] as $item)
-            <article class="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $item['label'] }}</p><p class="mt-2 truncate text-lg font-extrabold text-slate-900" title="{{ $item['value'] }}">{{ $item['value'] }}</p></div><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $item['tone'] }}"><i class="fas {{ $item['icon'] }}" aria-hidden="true"></i></span></div></article>
+            <article class="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><div class="flex flex-col-reverse items-start gap-2 sm:flex-row sm:justify-between sm:gap-2"><div class="min-w-0"><p class="break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $item['label'] }}</p><p class="mt-2 break-words leading-tight text-lg font-extrabold text-slate-900" title="{{ $item['value'] }}">{{ $item['value'] }}</p></div><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $item['tone'] }}"><i class="fas {{ $item['icon'] }}" aria-hidden="true"></i></span></div></article>
         @endforeach
     </section>
 

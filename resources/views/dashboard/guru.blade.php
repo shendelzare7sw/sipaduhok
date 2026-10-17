@@ -46,7 +46,7 @@
                     </div>
                     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $stat['tone'] }}"><i class="fa-solid {{ $stat['icon'] }}" aria-hidden="true"></i></span>
                 </div>
-                <p class="mt-3 truncate border-t border-slate-100 pt-3 text-[11px] font-semibold text-slate-500">{{ $stat['note'] }}</p>
+                <p class="mt-3 break-words border-t leading-snug border-slate-100 pt-3 text-[11px] font-semibold text-slate-500">{{ $stat['note'] }}</p>
             </article>
         @endforeach
     </section>

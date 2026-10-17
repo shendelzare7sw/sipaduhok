@@ -161,7 +161,7 @@
             @if($isAdminContext)
                 <div class="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-4 py-3 xl:hidden">
                     <input type="checkbox" :checked="allSelected" @change="toggleAll" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
-                    <button type="button" @click="toggleAll" class="text-xs font-bold text-slate-700">Pilih semua siswa di halaman ini</button>
+                    <button type="button" @click="toggleAll" class="text-xs font-bold text-slate-700">Pilih semua siswa yang tampil</button>
                 </div>
             @endif
 
@@ -171,7 +171,7 @@
                         $isPaid = $siswa->sisa_tagihan <= 0 && $siswa->total_tagihan > 0;
                         $isEmpty = $siswa->total_tagihan == 0;
                     @endphp
-                    <article class="p-4" :class="selected.includes('{{ $siswa->id }}') && 'bg-blue-50/60'">
+                    <article id="m-{{ $loop->iteration }}" class="p-4" :class="selected.includes('{{ $siswa->id }}') && 'bg-blue-50/60'">
                         <div class="flex items-start gap-3">
                             @if($isAdminContext)
                                 <input type="checkbox" value="{{ $siswa->id }}" x-model="selected" class="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
@@ -209,7 +209,7 @@
                                 $isPaid = $siswa->sisa_tagihan <= 0 && $siswa->total_tagihan > 0;
                                 $isEmpty = $siswa->total_tagihan == 0;
                             @endphp
-                            <tr class="hover:bg-slate-50" :class="selected.includes('{{ $siswa->id }}') && 'bg-blue-50/70'">
+                            <tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50" :class="selected.includes('{{ $siswa->id }}') && 'bg-blue-50/70'">
                                 @if($isAdminContext)<td class="px-3 py-4 text-center"><input type="checkbox" value="{{ $siswa->id }}" x-model="selected" class="h-4 w-4 rounded border-slate-300 text-brand-600"></td>@endif
                                 <td class="px-2 py-4 text-xs tabular-nums text-slate-400">{{ $students->firstItem() + $index }}</td>
                                 <td class="px-3 py-4"><strong class="block truncate text-slate-950" title="{{ $siswa->nama_lengkap }}">{{ $siswa->nama_lengkap }}</strong><span class="block text-xs text-slate-500">{{ ($siswa->status ?? '') === 'lulus' ? 'Alumni' : 'Siswa aktif' }}</span></td>
@@ -227,7 +227,7 @@
                 </table>
             </div>
 
-            <footer class="border-t border-slate-200 bg-slate-50 px-4 py-3 sm:px-5">{{ $students->withQueryString()->links() }}</footer>
+            <x-cleanflow.muat-lagi :items="$students" class="bg-slate-50" />
         @endif
     </section>
 

@@ -52,7 +52,7 @@ class KetuaController extends Controller
             });
         }
 
-        $tenagaPendidik = $queryTP->paginate(10, ['*'], 'tp_page');
+        $tenagaPendidik = $queryTP->tampil(10, 'tampil_tp');
 
         // Query Siswa
         $querySiswa = Siswa::with(['user', 'kelas']);
@@ -66,7 +66,7 @@ class KetuaController extends Controller
             $querySiswa->where('status', $request->status_siswa);
         }
 
-        $siswa = $querySiswa->paginate(10, ['*'], 'siswa_page');
+        $siswa = $querySiswa->tampil(10, 'tampil_siswa');
 
         // Stats (Calculated once)
         $stats = [
@@ -117,7 +117,7 @@ class KetuaController extends Controller
             });
         }
 
-        $waliKelas = $query->paginate(15);
+        $waliKelas = $query->tampil(15);
 
         // Map data
         $waliKelas->getCollection()->transform(function ($tp) use ($request) {
@@ -185,7 +185,7 @@ class KetuaController extends Controller
             });
         }
 
-        $guruPengajar = $query->paginate(15);
+        $guruPengajar = $query->tampil(15);
 
         $guruPengajar->getCollection()->transform(function ($tp) use ($request, $taFilterId) {
             $visibleAssignments = $tp->guruKelas;
@@ -265,7 +265,7 @@ class KetuaController extends Controller
         }
 
         // Get Pagination
-        $siswa = $query->paginate(20);
+        $siswa = $query->tampil(20);
 
         // Map data for display (only for current page)
         $siswa->getCollection()->transform(function ($s) {
@@ -630,7 +630,7 @@ class KetuaController extends Controller
 
     public function catatanIndex()
     {
-        $catatan = Catatan::with('pengirim')->where('pengirim_id', auth()->id())->latest()->paginate(15);
+        $catatan = Catatan::with('pengirim')->where('pengirim_id', auth()->id())->latest()->tampil(15);
 
         return view('admin.catatan.index', compact('catatan'));
     }

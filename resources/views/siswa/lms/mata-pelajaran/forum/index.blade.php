@@ -32,7 +32,7 @@
         @if($diskusi->count() > 0)
             <ul class="divide-y divide-slate-100">
                 @foreach($diskusi as $item)
-                    <li>
+                    <li id="m-{{ $loop->iteration }}">
                         <a href="{{ route('siswa.lms.mapel.forum.show', [$mataPelajaran->id, $item->id]) }}" class="group flex gap-3 px-4 py-4 no-underline transition hover:bg-indigo-50/50 sm:px-5">
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 text-sm font-extrabold text-white">{{ strtoupper(substr($item->user->name ?? 'U', 0, 1)) }}</span>
                             <span class="min-w-0 flex-1">
@@ -67,8 +67,6 @@
         @endif
     </section>
 
-    @if($diskusi->hasPages())
-        <div>{{ $diskusi->links() }}</div>
-    @endif
+    <x-cleanflow.muat-lagi :items="$diskusi" tema="lms" lepas />
 </div>
 @endsection

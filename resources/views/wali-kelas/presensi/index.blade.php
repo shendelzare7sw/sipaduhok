@@ -19,7 +19,7 @@
 
     @if($kelas)
         <header class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
-            <div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-700">Kehadiran siswa</p><h1 class="mt-1 text-lg font-extrabold text-slate-900">Presensi Kelas {{ $kelas->nama_kelas }}</h1><p class="mt-0.5 text-xs text-slate-500">Pilih tanggal, catat kehadiran, lalu simpan seluruh kelas.</p></div>
+            <div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-700">Kehadiran siswa</p><h1 class="mt-1 text-lg font-extrabold text-slate-900">Presensi Kelas {{ $kelas->nama_kelas }}</h1></div>
             <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 <a href="{{ route('wali.presensi.validasi-izin') }}" class="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-amber-50 px-3 text-xs font-bold text-amber-800 hover:bg-amber-100"><i class="fas fa-check-circle" aria-hidden="true"></i>Validasi izin</a>
                 <button type="button" @click="$refs.importDialog.showModal()" class="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-emerald-50 px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-100"><i class="fas fa-file-excel" aria-hidden="true"></i>Impor Excel</button>

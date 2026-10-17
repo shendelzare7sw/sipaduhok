@@ -37,7 +37,7 @@ class MataPelajaranController extends Controller
         }
         $mataPelajaranList = $query->orderBy('jenjang')
             ->orderBy('nama_mapel')
-            ->paginate(20);
+            ->tampil(20);
 
         // Statistics
         $stats = [

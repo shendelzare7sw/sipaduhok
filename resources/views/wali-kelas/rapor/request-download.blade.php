@@ -15,7 +15,7 @@
                     $label = match($req->status) { 'menunggu' => 'Menunggu', 'disetujui' => ($req->isExpired() ? 'Disetujui · kedaluwarsa' : 'Disetujui · aktif'), default => 'Ditolak' };
                     $tone = match($req->status) { 'menunggu' => 'bg-amber-50 text-amber-900', 'disetujui' => 'bg-emerald-50 text-emerald-800', default => 'bg-rose-50 text-rose-800' };
                 @endphp
-                <article class="grid gap-3 px-4 py-3 text-xs md:grid-cols-[minmax(130px,1fr)_minmax(160px,1.2fr)_minmax(140px,1fr)_minmax(150px,1.2fr)_auto] md:items-center">
+                <article id="m-{{ $loop->iteration }}" class="grid gap-3 px-4 py-3 text-xs md:grid-cols-[minmax(130px,1fr)_minmax(160px,1.2fr)_minmax(140px,1fr)_minmax(150px,1.2fr)_auto] md:items-center">
                     <div><span class="block text-[11px] font-semibold text-slate-500 md:hidden">Wali siswa</span><p class="font-bold text-slate-900">{{ $req->user->name ?? '—' }}</p></div>
                     <div><span class="block text-[11px] font-semibold text-slate-500 md:hidden">Siswa</span><p class="font-bold text-slate-900">{{ $req->siswa->nama_lengkap ?? '—' }}</p><p class="text-[11px] text-slate-500">{{ $req->siswa->kelas->nama_kelas ?? '—' }}</p></div>
                     <div><span class="block text-[11px] font-semibold text-slate-500 md:hidden">Rapor</span><p class="text-slate-800">{{ $req->rapor ? ucwords(str_replace('_', ' ', $req->rapor->jenis_rapor)) : '—' }} · {{ ucfirst($req->rapor->semester ?? '—') }}</p><p class="text-[11px] text-slate-500">{{ $req->tanggal_request?->format('d/m/Y H:i') ?? '—' }}</p></div>
@@ -30,7 +30,7 @@
                 <p class="px-4 py-9 text-center text-sm text-slate-500">Belum ada permintaan download rapor.</p>
             @endforelse
         </div>
-        @if($requests->hasPages())<div class="border-t border-slate-100 px-4 py-3">{{ $requests->links() }}</div>@endif
+        <x-cleanflow.muat-lagi :items="$requests" />
     </section>
     <dialog x-ref="actionDialog" class="w-[calc(100%-2rem)] max-w-md rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50" @click.self="$el.close()"><div class="border-b border-slate-100 px-4 py-3"><h2 class="text-sm font-extrabold text-slate-900" x-text="actionLabel + ' permintaan download?'"></h2></div><p class="px-4 py-4 text-xs leading-5 text-slate-700"><span x-text="requester"></span> akan <span x-text="approve ? 'mendapat tautan download aktif selama 24 jam' : 'menerima penolakan permintaan download'"></span>.</p><form :action="actionUrl" method="POST" class="flex justify-end gap-2 border-t border-slate-100 p-4">
         @csrf

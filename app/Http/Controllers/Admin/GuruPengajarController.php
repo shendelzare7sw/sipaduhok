@@ -56,7 +56,7 @@ class GuruPengajarController extends Controller
             });
         }
 
-        $guruList = $query->orderBy('nama_lengkap')->paginate(15);
+        $guruList = $query->orderBy('nama_lengkap')->tampil(15);
 
         // Data untuk filter
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();

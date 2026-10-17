@@ -68,7 +68,7 @@
                 @foreach($komponen as $item)
                     @php $skor = $nilai->{$item['key']}; @endphp
                     <div class="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3 text-center {{ $loop->last && $loop->count % 2 === 1 ? 'col-span-2 lg:col-span-1' : '' }}">
-                        <p class="truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $item['label'] }} ({{ $item['bobot'] }})</p>
+                        <p class="break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $item['label'] }} ({{ $item['bobot'] }})</p>
                         <p class="mt-1 text-xl font-extrabold tabular-nums {{ is_null($skor) ? 'text-slate-400' : $item['tone'] }}">{{ is_null($skor) ? '-' : number_format($skor, 1) }}</p>
                     </div>
                 @endforeach
@@ -92,15 +92,5 @@
             <p class="mt-1 text-sm text-slate-500">Silakan hubungi wali kelas jika mata pelajaran belum muncul.</p>
         </section>
     @endforelse
-
-    <section class="rounded-2xl border border-sky-200 bg-sky-50 p-4 sm:p-5">
-        <h2 class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-sky-800"><i class="fa-solid fa-circle-info" aria-hidden="true"></i>Panduan penilaian</h2>
-        <dl class="mt-3 grid gap-2 text-xs leading-5 text-slate-600 md:grid-cols-2">
-            <div><dt class="inline font-bold text-slate-800">Nilai tugas:</dt> <dd class="inline">Diambil dari rata-rata aktivitas harian.</dd></div>
-            <div><dt class="inline font-bold text-slate-800">Nilai akhir:</dt> <dd class="inline">Hasil akumulasi sesuai bobot kurikulum.</dd></div>
-            <div><dt class="inline font-bold text-slate-800">Nilai PTS/PAS:</dt> <dd class="inline">Skor murni hasil ujian semester.</dd></div>
-            <div><dt class="inline font-bold text-slate-800">Status:</dt> <dd class="inline">Nilai ini bersifat sementara sebelum dirilis di E-Rapor.</dd></div>
-        </dl>
-    </section>
 </div>
 @endsection

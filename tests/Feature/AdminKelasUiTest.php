@@ -57,7 +57,7 @@ class AdminKelasUiTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.kelas.edit', $kelas))
             ->assertOk()
-            ->assertSee('Edit kelas 7A')
+            ->assertSee('Perbarui data kelas 7A')->assertSee('Mengisi Data Kelas')
             ->assertSee('name="_return_url"', false)
             ->assertDontSee('data-bs-toggle', false);
 

@@ -38,8 +38,8 @@
                     <a href="{{ route($item['route']) }}" class="group flex min-h-11 w-full items-center gap-3 rounded-xl !border-0 !ring-0 px-3 py-2.5 text-sm font-semibold no-underline transition {{ $active ? '!bg-white/25 text-white shadow-lg shadow-slate-950/15' : $toneClass.' text-blue-50/90 hover:!bg-white/20 hover:text-white' }}">
                         <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
                         <span class="min-w-0 flex-1">
-                            <span class="block truncate">{{ $item['label'] }}</span>
-                            <span class="mt-0.5 block truncate text-[10px] font-medium {{ $active ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}">{{ $item['description'] }}</span>
+                            <span class="block truncate" data-marquee>{{ $item['label'] }}</span>
+                            <span class="mt-0.5 block truncate text-[10px] font-medium {{ $active ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}" data-marquee>{{ $item['description'] }}</span>
                         </span>
                     </a>
                 </li>

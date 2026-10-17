@@ -98,7 +98,7 @@ class ValidasiAksesController extends Controller
         $siswaList = $query->orderBy(
             Kelas::select('jenjang')->whereColumn('kelas.id', 'siswa.kelas_id')
         )->orderBy('nama_lengkap', 'asc')
-            ->paginate(15)
+            ->tampil(15)
             ->appends($request->query());
 
         // Hitung status keuangan per siswa

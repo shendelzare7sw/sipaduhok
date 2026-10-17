@@ -67,8 +67,8 @@
                         <button type="button" class="menu-link menu-toggle bg-transparent {{ $baseClasses }} {{ $stateClasses }}" data-menu-toggle aria-controls="{{ $targetId }}" aria-expanded="{{ $isActive ? 'true' : 'false' }}">
                             <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
                             <span class="min-w-0 flex-1">
-                                <span class="block truncate">{{ $item['label'] }}</span>
-                                <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}">{{ $item['description'] }}</span>
+                                <span class="block truncate" data-marquee>{{ $item['label'] }}</span>
+                                <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}" data-marquee>{{ $item['description'] }}</span>
                             </span>
                             <i class="fa-solid fa-chevron-down text-[10px] transition-transform {{ $isActive ? 'rotate-180' : '' }}" data-menu-chevron aria-hidden="true"></i>
                         </button>
@@ -90,8 +90,8 @@
                         <a href="{{ route($item['route']) }}" class="menu-link {{ $baseClasses }} {{ $stateClasses }}">
                             <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
                             <span class="min-w-0 flex-1">
-                                <span class="block truncate">{{ $item['label'] }}</span>
-                                <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}">{{ $item['description'] }}</span>
+                                <span class="block truncate" data-marquee>{{ $item['label'] }}</span>
+                                <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}" data-marquee>{{ $item['description'] }}</span>
                             </span>
                         </a>
                     @endif

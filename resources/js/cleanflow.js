@@ -6,6 +6,7 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 import { initTextareaAutogrow } from './components/textarea-autogrow.js';
 import { registerLmsExam } from './components/lms-exam.js';
 import { registerMediaLightbox } from './components/media-lightbox.js';
+import { initMarquee } from './components/marquee.js';
 
 window.Swal = Swal;
 window.Alpine = Alpine;
@@ -219,6 +220,7 @@ Alpine.start();
 
 document.addEventListener('DOMContentLoaded', () => {
     initTextareaAutogrow();
+    initMarquee();
 
     if (document.getElementById('aiChatbotWindow')) {
         import('./components/ai-chatbot.js');

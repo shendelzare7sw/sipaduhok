@@ -13,7 +13,7 @@
         <p class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800" role="alert">{{ $error }}</p>
     @else
         <header class="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div><p class="text-xs font-bold uppercase tracking-wide text-sky-700">Kelas {{ $kelas->nama_kelas }}</p><h1 class="mt-1 text-lg font-extrabold text-slate-900">Rekap nilai akademik</h1><p class="mt-1 text-xs text-slate-500">Pilih semester dan mata pelajaran, lalu buka nilai tiap siswa.</p></div>
+            <div><p class="text-xs font-bold uppercase tracking-wide text-sky-700">Kelas {{ $kelas->nama_kelas }}</p><h1 class="mt-1 text-lg font-extrabold text-slate-900">Rekap nilai akademik</h1></div>
             <a href="{{ route('wali.nilai.print', ['mata_pelajaran_id' => $selectedMapelId ?? '', 'semester' => $semester]) }}" target="_blank" rel="noopener" class="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50"><i class="fas fa-print" aria-hidden="true"></i>Cetak rekap</a>
         </header>
 

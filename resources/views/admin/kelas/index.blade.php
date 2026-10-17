@@ -57,7 +57,7 @@
         <div class="divide-y divide-slate-100 md:hidden">
             @forelse($kelas as $k)
                 @php $percentage = $k->kuota_siswa > 0 ? min(($k->siswa_count / $k->kuota_siswa) * 100, 100) : 0; @endphp
-                <article class="min-w-0 p-4">
+                <article id="m-{{ $loop->iteration }}" class="min-w-0 p-4">
                     <div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="truncate text-sm font-extrabold text-slate-900">{{ $k->nama_kelas }}</h3><p class="mt-1 truncate text-[11px] text-slate-500">{{ $k->kode_kelas }} · {{ $k->cabang->nama_cabang ?? 'Tanpa cabang' }}</p></div><span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold {{ $jenjangTone[$k->jenjang] ?? 'bg-slate-100 text-slate-700' }}">{{ $k->jenjang }}</span></div>
                     <div class="mt-3 rounded-xl bg-slate-50 p-3">
                         <div class="flex items-center justify-between gap-3 text-xs"><span class="text-slate-500">Siswa</span><strong class="text-slate-800">{{ $k->siswa_count }} / {{ $k->kuota_siswa ?: '-' }}</strong></div>
@@ -79,7 +79,7 @@
                     <tbody class="divide-y divide-slate-100">
                         @foreach($kelas as $k)
                             @php $percentage = $k->kuota_siswa > 0 ? min(($k->siswa_count / $k->kuota_siswa) * 100, 100) : 0; @endphp
-                            <tr class="hover:bg-slate-50/80">
+                            <tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50/80">
                                 <td class="px-3 py-4"><p class="truncate font-bold text-slate-900" title="{{ $k->nama_kelas }}">{{ $k->nama_kelas }}</p><p class="mt-1 truncate whitespace-nowrap text-[11px] text-slate-500" title="{{ $k->kode_kelas }} · {{ $k->cabang->nama_cabang ?? '-' }}">{{ $k->kode_kelas }} &middot; {{ $k->cabang->nama_cabang ?? '-' }}</p></td>
                                 <td class="px-3 py-4"><span class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-bold {{ $jenjangTone[$k->jenjang] ?? 'bg-slate-100 text-slate-700' }}">{{ $k->jenjang }}</span></td>
                                 <td class="min-w-0 px-3 py-4">@forelse($k->waliKelasAssignments as $assignment)<p class="truncate text-xs font-semibold text-slate-700" title="{{ $assignment->tenagaPendidik->nama_lengkap }}">{{ $assignment->tenagaPendidik->nama_lengkap }}</p>@empty<span class="whitespace-nowrap text-xs font-semibold text-amber-700">Belum ada</span>@endforelse</td>
@@ -92,7 +92,7 @@
             </div>
         @endif
 
-        @if($kelas->hasPages())<footer class="flex flex-col gap-2 border-t border-slate-200 px-4 py-3 text-[11px] text-slate-500 sm:flex-row sm:items-center sm:justify-between"><span>Menampilkan {{ $kelas->firstItem() ?? 0 }}-{{ $kelas->lastItem() ?? 0 }} dari {{ $kelas->total() }}</span>{{ $kelas->appends(request()->query())->links() }}</footer>@endif
+        <x-cleanflow.muat-lagi :items="$kelas" />
     </section>
 </div>
 

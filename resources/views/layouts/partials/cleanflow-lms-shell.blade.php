@@ -3,7 +3,7 @@
     Identitas visual sengaja berbeda dari SIA: sidebar terang beraksen indigo/violet.
 --}}
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50">
+<html lang="id" class="h-full scroll-pt-24 bg-slate-50">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -54,8 +54,8 @@
                     @endif
                 </span>
                 <span class="min-w-0 flex-1">
-                    <span class="block truncate font-bold text-slate-900">{{ auth()->user()->name }}</span>
-                    <span class="block truncate text-[11px] font-medium text-slate-500">{{ $roleLabel }}</span>
+                    <span class="block truncate font-bold text-slate-900" data-marquee>{{ auth()->user()->name }}</span>
+                    <span class="block truncate text-[11px] font-medium text-slate-500" data-marquee>{{ $roleLabel }}</span>
                 </span>
                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-slate-500 ring-1 ring-slate-200"><i class="fa-solid fa-gear text-xs"></i></span>
             </a>
@@ -70,8 +70,8 @@
                 </button>
                 <span class="hidden h-10 w-1.5 shrink-0 rounded-full bg-gradient-to-b from-indigo-500 to-violet-500 sm:block" aria-hidden="true"></span>
                 <div class="min-w-0 flex-1">
-                    <h1 class="truncate text-sm font-extrabold text-slate-900 sm:text-base">@yield('page-title', $shellName)</h1>
-                    <p class="mt-0.5 hidden truncate text-[11px] text-slate-500 sm:block">@yield('page-subtitle', $shellSubtitle)</p>
+                    <h1 class="truncate text-sm font-extrabold text-slate-900 sm:text-base" data-marquee>@yield('page-title', $shellName)</h1>
+                    <p class="mt-0.5 truncate text-[11px] text-slate-500" data-marquee>@yield('page-subtitle', $shellSubtitle)</p>
                 </div>
                 <div class="ml-auto flex items-center gap-2">
                     <x-cleanflow.notification-bell :ctx="$notificationContext" />
@@ -86,12 +86,17 @@
                     <div class="hidden" data-flash="{{ $flashType === 'error' ? 'error' : $flashType }}" data-title="{{ $flashType === 'success' ? 'Berhasil' : ucfirst($flashType) }}" data-message="{{ session($flashType) }}"></div>
                 @endif
             @endforeach
+            @php [$panduanHalaman, $kunciPanduan] = \App\Support\Panduan::halamanIni(); @endphp
+            @if($panduanHalaman)
+                <x-cleanflow.panduan :panduan="$panduanHalaman" :kunci="$kunciPanduan" tema="lms" class="mb-3 sm:mb-4" />
+            @endif
             @yield('content')
         </main>
 
         <x-cleanflow.app-footer />
     </div>
 
+    <x-cleanflow.flyer-popup />
     <div class="print:!hidden">@stack('modals')</div>
     @stack('scripts')
 

@@ -19,7 +19,7 @@ class GuruCatatanMonitoringController extends Controller
         $catatan = CatatanMonitoring::with(['pengirim', 'kelas', 'mataPelajaran'])
             ->forGuru($tp->id)
             ->latest()
-            ->paginate(15);
+            ->tampil(15);
 
         return view('guru.lms.catatan-monitoring.index', compact('catatan'));
     }

@@ -28,7 +28,6 @@
         <div class="min-w-0">
             <p class="text-[10px] font-extrabold uppercase tracking-[0.16em] text-brand-600">Tahun Ajaran {{ $tahunLabel }}</p>
             <h2 class="mt-1 text-base font-extrabold text-slate-900">Nilai KKM per mata pelajaran</h2>
-            <p class="mt-1 text-xs text-slate-500">Pilih jenjang, periksa nilai, lalu simpan seluruh perubahan sekaligus.</p>
         </div>
 
         <form action="{{ route($routePrefix . '.kkm.index') }}" method="GET" class="sm:w-48">
@@ -45,15 +44,15 @@
 
     <section class="grid grid-cols-3 gap-2 sm:gap-3">
         <article class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
-            <p class="truncate text-[10px] font-bold uppercase text-slate-500">Mata Pelajaran</p>
+            <p class="break-words leading-tight text-[10px] font-bold uppercase text-slate-500">Mata Pelajaran</p>
             <p class="mt-2 text-xl font-extrabold text-slate-900">{{ $mapelList->count() }}</p>
         </article>
         <article class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
-            <p class="truncate text-[10px] font-bold uppercase text-slate-500">Sudah Diatur</p>
+            <p class="break-words leading-tight text-[10px] font-bold uppercase text-slate-500">Sudah Diatur</p>
             <p class="mt-2 text-xl font-extrabold text-emerald-700">{{ $configured->count() }}</p>
         </article>
         <article class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
-            <p class="truncate text-[10px] font-bold uppercase text-slate-500">Rata-rata</p>
+            <p class="break-words leading-tight text-[10px] font-bold uppercase text-slate-500">Rata-rata</p>
             <p class="mt-2 text-xl font-extrabold text-brand-700">{{ $configured->isEmpty() ? 70 : number_format($configured->avg(), 0) }}</p>
         </article>
     </section>

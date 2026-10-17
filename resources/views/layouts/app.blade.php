@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50 print:bg-white">
+<html lang="id" class="h-full scroll-pt-24 bg-slate-50 print:bg-white">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -51,7 +51,7 @@
                 <img src="{{ asset('img/logo-nav.png') }}" alt="SIPADUHOK" class="h-12 w-12 shrink-0 object-contain">
                 <span class="min-w-0">
                     <span class="block truncate text-[15px] font-extrabold tracking-tight text-white">SIPADUHOK</span>
-                    <span class="block truncate text-[10px] font-bold uppercase tracking-[0.16em] text-sky-100/90">{{ auth()->user()->role_label }}</span>
+                    <span class="block truncate text-[10px] font-bold uppercase tracking-[0.16em] text-sky-100/90" data-marquee>{{ auth()->user()->role_label }}</span>
                 </span>
             </a>
             <button type="button" data-sidebar-close class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-slate-950/10 text-sky-100 transition hover:border-white/25 hover:bg-white/10 hover:text-white lg:hidden" aria-label="Tutup menu">
@@ -79,8 +79,8 @@
                     @endif
                 </span>
                 <span class="min-w-0 flex-1">
-                    <span class="block truncate font-bold text-white">{{ auth()->user()->name }}</span>
-                    <span class="block truncate text-[11px] font-medium text-sky-100/85">{{ auth()->user()->role_label }}</span>
+                    <span class="block truncate font-bold text-white" data-marquee>{{ auth()->user()->name }}</span>
+                    <span class="block truncate text-[11px] font-medium text-sky-100/85" data-marquee>{{ auth()->user()->role_label }}</span>
                 </span>
                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-950/15 text-white/90"><i class="fa-solid fa-gear text-xs"></i></span>
             </a>
@@ -94,21 +94,21 @@
                     <i class="fa-solid fa-bars"></i>
                 </button>
 
-                <button type="button" data-search-open class="hidden h-11 max-w-xl flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 text-left text-sm text-slate-500 transition hover:border-brand-500 hover:bg-white sm:flex">
-                    <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
-                    <span class="flex-1">Cari menu atau pekerjaan...</span>
-                    <kbd class="rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-semibold text-slate-400">Ctrl K</kbd>
-                </button>
-
-                <div class="min-w-0 flex-1 sm:hidden">
-                    <h1 class="truncate text-sm font-extrabold text-slate-900">@yield('page-title', 'Dashboard')</h1>
+                {{-- Judul & subjudul halaman tampil di semua ukuran layar; teks yang terpotong digeser pelan (data-marquee). --}}
+                <div class="min-w-0 flex-1">
+                    <h1 class="truncate text-sm font-extrabold text-slate-900 sm:text-base" data-marquee>@yield('page-title', 'Dashboard')</h1>
                     @if(trim($__env->yieldContent('page-subtitle')))
-                        <p class="mt-0.5 truncate text-[11px] text-slate-500">@yield('page-subtitle')</p>
+                        <p class="mt-0.5 truncate text-[11px] text-slate-500 sm:text-xs" data-marquee>@yield('page-subtitle')</p>
                     @endif
                 </div>
 
-                <div class="ml-auto flex items-center gap-2">
-                    <button type="button" data-search-open class="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:border-brand-500 hover:text-brand-600 sm:hidden" aria-label="Cari menu">
+                <div class="ml-auto flex shrink-0 items-center gap-2">
+                    <button type="button" data-search-open class="hidden h-11 w-72 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 text-left text-sm text-slate-500 transition hover:border-brand-500 hover:bg-white xl:flex">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                        <span class="min-w-0 flex-1 truncate">Cari menu atau pekerjaan...</span>
+                        <kbd class="rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-semibold text-slate-400">Ctrl K</kbd>
+                    </button>
+                    <button type="button" data-search-open class="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:border-brand-500 hover:text-brand-600 xl:hidden" aria-label="Cari menu">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                     <x-cleanflow.notification-bell />
@@ -123,6 +123,10 @@
                     <div class="hidden" data-flash="{{ $flashType === 'error' ? 'error' : $flashType }}" data-title="{{ $flashType === 'success' ? 'Berhasil' : ucfirst($flashType) }}" data-message="{{ session($flashType) }}"></div>
                 @endif
             @endforeach
+            @php [$panduanHalaman, $kunciPanduan] = \App\Support\Panduan::halamanIni(); @endphp
+            @if($panduanHalaman)
+                <x-cleanflow.panduan :panduan="$panduanHalaman" :kunci="$kunciPanduan" class="mb-3 sm:mb-4" />
+            @endif
             @yield('content')
         </main>
 
@@ -130,6 +134,7 @@
     </div>
 
     <x-cleanflow.menu-search />
+    <x-cleanflow.flyer-popup />
 
     @stack('scripts')
     @yield('scripts')

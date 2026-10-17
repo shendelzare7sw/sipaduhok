@@ -45,7 +45,6 @@
     }"
     class="min-w-0 w-full space-y-4"
 >
-    <header><p class="text-xs font-bold uppercase tracking-wide text-brand-600">Integrasi sistem</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Konfigurasi AI terpadu</h2><p class="mt-1 text-sm text-slate-500">Pilih satu provider global, lalu tentukan fitur dan pengguna yang diizinkan.</p></header>
 
     @if($errors->any())
         <section class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><strong class="block">Pengaturan belum dapat disimpan.</strong><ul class="mt-2 list-disc space-y-1 pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></section>

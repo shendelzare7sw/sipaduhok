@@ -17,15 +17,9 @@
 @endphp
 
 <div class="min-w-0 w-full space-y-5">
-    <header class="flex min-w-0 items-start gap-3"><a href="{{ route($routePrefix . '.kelas.index') }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali ke daftar kelas"><i class="fas fa-arrow-left" aria-hidden="true"></i></a><div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Import data</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Masukkan banyak kelas</h2><p class="mt-1 text-sm text-slate-500">Unduh template, isi data, kemudian unggah kembali.</p></div></header>
+    <header class="flex flex-wrap items-center justify-between gap-3"><a href="{{ route($routePrefix . '.kelas.index') }}" class="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali ke daftar kelas</a><a href="{{ route($routePrefix . '.kelas.template') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-50 px-4 text-sm font-bold text-emerald-700 no-underline hover:bg-emerald-100"><i class="fas fa-file-arrow-down" aria-hidden="true"></i>Unduh template Excel</a></header>
 
-    <section class="grid gap-4 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]">
-        <aside class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-950 sm:p-5">
-            <div class="flex items-center gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600"><i class="fas fa-list-ol" aria-hidden="true"></i></span><div><h3 class="font-extrabold">Urutan import</h3><p class="text-xs text-blue-700">Ikuti tiga langkah berikut.</p></div></div>
-            <ol class="mt-4 space-y-3 text-sm">@foreach([['Unduh template', 'Template berisi struktur kolom yang benar.'], ['Isi data kelas', 'Samakan nama cabang dan tahun dengan data di sistem.'], ['Pilih dan kirim file', 'Gunakan file .xlsx atau .xls maksimal 5 MB.']] as $index => $step)<li class="flex gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-xs font-extrabold text-white">{{ $index + 1 }}</span><span><strong class="block text-blue-950">{{ $step[0] }}</strong><span class="mt-0.5 block text-xs leading-5 text-blue-800">{{ $step[1] }}</span></span></li>@endforeach</ol>
-            <a href="{{ route($routePrefix . '.kelas.template') }}" class="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white no-underline hover:bg-emerald-700"><i class="fas fa-download" aria-hidden="true"></i>Unduh template Excel</a>
-        </aside>
-
+    <section class="grid gap-4">
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <header class="border-b border-slate-200 px-4 py-4 sm:px-5"><h3 class="font-extrabold text-slate-950"><i class="fas fa-file-import mr-2 text-brand-600" aria-hidden="true"></i>Unggah file kelas</h3><p class="mt-1 text-xs text-slate-500">Sistem akan memvalidasi setiap baris sebelum menyimpan.</p></header>
             <form action="{{ route($routePrefix . '.kelas.import.store') }}" method="POST" enctype="multipart/form-data" class="p-4 sm:p-5">@csrf

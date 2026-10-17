@@ -35,7 +35,7 @@ class TemplateCapaianController extends Controller
 
         $templates = $query->orderBy('mata_pelajaran_id')
             ->orderByDesc('id')
-            ->paginate(20);
+            ->tampil(20);
 
         // Batasi daftar mapel ke jenjang kelas yang diampu wali (mis. SMA) agar dropdown
         // tidak menampilkan mapel lintas jenjang yang tampak "duplikat" (mis. Bahasa

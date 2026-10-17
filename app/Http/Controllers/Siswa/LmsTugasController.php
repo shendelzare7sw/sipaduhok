@@ -240,7 +240,7 @@ class LmsTugasController extends Controller
             
         $query->whereIn('mata_pelajaran_id', $allowedMapelIds);
         
-        $tugasList = $query->orderBy('tanggal_deadline', 'asc')->paginate(10);
+        $tugasList = $query->orderBy('tanggal_deadline', 'asc')->tampil(10);
         
         // Custom Collection Filter for Pagination (Workaround)
         // Ideally we should filter in SQL. Let's do a basic SQL filter where possible.
@@ -257,7 +257,7 @@ class LmsTugasController extends Controller
                       ->where('status', $request->status);
                 });
             }
-            $tugasList = $query->orderBy('tanggal_deadline', 'asc')->paginate(10);
+            $tugasList = $query->orderBy('tanggal_deadline', 'asc')->tampil(10);
         }
 
         return view('siswa.lms.mata-pelajaran.tugas.index', compact(

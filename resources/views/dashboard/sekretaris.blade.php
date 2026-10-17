@@ -93,7 +93,7 @@
                         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $item['tone'] }}"><i class="fas {{ $item['icon'] }}" aria-hidden="true"></i></span>
                         <span class="min-w-0 flex-1">
                             <span class="block text-xs font-extrabold text-slate-900">{{ $item['title'] }}</span>
-                            <span class="mt-0.5 block truncate text-[10px] text-slate-500" title="{{ $item['description'] }}">{{ $item['description'] }}</span>
+                            <span class="mt-0.5 block text-[10px] leading-snug text-slate-500" title="{{ $item['description'] }}">{{ $item['description'] }}</span>
                         </span>
                         <i class="fas fa-chevron-right text-[10px] text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-brand-500" aria-hidden="true"></i>
                     </a>

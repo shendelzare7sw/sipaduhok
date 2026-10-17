@@ -30,7 +30,7 @@
                         default => ['bg-slate-100 text-slate-600', 'fa-flag-checkered', 'Selesai'],
                     };
                 @endphp
-                <article class="flex flex-col gap-4 rounded-2xl border p-4 lg:flex-row lg:items-center lg:justify-between {{ $meeting->is_active ? 'border-teal-200 bg-teal-50/30' : 'border-slate-200' }}">
+                <article id="m-{{ $loop->iteration }}" class="flex flex-col gap-4 rounded-2xl border p-4 lg:flex-row lg:items-center lg:justify-between {{ $meeting->is_active ? 'border-teal-200 bg-teal-50/30' : 'border-slate-200' }}">
                     <div class="min-w-0">
                         <div class="flex flex-wrap gap-1.5">
                             <span class="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-sky-700"><i class="fa-solid fa-video mr-1" aria-hidden="true"></i>{{ ucfirst(str_replace('_', ' ', $meeting->platform)) }}</span>
@@ -61,9 +61,7 @@
             @endforelse
         </div>
 
-        @if($meetings->hasPages())
-            <div class="border-t border-slate-100 px-4 py-3 sm:px-5">{{ $meetings->links() }}</div>
-        @endif
+        <x-cleanflow.muat-lagi :items="$meetings" tema="lms" />
     </section>
 </div>
 @endsection

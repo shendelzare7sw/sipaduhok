@@ -16,7 +16,7 @@
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             @foreach($catatan as $c)
                 @php $belumDibaca = is_null($c->dibaca_pada); @endphp
-                <a href="{{ route('guru.lms.catatan-monitoring.show', $c->id) }}" class="block min-w-0 border-b border-slate-100 p-4 no-underline transition last:border-b-0 hover:bg-slate-50 sm:p-5 {{ $belumDibaca ? 'border-l-4 border-l-brand-500 bg-brand-50/40' : '' }}">
+                <a id="m-{{ $loop->iteration }}" href="{{ route('guru.lms.catatan-monitoring.show', $c->id) }}" class="block min-w-0 border-b border-slate-100 p-4 no-underline transition last:border-b-0 hover:bg-slate-50 sm:p-5 {{ $belumDibaca ? 'border-l-4 border-l-brand-500 bg-brand-50/40' : '' }}">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="flex min-w-0 flex-wrap items-center gap-2 text-sm font-extrabold text-slate-900">
                             <i class="fa-solid fa-user-shield text-brand-600" aria-hidden="true"></i>
@@ -45,7 +45,7 @@
             @endforeach
         </section>
 
-        <div>{{ $catatan->links() }}</div>
+        <x-cleanflow.muat-lagi :items="$catatan" tema="lms" lepas />
     @endif
 </div>
 @endsection

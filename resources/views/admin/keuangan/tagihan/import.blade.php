@@ -23,22 +23,7 @@
         <a href="{{ route('admin.keuangan.tagihan.template') }}" class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-50 px-4 text-sm font-bold text-emerald-700 no-underline hover:bg-emerald-100"><i class="fas fa-file-arrow-down"></i>Unduh template Excel</a>
     </div>
 
-    <div class="grid gap-5 lg:grid-cols-[minmax(16rem,.65fr)_minmax(0,1.35fr)]">
-        <aside class="self-start rounded-2xl border border-blue-200 bg-blue-50 p-5">
-            <div class="flex items-start gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><i class="fas fa-circle-info"></i></span><div><h2 class="font-extrabold text-blue-950">Urutan import</h2><p class="mt-1 text-sm leading-6 text-blue-800">Gunakan template agar nama kolom terbaca dengan benar.</p></div></div>
-            <ol class="mt-5 space-y-4">
-                @foreach([
-                    ['Pilih tahun ajaran', 'Tagihan akan dicatat pada periode ini.'],
-                    ['Isi identitas siswa', 'Gunakan NIS, NISN, atau nama_siswa. Salah satu wajib diisi.'],
-                    ['Lengkapi tagihan', 'jenis_tagihan dan jumlah wajib diisi.'],
-                    ['Unggah dan periksa hasil', 'Status awal otomatis menjadi belum bayar.'],
-                ] as [$title, $description])
-                    <li class="flex gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-xs font-extrabold text-blue-700 ring-1 ring-blue-200">{{ $loop->iteration }}</span><div><strong class="block text-sm text-blue-950">{{ $title }}</strong><span class="mt-0.5 block text-xs leading-5 text-blue-800">{{ $description }}</span></div></li>
-                @endforeach
-            </ol>
-            <div class="mt-5 rounded-xl border border-blue-200 bg-white/70 p-3 text-xs leading-5 text-blue-900"><i class="fas fa-shield-halved mr-1 text-blue-700"></i>Baris yang tidak valid akan dilewati dan dirangkum setelah proses selesai.</div>
-        </aside>
-
+    <div class="grid gap-5">
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <header class="border-b border-slate-200 p-5"><h2 class="flex items-center gap-2 text-lg font-extrabold text-slate-950"><i class="fas fa-file-import text-brand-600"></i>Unggah file tagihan</h2><p class="mt-1 text-sm text-slate-500">Pilih periode dahulu, lalu lampirkan berkas Excel maksimal 5 MB.</p></header>
 

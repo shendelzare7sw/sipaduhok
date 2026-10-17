@@ -57,7 +57,7 @@ class KelasController extends Controller
         $kelas = $query->withCount('siswa')
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
-            ->paginate(15);
+            ->tampil(15);
 
         // Data untuk filter
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
@@ -178,7 +178,7 @@ class KelasController extends Controller
         // Get siswa in this kelas
         $siswa = Siswa::where('kelas_id', $kelas->id)
             ->orderBy('nama_lengkap')
-            ->paginate(20);
+            ->tampil(20);
 
         // Statistics
         $stats = [

@@ -61,15 +61,5 @@
             </a>
         </div>
     </article>
-
-    <section class="rounded-2xl border border-slate-200 border-l-4 border-l-sky-500 bg-white p-4 shadow-sm">
-        <h2 class="flex items-center gap-2 text-sm font-extrabold text-slate-900"><i class="fa-solid fa-lightbulb text-amber-500" aria-hidden="true"></i>Tips belajar</h2>
-        <ul class="mt-2 list-disc space-y-1 pl-5 text-xs leading-5 text-slate-600">
-            <li>Baca materi dengan seksama sebelum mengerjakan tugas.</li>
-            <li>Catat hal-hal penting untuk memudahkan belajar.</li>
-            <li>Jika ada yang tidak dipahami, tanyakan di forum diskusi.</li>
-            <li>Unduh materi untuk dipelajari secara offline.</li>
-        </ul>
-    </section>
 </div>
 @endsection

@@ -82,7 +82,7 @@
             @foreach($moduleGroups as $key => $modules)
                 <div x-cloak x-show="tab === '{{ $key }}'" class="grid gap-2 p-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
                     @foreach($modules as $module)
-                        <a href="{{ route($module['route']) }}" class="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 p-3 text-slate-700 no-underline transition hover:border-brand-200 hover:bg-brand-50/40"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $module['tone'] }}"><i class="fas {{ $module['icon'] }}" aria-hidden="true"></i></span><span class="min-w-0"><strong class="block truncate text-sm text-slate-900">{{ $module['label'] }}</strong><span class="mt-0.5 block truncate text-[11px] text-slate-500">{{ $module['description'] }}</span></span></a>
+                        <a href="{{ route($module['route']) }}" class="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 p-3 text-slate-700 no-underline transition hover:border-brand-200 hover:bg-brand-50/40"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $module['tone'] }}"><i class="fas {{ $module['icon'] }}" aria-hidden="true"></i></span><span class="min-w-0"><strong class="block text-sm leading-snug text-slate-900">{{ $module['label'] }}</strong><span class="mt-0.5 block text-[11px] leading-snug text-slate-500">{{ $module['description'] }}</span></span></a>
                     @endforeach
                 </div>
             @endforeach

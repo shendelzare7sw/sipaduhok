@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Siswa;
 use App\Models\Pengumuman;
-use App\Models\Flyer;
 use App\Models\Presensi;
 use App\Models\Tugas;
 use App\Models\Ujian;
@@ -48,8 +47,6 @@ class SiaDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Flyer Pop-up untuk Siswa
-        $flyerList = Flyer::getPopupFlyers('siswa', 3);
 
         // Grafik Performa Siswa
         $performaData = $this->getPerformaSiswa($siswa->id, $siswa->kelas_id);
@@ -100,7 +97,6 @@ class SiaDashboardController extends Controller
         return view('siswa.sia.dashboard', [
             'siswa' => $siswa,
             'pengumuman' => $pengumumanList,
-            'flyers' => $flyerList,
             'performa' => $performaData,
             'absensi' => $rekapAbsen,
             'jadwalHariIni' => $jadwalHariIni,

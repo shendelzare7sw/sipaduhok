@@ -160,7 +160,7 @@ class UserController extends Controller
         }
 
         // Order by name
-        $tenagaPendidik = $query->orderBy('name')->paginate(15);
+        $tenagaPendidik = $query->orderBy('name')->tampil(15);
 
         return view('admin.users.tenaga-pendidik', compact('tenagaPendidik', 'roles'));
     }
@@ -587,7 +587,7 @@ class UserController extends Controller
             $query->where('status', $request->status);
         }
 
-        $siswa = $query->orderBy('nama_lengkap')->paginate(15);
+        $siswa = $query->orderBy('nama_lengkap')->tampil(15);
         $kelasList = Kelas::with('cabang')->orderBy('jenjang')->orderBy('nama_kelas')->get()
             ->unique(fn ($k) => $k->cabang_id.'|'.$k->jenjang.'|'.$k->nama_kelas)
             ->values();
@@ -1191,7 +1191,7 @@ class UserController extends Controller
             $query->where('is_active', $isActive);
         }
 
-        $orangTua = $query->orderBy('name')->paginate(15);
+        $orangTua = $query->orderBy('name')->tampil(15);
         $cabangList = Cabang::where('is_active', true)->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 

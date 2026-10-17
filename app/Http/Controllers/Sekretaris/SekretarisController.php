@@ -659,7 +659,7 @@ class SekretarisController extends Controller
     {
         $pengumuman = Pengumuman::with(['kalenderAkademik', 'pembuat'])
             ->orderBy('tanggal_pengumuman', 'desc')
-            ->paginate(15);
+            ->tampil(15);
 
         return view($this->viewPath('sekretaris.pengumuman.index'), compact('pengumuman'));
     }
@@ -762,7 +762,7 @@ class SekretarisController extends Controller
     {
         $flyer = Flyer::with('pembuat')
             ->orderBy('urutan_tampil')
-            ->paginate(15);
+            ->tampil(15);
 
         return view($this->viewPath('sekretaris.flyer.index'), compact('flyer'));
     }
@@ -874,7 +874,7 @@ class SekretarisController extends Controller
             $query->search($request->search);
         }
 
-        $berita = $query->paginate(15);
+        $berita = $query->tampil(15);
         $kategoriOptions = Berita::getKategoriOptions();
         $statusOptions = Berita::getStatusOptions();
 

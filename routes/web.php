@@ -614,7 +614,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\LandingPage\LandingPageController::class, 'index'])->name('index');
             Route::get('/{landingPage:slug}/edit', [\App\Http\Controllers\Admin\LandingPage\LandingPageController::class, 'edit'])->name('edit');
             Route::put('/{landingPage:slug}', [\App\Http\Controllers\Admin\LandingPage\LandingPageController::class, 'update'])->name('update');
-            Route::get('/{landingPage:slug}/reset', [\App\Http\Controllers\Admin\LandingPage\LandingPageController::class, 'reset'])->name('reset');
+            Route::post('/{landingPage:slug}/reset', [\App\Http\Controllers\Admin\LandingPage\LandingPageController::class, 'reset'])->name('reset');
         });
 
         /*

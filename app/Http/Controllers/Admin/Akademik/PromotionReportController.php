@@ -86,7 +86,7 @@ class PromotionReportController extends Controller
         }
 
         $students = $query->orderBy('status_naik_kelas_siswa.tanggal_eksekusi', 'desc')
-            ->paginate(20);
+            ->tampil(20);
 
         // Tandai baris TIDAK_NAIK_KELAS yang sekarang bisa dinaikkan manual: siswa
         // LUNAS/dispensasi tapi akademiknya "unmeasurable" (kelas belum punya Jadwal
@@ -142,7 +142,7 @@ class PromotionReportController extends Controller
                 $simQuery->where('status_naik_kelas_siswa.kelas_asal', $kelasId);
             }
 
-            $activeStudents = $simQuery->paginate(20, ['*'], 'sim_page');
+            $activeStudents = $simQuery->tampil(20, 'tampil_sim');
 
             // For historical mode, data already includes results
             $simulationData = $activeStudents->map(function ($record) {
@@ -223,7 +223,7 @@ class PromotionReportController extends Controller
             // Clone query before paginate (paginate modifies the builder with limit/offset)
             $allStudentsQuery = clone $simQuery;
 
-            $activeStudents = $simQuery->paginate(20, ['*'], 'sim_page');
+            $activeStudents = $simQuery->tampil(20, 'tampil_sim');
 
             $simulationData = [];
             $promotionService = app(\App\Services\PromotionService::class);

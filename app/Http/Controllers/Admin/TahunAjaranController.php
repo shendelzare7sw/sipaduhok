@@ -21,7 +21,7 @@ class TahunAjaranController extends Controller
             $query->where('is_active', $request->status);
         }
 
-        $tahunAjarans = $query->orderBy('tanggal_mulai', 'desc')->paginate(10);
+        $tahunAjarans = $query->orderBy('tanggal_mulai', 'desc')->tampil(10);
 
         return view('admin.tahun-ajaran.index', compact('tahunAjarans'));
     }

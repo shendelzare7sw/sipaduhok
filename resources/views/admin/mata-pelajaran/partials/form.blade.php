@@ -10,8 +10,7 @@
 <div class="min-w-0 w-full space-y-4">
     <header class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex min-w-0 items-center gap-3">
-            <a href="{{ $backUrl }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
-            <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Data akademik</p><h2 class="truncate text-xl font-extrabold text-slate-950 sm:text-2xl">{{ $editing ? 'Edit mata pelajaran' : 'Tambah mata pelajaran' }}</h2><p class="mt-0.5 text-sm text-slate-500">Tentukan identitas, jenjang, dan aturan akses siswa.</p></div>
+            <a href="{{ $backUrl }}" class="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali</a>
         </div>
     </header>
 

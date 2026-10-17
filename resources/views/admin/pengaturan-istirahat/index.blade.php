@@ -21,8 +21,7 @@
 <div class="min-w-0 w-full space-y-5">
     <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex min-w-0 items-start gap-3">
-            <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700" aria-label="Kembali ke jadwal pelajaran"><i class="fas fa-arrow-left" aria-hidden="true"></i></a>
-            <div class="min-w-0"><p class="text-xs font-bold uppercase tracking-wider text-brand-600">Pengaturan jadwal</p><h2 class="text-xl font-extrabold text-slate-950 sm:text-2xl">Waktu istirahat per jenjang</h2><p class="mt-1 text-sm text-slate-500">Atur maksimal dua jeda untuk setiap jenjang.</p></div>
+            <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-600 no-underline hover:border-brand-300 hover:text-brand-700"><i class="fas fa-arrow-left" aria-hidden="true"></i>Kembali ke jadwal</a>
         </div>
         <a href="{{ route('admin.pengaturan-istirahat.create') }}" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-bold text-white no-underline shadow-sm hover:bg-brand-700"><i class="fas fa-plus" aria-hidden="true"></i>Tambah istirahat</a>
     </header>
@@ -33,10 +32,6 @@
         <article class="col-span-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:col-span-1"><div class="flex items-center gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600"><i class="fas fa-layer-group" aria-hidden="true"></i></span><div><p class="text-2xl font-extrabold leading-none text-slate-950">{{ count($jenjangList) }}</p><p class="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">Jenjang tersedia</p></div></div></article>
     </section>
 
-    <aside class="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-950">
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600"><i class="fas fa-circle-info" aria-hidden="true"></i></span>
-        <div class="min-w-0"><h3 class="text-sm font-extrabold">Cara kerja waktu istirahat</h3><p class="mt-1 text-xs leading-5 text-blue-800">Jeda aktif otomatis memblokir slot ketika jadwal dibuat dan ditandai pada hasil cetak. Hari yang tidak dipilih tetap dapat digunakan.</p></div>
-    </aside>
 
     <section class="grid min-w-0 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
         @foreach($jenjangList as $jenjang)

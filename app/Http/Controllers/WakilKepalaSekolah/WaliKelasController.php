@@ -125,7 +125,7 @@ class WaliKelasController extends Controller
             }
         }
 
-        $kelasList = $query->orderBy('jenjang')->orderBy('nama_kelas')->paginate(15);
+        $kelasList = $query->orderBy('jenjang')->orderBy('nama_kelas')->tampil(15);
 
         // Data untuk filter dan assignment
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();

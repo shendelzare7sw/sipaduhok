@@ -66,8 +66,8 @@
                     <a href="{{ route($item['route']) }}" class="menu-link {{ $baseClasses }} {{ $stateClasses }}">
                         <i class="fa-solid {{ $item['icon'] }} w-5 shrink-0 text-center text-sm" aria-hidden="true"></i>
                         <span class="min-w-0 flex-1">
-                            <span class="block truncate">{{ $item['label'] }}</span>
-                            <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}">{{ $item['description'] }}</span>
+                            <span class="block truncate" data-marquee>{{ $item['label'] }}</span>
+                            <span class="mt-0.5 block truncate text-[10px] font-medium {{ $isActive ? 'text-sky-50' : 'text-sky-100/80 group-hover:text-white' }}" data-marquee>{{ $item['description'] }}</span>
                         </span>
                     </a>
                 </li>

@@ -14,7 +14,6 @@
     $isBendahara = request()->routeIs('bendahara.*');
     $routePrefix = $isBendahara ? 'bendahara.validasi-akses' : 'admin.keuangan.validasi-akses';
     $tagihanRoutePrefix = $isBendahara ? 'bendahara.tagihan' : 'admin.keuangan.tagihan';
-    $validatorLabel = $isBendahara ? 'Bendahara' : 'Admin';
 @endphp
 
 <div class="min-w-0 w-full space-y-5" data-validasi-akses x-data="{
@@ -48,21 +47,6 @@
         this.$refs.dispensasiDialog.showModal();
     }
 }">
-    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:p-5">
-            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><i class="fas fa-route" aria-hidden="true"></i></span>
-            <div class="min-w-0"><h2 class="text-sm font-extrabold text-slate-950">Alur pembukaan akses</h2><p class="mt-1 text-xs text-slate-500">Rapor memerlukan persetujuan Ketua sebelum dapat divalidasi {{ $validatorLabel }}.</p></div>
-        </div>
-        <ol class="grid border-t border-slate-200 text-xs sm:grid-cols-3">
-            @foreach([
-                ['1', 'Ketua menyetujui', 'Persetujuan awal khusus akses rapor', 'bg-amber-50 text-amber-700'],
-                ['2', $validatorLabel.' memvalidasi', 'Periksa pembayaran atau dispensasi', 'bg-brand-50 text-brand-700'],
-                ['3', 'Akses terbuka', 'Siswa dapat membuka ujian atau rapor', 'bg-emerald-50 text-emerald-700'],
-            ] as [$number, $title, $description, $tone])
-                <li class="flex gap-3 border-slate-200 p-4 sm:border-r sm:last:border-r-0"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-extrabold {{ $tone }}">{{ $number }}</span><div><p class="font-extrabold text-slate-800">{{ $title }}</p><p class="mt-1 leading-5 text-slate-500">{{ $description }}</p></div></li>
-            @endforeach
-        </ol>
-    </section>
 
     <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">
         @foreach([
@@ -71,7 +55,7 @@
             ['Rapor valid', $validasiRapor, 'Akses telah divalidasi', 'fa-file-invoice', 'bg-violet-50 text-violet-600'],
             ['Belum validasi', $belumValidasi, 'Masih dalam antrean', 'fa-hourglass-half', 'bg-amber-50 text-amber-600'],
         ] as [$label, $value, $description, $icon, $tone])
-            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="truncate text-xl font-extrabold text-slate-950">{{ $value }}</p><p class="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $label }}</p></div><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div><p class="mt-3 truncate border-t border-slate-100 pt-3 text-[11px] text-slate-500">{{ $description }}</p></article>
+            <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><div class="flex flex-col-reverse items-start gap-2 sm:flex-row sm:justify-between sm:gap-2"><div class="min-w-0"><p class="break-words leading-tight text-xl font-extrabold text-slate-950">{{ $value }}</p><p class="mt-1 break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $label }}</p></div><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span></div><p class="mt-3 break-words leading-tight border-t border-slate-100 pt-3 text-[11px] text-slate-500">{{ $description }}</p></article>
         @endforeach
     </section>
 
@@ -97,7 +81,7 @@
 
         <div class="divide-y divide-slate-100 lg:hidden">
             @forelse($siswa as $s)
-                <article class="p-4">
+                <article id="m-{{ $loop->iteration }}" class="p-4">
                     <div class="flex min-w-0 items-start gap-3"><input type="checkbox" value="{{ $s->id }}" x-model="selected" class="mt-3 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-500"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-xs font-extrabold text-brand-700">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</span><div class="min-w-0 flex-1"><h3 class="break-words text-sm font-extrabold text-slate-900">{{ $s->nama_lengkap }}</h3><p class="mt-0.5 break-words text-[11px] text-slate-500">{{ $s->nisn ?: 'NISN belum tersedia' }} · {{ $s->cabang->nama_cabang ?? '-' }}</p></div><span class="shrink-0 rounded-full bg-brand-50 px-2 py-1 text-[9px] font-bold text-brand-700">{{ $s->kelas->nama_kelas ?? '-' }}</span></div>
                     <dl class="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 text-xs"><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Total tagihan</dt><dd class="mt-1 whitespace-nowrap font-bold text-slate-800">Rp {{ number_format($s->total_tagihan, 0, ',', '.') }}</dd></div><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Sisa</dt><dd class="mt-1 whitespace-nowrap font-extrabold {{ $s->sisa_tagihan > 0 ? 'text-red-700' : 'text-emerald-700' }}">Rp {{ number_format($s->sisa_tagihan, 0, ',', '.') }}</dd></div><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Akses ujian</dt><dd class="mt-1 font-bold {{ ($s->punya_akses_ujian ?? false) ? 'text-emerald-700' : 'text-amber-700' }}">{{ ($s->punya_akses_ujian ?? false) ? 'Valid' : 'Belum' }}</dd></div><div><dt class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Akses rapor</dt><dd class="mt-1 font-bold {{ $s->validasi_rapor_bendahara ? 'text-emerald-700' : 'text-amber-700' }}">{{ $s->validasi_rapor_bendahara ? 'Valid' : ($s->validasi_rapor_ketua ? 'Siap divalidasi' : 'Tunggu Ketua') }}</dd></div></dl>
                     <div class="mt-3 grid grid-cols-3 gap-2">
@@ -115,7 +99,7 @@
             <div class="hidden overflow-x-auto lg:block"><table class="w-full min-w-[1060px] table-fixed text-left text-xs">
                 <colgroup><col class="w-12"><col class="w-12"><col><col class="w-36"><col class="w-36"><col class="w-36"><col class="w-32"><col class="w-32"><col class="w-36"></colgroup>
                 <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500"><tr><th class="px-3 py-3"><input type="checkbox" @change="toggleAll()" :checked="allIds.length > 0 && selected.length === allIds.length" class="h-4 w-4 rounded border-slate-300 text-brand-600"></th><th class="px-2 py-3 text-center">No</th><th class="px-3 py-3">Siswa</th><th class="px-3 py-3">Kelas</th><th class="px-3 py-3">Tagihan</th><th class="px-3 py-3">Sisa</th><th class="px-3 py-3">Ujian</th><th class="px-3 py-3">Rapor</th><th class="px-4 py-3 text-right">Aksi</th></tr></thead>
-                <tbody class="divide-y divide-slate-100">@foreach($siswa as $index => $s)<tr class="hover:bg-slate-50/70">
+                <tbody class="divide-y divide-slate-100">@foreach($siswa as $index => $s)<tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50/70">
                     <td class="px-3 py-4"><input type="checkbox" value="{{ $s->id }}" x-model="selected" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"></td><td class="px-2 py-4 text-center text-slate-400">{{ $siswa->firstItem() + $index }}</td>
                     <td class="min-w-0 px-3 py-4"><div class="flex min-w-0 items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 font-extrabold text-brand-700">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</span><div class="min-w-0"><p class="truncate text-sm font-bold text-slate-900" title="{{ $s->nama_lengkap }}">{{ $s->nama_lengkap }}</p><p class="truncate text-[11px] text-slate-500" title="{{ $s->nisn }} · {{ $s->cabang->nama_cabang ?? '-' }}">{{ $s->nisn ?: 'Tanpa NISN' }} · {{ $s->cabang->nama_cabang ?? '-' }}</p></div></div></td>
                     <td class="px-3 py-4"><span class="inline-flex max-w-full truncate rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-bold text-brand-700">{{ $s->kelas->nama_kelas ?? '-' }}</span></td><td class="whitespace-nowrap px-3 py-4 font-bold text-slate-700">Rp {{ number_format($s->total_tagihan, 0, ',', '.') }}</td><td class="whitespace-nowrap px-3 py-4 font-extrabold {{ $s->sisa_tagihan > 0 ? 'text-red-700' : 'text-emerald-700' }}">Rp {{ number_format($s->sisa_tagihan, 0, ',', '.') }}</td>
@@ -125,7 +109,7 @@
                 </tr>@endforeach</tbody>
             </table></div>
         @endif
-        @if($siswa->hasPages())<div class="border-t border-slate-200 px-4 py-3 sm:px-5">{{ $siswa->withQueryString()->links() }}</div>@endif
+        <x-cleanflow.muat-lagi :items="$siswa" />
     </section>
 
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

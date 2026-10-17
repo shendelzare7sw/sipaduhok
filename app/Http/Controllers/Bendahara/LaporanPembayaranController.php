@@ -75,7 +75,7 @@ class LaporanPembayaranController extends Controller
             $query->where('metode_pembayaran', $metode);
         }
 
-        $pembayaran = $query->orderBy('tanggal_bayar', 'desc')->paginate(20)->appends($request->query());
+        $pembayaran = $query->orderBy('tanggal_bayar', 'desc')->tampil(20)->appends($request->query());
 
         // Reusable closure for location-based filtering (cabang → jenjang → kelas)
         $applyLocationFilter = function ($q) use ($kelasId, $jenjang, $cabangId) {

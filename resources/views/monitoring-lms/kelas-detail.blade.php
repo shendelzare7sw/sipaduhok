@@ -62,7 +62,7 @@
 
     <section class="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Ringkasan konten kelas">
         @foreach($stats as [$key, $label, $value, $icon, $tone])
-            <button type="button" @click="setTab('{{ $key }}')" :class="tab === '{{ $key }}' ? 'border-brand-300 ring-2 ring-brand-100' : 'border-slate-200 hover:border-brand-200'" class="flex min-w-0 items-center gap-3 rounded-2xl border bg-white p-3 text-left shadow-sm transition sm:p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span><span class="min-w-0"><strong class="block text-xl font-extrabold leading-none text-slate-950">{{ $value }}</strong><span class="mt-1.5 block truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">{{ $label }}</span></span></button>
+            <button type="button" @click="setTab('{{ $key }}')" :class="tab === '{{ $key }}' ? 'border-brand-300 ring-2 ring-brand-100' : 'border-slate-200 hover:border-brand-200'" class="flex min-w-0 items-center gap-3 rounded-2xl border bg-white p-3 text-left shadow-sm transition sm:p-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $tone }}"><i class="fas {{ $icon }}" aria-hidden="true"></i></span><span class="min-w-0"><strong class="block text-xl font-extrabold leading-none text-slate-950">{{ $value }}</strong><span class="mt-1.5 block break-words leading-tight text-[10px] font-bold uppercase tracking-normal sm:tracking-wide text-slate-500">{{ $label }}</span></span></button>
         @endforeach
     </section>
 

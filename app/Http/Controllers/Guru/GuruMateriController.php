@@ -38,7 +38,7 @@ class GuruMateriController extends Controller
             })
             ->orderBy('tanggal_upload', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->tampil(10);
 
         return view('guru.lms.materi.index', [
             'kelas' => $kelas,

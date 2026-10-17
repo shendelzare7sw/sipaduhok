@@ -122,7 +122,7 @@
                             $isBuktiImage = in_array($buktiExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
                             $isBuktiPdf = $buktiExtension === 'pdf';
                         @endphp
-                        <tr class="hover:bg-slate-50 transition" x-data="{ showBukti: false }">
+                        <tr id="d-{{ $loop->iteration }}" class="hover:bg-slate-50 transition" x-data="{ showBukti: false }">
                             <td class="px-4 py-2.5 font-bold text-slate-800">{{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('j F Y') }}</td>
                             <td class="px-4 py-2.5 text-slate-500">{{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('l') }}</td>
                             <td class="px-4 py-2.5 text-center">
@@ -186,11 +186,7 @@
                 </tbody>
             </table>
         </div>
-        @if($riwayat->hasPages())
-            <div class="border-t border-slate-200 bg-slate-50 px-5 py-3">
-                {{ $riwayat->links() }}
-            </div>
-        @endif
+        <x-cleanflow.muat-lagi :items="$riwayat" class="bg-slate-50" />
     </div>
 
 </div>

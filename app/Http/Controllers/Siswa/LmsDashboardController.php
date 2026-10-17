@@ -223,7 +223,7 @@ class LmsDashboardController extends Controller
             default => $query->orderBy('prioritas', 'desc')->orderBy('created_at', 'desc'),
         };
 
-        $pengumumanList = $query->paginate(20)->withQueryString();
+        $pengumumanList = $query->tampil(20)->withQueryString();
 
         return view('siswa.lms.pengumuman.index', compact('siswa', 'pengumumanList', 'filters', 'jumlahPrioritas'));
     }

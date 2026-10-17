@@ -42,7 +42,7 @@ class LmsForumController extends Controller
             ])
             ->orderBy('is_pinned', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->tampil(10);
 
         return view('siswa.lms.mata-pelajaran.forum.index', compact(
             'siswa',

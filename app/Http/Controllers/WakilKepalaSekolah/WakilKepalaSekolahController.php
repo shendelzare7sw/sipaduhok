@@ -100,7 +100,7 @@ class WakilKepalaSekolahController extends Controller
             $query->where('nama_lengkap', 'like', '%'.$request->search.'%');
         }
 
-        $guruPengajar = $query->paginate(15);
+        $guruPengajar = $query->tampil(15);
 
         $guruPengajar->getCollection()->transform(function ($tp) use ($userCabangId, $taFilterId) {
             $visibleAssignments = $tp->guruKelas
@@ -185,7 +185,7 @@ class WakilKepalaSekolahController extends Controller
             $query->where('nama_lengkap', 'like', '%'.$request->search.'%');
         }
 
-        $waliKelas = $query->paginate(15);
+        $waliKelas = $query->tampil(15);
 
         // Map data
         $waliKelas->getCollection()->transform(function ($tp) use ($userCabangId) {
@@ -238,7 +238,7 @@ class WakilKepalaSekolahController extends Controller
         }
 
         // Get Pagination
-        $siswa = $query->paginate(20);
+        $siswa = $query->tampil(20);
 
         // Map data for display (only for current page)
         $siswa->getCollection()->transform(function ($s) {
@@ -302,7 +302,7 @@ class WakilKepalaSekolahController extends Controller
             ->with(['pengirim', 'penerima', 'pembaca'])
             ->orderByDesc('tanggal_kirim')
             ->orderByDesc('id')
-            ->paginate(15);
+            ->tampil(15);
 
         return view('admin.catatan.index', compact('catatan'));
     }

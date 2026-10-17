@@ -40,7 +40,7 @@ class AdminPengaturanIstirahatUiTest extends TestCase
         $this->actingAs($admin)->get(route('admin.pengaturan-istirahat.index'))
             ->assertOk()
             ->assertSee('min-w-0 w-full space-y-5', false)
-            ->assertSee('Waktu istirahat per jenjang')
+            ->assertSee('Pengaturan Istirahat')->assertSee('Tampilkan panduan halaman ini')
             ->assertSee('Istirahat pagi')
             ->assertSee('aria-label="Edit waktu istirahat"', false)
             ->assertSee('data-confirm', false)
@@ -53,7 +53,8 @@ class AdminPengaturanIstirahatUiTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.pengaturan-istirahat.edit', $pengaturan->id))
             ->assertOk()
-            ->assertSee('Edit waktu istirahat')
+            ->assertSee('Edit Waktu Istirahat')
+            ->assertSee('Mengisi Waktu Istirahat')
             ->assertSee('Istirahat pagi')
             ->assertSee('name="is_active"', false);
 

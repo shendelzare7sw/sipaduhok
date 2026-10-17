@@ -67,7 +67,7 @@ class PembayaranController extends Controller
         }
 
         $pembayaranList = $query->orderBy('created_at', 'desc')
-            ->paginate(15)
+            ->tampil(15)
             ->appends($request->query());
 
         // Hitung statistik
@@ -106,7 +106,7 @@ class PembayaranController extends Controller
             ->where('siswa_id', $siswaId)
             ->whereIn('tagihan_id', $tagihanIds)
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->tampil(20);
 
         // Hitung total tagihan (Total Nominal Awal)
         $totalTagihan = $tagihan->sum('jumlah');

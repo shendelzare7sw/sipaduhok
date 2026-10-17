@@ -77,7 +77,7 @@ class ManajemenSiswaController extends Controller
             });
         }
 
-        $siswaList = $query->orderBy('nama_lengkap')->paginate(20)->withQueryString();
+        $siswaList = $query->orderBy('nama_lengkap')->tampil(20)->withQueryString();
 
         // Data untuk filter
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();

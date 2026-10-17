@@ -54,7 +54,7 @@ class AdminJadwalPelajaranUiTest extends TestCase
             ->assertOk()->assertSee('Jadwal per kelas')->assertSee('Matematika');
 
         $this->actingAs($admin)->get(route('admin.jadwal-pelajaran.import'))
-            ->assertOk()->assertSee('Import dari Excel')->assertSee('name="file"', false)
+            ->assertOk()->assertSee('Import Jadwal dari Excel')->assertSee('name="file"', false)
             ->assertDontSee('resources/js/admin/jadwal-pelajaran/import.js', false);
 
         $this->actingAs($admin)->get(route('admin.jadwal-pelajaran.preview-print', ['kelas' => $kelas->id, 'tahun_ajaran_id' => $tahun->id]))
@@ -104,7 +104,7 @@ class AdminJadwalPelajaranUiTest extends TestCase
             ->assertDontSee('/admin/jadwal-pelajaran', false);
 
         $this->actingAs($waka)->get(route('waka.jadwal-pelajaran.import'))
-            ->assertOk()->assertSee('Import dari Excel')->assertSee('name="file"', false)
+            ->assertOk()->assertSee('Import Jadwal dari Excel')->assertSee('name="file"', false)
             ->assertSee(route('waka.jadwal-pelajaran.import.store'), false)
             ->assertDontSee('/admin/jadwal-pelajaran', false);
 
