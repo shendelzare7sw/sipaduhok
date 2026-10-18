@@ -337,6 +337,37 @@ Skrip <script>alert(1)</script>",
         $review->assertSee('Pembahasan Ujian')->assertSee('Merkurius')->assertSee('Matahari adalah bintang')->assertSee('Kunci / Referensi');
     }
 
+    public function test_zona_latihan_dan_ujian_tanpa_panduan_dan_pop_up_flyer(): void
+    {
+        \App\Models\Flyer::create([
+            'judul' => 'Flyer Siswa Uji', 'gambar_flyer' => 'flyer/uji.jpg', 'target_audience' => 'siswa', 'urutan_tampil' => 1, 'status' => 'aktif',
+            'tanggal_mulai' => now()->subDay()->toDateString(), 'tanggal_selesai' => now()->addDay()->toDateString(), 'dibuat_oleh' => $this->user->id,
+        ]);
+        $ujian = $this->buatUjian('ulangan_harian', 'Ulangan Zona');
+        $latihan = $this->buatUjian('latihan', 'Latihan Zona');
+        $m = $this->mapel->id;
+        $this->actingAs($this->user);
+
+        // Pembanding: halaman LMS biasa tetap menampilkan panduan dan flyer.
+        $this->get(route('siswa.lms.pengumuman.index'))->assertOk()
+            ->assertSee('Tampilkan panduan halaman ini')->assertSee('Flyer Siswa Uji');
+
+        $zona = function ($response) {
+            $response->assertOk()->assertDontSee('Tampilkan panduan halaman ini')->assertDontSee('Flyer Siswa Uji')->assertDontSee('data-kunci="flyer:', false);
+        };
+
+        $zona($this->get(route('siswa.lms.mapel.ujian.show', [$m, $ujian->id])));
+        $this->post(route('siswa.lms.mapel.ujian.mulai', [$m, $ujian->id]));
+        $zona($this->get(route('siswa.lms.mapel.ujian.show', [$m, $ujian->id])));
+        $this->post(route('siswa.lms.mapel.ujian.submit', [$m, $ujian->id]), ['jawaban' => []]);
+        $zona($this->get(route('siswa.lms.mapel.ujian.show', [$m, $ujian->id])));
+        $zona($this->get(route('siswa.lms.mapel.ujian.review', [$m, $ujian->id])));
+
+        $zona($this->get(route('siswa.lms.mapel.latihan.show', [$m, $latihan->id])));
+        $this->post(route('siswa.lms.mapel.latihan.mulai', [$m, $latihan->id]));
+        $zona($this->get(route('siswa.lms.mapel.latihan.show', [$m, $latihan->id])));
+    }
+
     public function test_latihan_worksheet_flow_renders_without_anti_cheat_monitoring(): void
     {
         $latihan = $this->buatUjian('latihan', 'Latihan Tata Surya');

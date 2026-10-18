@@ -11,7 +11,9 @@
         'orang_tua' => 'orang_tua',
         default => 'semua',
     };
-    $flyer = auth()->check() ? \App\Models\Flyer::getPopupFlyers($targetFlyer, 1)->first() : null;
+    // Latihan & Ujian siswa adalah zona preservasi: tidak boleh diganggu pop-up apa pun.
+    $zonaUjian = request()->routeIs('siswa.lms.mapel.latihan.*', 'siswa.lms.mapel.ujian.*');
+    $flyer = auth()->check() && ! $zonaUjian ? \App\Models\Flyer::getPopupFlyers($targetFlyer, 1)->first() : null;
 @endphp
 @if($flyer)
     <div data-kunci="flyer:{{ auth()->id() }}:{{ $flyer->id }}:{{ $flyer->updated_at?->timestamp }}"
