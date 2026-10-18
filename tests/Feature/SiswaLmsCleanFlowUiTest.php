@@ -348,10 +348,15 @@ Skrip <script>alert(1)</script>",
         $m = $this->mapel->id;
         $this->actingAs($this->user);
 
-        // Pembanding: halaman LMS biasa tetap menampilkan panduan dan flyer.
+        // Pembanding: halaman LMS biasa tetap memakai panduan dan header baru; flyer hanya tampil
+        // di dashboard pada awal login, sehingga ujian/latihan tidak pernah menampilkannya meski penanda login ada.
         $this->get(route('siswa.lms.pengumuman.index'))->assertOk()
-            ->assertSee('Tampilkan panduan halaman ini')->assertSee('Flyer Siswa Uji')
+            ->assertSee('Tampilkan panduan halaman ini')->assertDontSee('Flyer Siswa Uji')
             ->assertSee('sm:text-base" data-marquee>', false);
+        $this->withSession(['flyer_awal_login' => true])->get(route('siswa.lms.mapel.latihan.show', [$m, $latihan->id]))
+            ->assertOk()->assertDontSee('Flyer Siswa Uji');
+        $this->withSession(['flyer_awal_login' => true])->get(route('siswa.sia.dashboard'))
+            ->assertOk()->assertSee('Flyer Siswa Uji');
 
         $zona = function ($response) {
             $response->assertOk()->assertDontSee('Tampilkan panduan halaman ini')->assertDontSee('Flyer Siswa Uji')->assertDontSee('data-kunci="flyer:', false);

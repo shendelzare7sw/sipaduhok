@@ -20,6 +20,7 @@ class LandingPageResetMethodTest extends TestCase
     public function test_reset_landing_page_tidak_bisa_lewat_get_dan_berjalan_lewat_post(): void
     {
         $this->withoutMiddleware(CheckAdminSecuritySetup::class);
+        /** @var User $admin */
         $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
         $page = LandingPage::create(['slug' => 'beranda', 'title' => 'Beranda', 'order' => 1]);
 

@@ -23,6 +23,7 @@ class TampilkanSemuaTest extends TestCase
     {
         for ($i = 1; $i <= $jumlah; $i++) {
             $nama = sprintf('%s %02d', $prefix, $i);
+            /** @var User $user */
             $user = User::factory()->create(['role' => 'siswa', 'is_active' => true, 'cabang_id' => $cabang->id, 'name' => $nama]);
             Siswa::create([
                 'user_id' => $user->id,
@@ -42,6 +43,7 @@ class TampilkanSemuaTest extends TestCase
     public function test_daftar_siswa_memakai_tampilkan_semua_bukan_pagination_bernomor(): void
     {
         $this->withoutMiddleware(CheckAdminSecuritySetup::class);
+        /** @var User $admin */
         $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
         $cabang = Cabang::create(['kode_cabang' => 'TLB', 'nama_cabang' => 'Cabang Uji', 'alamat' => 'Alamat', 'is_active' => true]);
         $this->buatSiswa(20, $cabang);
@@ -60,6 +62,7 @@ class TampilkanSemuaTest extends TestCase
     public function test_filter_tetap_terbawa_saat_menampilkan_semua(): void
     {
         $this->withoutMiddleware(CheckAdminSecuritySetup::class);
+        /** @var User $admin */
         $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
         $cabang = Cabang::create(['kode_cabang' => 'TLB', 'nama_cabang' => 'Cabang Uji', 'alamat' => 'Alamat', 'is_active' => true]);
         $this->buatSiswa(17, $cabang, 'Cocok');
@@ -85,6 +88,7 @@ class TampilkanSemuaTest extends TestCase
     public function test_dua_daftar_dalam_satu_halaman_tidak_saling_memengaruhi(): void
     {
         $this->withoutMiddleware(CheckAdminSecuritySetup::class);
+        /** @var User $admin */
         $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
         $cabang = Cabang::create(['kode_cabang' => 'TLB', 'nama_cabang' => 'Cabang Uji', 'alamat' => 'Alamat', 'is_active' => true]);
         $this->buatSiswa(14, $cabang);
@@ -99,6 +103,7 @@ class TampilkanSemuaTest extends TestCase
     {
         // Rekap kenaikan kelas memakai DB::table(), bukan model Eloquent.
         $this->withoutMiddleware(CheckAdminSecuritySetup::class);
+        /** @var User $admin */
         $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
         \App\Models\TahunAjaran::create(['nama_tahun_ajaran' => '2026/2027', 'tanggal_mulai' => '2026-07-01', 'tanggal_selesai' => '2027-06-30', 'is_active' => true]);
 
@@ -112,6 +117,7 @@ class TampilkanSemuaTest extends TestCase
         $tahun = \App\Models\TahunAjaran::create(['nama_tahun_ajaran' => '2026/2027', 'tanggal_mulai' => '2026-07-01', 'tanggal_selesai' => '2027-06-30', 'is_active' => true]);
         $kelas = \App\Models\Kelas::create(['cabang_id' => $cabang->id, 'tahun_ajaran_id' => $tahun->id, 'nama_kelas' => '7A', 'jenjang' => 'SMP', 'kode_kelas' => 'TLB-7A', 'kuota_siswa' => 30]);
         $mapel = \App\Models\MataPelajaran::create(['kode_mapel' => 'SMP-TLB', 'nama_mapel' => 'Matematika', 'jenjang' => 'SMP']);
+        /** @var User $user */
         $user = User::factory()->create(['role' => 'guru_pengajar', 'is_active' => true]);
         $guru = \App\Models\TenagaPendidik::create(['user_id' => $user->id, 'nip' => 'TLB-001', 'nama_lengkap' => 'Guru Uji', 'jenis_kelamin' => 'L', 'email' => $user->email]);
         \App\Models\GuruPengajarKelas::create(['tenaga_pendidik_id' => $guru->id, 'kelas_id' => $kelas->id, 'mata_pelajaran_id' => $mapel->id]);
@@ -132,6 +138,7 @@ class TampilkanSemuaTest extends TestCase
     public function test_panduan_tampil_tertutup_dan_dipakai_bersama_antarperan(): void
     {
         $this->withoutMiddleware(CheckAdminSecuritySetup::class);
+        /** @var User $admin */
         $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
 
         $this->actingAs($admin)->get(route('admin.monitoring.pengguna'))->assertOk()

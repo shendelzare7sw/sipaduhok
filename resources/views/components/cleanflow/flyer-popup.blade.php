@@ -1,23 +1,31 @@
 {{--
-    Pop-up flyer aktif untuk pengguna yang sedang masuk, dimiliki layout SIA & LMS (bukan per dashboard)
-    agar target Siswa, Guru, Wali Kelas, Wali Siswa, dan "Semua Pengguna" benar-benar sampai ke perannya.
-    Setiap flyer tampil sekali per perangkat; flyer baru atau yang diperbarui tampil lagi.
+    Pop-up flyer aktif, dimiliki layout SIA & LMS agar target Siswa, Guru, Wali Kelas, Wali Siswa,
+    dan "Semua Pengguna" sampai ke perannya. Hanya tampil SEKALI PER LOGIN: penanda sesi
+    `flyer_awal_login` dipasang saat login (AppServiceProvider) dan dipakai di halaman pertama
+    setelah masuk; flyer muncul hanya bila halaman itu dashboard peran. Halaman Pilih Kelas wali
+    kelas adalah jalur menuju dashboard, jadi tidak menghabiskan penanda. Halaman lain (termasuk
+    Latihan & Ujian siswa) tidak pernah menampilkan flyer.
 --}}
 @php
-    $targetFlyer = match (auth()->user()?->role) {
-        'siswa' => 'siswa',
-        'guru_pengajar' => 'guru',
-        'wali_kelas' => 'wali_kelas',
-        'orang_tua' => 'orang_tua',
-        default => 'semua',
-    };
-    // Latihan & Ujian siswa adalah zona preservasi: tidak boleh diganggu pop-up apa pun.
-    $zonaUjian = request()->routeIs('siswa.lms.mapel.latihan.*', 'siswa.lms.mapel.ujian.*');
-    $flyer = auth()->check() && ! $zonaUjian ? \App\Models\Flyer::getPopupFlyers($targetFlyer, 1)->first() : null;
+    $flyer = null;
+    if (auth()->check() && session()->has('flyer_awal_login') && ! request()->routeIs('wali.pilih-kelas')) {
+        session()->forget('flyer_awal_login');
+        $dashboard = request()->routeIs('admin.dashboard', 'ketua.dashboard', 'waka.dashboard', 'sekretaris.dashboard', 'bendahara.dashboard',
+            'wali.dashboard', 'guru.dashboard', 'siswa.sia.dashboard', 'wali-siswa.dashboard');
+        if ($dashboard) {
+            $targetFlyer = match (auth()->user()->role) {
+                'siswa' => 'siswa',
+                'guru_pengajar' => 'guru',
+                'wali_kelas' => 'wali_kelas',
+                'orang_tua' => 'orang_tua',
+                default => 'semua',
+            };
+            $flyer = \App\Models\Flyer::getPopupFlyers($targetFlyer, 1)->first();
+        }
+    }
 @endphp
 @if($flyer)
-    <div data-kunci="flyer:{{ auth()->id() }}:{{ $flyer->id }}:{{ $flyer->updated_at?->timestamp }}"
-        x-data="{ open: false, kunci: '', init() { this.kunci = this.$el.dataset.kunci; try { if (! localStorage.getItem(this.kunci)) setTimeout(() => this.open = true, 1200); } catch (e) {} }, close() { this.open = false; try { localStorage.setItem(this.kunci, '1'); } catch (e) {} } }"
+    <div data-flyer-popup x-data="{ open: false, init() { setTimeout(() => this.open = true, 1200); }, close() { this.open = false; } }"
         @keydown.escape.window="close()" class="print:hidden">
         <template x-teleport="body">
             <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" @click.self="close()" role="dialog" aria-modal="true" aria-label="{{ $flyer->judul }}">

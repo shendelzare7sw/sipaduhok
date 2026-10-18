@@ -33,9 +33,18 @@ class AppServiceProvider extends ServiceProvider
         // Use Indonesian wording for relative dates such as "1 jam yang lalu".
         Carbon::setLocale('id');
 
-        // Daftar "Tampilkan N lagi" pengganti pagination bernomor: ->tampil(15) atau ->tampil(10, 'tampil_siswa').
+        // Pop-up flyer hanya untuk awal login: tandai sesi saat login (termasuk login otomatis "ingat saya"),
+        // lalu <x-cleanflow.flyer-popup> memakai penanda ini di halaman pertama bila halaman itu dashboard.
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, function () {
+            if (app()->bound('session')) {
+                session()->put('flyer_awal_login', true);
+            }
+        });
+
+        // Daftar "Tampilkan semua" pengganti pagination bernomor: ->tampil(15) atau ->tampil(10, 'tampil_siswa').
         foreach ([\Illuminate\Database\Eloquent\Builder::class, \Illuminate\Database\Query\Builder::class] as $builder) {
             $builder::macro('tampil', function (int $langkah = \App\Support\Tampil::LANGKAH, string $param = 'tampil') {
+                // Macro terikat ke builder pemanggil, jadi $this di sini adalah query builder.
                 return \App\Support\Tampil::ambil($this, $langkah, $param);
             });
         }

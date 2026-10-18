@@ -39,7 +39,12 @@ class Tampil
         return min(self::MAKS, max($langkah, (int) ceil($diminta / $langkah) * $langkah));
     }
 
-    public static function ambil(Builder|Relation|QueryBuilder $query, int $langkah = self::LANGKAH, string $param = 'tampil'): LengthAwarePaginator
+    /**
+     * Tanpa type hint di parameter karena dipanggil dari macro builder (`$this` terikat saat runtime).
+     *
+     * @param  Builder|Relation|QueryBuilder  $query
+     */
+    public static function ambil($query, int $langkah = self::LANGKAH, string $param = 'tampil'): LengthAwarePaginator
     {
         return $query->paginate(self::jumlah($langkah, $param), ['*'], $param.'_halaman', 1)->withQueryString();
     }
