@@ -1,10 +1,13 @@
 // Teks satu baris yang terpotong (judul/subjudul topbar, deskripsi sidebar) digeser pelan agar terbaca utuh:
 // diam sejenak -> geser ke kanan sampai akhir teks terlihat -> diam -> memudar kembali ke awal -> ulang.
 // Hanya aktif bila teks memang terpotong; elemen cukup diberi atribut data-marquee (tetap pakai class truncate).
+// Bila perangkat meminta "kurangi animasi" (mis. Windows "Tampilkan animasi" mati), teks tetap bergeser
+// tetapi lebih lambat dengan jeda lebih panjang, agar penjelasan tetap bisa dibaca utuh tanpa gerakan mencolok.
 
-const KECEPATAN = 32; // px per detik, sama untuk teks pendek maupun panjang
-const JEDA_AWAL = 1800;
-const JEDA_AKHIR = 1600;
+const TEMPO = {
+    normal: { kecepatan: 32, jedaAwal: 1800, jedaAkhir: 1600 }, // kecepatan dalam px per detik
+    tenang: { kecepatan: 18, jedaAwal: 2800, jedaAkhir: 2600 },
+};
 const PUDAR = 350;
 const RUANG_PUDAR = 16; // lebar gradasi kanan; teks digeser sedikit lebih jauh agar huruf terakhir tidak ikut pudar
 
@@ -43,21 +46,23 @@ const measure = (el) => {
     // Lebar asli teks (tidak terpengaruh translate saat animasi berjalan).
     const overflow = Math.ceil(track.getBoundingClientRect().width) - width;
 
-    if (overflow <= 1 || reduceMotion.matches) {
+    if (overflow <= 1) {
         stop(el);
-        if (overflow > 1 && !el.title) el.title = el.textContent.trim();
         return;
     }
 
     const shift = overflow + RUANG_PUDAR;
-    if (s.animation && s.shift === shift) return;
+    const mode = reduceMotion.matches ? 'tenang' : 'normal';
+    if (s.animation && s.shift === shift && s.mode === mode) return;
     s.animation?.cancel();
     s.shift = shift;
+    s.mode = mode;
     el.classList.add(...KELAS_AKTIF);
     track.classList.add(...KELAS_TRACK);
 
-    const move = (shift / KECEPATAN) * 1000;
-    const total = JEDA_AWAL + move + JEDA_AKHIR + PUDAR * 2;
+    const { kecepatan, jedaAwal, jedaAkhir } = TEMPO[mode];
+    const move = (shift / kecepatan) * 1000;
+    const total = jedaAwal + move + jedaAkhir + PUDAR * 2;
     let t = 0;
     const at = (ms) => (t += ms) / total;
     const start = 'translateX(0)';
@@ -65,9 +70,9 @@ const measure = (el) => {
 
     s.animation = track.animate([
         { transform: start, opacity: 1, offset: 0 },
-        { transform: start, opacity: 1, offset: at(JEDA_AWAL), easing: 'ease-in-out' },
+        { transform: start, opacity: 1, offset: at(jedaAwal), easing: 'ease-in-out' },
         { transform: end, opacity: 1, offset: at(move) },
-        { transform: end, opacity: 1, offset: at(JEDA_AKHIR) },
+        { transform: end, opacity: 1, offset: at(jedaAkhir) },
         { transform: end, opacity: 0, offset: at(PUDAR) },
         { transform: start, opacity: 0, offset: Math.min(1, t / total + 0.0001) },
         { transform: start, opacity: 1, offset: 1 },
