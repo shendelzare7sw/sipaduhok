@@ -70,8 +70,14 @@
                 </button>
                 <span class="hidden h-10 w-1.5 shrink-0 rounded-full bg-gradient-to-b from-indigo-500 to-violet-500 sm:block" aria-hidden="true"></span>
                 <div class="min-w-0 flex-1">
-                    <h1 class="truncate text-sm font-extrabold text-slate-900 sm:text-base" data-marquee>@yield('page-title', $shellName)</h1>
-                    <p class="mt-0.5 truncate text-[11px] text-slate-500" data-marquee>@yield('page-subtitle', $shellSubtitle)</p>
+                    @if(request()->routeIs('siswa.lms.mapel.latihan.*', 'siswa.lms.mapel.ujian.*'))
+                        {{-- Zona Latihan & Ujian siswa: header dipertahankan seperti semula (tanpa teks bergeser). --}}
+                        <h1 class="truncate text-sm font-extrabold text-slate-900 sm:text-base">@yield('page-title', $shellName)</h1>
+                        <p class="mt-0.5 hidden truncate text-[11px] text-slate-500 sm:block">@yield('page-subtitle', $shellSubtitle)</p>
+                    @else
+                        <h1 class="truncate text-sm font-extrabold text-slate-900 sm:text-base" data-marquee>@yield('page-title', $shellName)</h1>
+                        <p class="mt-0.5 truncate text-[11px] text-slate-500" data-marquee>@yield('page-subtitle', $shellSubtitle)</p>
+                    @endif
                 </div>
                 <div class="ml-auto flex items-center gap-2">
                     <x-cleanflow.notification-bell :ctx="$notificationContext" />

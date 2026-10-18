@@ -350,12 +350,20 @@ Skrip <script>alert(1)</script>",
 
         // Pembanding: halaman LMS biasa tetap menampilkan panduan dan flyer.
         $this->get(route('siswa.lms.pengumuman.index'))->assertOk()
-            ->assertSee('Tampilkan panduan halaman ini')->assertSee('Flyer Siswa Uji');
+            ->assertSee('Tampilkan panduan halaman ini')->assertSee('Flyer Siswa Uji')
+            ->assertSee('sm:text-base" data-marquee>', false);
 
         $zona = function ($response) {
             $response->assertOk()->assertDontSee('Tampilkan panduan halaman ini')->assertDontSee('Flyer Siswa Uji')->assertDontSee('data-kunci="flyer:', false);
+            // Header layar awal/hasil kembali ke tampilan lama: subjudul tersembunyi di ponsel, tanpa teks bergeser.
+            if (str_contains($response->getContent(), 'id="admin-sidebar"')) {
+                $response->assertSee('<p class="mt-0.5 hidden truncate text-[11px] text-slate-500 sm:block">', false)
+                    ->assertDontSee('sm:text-base" data-marquee>', false);
+            }
         };
 
+        $this->get(route('siswa.lms.mapel.ujian.show', [$m, $ujian->id]))
+            ->assertSee('<p class="mt-0.5 hidden truncate text-[11px] text-slate-500 sm:block">', false);
         $zona($this->get(route('siswa.lms.mapel.ujian.show', [$m, $ujian->id])));
         $this->post(route('siswa.lms.mapel.ujian.mulai', [$m, $ujian->id]));
         $zona($this->get(route('siswa.lms.mapel.ujian.show', [$m, $ujian->id])));
