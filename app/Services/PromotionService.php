@@ -53,6 +53,7 @@ class PromotionService
         $unpaid = Tagihan::where('siswa_id', $siswa->id)
             ->where('tahun_ajaran_id', $tahunAjaranId)
             ->whereIn('status', ['belum_bayar', 'cicilan', 'terlambat'])
+            ->withTerbayarDisetujui()
             ->get()
             ->sum(fn ($t) => $t->sisa_pembayaran);
 
@@ -96,7 +97,8 @@ class PromotionService
             // yang kelasnya memang belum punya Jadwal Pelajaran sama sekali (jadi tidak
             // ada guru yang bisa/berhak mengisi nilai) - beda dengan siswa yang kelasnya
             // sudah lengkap tapi nilainya belum diisi guru (itu harus tetap gagal).
-            $kelasPunyaJadwal = $siswa->kelas && $siswa->kelas->jadwalPelajaran()->exists();
+            $kelasPunyaJadwal = $siswa->kelas
+                && ($this->jadwalKelasTerbaca[$siswa->kelas->id] ??= $siswa->kelas->jadwalPelajaran()->exists());
 
             return [
                 'is_tuntas' => false,
@@ -151,7 +153,23 @@ class PromotionService
         ];
     }
 
+    /**
+     * Pengaturan KKM & ambang tuntas yang sudah dibaca pada instance ini. Halaman validasi/laporan
+     * memeriksa puluhan siswa sekaligus dengan pengaturan yang sama, jadi cukup dibaca sekali.
+     */
+    private array $kkmTerbaca = [];
+
+    private array $ambangTerbaca = [];
+
+    /** kelas_id => apakah kelas sudah punya Jadwal Pelajaran. */
+    private array $jadwalKelasTerbaca = [];
+
     private function getKKM($mapelId, $taId, $jenjang)
+    {
+        return $this->kkmTerbaca["{$mapelId}|{$taId}|{$jenjang}"] ??= $this->bacaKKM($mapelId, $taId, $jenjang);
+    }
+
+    private function bacaKKM($mapelId, $taId, $jenjang)
     {
         // Try to get dynamic KKM
         $setting = DB::table('pengaturan_kkm')
@@ -173,6 +191,11 @@ class PromotionService
     }
 
     private function getPassingThreshold($taId)
+    {
+        return $this->ambangTerbaca[$taId] ??= $this->bacaAmbang($taId);
+    }
+
+    private function bacaAmbang($taId)
     {
         $setting = DB::table('pengaturan_naik_kelas')
             ->where('tahun_ajaran_id', $taId)

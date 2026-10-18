@@ -113,7 +113,7 @@ class JadwalPelajaranController extends Controller
             });
 
         // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
-        $guruList = TenagaPendidik::eligibleToTeach()->orderBy('nama_lengkap')->get();
+        $guruList = TenagaPendidik::eligibleToTeach()->with('user.cabang')->orderBy('nama_lengkap')->get();
 
         // Statistics
         $stats = [

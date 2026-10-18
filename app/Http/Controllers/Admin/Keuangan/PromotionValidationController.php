@@ -26,7 +26,7 @@ class PromotionValidationController extends Controller
         $activeYear = TahunAjaran::where('is_active', true)->firstOrFail();
         
         $candidates = [];
-        $students = Siswa::where('status', 'aktif')->get();
+        $students = Siswa::with(['kelas', 'cabang'])->where('status', 'aktif')->get();
         
         foreach ($students as $siswa) {
             $eligibility = $this->promotionService->checkEligibility($siswa, $activeYear->id);

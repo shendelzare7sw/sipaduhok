@@ -47,6 +47,14 @@ class Tagihan extends Model
     }
 
     /**
+     * Muat total pembayaran disetujui dalam query yang sama (dibaca accessor sisa_pembayaran).
+     */
+    public function scopeWithTerbayarDisetujui(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->withSum(['pembayaran as terbayar_disetujui' => fn ($q) => $q->where('status_validasi', 'disetujui')], 'jumlah_bayar');
+    }
+
+    /**
      * Tagihan asal di TA lama (jika ini adalah carryover).
      */
     public function tagihanAsal()
@@ -85,12 +93,16 @@ class Tagihan extends Model
 
     /**
      * Hitung sisa pembayaran (jumlah - total pembayaran disetujui).
+     * Daftar banyak tagihan sebaiknya memuat totalnya sekaligus lewat scope withTerbayarDisetujui()
+     * agar tidak ada satu query per tagihan.
      */
     public function getSisaPembayaranAttribute(): float
     {
-        $terbayar = $this->pembayaran()
-            ->where('status_validasi', 'disetujui')
-            ->sum('jumlah_bayar');
+        $terbayar = array_key_exists('terbayar_disetujui', $this->attributes)
+            ? (float) $this->attributes['terbayar_disetujui']
+            : $this->pembayaran()
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
 
         return max(0, (float) $this->jumlah - (float) $terbayar);
     }

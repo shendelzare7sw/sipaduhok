@@ -1,9 +1,10 @@
-/* Temporary compatibility layer for page bodies that are still being migrated. */
+/* Bridge Bootstrap sementara untuk shell yang memuat admin.css. Hanya Bootstrap inti yang tersisa:
+   utilitasnya (p-4, mt-3, border, shadow-sm, ...) masih menimpa kelas Tailwind bernama sama dengan
+   !important, sehingga melepasnya akan menggeser spasi semua halaman SIA.
+   Sneat (core/theme) dan font ikon Bootstrap Icons/Boxicons sudah dilepas: tidak ada halaman yang
+   memakainya, dan selector Sneat membuat setiap perubahan kelas (mis. buka/tutup sidebar) ~10x lebih
+   lambat dihitung browser. Ukuran teks dasar 15px peninggalan Sneat dijaga lewat text-[15px] di <body>. */
 @import 'bootstrap/dist/css/bootstrap.min.css';
-@import 'bootstrap-icons/font/bootstrap-icons.css';
-@import 'boxicons/css/boxicons.min.css';
-@import 'sneat-bootstrap-html-admin-template-free/assets/vendor/css/core.css';
-@import 'sneat-bootstrap-html-admin-template-free/assets/vendor/css/theme-default.css';
 
 :root {
     --bs-primary: #1e90ff;

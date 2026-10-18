@@ -12,7 +12,7 @@
         @vite(['resources/css/admin.css', 'resources/js/admin.js'])
     @endif
 </head>
-<body class="m-0 min-h-screen bg-slate-100 font-sans text-slate-950 print:bg-white">
+<body @class(['m-0 min-h-screen bg-slate-100 font-sans text-slate-950 print:bg-white', 'text-[15px]' => ! ($bootstrapFree ?? false)])>
     @hasSection('page-content')
         @yield('page-content')
     @else

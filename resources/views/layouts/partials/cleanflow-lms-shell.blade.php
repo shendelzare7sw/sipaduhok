@@ -21,8 +21,8 @@
     @endif
     @stack('styles')
 </head>
-<body class="min-h-full bg-slate-50 font-sans text-slate-800 antialiased">
-    <div id="admin-sidebar-overlay" class="fixed inset-0 z-40 hidden bg-slate-950/50 backdrop-blur-sm lg:hidden print:!hidden" aria-hidden="true"></div>
+<body @class(['min-h-full bg-slate-50 font-sans text-slate-800 antialiased', 'text-[15px]' => ! ($bootstrapFree ?? false)])>
+    <div id="admin-sidebar-overlay" class="fixed inset-0 z-40 hidden bg-slate-950/50 lg:hidden print:!hidden" aria-hidden="true"></div>
 
     <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col border-r border-slate-200 bg-white text-slate-700 shadow-xl shadow-slate-900/5 transition-transform duration-200 lg:translate-x-0 print:!hidden">
         <div class="relative flex h-20 shrink-0 items-center border-b border-slate-100 px-4">

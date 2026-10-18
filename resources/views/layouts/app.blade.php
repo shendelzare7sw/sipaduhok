@@ -14,7 +14,7 @@
     @yield('styles')
     @stack('styles')
 </head>
-<body class="min-h-full bg-slate-50 font-sans text-slate-800 antialiased print:bg-white">
+<body class="min-h-full bg-slate-50 font-sans text-[15px] text-slate-800 antialiased print:bg-white">
     @php
         $dashboardRoute = match (auth()->user()->role ?? null) {
             'admin', 'super_admin' => 'admin.dashboard',
@@ -43,7 +43,7 @@
         $sidebarView = $sidebarMap[auth()->user()->role ?? ''] ?? null;
     @endphp
 
-    <div id="admin-sidebar-overlay" class="fixed inset-0 z-40 hidden bg-slate-950/60 backdrop-blur-sm lg:hidden print:!hidden" aria-hidden="true"></div>
+    <div id="admin-sidebar-overlay" class="fixed inset-0 z-40 hidden bg-slate-950/60 lg:hidden print:!hidden" aria-hidden="true"></div>
 
     <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#17699f] bg-gradient-to-b from-[#245f91] via-[#176fa8] to-[#0f5688] text-white shadow-2xl transition-transform duration-200 lg:translate-x-0 print:!hidden">
         <div class="relative flex h-20 shrink-0 items-center border-b border-white/15 px-4">

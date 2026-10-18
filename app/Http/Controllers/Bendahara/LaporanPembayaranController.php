@@ -36,7 +36,7 @@ class LaporanPembayaranController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $cabangList = Cabang::where('is_active', true)->orderBy('nama_cabang')->get();
-        $kelasList = Kelas::when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
+        $kelasList = Kelas::with('cabang')->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
@@ -232,7 +232,7 @@ class LaporanPembayaranController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        $kelasList = Kelas::when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
+        $kelasList = Kelas::with('cabang')->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })
             ->withCount(['siswa as total_siswa' => function ($q) {
@@ -298,7 +298,7 @@ class LaporanPembayaranController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        $kelasList = Kelas::when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
+        $kelasList = Kelas::with('cabang')->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })
             ->withCount(['siswa as total_siswa' => function ($q) {
@@ -361,7 +361,7 @@ class LaporanPembayaranController extends Controller
     public function belumLunas(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        $kelasList = Kelas::when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
+        $kelasList = Kelas::with('cabang')->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
@@ -377,28 +377,7 @@ class LaporanPembayaranController extends Controller
         )->orderBy('nama_lengkap')->get();
 
         // Filter hanya siswa yang belum lunas
-        $siswaList = $siswaList->filter(function ($siswa) use ($tahunAjaranAktif) {
-            $tagihanQuery = Tagihan::where('siswa_id', $siswa->id)
-                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
-                    return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-                });
-
-            $totalTagihan = $tagihanQuery->sum('jumlah');
-
-            // Hitung total pembayaran yang sudah disetujui (actual payments)
-            $tagihanIds = $tagihanQuery->pluck('id');
-            $totalBayar = Pembayaran::whereIn('tagihan_id', $tagihanIds)
-                ->where('status_validasi', 'disetujui')
-                ->sum('jumlah_bayar');
-
-            $sisaTagihan = max(0, $totalTagihan - $totalBayar);
-
-            $siswa->total_tagihan = $totalTagihan;
-            $siswa->total_bayar = $totalBayar;
-            $siswa->sisa_tagihan = $sisaTagihan;
-
-            return $sisaTagihan > 0;
-        })->values();
+        $siswaList = $this->hanyaBelumLunas($siswaList, $tahunAjaranAktif);
 
         return view('admin.keuangan.laporan.belum-lunas', [
             'siswaList' => $siswaList,
@@ -429,33 +408,44 @@ class LaporanPembayaranController extends Controller
             Kelas::select('jenjang')->whereColumn('kelas.id', 'siswa.kelas_id')
         )->orderBy('nama_lengkap')->get();
 
-        $siswaList = $siswaList->filter(function ($siswa) use ($tahunAjaranAktif) {
-            $tagihanQuery = Tagihan::where('siswa_id', $siswa->id)
-                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
-                    return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-                });
-
-            $totalTagihan = $tagihanQuery->sum('jumlah');
-
-            // Hitung total pembayaran yang sudah disetujui (actual payments)
-            $tagihanIds = $tagihanQuery->pluck('id');
-            $totalBayar = Pembayaran::whereIn('tagihan_id', $tagihanIds)
-                ->where('status_validasi', 'disetujui')
-                ->sum('jumlah_bayar');
-
-            $sisaTagihan = max(0, $totalTagihan - $totalBayar);
-
-            $siswa->total_tagihan = $totalTagihan;
-            $siswa->total_bayar = $totalBayar;
-            $siswa->sisa_tagihan = $sisaTagihan;
-
-            return $sisaTagihan > 0;
-        })->values();
+        $siswaList = $this->hanyaBelumLunas($siswaList, $tahunAjaranAktif);
 
         return view('admin.keuangan.laporan.cetak-belum-lunas', [
             'siswaList' => $siswaList,
             'kelas' => $kelas,
             'tahunAjaran' => $tahunAjaranAktif,
         ]);
+    }
+
+    /**
+     * Sisakan siswa yang masih punya tunggakan di TA aktif, lengkap dengan total_tagihan, total_bayar
+     * (pembayaran disetujui), dan sisa_tagihan. Total dihitung dengan dua query berkelompok untuk
+     * semua siswa sekaligus, bukan tiga query per siswa.
+     */
+    protected function hanyaBelumLunas($siswaList, ?TahunAjaran $tahunAjaranAktif)
+    {
+        $siswaIds = $siswaList->pluck('id');
+
+        $totalTagihan = Tagihan::whereIn('siswa_id', $siswaIds)
+            ->when($tahunAjaranAktif, fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
+            ->groupBy('siswa_id')
+            ->selectRaw('siswa_id, SUM(jumlah) as total')
+            ->pluck('total', 'siswa_id');
+
+        $totalBayar = Pembayaran::join('tagihan', 'tagihan.id', '=', 'pembayaran.tagihan_id')
+            ->whereIn('tagihan.siswa_id', $siswaIds)
+            ->when($tahunAjaranAktif, fn ($q) => $q->where('tagihan.tahun_ajaran_id', $tahunAjaranAktif->id))
+            ->where('pembayaran.status_validasi', 'disetujui')
+            ->groupBy('tagihan.siswa_id')
+            ->selectRaw('tagihan.siswa_id, SUM(pembayaran.jumlah_bayar) as total')
+            ->pluck('total', 'siswa_id');
+
+        return $siswaList->filter(function ($siswa) use ($totalTagihan, $totalBayar) {
+            $siswa->total_tagihan = (float) ($totalTagihan[$siswa->id] ?? 0);
+            $siswa->total_bayar = (float) ($totalBayar[$siswa->id] ?? 0);
+            $siswa->sisa_tagihan = max(0, $siswa->total_tagihan - $siswa->total_bayar);
+
+            return $siswa->sisa_tagihan > 0;
+        })->values();
     }
 }
